@@ -1,0 +1,578 @@
+/* General Styles */
+body {
+    font-family: 'Inter', sans-serif; /* Modern font */
+    background-color: #e5ddd5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-size: 14px;
+}
+
+.chat-container {
+    width: 100%;
+    max-width: 450px;
+    height: 600px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Chat Header */
+.chat-header {
+    background-color: #075e54;
+    color: white;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ece5dd;
+}
+
+.user-info {
+    flex-grow: 1;
+}
+
+.user-name {
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.user-status {
+    font-size: 12px;
+    color: #bdbdbd;
+}
+
+.chat-box {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #e5ddd5;
+}
+
+/* Chat Bubbles */
+.chat-message {
+    margin-bottom: 8px;
+    padding: 8px;
+    border-radius: 8px;
+    position: relative;
+    max-width: 80%;
+    line-height: 1.4;
+    font-size: 14px;
+}
+
+.chat-message.user {
+    background-color: #dcf8c6;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.chat-message.bot {
+    background-color: #ffffff;
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+/* Timestamp Styling */
+.timestamp {
+    font-size: 12px;
+    color: #999;
+    margin-top: 3px;
+    text-align: right;
+}
+
+/* Chat Input Container */
+.chat-input-container {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #ffffff;
+    border-top: 1px solid #ece5dd;
+}
+
+#file-input {
+    display: none;
+}
+
+#upload-btn {
+    padding: 5px 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #075e54;
+    margin-right: 10px;
+}
+
+#chat-input {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: #f0f0f0;
+    font-size: 14px;
+    outline: none;
+}
+
+#send-btn {
+    padding: 8px;
+    background-color: #075e54;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+}
+
+#send-btn:hover {
+    background-color: #064e48;
+}
+
+/* Input Placeholder Styling */
+#chat-input::placeholder {
+    color: #999;
+}
+
+/* Container for inline buttons */
+.inline-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;  /* Reduced space between buttons */
+    margin-top: 5px;  /* Reduced top margin */
+    justify-content: center;  /* Center-align buttons */
+}
+
+/* Styling for each button */
+.inline-buttons button {
+    padding: 5px 10px;  /* Consistent padding */
+    background-color: #075e54;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;  /* Adjusted font size for consistency */
+    width: 45%;  /* Ensure buttons have similar width */
+    margin-bottom: 5px;  /* Reduced bottom margin */
+    max-width: 200px;  /* Set a max-width to prevent overly large buttons */
+    box-sizing: border-box;  /* Ensures padding and width are consistent */
+}
+
+/* Hover state */
+.inline-buttons button:hover {
+    background-color: #064e48;
+}
+
+/* Active state */
+.inline-buttons button:active {
+    background-color: #043e38;
+}
+
+/* Form Bubble */
+.form-bubble {
+    background-color: #f7f9fa;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 10px 0;
+    text-align: left; /* Aligns form content properly */
+}
+
+.form-bubble form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-bubble label {
+    margin-bottom: 3px;
+    font-weight: 500;
+    font-size: 13px;
+    color: #333;
+}
+
+.form-bubble input,
+.form-bubble select,
+.form-bubble textarea {
+    width: 100%; /* Adjust the input width to fit within the card */
+    padding: 6px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 13px;
+}
+
+.form-bubble button {
+    background-color: #25D366;
+    font-size: 14px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    color: white;
+}
+
+.form-bubble button:hover {
+    background-color: #20b858;
+}
+
+/* Swipeable Cards Container */
+.swipeable-cards {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 10px 0;
+    scroll-snap-type: x mandatory;
+    white-space: nowrap;
+    scroll-behavior: smooth;
+    position: relative;
+}
+
+.swipeable-cards::-webkit-scrollbar {
+    display: none;
+}
+
+.card {
+    min-width: 100%;
+    max-width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    scroll-snap-align: center;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.card h4 {
+    margin-bottom: 10px;
+    font-size: 16px;
+    text-align: center;
+}
+
+.card label {
+    display: block;
+    font-weight: bold;
+    margin-top: 6px;
+    margin-bottom: 2px;
+    font-size: 14px;
+}
+
+.card input,
+.card select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* For improved mobile experience */
+@media (max-width: 480px) {
+    .swipeable-cards {
+        padding: 6px 0;
+    }
+
+    .card {
+        padding: 10px;
+    }
+
+    .card label {
+        font-size: 12px;
+    }
+
+    .card input,
+    .card select {
+        padding: 6px;
+        font-size: 12px;
+    }
+}
+
+/* Navigation arrows for card rotation */
+.card-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #075e54;
+    cursor: pointer;
+    padding: 0 10px;
+    opacity: 0.7;
+    z-index: 10;
+}
+
+.card-nav.left-arrow {
+    left: 0;
+}
+
+.card-nav.right-arrow {
+    right: 0;
+}
+
+.card-nav:hover {
+    opacity: 1;
+}
+
+.card-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Added Styles for Swipeable Cards Container */
+.swipeable-cards-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Adjusting Arrow Buttons for Better Mobile View */
+@media (max-width: 480px) {
+    .card-navigation button {
+        font-size: 20px;
+        padding: 0 8px;
+    }
+
+    .swipeable-cards {
+        padding: 5px 0;
+    }
+
+    .card h4 {
+        font-size: 14px;
+    }
+}
+
+.form-section {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border-radius: 4px;
+}
+
+.form-section h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #075e54;
+}
+
+.form-section label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.form-section textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: none;
+}
+
+/* Additional Styling for a Modern Look */
+input, textarea, select {
+    font-family: 'Inter', sans-serif; /* Ensure form elements use the modern font */
+}
+
+button, label {
+    font-family: 'Inter', sans-serif; /* Ensure buttons and labels use the modern font */
+}
+
+/* Adjusted Spacing for a More Compact Look */
+.form-section {
+    padding: 8px 12px;
+    margin-bottom: 12px;
+}
+
+/* Adjusting Font Sizes and Weights for Consistency */
+label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+}
+
+input, textarea, select {
+    font-size: 13px;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+}
+
+button {
+    font-size: 14px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+    .form-bubble input,
+    .form-bubble select,
+    .form-bubble textarea {
+        width: 75%; /* Slightly increase width on mobile for better usability */
+    }
+}
+
+/* Specific Fixes for Swipeable Cards Visibility */
+.swipeable-cards {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 10px 0;
+    white-space: nowrap;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    position: relative;
+    align-items: center;
+    flex-grow: 1; /* Ensure cards take up available space */
+}
+
+.swipeable-cards-container {
+    display: flex;
+    position: relative;
+    align-items: center;
+    width: 100%;
+}
+
+/* Ensure card elements are centered correctly */
+.card {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 90%; /* Adjust width to ensure proper centering */
+    max-width: 90%;
+    scroll-snap-align: center;
+}
+
+/* Authentication Form */
+.auth-container {
+    position: absolute; /* Position absolutely to overlay other content */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5); /* Optional: Add background overlay for better contrast */
+}
+
+.auth-form {
+    width: 100%;
+    max-width: 400px; /* Ensure the form does not exceed a certain width */
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.auth-form input {
+    width: 100%; /* Ensure input fields take full width */
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#auth-error {
+    color: red;
+    margin-top: 10px;
+}
+
+#auth-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #075e54;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#auth-btn:hover {
+    background-color: #064e48;
+}
+
+/* Make sure the form container is displayed */
+#report-v2-form-container {
+    display: block; /* Ensure it's visible */
+    padding: 10px;
+    background-color: #f7f9fa; /* Match the form styling */
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+/* Style adjustments for the file upload section */
+.form-section {
+    display: flex; /* Ensure flex display for proper layout */
+    flex-direction: column;
+}
+
+/* Ensure input fields are not hidden */
+.form-section input[type="file"] {
+    display: block; /* Override any hidden display properties */
+    margin-top: 10px;
+}
+
+#file-upload-btn {
+    padding: 8px 12px;
+    background-color: #075e54;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+#file-upload-btn:hover {
+    background-color: #064e48;
+}
+
+/* Specific Styles for Report V3 to be Mobile-Friendly */
+#report-v3-form-container {
+    display: block;
+    padding: 10px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+#report-v3-form-container button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#report-v3-form-container button:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 480px) {
+    #report-v3-form-container {
+        padding: 15px;
+        width: 95%;
+        margin: 10px auto;
+    }
+
+    #report-v3-form-container button {
+        font-size: 14px;
+        padding: 12px;
+        width: 100%;
+    }
+}

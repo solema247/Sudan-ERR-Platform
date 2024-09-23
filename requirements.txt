@@ -1,0 +1,10 @@
+Flask
+Flask-SocketIO
+google-cloud-storage
+gspread
+twilio
+fpdf
+openai
+pytesseract
+Pillow
+
