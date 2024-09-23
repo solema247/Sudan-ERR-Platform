@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, send_file
 from flask_socketio import SocketIO, send
+from openai import OpenAI  # Updated import
 from google.auth import load_credentials_from_file
 from google.cloud import storage
 import gspread
@@ -21,28 +22,33 @@ from google.oauth2 import service_account
 import pandas as pd
 import requests  # Import requests to make API calls
 import re
+import cv2
 
 app = Flask(__name__)
+UPLOAD_FOLDER = 'uploads'  # This is the directory where uploaded files will be saved
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Create the directory if it doesn't exist
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER  # Set this as the upload folder in Flask config
+
 app.config['SECRET_KEY'] = 'supersecretkey'
 socketio = SocketIO(app)
 
+# Set the OpenAI API key directly
+openai_client = OpenAI(api_key='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')  # Replace with your actual API key
+
 # Set up logging
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Twilio credentials (replace with your actual Twilio credentials)
 account_sid = 'ACf8a9cf35a043af0acc877f245871b6ee'
 auth_token = '1526e8a67318c6cb7892f5ff3a230931'
-client = Client(account_sid, auth_token)
+twilio_client = Client(account_sid, auth_token)
 
 # Google Sheets setup
 scope = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive"
 ]
-creds, project = load_credentials_from_file(
-    'local-humanitarian-web-chat-5b747d2b153d.json',
-    scopes=scope)  # Update this path
+creds, project = load_credentials_from_file('local-humanitarian-web-chat-5b747d2b153d.json', scopes=scope)  # Update this path
 client = gspread.authorize(creds)
 spreadsheet = client.open('MAG Database (Web Chat MVP)')
 err_db_sheet = spreadsheet.worksheet('ERR DB')
@@ -50,13 +56,100 @@ sheet1 = spreadsheet.worksheet("Web Chat Form")  # Ensure the worksheet name mat
 sheet2 = spreadsheet.worksheet("Web Chat Expenses")  # Ensure the worksheet name matches
 
 # Google Cloud Storage setup
-storage_client = storage.Client.from_service_account_json(
-    'local-humanitarian-web-chat-5b747d2b153d.json')  # Update this path
+storage_client = storage.Client.from_service_account_json('local-humanitarian-web-chat-5b747d2b153d.json')  # Update this path
 bucket_name = 'local-humanitarian-webchat-mvp'  # Your GCS bucket name
 bucket = storage_client.bucket(bucket_name)
 
 # Path to your downloaded service account JSON key
 service_account_json = 'local-humanitarian-web-chat-1f81cd59311e.json'
+
+# Google Vision
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'local-humanitarian-web-chat-1f81cd59311e.json'
+
+# Google Vision function to extract text from cropped images
+def google_vision_ocr(image):
+    client = vision.ImageAnnotatorClient()
+    _, encoded_image = cv2.imencode('.jpg', image)
+    content = encoded_image.tobytes()
+    image = vision.Image(content=content)
+
+    response = client.text_detection(image=image)
+    texts = response.text_annotations
+    if texts:
+        return texts[0].description.strip()
+    return "Not found"
+
+# Function to clean up extracted text
+def clean_extracted_text(raw_text):
+    cleaned_text = re.sub(r'[\n\r]+', ' ', raw_text).strip()
+    return cleaned_text
+
+# Function to call GPT for classification based on the entire OCR text
+def chatgpt_classification(raw_text):
+    # Clean the raw OCR text
+    cleaned_text = clean_extracted_text(raw_text)
+
+    # Create the combined prompt
+    prompt = f"""
+    I have extracted the following text from a financial report form. The text contains multiple sections including a date, ERR number, an activity table, a financial summary, and responses to additional questions.
+
+    Here is the text:
+    {cleaned_text}
+
+    Please extract the following information and structure it accordingly:
+
+    1. Date: Identify the date from the text.
+    2. ERR Number: Extract the ERR number.
+    3. Activity Table: Identify each row in the activity table and organize the data into the following fields:
+       - Activity
+       - Description of Expenses
+       - Payment Date
+       - Seller/Recipient Details
+       - Payment Method (Cash/Bank App)
+       - Receipt Number
+       - Expenses
+    4. Financial Summary: Extract the following fields:
+       - Total Expenses
+       - Total Grant Received
+       - Total Amount from Other Sources
+       - Remainder
+    5. Additional Questions: Extract responses to the following questions:
+       - How did you cover excess expenses?
+       - How would you spend the surplus if expenses were less than the grant received?
+       - What lessons did you learn about budget planning?
+       - Were there any additional training needs or opportunities?
+    """
+
+    # Log the prompt for debugging
+    print(f"Prompt sent to ChatGPT: {prompt}")
+
+    try:
+        # Send the prompt to GPT
+        response = openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=1000,
+            temperature=0.7
+        )
+
+        # Return the response
+        return response.choices[0].message.content.strip()
+
+    except Exception as e:
+        print(f"An error occurred while interacting with the OpenAI API: {e}")
+        return "An error occurred while processing the data."
+
+
+# Preprocess the image before OCR
+def preprocess_image(image_path):
+    image = cv2.imread(image_path)
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blurred_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
+    adjusted_image = cv2.convertScaleAbs(blurred_image, alpha=1.5, beta=0)
+    return adjusted_image
 
 # State tracking for user conversations
 user_state = {}
@@ -299,12 +392,15 @@ def handle_message(msg):
             response_text = "Please enter your ERR ID to proceed with the financial report."
             set_user_state(user_id, 'AWAITING_ERR_ID')
         elif msg in ['report v2', 'report (v2)']:
-            form_html = generate_report_v2_form(
-                5)  # Generate 5 cards using the helper function
+            form_html = generate_report_v2_form(5)  # Generate 5 cards using the helper function
             send(form_html, broadcast=True)
             response_text = ""
-        elif msg in ['report v3', 'report (v3)']:  # Handle Report V3 command
+        elif msg in ['report v3', 'report (v3)']:
             response_text = "Please take a picture of the form to digitize it."
+            send(response_text, broadcast=True)
+        elif msg in ['scan form', 'scan']:  # Add this block for Scan Form
+            response_text = "Please upload the image of the form you'd like to scan."
+            set_user_state(user_id, 'AWAITING_SCAN_FORM')
             send(response_text, broadcast=True)
         else:
             response_text = "Invalid option. Choose an option:\n1. Menu\n2. Report\n"
@@ -321,9 +417,7 @@ def handle_message(msg):
                 response_text = f"Your ERR ID {err_id} exists. Please provide a description of the item (e.g., food) or service (e.g., transportation) that you purchased."
                 set_user_state(user_id, 'AWAITING_DESCRIPTION')
             except gspread.exceptions.WorksheetNotFound:
-                new_sheet = spreadsheet.add_worksheet(title=f'ERR {err_id}',
-                                                      rows="100",
-                                                      cols="20")
+                new_sheet = spreadsheet.add_worksheet(title=f'ERR {err_id}', rows="100", cols="20")
                 template_data = err_db_sheet.row_values(1)
                 new_sheet.append_row(template_data)
                 user_data[user_id] = {'err_id': err_id, 'sheet': new_sheet}
@@ -365,14 +459,36 @@ def handle_message(msg):
             set_user_state(user_id, 'INITIAL')
         else:
             response_text = "Please choose an option:\n1. Add another expense\n2. Submit report"
-    else:
-        response_text = f"Bot Response: You said '{msg}'"
+    elif user_state[user_id] == 'AWAITING_SCAN_FORM':  # New state to handle file upload
+        if 'file' in request.files:
+            file = request.files['file']
+            if file.filename == '':  # If no file is selected
+                response_text = "No file selected. Please upload an image to scan."
+            else:
+                # Save the file and process it
+                image_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+                file.save(image_path)
 
-    print(f"Responding with: {response_text}")
+                # Preprocess and scan the form
+                preprocessed_image = preprocess_image(image_path)
+                raw_text = google_vision_ocr(preprocessed_image)
+                print(f"Raw OCR text: {raw_text}") 
+                structured_response = chatgpt_classification(raw_text)
+                print(f"Structured response: {structured_response}") 
+
+                response_text = f"Here is the extracted data:\n{structured_response}"
+                set_user_state(user_id, 'INITIAL')
+        else:
+            response_text = "Please upload a valid image file to scan."
+    else:  # This else handles any states not explicitly managed above
+        response_text = f"Bot Response: You said '{msg}'"
 
     # Send response only if response_text is not empty
     if response_text.strip():
         send(response_text, broadcast=True)
+
+    print(f"Responding with: {response_text}")
+
 
 # Function to generate a 10-digit number, first 4 characters based on ERR ID input
 def generate_ten_digit_id(err_id):
@@ -464,7 +580,6 @@ def handle_submit_report_v2(data):
     # Explicitly send back the form reset command, if needed
     send('reset_form', broadcast=True
          )  # This line will help trigger the form reset client-side if needed
-
 
 # User Confirmation and Upload of PDF Form
 @app.route('/upload_report_v3', methods=['POST'])
@@ -674,6 +789,35 @@ def whatsapp():
         msg = resp.message("Send 'start' to receive the link to our Web Chat.")
         logging.info("Responding with instruction message.")
     return str(resp)
+
+# Scan Form
+@app.route('/scan_form', methods=['POST'])
+def scan_form():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    # Save the file and process it
+    image_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+    file.save(image_path)
+
+    # Preprocess the image and extract text
+    preprocessed_image = preprocess_image(image_path)
+    raw_text = google_vision_ocr(preprocessed_image)
+
+    # Log the OCR result for debugging
+    print(f"Raw OCR text: {raw_text}")
+
+    # Use the new combined GPT prompt to classify the text
+    structured_response = chatgpt_classification(raw_text)
+
+    # Log the classification result for debugging
+    print(f"Structured response: {structured_response}")
+
+    return jsonify({"message": structured_response})
 
 if __name__ == "__main__":
     socketio.run(app, debug=True)

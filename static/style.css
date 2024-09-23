@@ -576,3 +576,42 @@ button {
         width: 100%;
     }
 }
+
+/* Scan Form Container */
+#scan-form-container {
+    display: block; /* Ensure it's visible when required */
+    padding: 10px;
+    background-color: #ffffff; /* Match the other sections' backgrounds */
+    border-radius: 10px;
+    margin: 10px 0;
+    text-align: center; /* Center-align for simplicity */
+}
+
+/* Button for Uploading the Scan Form */
+#scan-form-container button {
+    padding: 10px 20px;
+    background-color: #ff9800; /* Different color to highlight scan functionality */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#scan-form-container button:hover {
+    background-color: #e68900;
+}
+
+@media (max-width: 480px) {
+    #scan-form-container {
+        padding: 15px;
+        width: 95%;
+        margin: 10px auto;
+    }
+
+    #scan-form-container button {
+        font-size: 14px;
+        padding: 12px;
+        width: 100%;
+    }
+}

@@ -167,16 +167,18 @@ function appendMenuOptions() {
         { text: 'Menu', value: 'menu' },
         { text: 'Report', value: 'report' },
         { text: 'Report V2', value: 'report v2' },
-        { text: 'Report V3', value: 'report v3' }  // Add Report V3 button here
+        { text: 'Report V3', value: 'report v3' },  // Report V3
+        { text: 'Scan Form', value: 'scan form' }   // Add Scan Form option here
     ];
 
-    // Create buttons dynamically
     options.forEach(option => {
         const button = document.createElement('button');
         button.innerText = option.text;
         button.addEventListener('click', () => {
-            if (option.value === 'report v3') {
-                startReportV3();  // Call the startReportV3 function when 'Report V3' is clicked
+            if (option.value === 'scan form') {
+                startScanForm();  // Add the scan form functionality here
+            } else if (option.value === 'report v3') {
+                startReportV3();
             } else {
                 socket.send(option.value);
                 appendMessage(option.text, 'user');
@@ -474,3 +476,54 @@ function uploadConfirmedForm(digitizedText) {
     });
 }
 
+// Function to scan form
+function startScanForm() {
+    appendMessage('Please upload the image of the form you\'d like to scan.', 'bot');
+
+    // Create file input for image capture
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment'; // Use the back camera on mobile if available
+
+    input.onchange = () => {
+        const file = input.files[0];
+        if (file) {
+            uploadScanFormImage(file);  // Function to handle the image upload
+        }
+    };
+    input.click();
+}
+
+// Function to scan form image upload
+function uploadScanFormImage(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    appendMessage('Uploading and processing the form image...', 'bot'); // Feedback to user during upload
+
+    fetch('/scan_form', {
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            // Show the extracted data from the form
+            displayExtractedData(data.message);
+        } else {
+            appendMessage('Failed to scan the form. Please try again.', 'bot');
+        }
+    })
+    .catch(error => {
+        console.error('Error scanning form:', error);
+        appendMessage('Error processing the form. Please try again.', 'bot');
+    });
+}
+
+// Display Extracted Data
+function displayExtractedData(data) {
+    const formattedData = data.replace(/\n/g, '<br>'); // Replace newlines with HTML line breaks
+    appendMessage('Extracted form data:<br>' + formattedData, 'bot');
+    appendMessage('You can now edit or confirm the data.', 'bot');
+}
