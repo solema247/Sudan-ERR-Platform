@@ -521,9 +521,38 @@ function uploadScanFormImage(file) {
     });
 }
 
-// Display Extracted Data
+// Display Extracted Data as Editable Text Area
 function displayExtractedData(data) {
-    const formattedData = data.replace(/\n/g, '<br>'); // Replace newlines with HTML line breaks
-    appendMessage('Extracted form data:<br>' + formattedData, 'bot');
-    appendMessage('You can now edit or confirm the data.', 'bot');
+    const chatBox = document.getElementById('chat-box');
+
+    // Create a container for the message
+    const messageContainer = document.createElement('div');
+    messageContainer.className = 'chat-message bot';
+
+    // Create a textarea element with the extracted data
+    const textarea = document.createElement('textarea');
+    textarea.className = 'editable-textarea';
+    textarea.value = data;  // Set the extracted data as the value of the textarea
+    textarea.rows = 10;     // You can adjust the number of rows to display more or less text
+
+    // Append the textarea to the message container
+    messageContainer.appendChild(textarea);
+
+    // Add a save button to save the edited data
+    const saveButton = document.createElement('button');
+    saveButton.innerText = 'Save';
+    saveButton.className = 'save-button'; // Optional: You can style this in your CSS
+    saveButton.onclick = () => {
+        const updatedText = textarea.value;
+        console.log('Updated text:', updatedText);  // For debugging
+        appendMessage('You have saved the changes.', 'user');  // Add this message to the chat
+        // Handle the updated text (e.g., send it to the server or process further)
+    };
+
+    // Append the save button to the message container
+    messageContainer.appendChild(saveButton);
+
+    // Append the message container to the chatbox
+    chatBox.appendChild(messageContainer);
+    chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the latest message
 }
