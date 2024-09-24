@@ -539,44 +539,6 @@ button {
     background-color: #064e48;
 }
 
-/* Specific Styles for Report V3 to be Mobile-Friendly */
-#report-v3-form-container {
-    display: block;
-    padding: 10px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    margin: 10px 0;
-    text-align: center;
-}
-
-#report-v3-form-container button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-#report-v3-form-container button:hover {
-    background-color: #0056b3;
-}
-
-@media (max-width: 480px) {
-    #report-v3-form-container {
-        padding: 15px;
-        width: 95%;
-        margin: 10px auto;
-    }
-
-    #report-v3-form-container button {
-        font-size: 14px;
-        padding: 12px;
-        width: 100%;
-    }
-}
-
 /* Scan Form Container */
 #scan-form-container {
     display: block; /* Ensure it's visible when required */
@@ -614,4 +576,54 @@ button {
         padding: 12px;
         width: 100%;
     }
+}
+
+/* Ensure the welcome message spans the full width */
+.chat-message.bot {
+    width: 100%; /* Make sure it spans the full width of the parent */
+    text-align: center; /* Center-align the text */
+    padding: 10px; /* Add padding for a nice look */
+    background-color: #f1f1f1; /* Optional: Add a light background color */
+    border-radius: 8px; /* Make the corners rounded */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow */
+}
+
+/* Style the Start button similar to the other buttons */
+.start-button {
+    padding: 5px 10px;
+    background-color: #075e54;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px; /* Add some margin for spacing */
+    width: 45%; /* Match the width with other buttons */
+    max-width: 200px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* Add hover state for Start button */
+.start-button:hover {
+    background-color: #064e48;
+}
+
+/* Active state */
+.start-button:active {
+    background-color: #043e38;
+}
+
+.return-button {
+    padding: 10px 15px;
+    background-color: #075e54;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.return-button:hover {
+    background-color: #064e48;
 }

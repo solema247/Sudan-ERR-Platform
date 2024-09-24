@@ -1,14 +1,23 @@
 // Authentication Logic
 document.addEventListener('DOMContentLoaded', () => {
+    // Hide the chat container initially
+    document.querySelector('.chat-container').style.display = 'none';
+
     document.getElementById('auth-btn').addEventListener('click', () => {
         const errId = document.getElementById('err-id').value.trim();
         const pin = document.getElementById('pin').value.trim();
 
         if (errId === '123' && pin === '321') {
+            // Hide the authentication form
             document.querySelector('.auth-container').style.display = 'none';
+
+            // Show the chat container
             document.querySelector('.chat-container').style.display = 'flex';
-            initializeChat();
+
+            // Initialize the chat and display the welcome message
+            initializeChat(); // Call the chat initialization only after login
         } else {
+            // Show error message if login fails
             document.getElementById('auth-error').style.display = 'block';
         }
     });
@@ -28,6 +37,9 @@ function initializeChat() {
     socket.on('message', (msg) => {
         handleMessage(msg);
     });
+
+    // Show welcome message and Start button only after successful login
+    appendWelcomeMessage(); // This call ensures the message and button appear post-login
 
     document.getElementById('send-btn').addEventListener('click', () => {
         const input = document.getElementById('chat-input');
@@ -49,6 +61,40 @@ function initializeChat() {
             uploadFile(file);
         }
     });
+}
+
+// Function to append welcome message and Start button
+function appendWelcomeMessage() {
+    const chatBox = document.getElementById('chat-box');
+
+    // Clear any existing messages
+    chatBox.innerHTML = '';
+
+    // Create welcome message
+    const welcomeMessage = document.createElement('div');
+    welcomeMessage.className = 'chat-message bot';
+    welcomeMessage.innerHTML = "Welcome to the Sudan Emergency Response Rooms bot. We will help you report on your projects.";
+
+    // Create 'Start' button
+    const startButton = document.createElement('button');
+    startButton.innerText = 'Start';
+    startButton.className = 'start-button'; // You can style this button in CSS
+    startButton.onclick = () => {
+        // Trigger the menu when 'Start' button is clicked
+        appendMenuOptions();
+
+        // Show the chat input and send button after starting
+        document.getElementById('chat-input').style.display = 'block';
+        document.getElementById('send-btn').style.display = 'block';
+
+        // Hide the Start button after clicking
+        startButton.style.display = 'none';
+    };
+
+    // Append welcome message and Start button to chatBox
+    chatBox.appendChild(welcomeMessage);
+    chatBox.appendChild(startButton);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 // Ensure event listeners are correctly initialized when the form is shown or re-initialized
@@ -146,6 +192,12 @@ function handleMessage(msg) {
     } else {
         appendMessage(msg, 'bot');
     }
+
+    // Check if this is the final message in the Report flow
+    if (msg.includes('Report submitted. Thank you!')) {
+        // After the final report message, append the "Return to Menu" button
+        appendReturnToMenuButton(document.getElementById('chat-box'));
+    }
 }
 
 // Function to dynamically add menu options
@@ -162,13 +214,12 @@ function appendMenuOptions() {
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'inline-buttons';
 
-    // Define menu options including Report V3
+    // Define menu options
     const options = [
         { text: 'Menu', value: 'menu' },
-        { text: 'Report', value: 'report' },
-        { text: 'Report V2', value: 'report v2' },
-        { text: 'Report V3', value: 'report v3' },  // Report V3
-        { text: 'Scan Form', value: 'scan form' }   // Add Scan Form option here
+        { text: 'Report with Chat', value: 'report' },
+        { text: 'Report with Fill Form', value: 'report v2' },
+        { text: 'Report with Scan Form', value: 'scan form' }   // Add Scan Form option here
     ];
 
     options.forEach(option => {
@@ -177,8 +228,6 @@ function appendMenuOptions() {
         button.addEventListener('click', () => {
             if (option.value === 'scan form') {
                 startScanForm();  // Add the scan form functionality here
-            } else if (option.value === 'report v3') {
-                startReportV3();
             } else {
                 socket.send(option.value);
                 appendMessage(option.text, 'user');
@@ -269,6 +318,10 @@ function submitV2Form() {
         } else {
             appendMessage(`Failed to submit form: ${data.error}`, 'bot');
         }
+
+        // After form submission, append the Return to Menu button
+        appendReturnToMenuButton(document.getElementById('chat-box'));
+
     })
     .catch(error => {
         console.error('Error submitting form:', error);
@@ -378,104 +431,6 @@ function uploadFiles() {
     });
 }
 
-// Function to start Report V3
-function startReportV3() {
-    appendMessage('Please take a picture of the form to digitize it.', 'bot');
-
-    // Create file input for image capture
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.capture = 'environment'; // Use device's back camera if available
-    input.onchange = () => {
-        const file = input.files[0];
-        if (file) {
-            uploadFormImage(file);
-        }
-    };
-    input.click();
-}
-
-// Function to handle form image upload
-function uploadFormImage(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    appendMessage('Uploading and processing the form image...', 'bot'); // Feedback during upload
-
-    fetch('/upload_report_v3', {
-        method: 'POST',
-        body: formData,
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.success) {
-                displayFormattedText(data.text); // Show formatted text to the user
-            } else {
-                appendMessage('Failed to digitize the form. Please try again.', 'bot');
-            }
-        })
-        .catch((error) => {
-            console.error('Error uploading form image:', error);
-            appendMessage('Error processing form. Please try again.', 'bot');
-        });
-}
-
-// Function to format and display digitized text
-function displayFormattedText(digitizedText) {
-    const formattedText = digitizedText.replace(/\n/g, '<br>'); // Replace line breaks with HTML line breaks
-    appendMessage('Digitized form text:<br>' + formattedText, 'bot'); 
-    appendMessage('Please confirm or retake the picture.', 'bot');
-    appendConfirmationButtons(digitizedText);
-}
-
-// Function to append confirmation buttons
-function appendConfirmationButtons(digitizedText) {
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'inline-buttons';
-
-    // Confirm button
-    const confirmButton = document.createElement('button');
-    confirmButton.innerText = 'Confirm';
-    confirmButton.onclick = () => {
-        appendMessage('Uploading confirmed form...', 'bot'); // Feedback during confirmation
-        uploadConfirmedForm(digitizedText);
-    };
-    buttonContainer.appendChild(confirmButton);
-
-    // Retake button
-    const retakeButton = document.createElement('button');
-    retakeButton.innerText = 'Retake';
-    retakeButton.onclick = startReportV3;
-    buttonContainer.appendChild(retakeButton);
-
-    document.getElementById('chat-box').appendChild(buttonContainer);
-    document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight; // Scroll to show new buttons
-}
-
-// Function to handle confirmed form upload
-function uploadConfirmedForm(digitizedText) {
-    fetch('/confirm_upload_report_v3', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: digitizedText }),
-    })
-    .then((response) => response.json())
-    .then((data) => {
-        if (data.success) {
-            appendMessage('Form uploaded successfully as a PDF.', 'bot');
-        } else {
-            appendMessage(`Failed to upload the form: ${data.error}`, 'bot');
-        }
-    })
-    .catch((error) => {
-        console.error('Error uploading confirmed form:', error);
-        appendMessage('Error uploading form. Please try again.', 'bot');
-    });
-}
-
 // Function to scan form
 function startScanForm() {
     appendMessage('Please upload the image of the form you\'d like to scan.', 'bot');
@@ -546,7 +501,9 @@ function displayExtractedData(data) {
         const updatedText = textarea.value;
         console.log('Updated text:', updatedText);  // For debugging
         appendMessage('You have saved the changes.', 'user');  // Add this message to the chat
-        // Handle the updated text (e.g., send it to the server or process further)
+
+        // Add the "Return to Menu" button after saving
+        appendReturnToMenuButton(messageContainer);
     };
 
     // Append the save button to the message container
@@ -556,3 +513,22 @@ function displayExtractedData(data) {
     chatBox.appendChild(messageContainer);
     chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the latest message
 }
+
+// Function to append the "Return to Menu" button
+function appendReturnToMenuButton(container) {
+    // Create the return to menu button
+    const returnToMenuButton = document.createElement('button');
+    returnToMenuButton.innerText = 'Return to Menu';
+    returnToMenuButton.className = 'return-button'; // You can style this button in CSS
+
+    // Add an event listener to trigger the menu options
+    returnToMenuButton.onclick = () => {
+        appendMenuOptions(); // Return to the main menu
+    };
+
+    // Append the return button to the provided container (messageContainer)
+    container.appendChild(returnToMenuButton);
+}
+
+
+

@@ -382,6 +382,7 @@ def handle_message(msg):
     print(f"Current State: {user_state.get(user_id, 'None')}")
 
     response_text = ""
+
     if user_id not in user_state or msg == 'start':
         response_text = "Choose an option:"
         set_user_state(user_id, 'INITIAL')
@@ -389,15 +390,14 @@ def handle_message(msg):
         if msg in ['1', 'menu']:
             response_text = "Choose an option:"
         elif msg in ['2', 'report']:
-            response_text = "Please enter your ERR ID to proceed with the financial report."
+            # Set state to AWAITING_ERR_ID and send response
             set_user_state(user_id, 'AWAITING_ERR_ID')
+            response_text = "Please enter your ERR ID to proceed with the financial report."
         elif msg in ['report v2', 'report (v2)']:
             form_html = generate_report_v2_form(5)  # Generate 5 cards using the helper function
             send(form_html, broadcast=True)
+            set_user_state(user_id, 'AWAITING_FORM_FILL')  # Set the state for 'report v2'
             response_text = ""
-        elif msg in ['report v3', 'report (v3)']:
-            response_text = "Please take a picture of the form to digitize it."
-            send(response_text, broadcast=True)
         elif msg in ['scan form', 'scan']:  # Add this block for Scan Form
             response_text = "Please upload the image of the form you'd like to scan."
             set_user_state(user_id, 'AWAITING_SCAN_FORM')
@@ -489,7 +489,6 @@ def handle_message(msg):
 
     print(f"Responding with: {response_text}")
 
-
 # Function to generate a 10-digit number, first 4 characters based on ERR ID input
 def generate_ten_digit_id(err_id):
     return err_id[:4] + ''.join(random.choices(string.digits, k=6))
@@ -580,215 +579,6 @@ def handle_submit_report_v2(data):
     # Explicitly send back the form reset command, if needed
     send('reset_form', broadcast=True
          )  # This line will help trigger the form reset client-side if needed
-
-# User Confirmation and Upload of PDF Form
-@app.route('/upload_report_v3', methods=['POST'])
-def upload_report_v3():
-    try:
-        # Get the uploaded file
-        file = request.files.get('file')
-        if not file:
-            return jsonify({'success': False, 'error': 'No file uploaded.'})
-
-        # Read the image content
-        content = file.read()
-
-        # Extract text using Google Vision
-        digitized_text = extract_text_with_google_vision(content)
-
-        # Use regex to parse the relevant fields from the extracted text
-        activity_match = re.search(r'Activity\s+(.+?)\s', digitized_text)
-        description_match = re.search(r'Description\s+of\s+Expenses\s+(.+?)\s', digitized_text)
-        payment_date_match = re.search(r'Payment\s+Date\s+(.+?)\s', digitized_text)
-        seller_match = re.search(r'Seller/\s+Recipient\s+Details\s+(.+?)\s', digitized_text)
-        payment_method_match = re.search(r'Payment\s+\(Cash/Bank\s+App\)\s+(.+?)\s', digitized_text)
-        receipt_no_match = re.search(r'Receipt\s+No\.\s+(.+?)\s', digitized_text)
-        expenses_match = re.search(r'Expenses\s+(.+?)\s', digitized_text)
-
-        # Fallback values if no match is found
-        form_data = {
-            "activity": activity_match.group(1) if activity_match else "N/A",
-            "description": description_match.group(1) if description_match else "N/A",
-            "payment_date": payment_date_match.group(1) if payment_date_match else "N/A",
-            "seller": seller_match.group(1) if seller_match else "N/A",
-            "payment_method": payment_method_match.group(1) if payment_method_match else "N/A",
-            "receipt_no": receipt_no_match.group(1) if receipt_no_match else "N/A",
-            "expenses": expenses_match.group(1) if expenses_match else "N/A"
-        }
-
-        # Log the form data for debugging purposes
-        logging.info(f"Extracted Form Data: {form_data}")
-
-        # Generate pre-filled form HTML using Report V2 structure with pre-filled data
-        prefilled_form_html = f"""
-        <div class='form-bubble'>
-            <form id="report-v2-form">
-                <div class="form-section">
-                    <label for="v2-activity-1">Activity:</label>
-                    <input type="text" id="v2-activity-1" name="activity-1" value="{form_data['activity']}" placeholder="Enter activity"><br>
-                    <label for="v2-description-1">Description of Expenses:</label>
-                    <input type="text" id="v2-description-1" name="description-1" value="{form_data['description']}" placeholder="Enter description"><br>
-                    <label for="v2-payment-date-1">Payment Date:</label>
-                    <input type="date" id="v2-payment-date-1" name="payment-date-1" value="{form_data['payment_date']}"><br>
-                    <label for="v2-seller-1">Seller / Recipient Details:</label>
-                    <input type="text" id="v2-seller-1" name="seller-1" value="{form_data['seller']}" placeholder="Enter seller details"><br>
-                    <label for="v2-payment-method-1">Payment Method:</label>
-                    <select id="v2-payment-method-1" name="payment-method-1">
-                        <option value="cash" {"selected" if form_data['payment_method'] == "CASH" else ""}>Cash</option>
-                        <option value="bank app" {"selected" if form_data['payment_method'] == "Bank App" else ""}>Bank App</option>
-                    </select><br>
-                    <label for="v2-receipt-no-1">Receipt No.:</label>
-                    <input type="text" id="v2-receipt-no-1" name="receipt-no-1" value="{form_data['receipt_no']}" placeholder="Enter receipt number"><br>
-                    <label for="v2-expenses-1">Expenses:</label>
-                    <input type="number" id="v2-expenses-1" name="expenses-1" value="{form_data['expenses']}" placeholder="Enter amount" class="expense-input"><br>
-                </div>
-            </form>
-        </div>
-        """
-
-        # Send pre-filled form back to the user for review and edits
-        return jsonify({'success': True, 'form_html': prefilled_form_html})
-
-    except Exception as e:
-        logging.error(f"Error processing the image: {e}")
-        return jsonify({'success': False, 'error': 'Error processing form. Please try again.'})
-
-# Add this function to generate the PDF with UTF-8 encoding support
-@app.route('/confirm_upload_report_v3', methods=['POST'])
-def confirm_upload_report_v3():
-    try:
-        # Extract the confirmed text from the request
-        confirmed_text = request.json.get('text')
-        if not confirmed_text:
-            return jsonify({
-                'success': False,
-                'error': 'No text provided for confirmation.'
-            })
-
-        # Convert the text to PDF using FPDF with UTF-8 support
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-
-        # Split text into lines for proper UTF-8 handling
-        lines = confirmed_text.split('\n')
-        for line in lines:
-            # Ensure UTF-8 handling, replacing any characters that can't be encoded
-            pdf.cell(0, 10, txt=line.encode('latin-1', 'replace').decode('latin-1'), ln=True)
-
-        # Save PDF to a temporary path
-        pdf_path = '/tmp/confirmed_report.pdf'
-        pdf.output(pdf_path)
-
-        # Upload the PDF to Google Cloud Storage
-        blob = bucket.blob('reports_v3/confirmed_report.pdf')
-        blob.upload_from_filename(pdf_path)
-
-        return jsonify({
-            'success': True,
-            'message': 'Form uploaded successfully as a PDF.'
-        })
-
-    except Exception as e:
-        print(f"Error confirming and uploading the form: {e}")
-        return jsonify({'success': False, 'error': str(e)})
-
-
-def format_extracted_text_to_table(texts):
-    # Split the extracted text into lines
-    lines = texts.splitlines()
-
-    # Define headers based on the form's layout
-    headers = ["Activity", "Description of Expenses", "Payment Date", "Seller/Recipient Details", "Payment (Cash/Bank App)", "Receipt No.", "Expenses"]
-
-    # Initialize an empty list to collect rows of data
-    rows = []
-    current_row = []
-
-    # Flags for identifying sections in the text
-    in_table = False
-
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-
-        # Detect when to start reading table rows
-        if "Activity" in line:
-            in_table = True
-            continue
-
-        # Process each line as a row once we are in the table
-        if in_table:
-            # Accumulate data for each row
-            if any(char.isdigit() for char in line):  # If the line contains digits, it's likely a row of data
-                current_row.append(line)
-
-                # Once the current row matches the headers length, add it to rows and reset
-                if len(current_row) == len(headers):
-                    rows.append(current_row)
-                    current_row = []
-
-    # Fill the DataFrame with headers and rows
-    df = pd.DataFrame(rows, columns=headers)
-
-    # Print and return the formatted table
-    formatted_table = df.to_string(index=False)
-    print("Formatted Table:\n", formatted_table)
-    return formatted_table
-
-# Integration within the Extract Text Function
-def extract_text_with_google_vision(image_content):
-    try:
-        # Load credentials and set the project ID explicitly
-        credentials = service_account.Credentials.from_service_account_file(
-            'local-humanitarian-web-chat-1f81cd59311e.json'  # Ensure this path is correct
-        )
-
-        # Initialize Vision client with explicit project ID and credentials
-        client = vision.ImageAnnotatorClient(credentials=credentials)
-
-        # Create an image object from the content
-        image = vision.Image(content=image_content)
-
-        # Perform text detection
-        response = client.text_detection(image=image)
-
-        # Extract and combine text from the response
-        texts = response.text_annotations
-        if texts:
-            extracted_text = texts[0].description.strip()
-
-            # Print the extracted text for debugging
-            print("Full Extracted Text:\n", extracted_text)  # Debugging line
-
-            # Use the formatting function to structure the text
-            formatted_text = format_extracted_text_to_table(extracted_text)
-
-            # Return the formatted text
-            return formatted_text
-        else:
-            return "No text detected."
-
-    except Exception as e:
-        print(f"Error using Google Vision API: {e}")
-        return "Error in processing the image."
-
-# Web Chat URL
-@app.route('/whatsapp', methods=['POST'])
-def whatsapp():
-    incoming_msg = request.form.get('Body').strip().lower()
-    logging.info(f"Incoming message: {incoming_msg}")
-    resp = MessagingResponse()
-    if 'start' in incoming_msg:
-        long_url = "https://7c18ace5-72cd-4d34-b5be-cec6d1a14d1b-00-277hzsk9eprj9.riker.replit.dev/"
-        short_url = shorten_url(long_url)  # Use the shorten_url function with TinyURL
-        msg = resp.message(f"Welcome to our service! Please visit the following link to continue: {short_url}")
-        logging.info("Responding with Web Chat URL.")
-    else:
-        msg = resp.message("Send 'start' to receive the link to our Web Chat.")
-        logging.info("Responding with instruction message.")
-    return str(resp)
 
 # Scan Form
 @app.route('/scan_form', methods=['POST'])
