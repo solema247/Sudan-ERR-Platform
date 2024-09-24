@@ -33,14 +33,14 @@ app.config['SECRET_KEY'] = 'supersecretkey'
 socketio = SocketIO(app)
 
 # Set the OpenAI API key directly
-openai_client = OpenAI(api_key='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')  # Replace with your actual API key
+openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))  # Replace with your actual API key
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Twilio credentials (replace with your actual Twilio credentials)
-account_sid = 'ACf8a9cf35a043af0acc877f245871b6ee'
-auth_token = '1526e8a67318c6cb7892f5ff3a230931'
+account_sid = os.getenv('TWILIO_ACCOUNT_SID')
+auth_token = os.getenv('TWILIO_AUTH_TOKEN')
 twilio_client = Client(account_sid, auth_token)
 
 # Google Sheets setup
@@ -48,7 +48,7 @@ scope = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive"
 ]
-creds, project = load_credentials_from_file('local-humanitarian-web-chat-5b747d2b153d.json', scopes=scope)  # Update this path
+creds, project = load_credentials_from_file(os.getenv('GCP_CREDENTIALS_JSON'), scopes=scope) # Update this path
 client = gspread.authorize(creds)
 spreadsheet = client.open('MAG Database (Web Chat MVP)')
 err_db_sheet = spreadsheet.worksheet('ERR DB')
@@ -56,15 +56,16 @@ sheet1 = spreadsheet.worksheet("Web Chat Form")  # Ensure the worksheet name mat
 sheet2 = spreadsheet.worksheet("Web Chat Expenses")  # Ensure the worksheet name matches
 
 # Google Cloud Storage setup
-storage_client = storage.Client.from_service_account_json('local-humanitarian-web-chat-5b747d2b153d.json')  # Update this path
-bucket_name = 'local-humanitarian-webchat-mvp'  # Your GCS bucket name
+storage_client = storage.Client.from_service_account_json(os.getenv('GCP_CREDENTIALS_JSON'))
+# Update this path
+bucket_name = os.getenv('GCS_BUCKET_NAME')  # Your GCS bucket name
 bucket = storage_client.bucket(bucket_name)
 
 # Path to your downloaded service account JSON key
-service_account_json = 'local-humanitarian-web-chat-1f81cd59311e.json'
+service_account_json = os.getenv('GOOGLE_VISION')
 
 # Google Vision
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'local-humanitarian-web-chat-1f81cd59311e.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.getenv('GOOGLE_VISION')
 
 # Google Vision function to extract text from cropped images
 def google_vision_ocr(image):
