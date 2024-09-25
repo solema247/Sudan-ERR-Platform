@@ -7,21 +7,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const errId = document.getElementById('err-id').value.trim();
         const pin = document.getElementById('pin').value.trim();
 
-        if (errId === '123' && pin === '321') {
-            // Hide the authentication form
-            document.querySelector('.auth-container').style.display = 'none';
+        // Create form data
+        const formData = new FormData();
+        formData.append('err-id', errId);
+        formData.append('pin', pin);
 
-            // Show the chat container
-            document.querySelector('.chat-container').style.display = 'flex';
+        // Send POST request to server for authentication
+        fetch('/login', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include' // Include credentials to allow cookies
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Hide the authentication form
+                document.querySelector('.auth-container').style.display = 'none';
 
-            // Initialize the chat and display the welcome message
-            initializeChat(); // Call the chat initialization only after login
-        } else {
-            // Show error message if login fails
+                // Show the chat container
+                document.querySelector('.chat-container').style.display = 'flex';
+
+                // Initialize the chat and display the welcome message
+                initializeChat(); // Call the chat initialization only after login
+            } else {
+                // Show error message if login fails
+                document.getElementById('auth-error').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error during login:', error);
             document.getElementById('auth-error').style.display = 'block';
-        }
+        });
     });
-});
 
 let socket;
 
@@ -36,6 +53,16 @@ function initializeChat() {
 
     socket.on('message', (msg) => {
         handleMessage(msg);
+    });
+
+    // Listen for reset form event from the server
+    socket.on('reset_form', () => {
+        // Clear the form visually or reinitialize the form as needed
+        const formElement = document.getElementById('report-v2-form');
+        if (formElement) {
+            formElement.reset();
+        }
+        initializeForm(); // Reinitialize to ensure event listeners are correctly set
     });
 
     // Show welcome message and Start button only after successful login
@@ -99,7 +126,7 @@ function appendWelcomeMessage() {
 
 // Ensure event listeners are correctly initialized when the form is shown or re-initialized
 function initializeForm() {
-    const submitButton = document.querySelector("#report-v2-form button[type='button']");
+    const submitButton = document.getElementById('v2-submit-button');
 
     if (submitButton) {  // Check if the submit button exists
         // Remove any existing listeners to prevent duplication
@@ -267,15 +294,6 @@ function appendForm(formHtml) {
     }
 }
 
-// Listen for reset form event from the server
-socket.on('reset_form', () => {
-    // Clear the form visually or reinitialize the form as needed
-    const formElement = document.getElementById('report-v2-form');
-    if (formElement) {
-        formElement.reset();
-    }
-    initializeForm(); // Reinitialize to ensure event listeners are correctly set
-});
 
 // Function to handle form submission
 function submitV2Form() {
@@ -310,13 +328,14 @@ function submitV2Form() {
     fetch('/upload', {
         method: 'POST',
         body: formData,
+        credentials: 'include',  // Add this line
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            appendMessage('Report V2 submitted successfully!', 'user');
+            appendMessage('Report V2 submitted successfully!', 'user');  // User feedback for success
         } else {
-            appendMessage(`Failed to submit form: ${data.error}`, 'bot');
+            appendMessage(`Failed to submit form: ${data.error}`, 'bot');  // Error handling for server-side errors
         }
 
         // After form submission, append the Return to Menu button
@@ -325,7 +344,7 @@ function submitV2Form() {
     })
     .catch(error => {
         console.error('Error submitting form:', error);
-        appendMessage('Error submitting form. Please try again.', 'bot');
+        appendMessage('Error submitting form. Please try again.', 'bot');  // Client-side error handling
     })
     .finally(() => {
         // Re-enable the submit button after the operation is complete
@@ -530,5 +549,4 @@ function appendReturnToMenuButton(container) {
     container.appendChild(returnToMenuButton);
 }
 
-
-
+}); 

@@ -40,7 +40,7 @@
 
     <!-- Integrated Form for Report V2 -->
     <div id="report-v2-form-container" style="display:none;">
-        <form id="report-v2-form" enctype="multipart/form-data">
+        <form id="report-v2-form" enctype="multipart/form-data" action="/upload" method="POST">
             <div class="form-section">
                 <label for="v2-date">Date:</label>
                 <input type="date" id="v2-date" name="date">
@@ -105,7 +105,7 @@
             </div>
 
             <div class="form-section">
-                <button type="button" onclick="submitV2Form()">Submit</button>
+                <button type="button" id="v2-submit-button">Submit</button>
             </div>
         </form>
     </div>

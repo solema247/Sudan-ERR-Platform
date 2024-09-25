@@ -20,6 +20,9 @@ pytesseract = "^0.3.13"
 pandas = "^2.2.2"
 requests = "^2.32.3"
 opencv-python = "^4.10.0.84"
+send = "^0.2.0"
+socketio = "^0.2.1"
+flask-session = "^0.8.0"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md

@@ -7,4 +7,5 @@ fpdf
 openai
 pytesseract
 Pillow
-
+gunicorn
+gevent

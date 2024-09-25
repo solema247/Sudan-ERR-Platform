@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, jsonify, send_file
-from flask_socketio import SocketIO, send
+from flask import Flask, render_template, request, jsonify, send_file, session
+from flask_socketio import SocketIO, send, disconnect  # Keep this simple
+from flask_session import Session  # Add this import for Session
 from openai import OpenAI  # Updated import
 from google.auth import load_credentials_from_file
 from google.cloud import storage
@@ -29,8 +30,16 @@ UPLOAD_FOLDER = 'uploads'  # This is the directory where uploaded files will be 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Create the directory if it doesn't exist
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER  # Set this as the upload folder in Flask config
 
-app.config['SECRET_KEY'] = 'supersecretkey'
-socketio = SocketIO(app)
+app.config['SECRET_KEY'] = os.urandom(24)  # Generate a random secret key
+
+app.secret_key = 'your_secret_key'  # Replace with a strong random string
+
+# Configure session type
+app.config['SESSION_TYPE'] = 'filesystem'  # You can also use 'redis' or other backends for production
+Session(app)  # Initialize session with the app
+
+# Set up WebSocket with ping timeouts to prevent idle WebSocket connections
+socketio = SocketIO(app, manage_session=True, ping_timeout=10, ping_interval=5)
 
 # Set the OpenAI API key directly
 openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))  # Replace with your actual API key
@@ -156,6 +165,32 @@ def preprocess_image(image_path):
 user_state = {}
 user_data = {}
 
+@socketio.on('connect')
+def handle_connect(auth):
+    sid = request.sid  # Get the Socket.IO session ID
+    print(f"Client connected with SID: {sid}")
+
+    # Check if user is authenticated
+    if 'err_id' in session:
+        # Store the Socket.IO session ID in the Flask session
+        session['sid'] = sid
+        set_user_state(sid, 'INITIAL')  # Initialize state for this user
+        print(f"SID stored in session: {session.get('sid')}")
+    else:
+        print("Unauthenticated user attempted to connect.")
+        # Optionally, disconnect the client
+        send('Unauthorized access. Please log in.', to=sid)
+        disconnect()
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    sid = request.sid
+    if sid in user_state:
+        del user_state[sid]  # Clean up the state when a user disconnects
+    if sid in user_data:
+        del user_data[sid]  # Clean up user data
+    print(f"Client disconnected with SID: {sid}")
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -175,10 +210,32 @@ def shorten_url(long_url):
         logging.error(f"Exception during URL shortening: {e}")
         return long_url  # Return the original URL if an error occurs
 
+# Login Server Side 
+@app.route('/login', methods=['POST'])
+def login():
+    err_id = request.form.get('err-id')
+    pin = request.form.get('pin')
+
+    # Perform your authentication logic here
+    if err_id == '123' and pin == '321':
+        # Set the session data
+        session['err_id'] = err_id
+        print(f"Session data set: {session}")
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
+
+
 # File Upload and Form Submission V2
 @app.route('/upload', methods=['POST'])
 def upload():
     try:
+        # Get the 'err_id' from the Flask session
+        session_err_id = session.get('err_id')
+        if not session_err_id:
+            return jsonify({'error': 'Not authenticated'}), 401
+        print(f"ERR ID from session in upload: {session_err_id}")
+
         # Extract form data
         err_id = request.form.get('err-id', 'default-id')
         report_date = request.form.get('date', '')
@@ -189,11 +246,18 @@ def upload():
         additional_budget_lessons = request.form.get('additional-budget-lessons', '')
         additional_training_needs = request.form.get('additional-training-needs', '')
 
+        # Optional: Validate that the 'err-id' from the form matches the session 'err_id'
+        if err_id != session_err_id:
+            return jsonify({'error': 'ERR ID mismatch'}), 400
+
         # Extract and parse expenses JSON
         expenses = json.loads(request.form.get('expenses', '[]'))
 
         # Log the extracted form data for debugging
         logging.info(f"Form data: ERR ID: {err_id}, Date: {report_date}, Expenses: {expenses}")
+
+        # Collect uploaded URLs
+        uploaded_urls = []
 
         # Handle file uploads
         if 'file' in request.files:
@@ -219,13 +283,8 @@ def upload():
                     logging.info(f"File successfully uploaded to {blob_path}")
                     logging.info(f"Authenticated URL: {authenticated_url}")
 
-                    # You can store this URL in Google Sheets or wherever necessary
-                    # Example for storing in a list
-                    if 'web_user' not in user_data:
-                        user_data['web_user'] = {}
-                    if 'receipts' not in user_data['web_user']:
-                        user_data['web_user']['receipts'] = []
-                    user_data['web_user']['receipts'].append(authenticated_url)
+                    # Collect the URLs in a list
+                    uploaded_urls.append(authenticated_url)
 
         # Update Google Sheets (Sheet 1)
         try:
@@ -363,104 +422,113 @@ def generate_report_v2_form(num_cards):
                     <textarea id="v2-additional-training-needs" name="additional-training-needs" rows="3" placeholder="Enter details"></textarea><br>
                 </div>
                 <div class="form-section">
-                    <button type="button" onclick="submitV2Form()">Submit</button>
+                    <button type="button" id="v2-submit-button">Submit</button>
                 </div>
             </div>
         </form>
     </div>
     """
 
+# Define global dictionaries to store user state and data
+user_state = {}  # Tracks each user's state
+user_data = {}   # Tracks each user's data
+
 # Define the helper function for user state
-def set_user_state(user_id, state):
-    user_state[user_id] = state
+def set_user_state(sid, state):
+    user_state[sid] = state
+
+def get_user_data(sid):
+    if sid not in user_data:
+        user_data[sid] = {}
+    return user_data[sid]
 
 @socketio.on('message')
 def handle_message(msg):
-    user_id = 'web_user'
+    sid = request.sid  # Get the unique session ID for each user
     msg = msg.strip().lower()
 
-    print(f"Received message: {msg}")
-    print(f"Current State: {user_state.get(user_id, 'None')}")
+    print(f"Received message from {sid}: {msg}")
+    print(f"Current State for {sid}: {user_state.get(sid, 'None')}")  # Track state per user
 
     response_text = ""
 
-    if user_id not in user_state or msg == 'start':
+    if sid not in user_state or msg == 'start':
         response_text = "Choose an option:"
-        set_user_state(user_id, 'INITIAL')
-    elif user_state[user_id] == 'INITIAL':
+        set_user_state(sid, 'INITIAL')  # Set state specific to this user's session
+    elif user_state[sid] == 'INITIAL':
         if msg in ['1', 'menu']:
             response_text = "Choose an option:"
         elif msg in ['2', 'report']:
             # Set state to AWAITING_ERR_ID and send response
-            set_user_state(user_id, 'AWAITING_ERR_ID')
+            set_user_state(sid, 'AWAITING_ERR_ID')
             response_text = "Please enter your ERR ID to proceed with the financial report."
         elif msg in ['report v2', 'report (v2)']:
             form_html = generate_report_v2_form(5)  # Generate 5 cards using the helper function
             send(form_html, broadcast=True)
-            set_user_state(user_id, 'AWAITING_FORM_FILL')  # Set the state for 'report v2'
+            set_user_state(sid, 'AWAITING_FORM_FILL')  # Set the state for 'report v2'
             response_text = ""
         elif msg in ['scan form', 'scan']:  # Add this block for Scan Form
             response_text = "Please upload the image of the form you'd like to scan."
-            set_user_state(user_id, 'AWAITING_SCAN_FORM')
+            set_user_state(sid, 'AWAITING_SCAN_FORM')
             send(response_text, broadcast=True)
         else:
             response_text = "Invalid option. Choose an option:\n1. Menu\n2. Report\n"
-    elif user_state[user_id] == 'AWAITING_ERR_ID':
+    elif user_state[sid] == 'AWAITING_ERR_ID':
         err_id = msg.upper()
         cell = err_db_sheet.find(err_id)
         if cell:
             try:
                 existing_sheet = spreadsheet.worksheet(f'ERR {err_id}')
-                user_data[user_id] = {
+                user_data[sid] = {
                     'err_id': err_id,
                     'sheet': existing_sheet
                 }
                 response_text = f"Your ERR ID {err_id} exists. Please provide a description of the item (e.g., food) or service (e.g., transportation) that you purchased."
-                set_user_state(user_id, 'AWAITING_DESCRIPTION')
+                set_user_state(sid, 'AWAITING_DESCRIPTION')
             except gspread.exceptions.WorksheetNotFound:
                 new_sheet = spreadsheet.add_worksheet(title=f'ERR {err_id}', rows="100", cols="20")
                 template_data = err_db_sheet.row_values(1)
                 new_sheet.append_row(template_data)
-                user_data[user_id] = {'err_id': err_id, 'sheet': new_sheet}
+                user_data[sid] = {'err_id': err_id, 'sheet': new_sheet}
                 response_text = f"A new financial report has been created. Let's start filling out the report. Please provide a description of the item or service that you purchased."
-                set_user_state(user_id, 'AWAITING_DESCRIPTION')
+                set_user_state(sid, 'AWAITING_DESCRIPTION')
         else:
             response_text = "ERR ID not found. Please try again."
-            set_user_state(user_id, 'AWAITING_ERR_ID')
-    elif user_state[user_id] == 'AWAITING_DESCRIPTION':
-        user_data[user_id]['description'] = msg
+            set_user_state(sid, 'AWAITING_ERR_ID')
+    elif user_state[sid] == 'AWAITING_DESCRIPTION':
+        user_data[sid]['description'] = msg
         response_text = "Please provide the vendor name."
-        set_user_state(user_id, 'AWAITING_VENDOR')
-    elif user_state[user_id] == 'AWAITING_VENDOR':
-        user_data[user_id]['vendor'] = msg
+        set_user_state(sid, 'AWAITING_VENDOR')
+    elif user_state[sid] == 'AWAITING_VENDOR':
+        user_data[sid]['vendor'] = msg
         response_text = "Please upload an image of the receipt using the 📎 button."
-        set_user_state(user_id, 'AWAITING_RECEIPT')
-    elif user_state[user_id] == 'AWAITING_RECEIPT':
+        set_user_state(sid, 'AWAITING_RECEIPT')
+    elif user_state[sid] == 'AWAITING_RECEIPT':
         response_text = "Waiting for receipt upload..."
-        set_user_state(user_id, 'AWAITING_AMOUNT')
-    elif user_state[user_id] == 'AWAITING_AMOUNT':
-        user_data[user_id]['amount'] = msg
-        new_sheet = user_data[user_id]['sheet']
+        set_user_state(sid, 'AWAITING_AMOUNT')
+    elif user_state[sid] == 'AWAITING_AMOUNT':
+        user_data[sid]['amount'] = msg
+        new_sheet = user_data[sid]['sheet']
         current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         new_sheet.append_row([
-            user_data[user_id]['description'], current_date,
-            user_data[user_id]['vendor'],
-            user_data[user_id].get('receipt', 'No receipt uploaded'),
-            user_data[user_id]['amount']
+            user_data[sid]['description'], current_date,
+            user_data[sid]['vendor'],
+            user_data[sid].get('receipt', 'No receipt uploaded'),
+            user_data[sid]['amount']
         ])
         response_text = "Do you want to add another expense or submit the report?\n1. Add another expense\n2. Submit report"
-        set_user_state(user_id, 'AWAITING_NEXT_ACTION')
-    elif user_state[user_id] == 'AWAITING_NEXT_ACTION':
+        set_user_state(sid, 'AWAITING_NEXT_ACTION')
+    elif user_state[sid] == 'AWAITING_NEXT_ACTION':
         if msg == '1':
             response_text = "Please provide the description of the item or service purchased."
-            set_user_state(user_id, 'AWAITING_DESCRIPTION')
+            set_user_state(sid, 'AWAITING_DESCRIPTION')
         elif msg == '2':
             response_text = "Report submitted. Thank you!"
-            del user_data[user_id]
-            set_user_state(user_id, 'INITIAL')
+            del user_data[sid]
+            set_user_state(sid, 'INITIAL')
         else:
             response_text = "Please choose an option:\n1. Add another expense\n2. Submit report"
-    elif user_state[user_id] == 'AWAITING_SCAN_FORM':  # New state to handle file upload
+    elif user_state[sid] == 'AWAITING_SCAN_FORM':  # New state to handle file upload
         if 'file' in request.files:
             file = request.files['file']
             if file.filename == '':  # If no file is selected
@@ -478,7 +546,7 @@ def handle_message(msg):
                 print(f"Structured response: {structured_response}") 
 
                 response_text = f"Here is the extracted data:\n{structured_response}"
-                set_user_state(user_id, 'INITIAL')
+                set_user_state(sid, 'INITIAL')
         else:
             response_text = "Please upload a valid image file to scan."
     else:  # This else handles any states not explicitly managed above
@@ -489,6 +557,7 @@ def handle_message(msg):
         send(response_text, broadcast=True)
 
     print(f"Responding with: {response_text}")
+
 
 # Function to generate a 10-digit number, first 4 characters based on ERR ID input
 def generate_ten_digit_id(err_id):
@@ -611,4 +680,5 @@ def scan_form():
     return jsonify({"message": structured_response})
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Get port from environment or default to 5000
+    socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
