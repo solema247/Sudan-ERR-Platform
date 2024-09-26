@@ -1,10 +1,10 @@
 from flask import Flask, render_template, request, jsonify, send_file, session
-from flask_socketio import SocketIO, send, disconnect  # Keep this simple
-from flask_session import Session  # Add this import for Session
-from openai import OpenAI  # Updated import
+from flask_socketio import SocketIO, send, disconnect
+from flask_session import Session  # For server-side sessions
+from openai import OpenAI
 from google.auth import load_credentials_from_file
 from google.cloud import storage
-import gspread
+import gspread  # For interacting with Google Sheets
 import logging
 from datetime import datetime
 import random
@@ -12,39 +12,41 @@ import string
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.rest import Client
 import json
-from fpdf import FPDF  # Import FPDF
+from fpdf import FPDF  # For PDF generation
 import os
 import base64
 from io import BytesIO
-import pytesseract
+import pytesseract  # For OCR processing
 from PIL import Image
-from google.cloud import vision
+from google.cloud import vision  # For Google Vision API
 from google.oauth2 import service_account
 import pandas as pd
-import requests  # Import requests to make API calls
+import requests  # For making HTTP requests
 import re
-import cv2
+import cv2  # For image processing
 
 app = Flask(__name__)
-UPLOAD_FOLDER = 'uploads'  # This is the directory where uploaded files will be saved
+
+# Configure upload folder for saving uploaded files
+UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Create the directory if it doesn't exist
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER  # Set this as the upload folder in Flask config
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Set secret keys for session management
 app.config['SECRET_KEY'] = os.urandom(24)  # Generate a random secret key
+app.secret_key = os.getenv('APP_SECRET_KEY')  
 
-app.secret_key = 'your_secret_key'  # Replace with a strong random string
+# Configure session type and initialize session
+app.config['SESSION_TYPE'] = 'filesystem'  # Use filesystem-based sessions
+Session(app)
 
-# Configure session type
-app.config['SESSION_TYPE'] = 'filesystem'  # You can also use 'redis' or other backends for production
-Session(app)  # Initialize session with the app
-
-# Set up WebSocket with ping timeouts to prevent idle WebSocket connections
+# Set up WebSocket with ping timeouts to prevent idle connections
 socketio = SocketIO(app, manage_session=True, ping_timeout=10, ping_interval=5)
 
-# Set the OpenAI API key directly
+# Initialize OpenAI client with API key
 openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))  # Replace with your actual API key
 
-# Set up logging
+# Set up logging configuration
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Twilio credentials (replace with your actual Twilio credentials)
@@ -52,28 +54,28 @@ account_sid = os.getenv('TWILIO_ACCOUNT_SID')
 auth_token = os.getenv('TWILIO_AUTH_TOKEN')
 twilio_client = Client(account_sid, auth_token)
 
-# Google Sheets setup
+# Google Sheets API setup
 scope = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive"
 ]
-creds, project = load_credentials_from_file(os.getenv('GCP_CREDENTIALS_JSON'), scopes=scope) # Update this path
+creds, project = load_credentials_from_file(os.getenv('GCP_CREDENTIALS_JSON'), scopes=scope)
 client = gspread.authorize(creds)
 spreadsheet = client.open('MAG Database (Web Chat MVP)')
+# Access specific worksheets within the spreadsheet
 err_db_sheet = spreadsheet.worksheet('ERR DB')
-sheet1 = spreadsheet.worksheet("Web Chat Form")  # Ensure the worksheet name matches
-sheet2 = spreadsheet.worksheet("Web Chat Expenses")  # Ensure the worksheet name matches
+sheet1 = spreadsheet.worksheet("Web Chat Form")
+sheet2 = spreadsheet.worksheet("Web Chat Expenses")
 
 # Google Cloud Storage setup
 storage_client = storage.Client.from_service_account_json(os.getenv('GCP_CREDENTIALS_JSON'))
-# Update this path
-bucket_name = os.getenv('GCS_BUCKET_NAME')  # Your GCS bucket name
+bucket_name = os.getenv('GCS_BUCKET_NAME')  # GCS bucket name from environment variable
 bucket = storage_client.bucket(bucket_name)
 
 # Path to your downloaded service account JSON key
 service_account_json = os.getenv('GOOGLE_VISION')
 
-# Google Vision
+# Set environment variable for Google Vision
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.getenv('GOOGLE_VISION')
 
 # Google Vision function to extract text from cropped images
@@ -152,7 +154,6 @@ def chatgpt_classification(raw_text):
         print(f"An error occurred while interacting with the OpenAI API: {e}")
         return "An error occurred while processing the data."
 
-
 # Preprocess the image before OCR
 def preprocess_image(image_path):
     image = cv2.imread(image_path)
@@ -210,33 +211,33 @@ def shorten_url(long_url):
         logging.error(f"Exception during URL shortening: {e}")
         return long_url  # Return the original URL if an error occurs
 
-# Login Server Side 
+# Login route for user authentication
 @app.route('/login', methods=['POST'])
 def login():
     err_id = request.form.get('err-id')
     pin = request.form.get('pin')
 
-    # Perform your authentication logic here
+    # Authenticate user credentials
     if err_id == '123' and pin == '321':
-        # Set the session data
+        # Set the session data upon successful authentication
         session['err_id'] = err_id
         print(f"Session data set: {session}")
         return jsonify({'success': True})
     else:
+        # Return error if authentication fails
         return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
 
-
-# File Upload and Form Submission V2
+# File Upload and Form Submission (Version 2)
 @app.route('/upload', methods=['POST'])
 def upload():
     try:
-        # Get the 'err_id' from the Flask session
+        # Get the 'err_id' from the Flask session to ensure user is authenticated
         session_err_id = session.get('err_id')
         if not session_err_id:
             return jsonify({'error': 'Not authenticated'}), 401
         print(f"ERR ID from session in upload: {session_err_id}")
 
-        # Extract form data
+        # Extract form data from the request
         err_id = request.form.get('err-id', 'default-id')
         report_date = request.form.get('date', '')
         total_grant = safe_float(request.form.get('total-grant', ''))
@@ -246,17 +247,17 @@ def upload():
         additional_budget_lessons = request.form.get('additional-budget-lessons', '')
         additional_training_needs = request.form.get('additional-training-needs', '')
 
-        # Optional: Validate that the 'err-id' from the form matches the session 'err_id'
+        # Validate that the 'err-id' from the form matches the session 'err_id'
         if err_id != session_err_id:
             return jsonify({'error': 'ERR ID mismatch'}), 400
 
-        # Extract and parse expenses JSON
+        # Extract and parse expenses JSON data
         expenses = json.loads(request.form.get('expenses', '[]'))
 
-        # Log the extracted form data for debugging
+        # Log the extracted form data for debugging purposes
         logging.info(f"Form data: ERR ID: {err_id}, Date: {report_date}, Expenses: {expenses}")
 
-        # Collect uploaded URLs
+        # Collect uploaded file URLs
         uploaded_urls = []
 
         # Handle file uploads
@@ -264,7 +265,7 @@ def upload():
             uploaded_files = request.files.getlist('file')
             for file in uploaded_files:
                 if file.filename:
-                    # Define the folder path in GCS
+                    # Define the folder path in Google Cloud Storage
                     submission_date = datetime.now().strftime('%Y-%m-%d')
                     folder_name = f"report-v2/submission-{submission_date}-{err_id}"
                     blob_path = f"{folder_name}/{file.filename}"
@@ -276,24 +277,25 @@ def upload():
                     blob = bucket.blob(blob_path)
                     blob.upload_from_file(file)
 
-                    # Generate the authenticated URL instead of the public URL
+                    # Generate the authenticated URL for the uploaded file
                     authenticated_url = f"https://storage.cloud.google.com/{bucket_name}/{blob_path}"
 
                     # Log and store the URL
                     logging.info(f"File successfully uploaded to {blob_path}")
                     logging.info(f"Authenticated URL: {authenticated_url}")
 
-                    # Collect the URLs in a list
+                    # Add the URL to the list of uploaded URLs
                     uploaded_urls.append(authenticated_url)
 
-        # Update Google Sheets (Sheet 1)
+        # Update Google Sheets with form data (Sheet 1)
         try:
             err_report_id = generate_ten_digit_id(err_id)
             total_expenses = sum(safe_float(expense.get('amount', '')) for expense in expenses)
 
-            # Construct GCS folder link
+            # Construct Google Cloud Storage folder link
             gcs_folder_link = f"https://storage.cloud.google.com/{bucket_name}/report-v2/submission-{report_date}-{err_id}"
 
+            # Append form data to Sheet 1
             sheet1.append_row([
                 err_id,  # Column A (ERR ID)
                 err_report_id,  # Column B (ERR Report ID)
@@ -309,7 +311,7 @@ def upload():
             ])
             logging.info("Successfully updated Sheet 1 with form data.")
 
-            # Update Google Sheets (Sheet 2) with expense details
+            # Update Google Sheets with expense details (Sheet 2)
             for expense in expenses:
                 activity = expense.get('activity')
                 description = expense.get('description')
@@ -319,7 +321,7 @@ def upload():
                 receipt_no = expense.get('receipt-no')
                 amount = safe_float(expense.get('amount', ''))
 
-                # Add the expense data row to the sheet
+                # Append expense data to Sheet 2
                 sheet2.append_row([
                     err_report_id,  # Column A (ERR Report ID)
                     activity,  # Column B (Activity)
@@ -342,7 +344,7 @@ def upload():
         logging.error(f"Error processing upload: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
-# Define card template
+# Define card template for the form
 def generate_card_template(num_cards):
     card_html = ""
     for i in range(1, num_cards + 1):
@@ -370,7 +372,7 @@ def generate_card_template(num_cards):
         """
     return card_html
 
-# Define the helper function first
+# Generate the HTML for the report form (Version 2)
 def generate_report_v2_form(num_cards):
     return f"""
     <div class='form-bubble'>
@@ -433,7 +435,7 @@ def generate_report_v2_form(num_cards):
 user_state = {}  # Tracks each user's state
 user_data = {}   # Tracks each user's data
 
-# Define the helper function for user state
+# Helper functions for user state management
 def set_user_state(sid, state):
     user_state[sid] = state
 
@@ -467,7 +469,7 @@ def handle_message(msg):
             send(form_html, broadcast=True)
             set_user_state(sid, 'AWAITING_FORM_FILL')  # Set the state for 'report v2'
             response_text = ""
-        elif msg in ['scan form', 'scan']:  # Add this block for Scan Form
+        elif msg in ['scan form', 'scan']:
             response_text = "Please upload the image of the form you'd like to scan."
             set_user_state(sid, 'AWAITING_SCAN_FORM')
             send(response_text, broadcast=True)
@@ -528,10 +530,10 @@ def handle_message(msg):
             set_user_state(sid, 'INITIAL')
         else:
             response_text = "Please choose an option:\n1. Add another expense\n2. Submit report"
-    elif user_state[sid] == 'AWAITING_SCAN_FORM':  # New state to handle file upload
+    elif user_state[sid] == 'AWAITING_SCAN_FORM':
         if 'file' in request.files:
             file = request.files['file']
-            if file.filename == '':  # If no file is selected
+            if file.filename == '':
                 response_text = "No file selected. Please upload an image to scan."
             else:
                 # Save the file and process it
@@ -541,15 +543,16 @@ def handle_message(msg):
                 # Preprocess and scan the form
                 preprocessed_image = preprocess_image(image_path)
                 raw_text = google_vision_ocr(preprocessed_image)
-                print(f"Raw OCR text: {raw_text}") 
+                print(f"Raw OCR text: {raw_text}")
                 structured_response = chatgpt_classification(raw_text)
-                print(f"Structured response: {structured_response}") 
+                print(f"Structured response: {structured_response}")
 
                 response_text = f"Here is the extracted data:\n{structured_response}"
                 set_user_state(sid, 'INITIAL')
         else:
             response_text = "Please upload a valid image file to scan."
-    else:  # This else handles any states not explicitly managed above
+    else:
+        # Handles any states not explicitly managed above
         response_text = f"Bot Response: You said '{msg}'"
 
     # Send response only if response_text is not empty
@@ -557,7 +560,6 @@ def handle_message(msg):
         send(response_text, broadcast=True)
 
     print(f"Responding with: {response_text}")
-
 
 # Function to generate a 10-digit number, first 4 characters based on ERR ID input
 def generate_ten_digit_id(err_id):
@@ -620,8 +622,7 @@ def handle_submit_report_v2(data):
         seller = expense.get('seller')
         payment_method = expense.get('payment-method')
         receipt_no = expense.get('receipt-no')
-        amount = safe_float(expense.get(
-            'amount', ''))  # Safely handle empty or non-numeric values
+        amount = safe_float(expense.get('amount', ''))  # Safely handle empty or non-numeric values
 
         # Add the expense data row to the sheet
         sheet2.append_row([
@@ -647,8 +648,7 @@ def handle_submit_report_v2(data):
     set_user_state(user_id, 'INITIAL')  # Reset to INITIAL state
 
     # Explicitly send back the form reset command, if needed
-    send('reset_form', broadcast=True
-         )  # This line will help trigger the form reset client-side if needed
+    send('reset_form', broadcast=True)  # This line will help trigger the form reset client-side if needed
 
 # Scan Form
 @app.route('/scan_form', methods=['POST'])

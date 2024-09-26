@@ -1,13 +1,14 @@
-// Authentication Logic
+// Event listener for when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Hide the chat container initially
+    // Initially hide the chat container until the user is authenticated
     document.querySelector('.chat-container').style.display = 'none';
 
+    // Add click event listener to the authentication button
     document.getElementById('auth-btn').addEventListener('click', () => {
         const errId = document.getElementById('err-id').value.trim();
         const pin = document.getElementById('pin').value.trim();
 
-        // Create form data
+        // Create form data for authentication
         const formData = new FormData();
         formData.append('err-id', errId);
         formData.append('pin', pin);
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Hide the authentication form
+                // Hide the authentication form upon successful login
                 document.querySelector('.auth-container').style.display = 'none';
 
                 // Show the chat container
@@ -40,22 +41,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-let socket;
+let socket; // Declare socket variable globally
 
-// Chat initialization logic
+// Function to initialize chat functionalities
 function initializeChat() {
-    socket = io();
+    socket = io(); // Initialize Socket.IO connection
 
-    // Existing socket connection logic
+    // Handle successful connection to the server
     socket.on('connect', () => {
         console.log('Connected to the server');
     });
 
+    // Handle incoming messages from the server
     socket.on('message', (msg) => {
         handleMessage(msg);
     });
 
-    // Listen for reset form event from the server
+    // Listen for 'reset_form' event from the server to reset forms
     socket.on('reset_form', () => {
         // Clear the form visually or reinitialize the form as needed
         const formElement = document.getElementById('report-v2-form');
@@ -68,6 +70,7 @@ function initializeChat() {
     // Show welcome message and Start button only after successful login
     appendWelcomeMessage(); // This call ensures the message and button appear post-login
 
+    // Add event listener for the send button in the chat input
     document.getElementById('send-btn').addEventListener('click', () => {
         const input = document.getElementById('chat-input');
         const message = input.value.trim();
@@ -78,10 +81,12 @@ function initializeChat() {
         }
     });
 
+    // Add event listener for the upload button to trigger file input
     document.getElementById('upload-btn').addEventListener('click', () => {
         document.getElementById('file-input').click();
     });
 
+    // Handle file input change event for uploading files
     document.getElementById('file-input').addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -90,19 +95,19 @@ function initializeChat() {
     });
 }
 
-// Function to append welcome message and Start button
+// Function to append welcome message and Start button to the chat
 function appendWelcomeMessage() {
     const chatBox = document.getElementById('chat-box');
 
     // Clear any existing messages
     chatBox.innerHTML = '';
 
-    // Create welcome message
+    // Create welcome message element
     const welcomeMessage = document.createElement('div');
     welcomeMessage.className = 'chat-message bot';
     welcomeMessage.innerHTML = "Welcome to the Sudan Emergency Response Rooms bot. We will help you report on your projects.";
 
-    // Create 'Start' button
+    // Create 'Start' button element
     const startButton = document.createElement('button');
     startButton.innerText = 'Start';
     startButton.className = 'start-button'; // You can style this button in CSS
@@ -121,10 +126,10 @@ function appendWelcomeMessage() {
     // Append welcome message and Start button to chatBox
     chatBox.appendChild(welcomeMessage);
     chatBox.appendChild(startButton);
-    chatBox.scrollTop = chatBox.scrollHeight;
+    chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
 }
 
-// Ensure event listeners are correctly initialized when the form is shown or re-initialized
+// Function to ensure event listeners are correctly initialized when the form is shown or re-initialized
 function initializeForm() {
     const submitButton = document.getElementById('v2-submit-button');
 
@@ -150,7 +155,7 @@ initializeForm();
 
 // Dynamic card generation when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function () {
-    // Generate 5 empty cards
+    // Generate 5 empty cards for expense entries
     const cardsContainer = document.getElementById('swipeable-cards');
 
     for (let i = 1; i <= 5; i++) {
@@ -189,7 +194,7 @@ function updateTotalExpenses() {
     document.getElementById('total-expenses').innerText = total.toFixed(2);
 }
 
-// Function to handle incoming messages
+// Function to append messages to the chat box
 function appendMessage(msg, sender) {
     const chatBox = document.getElementById('chat-box');
     const messageContainer = document.createElement('div');
@@ -207,10 +212,10 @@ function appendMessage(msg, sender) {
     messageContainer.appendChild(timestamp);
     chatBox.appendChild(messageContainer);
 
-    chatBox.scrollTop = chatBox.scrollHeight;
+    chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
 }
 
-// Function to handle specific message types
+// Function to handle specific message types received from the server
 function handleMessage(msg) {
     if (msg.includes('Choose an option')) {
         appendMenuOptions();
@@ -227,7 +232,7 @@ function handleMessage(msg) {
     }
 }
 
-// Function to dynamically add menu options
+// Function to dynamically add menu options to the chat
 function appendMenuOptions() {
     const chatBox = document.getElementById('chat-box');
 
@@ -264,10 +269,10 @@ function appendMenuOptions() {
     });
 
     chatBox.appendChild(buttonContainer);
-    chatBox.scrollTop = chatBox.scrollHeight;
+    chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
 }
 
-// Function to append form HTML content
+// Function to append form HTML content to the chat
 function appendForm(formHtml) {
     console.log("Form HTML content:", formHtml);
 
@@ -282,7 +287,7 @@ function appendForm(formHtml) {
     const formContainer = document.createElement('div');
     formContainer.innerHTML = formHtml;
     chatBox.appendChild(formContainer);
-    chatBox.scrollTop = chatBox.scrollHeight;
+    chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
 
     // Initialize the form and set up event listeners
     initializeForm(); // Call initializeForm to manage event listeners properly
@@ -294,14 +299,13 @@ function appendForm(formHtml) {
     }
 }
 
-
-// Function to handle form submission
+// Function to handle form submission for Report V2
 function submitV2Form() {
     // Disable submit button to prevent multiple submissions
     const submitButton = document.querySelector("#report-v2-form button[type='button']");
     submitButton.disabled = true;
 
-    // Collect form data
+    // Collect form data including files
     const formData = new FormData(document.getElementById('report-v2-form')); // Collects all form data including files
 
     // Collect expense data from dynamically generated cards
@@ -328,7 +332,7 @@ function submitV2Form() {
     fetch('/upload', {
         method: 'POST',
         body: formData,
-        credentials: 'include',  // Add this line
+        credentials: 'include',  // Include credentials to allow cookies
     })
     .then(response => response.json())
     .then(data => {
@@ -371,7 +375,7 @@ function submitV2Form() {
     }, 500); // Adjust delay as necessary
 }
 
-// File upload logic
+// File upload logic for a single file
 function uploadFile(file) {
     const formData = new FormData();
     formData.append('file', file);
@@ -398,7 +402,7 @@ function uploadFile(file) {
     });
 }
 
-// Scrolling functions for navigating the cards
+// Scrolling functions for navigating the cards in the swipeable interface
 function scrollLeft() {
     const cardsContainer = document.querySelector('.swipeable-cards');
     cardsContainer.scrollBy({
@@ -415,7 +419,7 @@ function scrollRight() {
     });
 }
 
-// Upload files V2 form
+// Function to upload multiple files in the V2 form
 function uploadFiles() {
     // Get the file input element
     const fileInput = document.getElementById('v2-file-upload');
@@ -450,7 +454,7 @@ function uploadFiles() {
     });
 }
 
-// Function to scan form
+// Function to initiate the scan form process
 function startScanForm() {
     appendMessage('Please upload the image of the form you\'d like to scan.', 'bot');
 
@@ -469,7 +473,7 @@ function startScanForm() {
     input.click();
 }
 
-// Function to scan form image upload
+// Function to upload the scanned form image to the server
 function uploadScanFormImage(file) {
     const formData = new FormData();
     formData.append('file', file);
@@ -495,7 +499,7 @@ function uploadScanFormImage(file) {
     });
 }
 
-// Display Extracted Data as Editable Text Area
+// Function to display extracted data from the scanned form as an editable text area
 function displayExtractedData(data) {
     const chatBox = document.getElementById('chat-box');
 
@@ -533,7 +537,7 @@ function displayExtractedData(data) {
     chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the latest message
 }
 
-// Function to append the "Return to Menu" button
+// Function to append the "Return to Menu" button to a container
 function appendReturnToMenuButton(container) {
     // Create the return to menu button
     const returnToMenuButton = document.createElement('button');
@@ -549,4 +553,4 @@ function appendReturnToMenuButton(container) {
     container.appendChild(returnToMenuButton);
 }
 
-}); 
+}); // End of DOMContentLoaded event listener
