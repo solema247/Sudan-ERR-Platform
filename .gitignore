@@ -161,3 +161,8 @@ cython_debug/
 
 # Ignore JSON files containing sensitive information
 *.json
+
+local-humanitarian-web-chat-1f81cd59311e.json
+local-humanitarian-web-chat-5b747d2b153d.json
+scan-form-436313-6250060cec14.json
+
