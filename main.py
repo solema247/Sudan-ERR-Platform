@@ -1,34 +1,39 @@
-from fastapi import FastAPI, WebSocket, UploadFile, File, Request, Form, Depends
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse 
-import socketio
+from fastapi import FastAPI, WebSocket, UploadFile, File, Request, Form, Depends, HTTPException
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+
+import socketio
+import logging
+import random
+import string
+import json
+import os
+import base64
+import asyncio
+import re
+
 from redis import Redis
 from openai import OpenAI
 from google.auth import load_credentials_from_file
-from google.cloud import storage
+from google.cloud import storage, vision  # Combined Google Cloud imports
+from google.oauth2 import service_account
+
 import gspread  # For interacting with Google Sheets
-import logging
-from datetime import datetime
-import random
-import string
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.rest import Client as TwilioClient  # Alias Twilio Client to avoid conflict
-import json
 from fpdf import FPDF  # For PDF generation
-import os
-import base64
 from io import BytesIO
 import pytesseract  # For OCR processing
 from PIL import Image
-from google.cloud import vision  # For Google Vision API
-from google.oauth2 import service_account
 import pandas as pd
 import requests  # For making HTTP requests
-import re
 import cv2  # For image processing
-from supabase import create_client, Client as SupabaseClient  
-import asyncio
+from supabase import create_client, Client as SupabaseClient
+
+from datetime import datetime
+from typing import Optional, List
+
 
 app = FastAPI()
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins="*")
@@ -248,9 +253,6 @@ async def shorten_url(long_url: str):
         logging.error(f"Exception during URL shortening: {e}")
         return long_url  # Return the original URL if an error occurs
 
-# Login route for user authentication
-from fastapi import Request, Form
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 @app.post("/login")
 async def login(request: Request, err_id: str = Form(...), pin: str = Form(...)):
@@ -281,10 +283,7 @@ async def chat(request: Request):
         return RedirectResponse(url="/", status_code=303)
     return templates.TemplateResponse("index.html", {"request": request})
 
-# File Upload and Form Submission (Version 2)
-from fastapi import UploadFile, File, Form, HTTPException
-from fastapi.responses import JSONResponse
-from typing import Optional, List
+
 
 @app.post("/upload")
 async def upload(
@@ -299,11 +298,7 @@ async def upload(
     expenses: Optional[str] = Form(None),
     files: Optional[List[UploadFile]] = File(None)
 ):
-    # Log raw form data/upload
-    logging.info(f"Received data: err_id={err_id}, date={date}, total_grant={total_grant}, total_other_sources={total_other_sources}, additional_excess_expenses={additional_excess_expenses}, additional_surplus_use={additional_surplus_use}, additional_budget_lessons={additional_budget_lessons}, additional_training_needs={additional_training_needs}")
-    logging.info(f"Expenses (raw JSON): {expenses}")
-    logging.info(f"Files: {[file.filename for file in files] if files else 'No files uploaded'}")
-
+    
     try:
         # Handle optional expenses
         if expenses:
@@ -328,7 +323,7 @@ async def upload(
         print(f"ERR ID from Redis in upload: {err_id}")
 
         # Validate that the 'err-id' from the form matches the session 'err_id'
-        if err_id != session_err_id.decode('utf-8'):
+        if err_id != session_err_id:
             raise HTTPException(status_code=400, detail="ERR ID mismatch")
 
         # Insert data into Supabase tables
@@ -495,7 +490,7 @@ async def handle_message(websocket: WebSocket):
     msg = msg.strip().lower()
 
     print(f"Received message from {sid}: {msg}")
-    user_state = redis.get(f"user_state_{sid}").decode("utf-8") if redis.get(f"user_state_{sid}") else 'None'
+    user_state = redis.get(f"user_state_{sid}") if redis.get(f"user_state_{sid}") else 'None'
     print(f"Current State for {sid}: {user_state}")  # Track state per user
 
     response_text = ""
@@ -587,11 +582,7 @@ async def handle_message(websocket: WebSocket):
 
     print(f"Responding with: {response_text}")
 
-import random
-import string
-import logging
-from fastapi import WebSocket
-import socketio
+
 
 # Function to generate a 10-digit number, first 4 characters based on ERR ID input
 def generate_ten_digit_id(err_id: str) -> str:
@@ -706,9 +697,7 @@ async def handle_submit_report_v2(sid, data: dict):
     set_user_state(user_id, 'INITIAL')
 
 
-# Scan Form
-from fastapi import UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse
+
 
 @app.post("/scan_form")
 async def scan_form(file: UploadFile = File(...)):

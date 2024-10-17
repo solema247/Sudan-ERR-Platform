@@ -372,8 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Append the expenses data as a JSON string to the FormData
-        const expensesBlob = new Blob([JSON.stringify(expenses)], { type: 'application/json' });
-        formData.append('expenses', expensesBlob);
+        formData.append('expenses', JSON.stringify(expenses));
         console.log([...formData.entries()]);
 
         console.log("Submitting Form Data:", formData);  // Debug: Check if the data logged here is correct
@@ -385,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         console.log([...formData.entries()]); // Log all form data entries
-        
+
         // Send the form data to the server
         fetch('/upload', {
             method: 'POST',
@@ -500,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('err_id', errId);
 
         console.log([...formData.entries()]); // Log all form data entries
-        
+
         // Send the FormData object to the server
         fetch('/upload', {
             method: 'POST',
