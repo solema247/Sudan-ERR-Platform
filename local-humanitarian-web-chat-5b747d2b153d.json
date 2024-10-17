@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "local-humanitarian-web-chat",
+  "private_key_id": "5b747d2b153d526dc810548bd8b01695aad42d69",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDtdAUJuJcLijX7\nJhw1SAns0dZaGrgI5x4iOtJyncUZt3IbJ10VPlNHNgFj1XD+1lti4okO1xzN0eAn\ncUSm5iyFBcCMn/vBGNiK5m1ITId/2e4IColOXxp5gPhwfa/H2N+Y9ta5+eCQw6Mp\nAmisApxB0SpZoy+1hFdMeTwX3vg1iGYMNjuVDyFll2HN91xXJ4JRzHw3oxwhn8GB\nunhovfFO+zq0XbIvQok4jmJiJi+LmErWq3LpGm0++NfqMkQBVBqWkJbMeDqMR8Y4\n3CDbCiR3udp04MgAs+wYl4JEqn5O6OUfowjzYBQmJqg2pS66YE/7DSHBWGY+xpcf\nLOI2oj3BAgMBAAECggEAATayMEVf+oNm/Or6Gr682/+7MTYE7/j2MD+pp+PA/D2C\nAxP0lZ9ORblPuNHgXlGUOU9SCvQYE+BbVWlGlAWt92K2/BME4mzvDafxidyoBkQL\n66Ep6C9b0VBaqLjIPFDKPQfxM1V015mT4tGuDTfE0qBsB3XySGLCH1g46aByZ2Ph\n6Co9IoL4FQoPN+sVznrXNpWiSBFJKjOYTtCBYQoJTvuoueZgeeEw+pMQy38upxlE\nMcLmc/cV+W+Un1KNuk0cmnsZYvaEdvf6NYp6cmVEeBLI35lMluqjy1ehxLiGIdSn\nIJ0dy2wS1M8UNJ24wHGj+C/J2BD16d1+2twUTxRqYQKBgQD4SDlvTK4Djye8yDqr\nqvUumUH1+0sVj8u8fBILujadehb5lQbZLmbyAjJN1Wk7Qihg6O/yjYrQe7Xm6gCC\nulo36a1qjbFDJb2WQFLt3EnS/rXXD5BC4DNk72mksw6Io7GMIXdT3/CpjzUKG+I7\nAZetrnoer9kVl/n7azYXuPpvoQKBgQD01Z7+9jb2nZstVrTmT8DIqRw3aWg1Mta2\nECRS8yMQd5suI2Rpj6UH83pL3MlzOW0D0gD63CoJgi/ES2kBXspiPAFwKxNZ52hy\nx+82SrO3T7IQbeZcN825KUiHlXIiP+6DX0h17JVEnDgJedjPb8jeCvAt5+Amxlin\n8jSExlOaIQKBgCw54VE8HXsw0ulD2X+e0lHcpu1EOBm9JZOLnkNMhlIC33jR3Qhu\nxZOyZHeM3lPZ8wtgMu3H3MRKZRqe8DxZKZzwGR3z43GMlXrgNmV8agIVsRqAATiI\na189bloSMzKPxh6qD3F3YI0zn0UPtnrAS956R/KTbF32Vmc8r8QGBUZBAoGBAN3z\n2tOgOWuQrWCIvi4cFtTSGfZR5Fp14BfkwklAiYUgKNnG0/yucBmpLDEh0q5WXPGd\nq62/cYx1LQByrJrFaAtuAo/BPSW/lvyXK9C4H/wKj449Uxw+qo01U782R+Wst3j5\nJCNjel5ckKBmiZpj6GEC4YF8N8RvA2gdNmc3tAqBAoGAF3inzgbeHJ6nVkt2LqUD\nGCRZoPXiOKKAKwyy40W66rLanp/pCs2okzqW7hzmHYOnWgFuWkiXyHzySfI003IF\nKs55Sjj9mqIh8z51338UnbMR+8ddgohUzSVoiBuLhzNJkl5rIOfKCcMF2utJ7JzU\nR0WToUFv8kyUPrv3kq1F2AA=\n-----END PRIVATE KEY-----\n",
+  "client_email": "local-humanitarian-webchat@local-humanitarian-web-chat.iam.gserviceaccount.com",
+  "client_id": "112424056952323722822",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/local-humanitarian-webchat%40local-humanitarian-web-chat.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

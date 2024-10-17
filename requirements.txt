@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+redis
+google-cloud-storage
+google-cloud-vision
+gspread
+twilio
+fpdf
+openai
+pytesseract
+Pillow
+gunicorn
+gevent
+supabase
+typing-extensions>=4.5.0
+jinja2

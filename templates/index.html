@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Chat</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Chat Container (always included) -->
+    <div class="chat-container" style="display: none;">
+        <div class="chat-header">
+            <div class="user-info">
+                <div class="user-name">Web Chat</div>
+                <div class="user-status">Online</div>
+            </div>
+        </div>
+        <div class="chat-box" id="chat-box">
+            <!-- Chat messages will be dynamically added here after login -->
+        </div>
+        <div class="chat-input-container">
+            <button id="upload-btn"><i class="fa fa-paperclip"></i></button>
+            <input type="text" id="chat-input" placeholder="Type a message..." style="display: none;">
+            <button id="send-btn" style="display: none;"><i class="fa fa-paper-plane"></i></button>
+        </div>
+    </div>
+    
+    <!-- Authentication Form (always included) -->
+    <div class="auth-container">
+        <div class="auth-form">
+            <h2>Welcome to Web Chat</h2>
+            <div>
+                <input type="text" id="err-id" name="err_id" placeholder="Enter ERR ID" required>
+                <input type="password" id="pin" name="pin" placeholder="Enter PIN" required>
+                <button type="button" id="auth-btn">Login</button>
+            </div>
+            <div id="auth-error" style="color: red; display: none;">Invalid ERR ID or PIN.</div>
+        </div>
+    </div>
+    
+    <!-- Integrated Form for Report V2 -->
+    <div id="report-v2-form-container" style="display:none;">
+        <form id="report-v2-form" enctype="multipart/form-data" action="/upload" method="POST">
+            <div class="form-section">
+                <label for="v2-date">Date:</label>
+                <input type="date" id="v2-date" name="date">
+            </div>
+            <div class="form-section">
+                <label for="v2-err_id">ERR ID:</label>
+                <input type="text" id="v2-err-id" name="err_id" placeholder="Enter ERR ID">
+            </div>
+
+            <!-- Swipeable Cards for Expense Details with Navigation Arrows -->
+            <div class="form-bubble">
+                <!-- Form Header inside the bubble -->
+                <h2 style="text-align: center; margin-bottom: 2px;">F4 Form</h2>
+                <div class="swipeable-cards-container">
+                    <!-- Left Arrow -->
+                    <button type="button" class="card-nav left-arrow" onclick="scrollLeft()">
+                        &#9664; <!-- Left arrow symbol -->
+                    </button>
+
+                    <div class="swipeable-cards" id="swipeable-cards">
+                        <!-- Dynamically generated cards will be inserted here -->
+                    </div>
+
+                    <!-- Right Arrow -->
+                    <button type="button" class="card-nav right-arrow" onclick="scrollRight()">
+                        &#9654; <!-- Right arrow symbol -->
+                    </button>
+                </div>
+            </div>
+
+            <!-- Display total expenses -->
+            <div class="form-section">
+                <label>Total Expenses:</label>
+                <span id="total-expenses">0.00</span>
+            </div>
+
+            <!-- File Upload Section -->
+            <div class="form-section">
+                <label for="v2-file-upload">Upload Receipts/Files:</label>
+                <input type="file" id="v2-file-upload" name="file" accept="image/*" capture="camera" multiple>
+            </div>
+
+            <!-- Additional inputs -->
+            <div class="form-section">
+                <label for="v2-total-grant">Total Grant Received:</label>
+                <input type="number" id="v2-total-grant" name="total-grant" placeholder="Enter total grant received">
+            </div>
+            <div class="form-section">
+                <label for="v2-total-other-sources">Total Amount from Other Sources:</label>
+                <input type="number" id="v2-total-other-sources" name="total-other-sources" placeholder="Enter amount from other sources">
+            </div>
+
+            <!-- Additional Questions Section -->
+            <div class="form-section">
+                <h3>Additional Questions:</h3>
+                <label for="v2-additional-excess-expenses">How did you cover excess expenses?</label>
+                <textarea id="v2-additional-excess-expenses" name="additional-excess-expenses" rows="3" placeholder="Enter details"></textarea><br>
+                <label for="v2-additional-surplus-use">How would you spend the surplus?</label>
+                <textarea id="v2-additional-surplus-use" name="additional-surplus-use" rows="3" placeholder="Enter details"></textarea><br>
+                <label for="v2-additional-budget-lessons">Lessons learned in budget planning?</label>
+                <textarea id="v2-additional-budget-lessons" name="additional-budget-lessons" rows="3" placeholder="Enter details"></textarea><br>
+                <label for="v2-additional-training-needs">Additional training needs?</label>
+                <textarea id="v2-additional-training-needs" name="additional-training-needs" rows="3" placeholder="Enter details"></textarea><br>
+            </div>
+
+            <div class="form-section">
+                <button type="button" id="v2-submit-button">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Integrated Form for Scan Form -->
+    <div id="scan-form-container" style="display:none;">
+        <div class="form-section">
+            <h3>Scan Form - Upload</h3>
+            <button type="button" id="scan-form-button">Upload Form Image</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>

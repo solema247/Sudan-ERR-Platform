@@ -1,0 +1,662 @@
+/* General Styles */
+body {
+    font-family: 'Inter', sans-serif; /* Modern font */
+    background-color: #e5ddd5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Ensure the chat container fits the entire viewport and prevent overall scrolling */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent body scrolling */
+}
+
+.chat-container {
+    display: none;
+}
+
+.chat-container {
+    width: 100%; /* Use 100% instead of 100vw to prevent overflow */
+    height: 100vh; /* Full height of the viewport */
+    background-color: #ffffff;
+    box-shadow: none; /* Remove shadow for hard edges */
+    border-radius: 0px; /* Hard edges */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: fixed; /* Fix the container in place */
+    top: 0;
+    left: 0;
+}
+
+/* Chat Header */
+.chat-header {
+    background-color: #128c7e;
+    color: white;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ece5dd;
+}
+
+.user-info {
+    flex-grow: 1;
+}
+
+.user-name {
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.user-status {
+    font-size: 12px;
+    color: #bdbdbd;
+}
+
+/* Chat Box: Ensure scrolling works fully */
+.chat-box {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #e5ddd5;
+    height: calc(100vh - 160px); /* Adjust this value based on the actual header and input heights */
+    box-sizing: border-box; /* Ensure padding is considered in the height */
+}
+
+/* Chat Bubbles */
+.chat-message {
+    margin-bottom: 16px;
+    padding: 8px;
+    border-radius: 8px;
+    position: relative;
+    max-width: 85%;
+    line-height: 1.4;
+    font-size: 14px;
+    margin-bottom: 16px; /* Ensure consistent spacing between chat bubbles */
+}
+
+.chat-message.user {
+    background-color: #dcf8c6;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.chat-message.bot {
+    background-color: #ffffff;
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+/* Remove extra space after the last message */
+.chat-message:last-child {
+    margin-bottom: 0; /* This prevents extra margin below the last message */
+}
+
+/* Timestamp Styling */
+.timestamp {
+    font-size: 12px;
+    color: #999;
+    margin-top: 3px;
+    text-align: right;
+}
+
+/* Chat Input Container */
+.chat-input-container {
+    display: flex;
+    padding: 10px;
+    background-color: white;
+    position: fixed; /* Keep input bar at the bottom */
+    bottom: 0; /* Align to bottom */
+    left: 0;
+    width: 100%;
+    box-sizing: border-box; /* Ensures padding is included in the total width calculation */
+    max-width: 100vw; /* Prevents the send button from overflowing */
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Slight shadow for input */
+}
+
+/* Prevent zooming on input */
+input, textarea, select, button {
+    font-size: 16px; /* Prevent zooming on mobile */
+}
+
+#upload-btn {
+    padding: 5px 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #128c7e;
+    margin-right: 10px;
+}
+
+#chat-input {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: #f0f0f0;
+    font-size: 14px;
+    outline: none;
+}
+
+#send-btn {
+    padding: 8px;
+    background-color: #128c7e;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+}
+
+#send-btn:hover {
+    background-color: #128c7e;
+}
+
+/* Input Placeholder Styling */
+#chat-input::placeholder {
+    color: #999;
+}
+
+/* Container for inline buttons */
+.inline-buttons {
+    display: flex;
+    flex-wrap: wrap; /* Wrap buttons into multiple rows */
+    gap: 3px; /* Small visible gap between buttons */
+    justify-content: space-between; /* Distribute buttons evenly across the screen */
+    width: 100%; /* Make sure the buttons container uses the full width */
+    margin-bottom: 16px; /* Add margin to create space below the buttons */
+}
+
+.inline-buttons button {
+    padding: 10px 0;
+    background-color: #128c7e;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    width: calc(50% - 1.5px); /* Ensure buttons take up 50% of the container's width minus half of the gap */
+    height: 50px; /* Set a consistent button height */
+    box-sizing: border-box; /* Ensure padding and borders are included in width/height */
+    text-align: center; /* Center-align the text inside the button */
+
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide overflow text */
+    text-overflow: ellipsis; /* Add ellipsis if text is too long */
+}
+
+
+/* Hover state */
+.inline-buttons button:hover {
+    background-color: #128c7e;
+}
+
+/* Active state */
+.inline-buttons button:active {
+    background-color: #128c7e;
+}
+
+/* Form Bubble */
+.form-bubble {
+    background-color: #ffffff;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 10px 0;
+    text-align: left; /* Aligns form content properly */
+    overflow: hidden; /* Ensure contents do not overflow the form bubble */
+}
+
+.form-bubble form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-bubble label {
+    margin-bottom: 2px; /* Minimize space between label and input */
+    font-weight: 500;
+    font-size: 13px;
+    color: #333;
+}
+
+.form-bubble input,
+.form-bubble select,
+.form-bubble textarea {
+    width: 100%; /* Full width */
+    padding: 4px; /* Reduce padding inside inputs */
+    margin-bottom: 4px; /* Reduce space between form fields */
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 13px; /* Keep font readable */
+}
+
+.form-bubble button {
+    background-color: #128c7e;
+    font-size: 14px;
+    padding: 6px 10px; /* Reduce button padding */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    color: white;
+    margin-top: 10px; /* Ensure a bit of space at the top */
+}
+
+.form-bubble button:hover {
+    background-color: #128c7e;
+}
+
+/* Swipeable Cards Container */
+.swipeable-cards {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 10px 0;
+    white-space: nowrap;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    max-width: 100%; /* Ensure the card container stays within the form bubble */
+    box-sizing: border-box; /* Include padding in width calculations */
+}
+
+.swipeable-cards::-webkit-scrollbar {
+    display: none;
+}
+
+.card {
+    min-width: 90%; /* Adjust as needed to prevent overflow */
+    max-width: 90%; /* Ensure cards don't exceed the container width */
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    scroll-snap-align: center;
+    flex-shrink: 0;
+    box-sizing: border-box; /* Ensure padding and borders are considered in width */
+}
+
+.card h4 {
+    margin-bottom: 10px;
+    font-size: 16px;
+    text-align: center;
+}
+
+.card label {
+    display: block;
+    font-weight: bold;
+    margin-top: 6px;
+    margin-bottom: 2px;
+    font-size: 14px;
+}
+
+.card input,
+.card select {
+    width: 100%;
+    max-width: 100%; /* Ensures inputs do not overflow the card */
+    box-sizing: border-box; /* Includes padding and borders in width calculations */
+    padding: 8px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+
+/* For improved mobile experience */
+@media (max-width: 480px) {
+    .swipeable-cards {
+        padding: 6px 0;
+    }
+
+    .card {
+        padding: 10px;
+    }
+
+    .card label {
+        font-size: 12px;
+    }
+
+    .card input,
+    .card select {
+        padding: 6px;
+        font-size: 12px;
+    }
+}
+
+/* Navigation arrows for card rotation */
+.card-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #128c7e;
+    cursor: pointer;
+    padding: 0 10px;
+    opacity: 0.7;
+    z-index: 10;
+}
+
+.card-nav.left-arrow {
+    left: 0;
+}
+
+.card-nav.right-arrow {
+    right: 0;
+}
+
+.card-nav:hover {
+    opacity: 1;
+}
+
+.card-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Added Styles for Swipeable Cards Container */
+.swipeable-cards-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Adjusting Arrow Buttons for Better Mobile View */
+@media (max-width: 480px) {
+    .card-navigation button {
+        font-size: 20px;
+        padding: 0 8px;
+    }
+
+    .swipeable-cards {
+        padding: 5px 0;
+    }
+
+    .card h4 {
+        font-size: 14px;
+    }
+}
+
+.form-section {
+    padding: 0.5px 1px;  /* Combined from block 1 and 2, reduced for compactness */
+    margin-bottom: 1.5px;  /* Reduce space between sections */
+    background-color: #f8f8f8;  /* Keep the background color from block 1 */
+    border-radius: 3px;  /* Keep the border-radius from block 1 */
+    display: flex;  /* Keep display and flex layout from block 3 */
+    flex-direction: column;  /* Ensure flex-direction for form alignment from block 3 */
+}
+
+.form-section h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #128c7e;
+}
+
+.form-section label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.form-section textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: none;
+}
+
+/* Additional Styling for a Modern Look */
+input, textarea, select {
+    font-family: 'Inter', sans-serif; /* Ensure form elements use the modern font */
+}
+
+button, label {
+    font-family: 'Inter', sans-serif; /* Ensure buttons and labels use the modern font */
+}
+
+
+/* Adjusting Font Sizes and Weights for Consistency */
+label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+}
+
+input, textarea, select {
+    font-size: 13px;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+}
+
+button {
+    font-size: 14px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+    .form-bubble input,
+    .form-bubble select,
+    .form-bubble textarea {
+        width: 100%; /* Slightly increase width on mobile for better usability */
+    }
+}
+
+/* Specific Fixes for Swipeable Cards Visibility */
+.swipeable-cards {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 10px 0;
+    white-space: nowrap;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    position: relative;
+    align-items: center;
+    flex-grow: 1; /* Ensure cards take up available space */
+}
+
+.swipeable-cards-container {
+    display: flex;
+    position: relative;
+    align-items: center;
+    width: 100%;
+}
+
+/* Ensure card elements are centered correctly */
+.card {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 90%; /* Adjust width to ensure proper centering */
+    max-width: 90%;
+    scroll-snap-align: center;
+}
+
+/* Authentication Form */
+.auth-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3); /* Reduced opacity for visibility of background */
+}
+
+.auth-form {
+    width: 100%;
+    max-width: 350px; /* Ensure the form does not exceed a certain width */
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.auth-form input {
+    width: calc(100% - 20px); /* Ensure proper padding and avoid overflow */
+    padding: 8px;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#auth-error {
+    color: red;
+    margin-top: 10px;
+}
+
+#auth-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #128c7e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#auth-btn:hover {
+    background-color: #128c7e;
+}
+
+/* Make sure the form container is displayed */
+#report-v2-form-container {
+    display: block; /* Ensure it's visible */
+    padding: 10px;
+    background-color: #f7f9fa; /* Match the form styling */
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+
+/* Ensure input fields are not hidden */
+.form-section input[type="file"] {
+    display: block; /* Override any hidden display properties */
+    margin-top: 10px;
+}
+
+#file-upload-btn {
+    padding: 8px 12px;
+    background-color: #128c7e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+#file-upload-btn:hover {
+    background-color: #128c7e;
+}
+
+/* Scan Form Container */
+#scan-form-container {
+    display: block; /* Ensure it's visible when required */
+    padding: 10px;
+    background-color: #ffffff; /* Match the other sections' backgrounds */
+    border-radius: 10px;
+    margin: 10px 0;
+    text-align: center; /* Center-align for simplicity */
+}
+
+/* Button for Uploading the Scan Form */
+#scan-form-container button {
+    padding: 10px 20px;
+    background-color: #ff9800; /* Different color to highlight scan functionality */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#scan-form-container button:hover {
+    background-color: #e68900;
+}
+
+@media (max-width: 480px) {
+    #scan-form-container {
+        padding: 15px;
+        width: 95%;
+        margin: 10px auto;
+    }
+
+    #scan-form-container button {
+        font-size: 14px;
+        padding: 12px;
+        width: 100%;
+    }
+}
+
+/* Ensure the welcome message spans the full width */
+.chat-message.bot {
+    width: 100%; /* Make sure it spans the full width of the parent */
+    text-align: center; /* Center-align the text */
+    padding: 10px; /* Add padding for a nice look */
+    background-color: #f1f1f1; /* Optional: Add a light background color */
+    border-radius: 8px; /* Make the corners rounded */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow */
+}
+
+/* Style the Start button similar to the other buttons */
+.start-button {
+    padding: 5px 10px;
+    background-color: #128c7e;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px; /* Add some margin for spacing */
+    width: 45%; /* Match the width with other buttons */
+    max-width: 200px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* Add hover state for Start button */
+.start-button:hover {
+    background-color: #128c7e;
+}
+
+/* Active state */
+.start-button:active {
+    background-color: #128c7e;
+}
+
+.return-button {
+    padding: 10px 15px;
+    background-color: #128c7e;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.return-button:hover {
+    background-color: #128c7e;
+}
