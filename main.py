@@ -12,6 +12,7 @@ import os
 import base64
 import asyncio
 import re
+import uuid
 
 from redis import Redis
 from openai import OpenAI
@@ -75,6 +76,15 @@ SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
 
 supabase: SupabaseClient = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
+# Define the helper function to verify user credentials
+def verify_user(err_id: str, pin: str):
+    response = supabase.table("users").select("*").eq("err_id", err_id).execute()
+    if response.data:
+        user = response.data[0]
+        if user['pin_hash'] == pin:  # Replace this with proper hash checking
+            return True
+    return False
 
 # Twilio credentials (replace with your actual Twilio credentials)
 account_sid = os.getenv('TWILIO_ACCOUNT_SID')
@@ -253,21 +263,24 @@ async def shorten_url(long_url: str):
         logging.error(f"Exception during URL shortening: {e}")
         return long_url  # Return the original URL if an error occurs
 
-
 @app.post("/login")
 async def login(request: Request, err_id: str = Form(...), pin: str = Form(...)):
-    if err_id == '123' and pin == '321':
-        redis.set(f'{err_id}_authenticated', '1')
+    # Replace manual check with verify_user function
+    if verify_user(err_id, pin):
+        # Generate a unique session ID
+        session_id = str(uuid.uuid4())
+        # Store session data in Redis (1-hour expiration)
+        redis.set(f"session:{session_id}", json.dumps({"err_id": err_id}), ex=3600)
 
-        # Check if the request is an AJAX request
+        # Create the response based on AJAX request or not
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             response = JSONResponse({"success": True})
-            response.set_cookie(key="err_id", value=err_id)
-            return response
         else:
             response = RedirectResponse(url="/chat", status_code=303)
-            response.set_cookie(key="err_id", value=err_id)
-            return response
+
+        # Set session ID as cookie
+        response.set_cookie(key="session_id", value=session_id)
+        return response
     else:
         # Handle invalid credentials
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -278,16 +291,19 @@ async def login(request: Request, err_id: str = Form(...), pin: str = Form(...))
 # Chat Page
 @app.get("/chat", response_class=HTMLResponse)
 async def chat(request: Request):
-    err_id = request.cookies.get('err_id')
-    if not err_id or not redis.get(f'{err_id}_authenticated'):
+    # Retrieve the session_id from cookies
+    session_id = request.cookies.get('session_id')
+    if not session_id or not redis.get(f"session:{session_id}"):
+        # Redirect to login if session is invalid or not found
         return RedirectResponse(url="/", status_code=303)
+
+    # If session is valid, proceed to chat page
     return templates.TemplateResponse("index.html", {"request": request})
 
-
-
+# Upload
 @app.post("/upload")
 async def upload(
-    err_id: str = Form(...),
+    request: Request,
     date: Optional[str] = Form(None),
     total_grant: Optional[float] = Form(None),
     total_other_sources: Optional[float] = Form(None),
@@ -298,8 +314,16 @@ async def upload(
     expenses: Optional[str] = Form(None),
     files: Optional[List[UploadFile]] = File(None)
 ):
-    
     try:
+        # Validate session using the session ID
+        session_id = request.cookies.get('session_id')
+        session_data = redis.get(f"session:{session_id}")
+        if not session_data:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        session_info = json.loads(session_data)
+        err_id = session_info.get("err_id")
+
         # Handle optional expenses
         if expenses:
             try:
@@ -315,16 +339,6 @@ async def upload(
         # Handle optional date
         if not date:
             date = ''  # Or handle as needed
-
-        # Get the 'err_id' from Redis to ensure user is authenticated
-        session_err_id = redis.get(f'{err_id}_authenticated')
-        if not session_err_id:
-            raise HTTPException(status_code=401, detail="Not authenticated")
-        print(f"ERR ID from Redis in upload: {err_id}")
-
-        # Validate that the 'err-id' from the form matches the session 'err_id'
-        if err_id != session_err_id:
-            raise HTTPException(status_code=400, detail="ERR ID mismatch")
 
         # Insert data into Supabase tables
         err_report_id = generate_ten_digit_id(err_id)
@@ -380,6 +394,7 @@ async def upload(
     except Exception as e:
         logging.error(f"Unexpected error occurred: {e}")
         return JSONResponse(content={"error": "An unexpected error occurred"}, status_code=500)
+
 
 
 # Define card template for the form
