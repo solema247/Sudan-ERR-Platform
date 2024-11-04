@@ -33,25 +33,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const { data: summaryData, error: summaryError } = await supabase
                 .from('MAG F4 Summary')
                 .insert([{
-                    err_id: err_id || '',
+                    err_id,
                     err_report_id,
                     created_at: date || new Date().toISOString(),
                     total_grant,
                     total_other_sources,
-                    excess_expenses: additional_excess_expenses || '',
-                    surplus_use: additional_surplus_use || '',
-                    training: additional_training_needs || '',
+                    excess_expenses: additional_excess_expenses,
+                    surplus_use: additional_surplus_use,
+                    training: additional_training_needs,
                     lessons,
                     total_expenses
                 }]);
 
-            if (summaryError) {
-                console.error('Error inserting into MAG F4 Summary:', summaryError);
-                throw new Error("Failed to insert data into MAG F4 Summary");
-            }
+            if (summaryError) throw new Error("Failed to insert data into MAG F4 Summary");
 
             for (const expense of expenses) {
-                const { activity = '', description = '', payment_date = null, seller = '', payment_method = 'cash', receipt_no = '', amount = 0 } = expense;
+                const {
+                    activity, description, payment_date, seller, payment_method, receipt_no, amount
+                } = expense;
+
+                if (!(activity && description && payment_date && seller && receipt_no && amount)) {
+                    continue; // Skip incomplete cards
+                }
 
                 const { error: expenseError } = await supabase
                     .from('MAG F4 Expenses')
@@ -66,25 +69,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         expense_amount: parseFloat(amount) || 0
                     }]);
 
-                if (expenseError) {
-                    console.error('Error inserting into MAG F4 Expenses:', expenseError);
-                    throw new Error("Failed to insert expense data");
-                }
+                if (expenseError) throw new Error("Failed to insert expense data");
             }
 
             if (file) {
-                const fileData = Buffer.from(file.content, 'base64');
+                const uniqueFileName = `reports/${file.name}-${crypto.randomUUID()}`;
                 const { data: uploadData, error: uploadError } = await supabase
                     .storage
                     .from('expense-reports')
-                    .upload(`reports/${file.name}`, fileData, { contentType: file.type });
+                    .upload(uniqueFileName, Buffer.from(file.content, 'base64'), { contentType: file.type });
 
                 if (uploadError) throw uploadError;
 
                 const { publicUrl } = supabase
                     .storage
                     .from('expense-reports')
-                    .getPublicUrl(`reports/${file.name}`);
+                    .getPublicUrl(uniqueFileName);
 
                 await supabase
                     .from('MAG F4 Summary')

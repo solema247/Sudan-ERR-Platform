@@ -43,13 +43,29 @@ const FillForm: React.FC = () => {
         }
     };
 
+    const isExpenseComplete = (expense: any) => {
+        return (
+            expense.activity && expense.description && expense.payment_date && expense.seller &&
+            expense.receipt_no && expense.amount && expense.payment_method
+        );
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validate required summary fields
+        if (!formData.err_id || !formData.date || !formData.total_grant || !formData.total_other_sources) {
+            alert('Please fill in all required summary fields.');
+            return;
+        }
+
+        // Filter fully completed expense cards
+        const completedExpenses = expenses.filter(isExpenseComplete);
 
         const fileContent = file ? await file.arrayBuffer() : null;
         const submissionData = {
             ...formData,
-            expenses,
+            expenses: completedExpenses,
             file: file ? { name: file.name, type: file.type, content: Buffer.from(fileContent!).toString('base64') } : null
         };
 
