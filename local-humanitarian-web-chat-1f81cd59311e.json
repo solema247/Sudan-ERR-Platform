@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "local-humanitarian-web-chat",
+  "private_key_id": "1f81cd59311e8d5f9def15255e0a2df263d424e4",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCpG6c1TXBfgMnP\n7M2cxUPf0TKJbPhcYgv8/HZVmddyCnJZ3IzqY+SfdEeZj1RmX5IylnN2kF7rSABj\neeaqvBdidpGi/Brj/8FODpHyXkcC/t/WiV07EXuLrbQs9sbTDkIGeRDNFD1e+6aP\nAPj8bhiaC3q6ThZGVhXDNBIp/4KaxeBSv7V4yTvZe2tDbtYNxAvIRNgLF0WZoLoG\nW5k25mnDnNX/Y+F/AKy5rmY5djeHjLggLICKexV41YouvKMWlbKv/fztwUj0U+V9\nhhaNm/UYlu/ljwlhGqsyV0MzNO1axTTnQ+g4P/Wlnhl1Y9XB6ASazusMtDiarpE0\nSXK3PjK5AgMBAAECggEABvOSDgje464hnaB4W0dooNyynR+TngiRwZaHLsGiL5fq\nV3NPf5sXnM5k2xUfPQ4Urmus12Tb4gQVsAEk0EPnGi8RkYeXe2PaCGFk8neZp6/e\nd60x3em8EGPVkjuatLZTVHzJigSY+TyS/jHmCkpkTIDITLxFAiMrxdhwHrXYIpCK\nmbfX8AzteoCmLch2Lo7mJnWLPcafI5hF5nHd51r54lvorc0GJTR5W2W6k6KXjjuy\nM90VHqy8c0iqsP16kiVXxdwLRLaT1gd9jkA+RPBCwq8P4FihImfKuXwc767GUTtg\n+DuVG04RSzDKT/GAnGH0drN1aQFdODi0xVNtxArrYQKBgQDjXj1UBupqrRJXi1rA\nWVAWJj9P0NB72IOlEwqwOTbM2l73n/ATcdMvuG5UljjzDUV6DK2QY5KeNfZJhbz/\nzIShQGNjdV96gOrVWSSL+fuNn6SzeccWzCrrk1UpBdcaQWs9eN12/cx2drR4w7Jl\nMQEgEm+kmRurVW2D6zWjsZmWRQKBgQC+Z0ItACMXKrAXeqF8nbvsAFEC4DR0x9I/\n1YACiCZ3uV5E1qSnQlVYhvGUdC94eTWGt8TIpO0cOXQQzLZRyu4bNFM5CryZXmDu\nJbsBoH/vFGz00+GnabTqQvGHGK2lfGW7CBmItd+UWXnspSrUi1Yux9teWqAh7jel\nIkmuANOb5QKBgBFLZMzUbdZJbeC8191TrdTRefVfQ8x3zqOqzCBVacaxQZICV2eT\nO+YgWDwU5SYPt14uQrF98XQZVK+I/bRTYS9Gz4iMMAQIdFRgIHiJPkoqf4OrWqpw\nQz+CCHNDX3Y+zaJyZB4d9gR4yQd6k0JBNP20iUty3fjtWZQ0OvNFmhIlAoGBAI4p\nQruespSFhtzA7vnAO6NFyTbAd+oJl+2ZVu6NAUu616vGJ0HKwTZL6uvQo/Drbw+a\n/g5hNbgxHXu9nRMM1SLyuoCIh7BrSywEd9ALKfoz4fYajQ0WW8HdIcCgqGY6ryoq\nLgZo5Po6pFIQMB5puntLNXsJZy5uUpW1OBX3AAgRAoGAQN+WMR4ZrVbSXz+vOQuW\nIiXPRLBKfQuY6PA0PgQkpYxIODmITkJhizsog8Pr7kj9qL46EwhSxGzbtbkBAO+e\nffTO7c3mK2JqTYRO8QBo6UAeUms/SUHqkxq87bF87byHw+MdDKUON1/ML1xsNaVY\n03OL0Z6GX0onuhgyVEsBNI8=\n-----END PRIVATE KEY-----\n",
+  "client_email": "vision-api-test@local-humanitarian-web-chat.iam.gserviceaccount.com",
+  "client_id": "103026201241456613288",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/vision-api-test%40local-humanitarian-web-chat.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
