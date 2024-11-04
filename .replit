@@ -1,6 +1,6 @@
 run = "npm run dev"
 entrypoint = "index.js"
-modules = ["nodejs-20:v9-20231020-a3526c9"]
+modules = ["nodejs-20:v9-20231020-a3526c9", "python-3.11"]
 hidden = [".config", "package-lock.json", ".next", ".swc"]
 
 [nix]

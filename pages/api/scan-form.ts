@@ -1,44 +1,124 @@
 // pages/api/scan-form.ts
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import vision from '@google-cloud/vision';
 import OpenAI from 'openai';
+import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
+import formidable from 'formidable';
+
+// Disable Next.js's default body parsing to allow for file uploads
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 // Initialize Supabase
-const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+);
 
-// Initialize Google Vision using the JSON file in the root directory
-const visionClient = new vision.ImageAnnotatorClient({
-  keyFilename: path.join(process.cwd(), 'local-humanitarian-web-chat-1f81cd59311e.json'), // Path to your credentials file
-});
+// Initialize Google Vision
+let visionClient;
+try {
+  const keyPath = path.join(process.cwd(), 'local-humanitarian-web-chat-1f81cd59311e.json');
+  visionClient = new vision.ImageAnnotatorClient({
+    keyFilename: keyPath,
+  });
+  console.log('Vision client initialized successfully');
+} catch (error) {
+  console.error('Vision client initialization error:', error);
+}
 
 // Initialize OpenAI
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-// Helper functions
-async function googleVisionOCR(imagePath: string): Promise<string> {
+// Function to parse multipart/form-data using formidable
+async function parseForm(
+  req: NextApiRequest
+): Promise<{ filePath: string }> {
+  const uploadDir = path.join(process.cwd(), 'uploads');
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+
+  const form = formidable({
+    multiples: false, // Handle single file upload
+    keepExtensions: true,
+    uploadDir: uploadDir,
+  });
+
+  return new Promise((resolve, reject) => {
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      console.log('Files received:', files); // Log to inspect the files object
+      const file = files.file[0] as formidable.File;
+      if (!file) {
+        reject(new Error('No file uploaded'));
+        return;
+      }
+      resolve({ filePath: file.filepath });
+    });
+  });
+}
+
+// Function to preprocess the image and convert to binary for Google Vision
+async function preprocessImageToBuffer(
+  imagePath: string
+): Promise<Buffer> {
   try {
-    const [result] = await visionClient.textDetection(imagePath);
+    console.log('Attempting to process image at path:', imagePath);
+
+    // Load, grayscale, and re-encode the image as JPEG in-memory
+    const processedImageBuffer = await sharp(imagePath)
+      .grayscale() // Convert to grayscale
+      .modulate({ brightness: 1.2, contrast: 1.5 }) // Adjust brightness and contrast
+      .jpeg({ quality: 90 }) // Re-encode as JPEG
+      .toBuffer();
+
+    console.log('Image successfully processed and ready for OCR.');
+    return processedImageBuffer;
+  } catch (error: any) {
+    console.error('Error during image preprocessing:', error.message);
+    throw new Error(`Preprocessing failed: ${error.message}`);
+  }
+}
+
+// Function to run Google Vision OCR on the processed image buffer
+async function googleVisionOCR(imageBuffer: Buffer): Promise<string> {
+  try {
+    // Pass the image buffer directly to the textDetection method
+    const [result] = await visionClient.textDetection(imageBuffer);
     const detections = result.textAnnotations;
 
-    // Log the raw text from Google Vision OCR for debugging
-    const ocrText = detections && detections.length ? detections[0].description!.trim() : 'Not found';
-    console.log("Google Vision OCR Output:", ocrText); // Log OCR output
+    const ocrText =
+      detections && detections.length
+        ? detections[0].description!.trim()
+        : 'Not found';
+    console.log('Google Vision OCR Output:', ocrText);
     return ocrText;
   } catch (error: any) {
+    console.error(`Google Vision OCR failed: ${error.message}`);
     throw new Error(`Google Vision OCR failed: ${error.message}`);
   }
 }
 
+// Function to clean extracted text
 function cleanExtractedText(rawText: string): string {
   return rawText.replace(/[\n\r]+/g, ' ').trim();
 }
 
-async function chatGPTClassification(rawText: string): Promise<string> {
+// OpenAI GPT-based classification
+async function chatGPTClassification(
+  rawText: string
+): Promise<string> {
   const cleanedText = cleanExtractedText(rawText);
   const prompt = `
 I have extracted the following text from a financial report form. The text contains multiple sections including a date, ERR number, an activity table, a financial summary, and responses to additional questions.
@@ -67,7 +147,7 @@ Please extract the following information and structure it accordingly:
    - Were there any additional training needs or opportunities?
 `;
 
-  console.log("Prompt sent to OpenAI:", prompt); // Log prompt for OpenAI
+  console.log('Prompt sent to OpenAI:', prompt);
 
   const response = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
@@ -76,68 +156,31 @@ Please extract the following information and structure it accordingly:
     temperature: 0.7,
   });
 
-  const openAIOutput = response.choices[0].message?.content || 'An error occurred while processing the data.';
-  console.log("OpenAI Response:", openAIOutput); // Log OpenAI response
+  const openAIOutput =
+    response.choices[0].message?.content ||
+    'An error occurred while processing the data.';
+  console.log('OpenAI Response:', openAIOutput);
   return openAIOutput;
 }
 
-// Disable Next.js's default body parsing to allow for custom file parsing
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-// Utility function to parse the multipart/form-data request
-async function parseMultipartFormData(req: NextApiRequest): Promise<{ filePath: string }> {
-  return new Promise((resolve, reject) => {
-    const tempDir = '/tmp';
-    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
-
-    const chunks: Uint8Array[] = [];
-    req.on('data', (chunk) => {
-      chunks.push(chunk);
-    });
-
-    req.on('end', () => {
-      const buffer = Buffer.concat(chunks);
-      const boundary = req.headers['content-type']?.split('boundary=')[1];
-      if (!boundary) return reject(new Error('Boundary not found in request headers'));
-
-      // Split the buffer on the boundary to isolate the file content
-      const parts = buffer.toString().split(`--${boundary}`);
-      const filePart = parts.find((part) => part.includes('filename="'));
-      if (!filePart) return reject(new Error('File part not found'));
-
-      const filenameMatch = /filename="(.+?)"/.exec(filePart);
-      const filename = filenameMatch ? filenameMatch[1] : `upload-${Date.now()}.jpg`;
-      const filePath = path.join(tempDir, filename);
-
-      // Extract the binary data of the file
-      const fileData = filePart.split('\r\n\r\n')[1];
-      const fileBuffer = Buffer.from(fileData, 'binary');
-
-      // Save the file to the filesystem
-      fs.writeFileSync(filePath, fileBuffer);
-      resolve({ filePath });
-    });
-
-    req.on('error', (error) => reject(error));
-  });
-}
-
 // API Route Handler
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
   try {
-    const { filePath } = await parseMultipartFormData(req);
+    const { filePath } = await parseForm(req);
+
+    // Perform preprocessing
+    const processedImageBuffer = await preprocessImageToBuffer(filePath);
 
     // Perform OCR and classification
-    const rawText = await googleVisionOCR(filePath);
+    const rawText = await googleVisionOCR(processedImageBuffer);
     const structuredResponse = await chatGPTClassification(rawText);
 
     // Send the structured response back to the client
@@ -147,6 +190,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     fs.unlinkSync(filePath);
   } catch (error: any) {
     console.error(`Processing error: ${error.message}`);
-    res.status(500).json({ error: `Error processing scan: ${error.message}` });
+    res
+      .status(500)
+      .json({ error: `Error processing scan: ${error.message}` });
   }
-};
+}

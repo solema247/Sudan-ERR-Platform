@@ -9,7 +9,9 @@ const ScanForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
       console.log('File selected:', e.target.files[0].name); // Log file name to confirm selection
@@ -32,7 +34,11 @@ const ScanForm: React.FC = () => {
       if (!response.ok) {
         // Log detailed error if response is not OK
         const errorText = await response.text();
-        console.error('Server responded with an error:', response.statusText, errorText);
+        console.error(
+          'Server responded with an error:',
+          response.statusText,
+          errorText
+        );
         throw new Error(`Server Error: ${response.status}`);
       }
 
@@ -59,7 +65,11 @@ const ScanForm: React.FC = () => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Server responded with an error:', response.statusText, errorText);
+        console.error(
+          'Server responded with an error:',
+          response.statusText,
+          errorText
+        );
         throw new Error(`Server Error: ${response.status}`);
       }
 
@@ -91,7 +101,10 @@ const ScanForm: React.FC = () => {
               rows={10}
               className="w-full p-2 border rounded"
             />
-            <button onClick={handleConfirm} className="bg-green-500 text-white py-2 px-4 rounded">
+            <button
+              onClick={handleConfirm}
+              className="bg-green-500 text-white py-2 px-4 rounded"
+            >
               Confirm and Save
             </button>
           </div>
