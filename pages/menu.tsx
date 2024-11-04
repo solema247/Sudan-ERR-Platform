@@ -4,6 +4,7 @@ import ChatContainer from '../components/ChatContainer';
 import MessageBubble from '../components/MessageBubble';
 import Button from '../components/Button';
 import FillForm from '../pages/fill-form';
+import ScanForm from '../pages/scan-form'; // Import ScanForm component
 
 const getCurrentTimestamp = () => {
     const now = new Date();
@@ -13,7 +14,8 @@ const getCurrentTimestamp = () => {
 const Menu = () => {
     const [showIntro, setShowIntro] = useState(true);
     const [showMenu, setShowMenu] = useState(false);
-    const [showFillForm, setShowFillForm] = useState(false);  // New state for showing the form
+    const [showFillForm, setShowFillForm] = useState(false);
+    const [showScanForm, setShowScanForm] = useState(false); // New state for showing ScanForm
 
     const handleStartClick = () => {
         setShowIntro(false);
@@ -21,26 +23,34 @@ const Menu = () => {
     };
 
     const handleMenuSelection = (selection: string) => {
+        setShowFillForm(false);
+        setShowScanForm(false); // Reset other forms when a new one is selected
+        setShowMenu(false);
+
         if (selection === 'fill-form') {
-            setShowFillForm(true);  // Show the form bubble
-            setShowMenu(false);  // Hide the menu
+            setShowFillForm(true);
+        } else if (selection === 'scan-form') {
+            setShowScanForm(true); // Show ScanForm
         }
+        // Additional conditions can be added here for other selections
     };
 
     return (
         <ChatContainer>
+            {/* Welcome message and start button */}
             {showIntro && (
-                <MessageBubble
-                    text="Welcome to the chatbot! Click Start to begin."
-                    timestamp={getCurrentTimestamp()}
-                />
-            )}
-            {showIntro && (
-                <div className="text-center">
-                    <Button text="Start" onClick={handleStartClick} />
-                </div>
+                <>
+                    <MessageBubble
+                        text="Welcome to the chatbot! Click Start to begin."
+                        timestamp={getCurrentTimestamp()}
+                    />
+                    <div className="text-center">
+                        <Button text="Start" onClick={handleStartClick} />
+                    </div>
+                </>
             )}
 
+            {/* Menu options */}
             {showMenu && (
                 <>
                     <MessageBubble
@@ -56,10 +66,17 @@ const Menu = () => {
                 </>
             )}
 
-            {/* Render the form as a bubble when showFillForm is true */}
+            {/* Display FillForm as a form bubble when selected */}
             {showFillForm && (
                 <MessageBubble timestamp={getCurrentTimestamp()}>
-                    <FillForm /> {/* Display the form within a message bubble */}
+                    <FillForm />
+                </MessageBubble>
+            )}
+
+            {/* Display ScanForm as a form bubble when selected */}
+            {showScanForm && (
+                <MessageBubble timestamp={getCurrentTimestamp()}>
+                    <ScanForm />
                 </MessageBubble>
             )}
         </ChatContainer>

@@ -1,3 +1,4 @@
+// ChatContainer.tsx
 import { ReactNode } from 'react';
 
 interface ChatContainerProps {
@@ -17,8 +18,7 @@ const ChatContainer = ({ children }: ChatContainerProps) => {
             </div>
 
             {/* Message Area */}
-            <div className="flex-1 overflow-y-auto p-4" id="chat-box">
-                {/* Render each child as a message bubble */}
+            <div className="flex-1 overflow-y-auto px-4" id="chat-box">
                 {children}
             </div>
 
