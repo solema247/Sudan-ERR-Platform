@@ -18,6 +18,7 @@ const ChatContainer = ({ children }: ChatContainerProps) => {
 
             {/* Message Area */}
             <div className="flex-1 overflow-y-auto p-4" id="chat-box">
+                {/* Render each child as a message bubble */}
                 {children}
             </div>
 
