@@ -1,13 +1,11 @@
-// pages/scan-prefill-form.tsx
-
 import React, { useState, useEffect } from 'react';
 import PrefilledForm from '../components/PrefilledForm';
-import { useRouter } from 'next/router';
+import FileUploader from '../components/FileUploader'; // Import the FileUploader component
 
 const ScanPrefillForm: React.FC = () => {
   const [structuredData, setStructuredData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const [showFileUploader, setShowFileUploader] = useState(false); // Add state for file uploader
 
   useEffect(() => {
     // Retrieve data from localStorage
@@ -46,7 +44,9 @@ const ScanPrefillForm: React.FC = () => {
       const result = await response.json();
       console.log('Form submitted successfully:', result);
       alert('Form submitted successfully!');
-      router.push('/menu'); // Navigate back to the menu or main chat view
+
+      // Show the file uploader instead of navigating away
+      setShowFileUploader(true);
     } catch (error) {
       console.error('Error submitting form:', error);
       alert('Failed to submit the form. Please try again.');
@@ -63,8 +63,20 @@ const ScanPrefillForm: React.FC = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-lg font-semibold mb-4">Prefilled Form</h2>
-      <PrefilledForm data={structuredData} onSubmit={handleFormSubmit} />
+      {!showFileUploader ? (
+        <>
+          <h2 className="text-lg font-semibold mb-4">Prefilled Form</h2>
+          <PrefilledForm data={structuredData} onFormSubmit={handleFormSubmit} />
+        </>
+      ) : (
+        <>
+          <h2 className="text-lg font-semibold mb-4">Upload Photos</h2>
+          <FileUploader onUploadComplete={() => {
+            alert('Files uploaded successfully!');
+            // Optionally navigate back to menu or reset state
+          }} />
+        </>
+      )}
     </div>
   );
 };

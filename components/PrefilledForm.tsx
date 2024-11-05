@@ -27,9 +27,10 @@ interface PrefilledFormProps {
     lessons_learned?: string;
     additional_training_needs?: string;
   };
+  onFormSubmit: () => void; // New callback prop for form submission
 }
 
-const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
+const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => {
   const router = useRouter();
   const [formData, setFormData] = useState({
     date: data.date || '',
@@ -57,6 +58,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
     setFormData({ ...formData, expenses: newExpenses });
   };
 
+  //Components/PreFilledForm.tsx
   const handleSubmit = async () => {
     try {
       const response = await fetch('/api/submit-prefilled-form', {
@@ -74,13 +76,15 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
       const result = await response.json();
       console.log('Form submitted successfully:', result.message);
 
-      // After successful submission, redirect or update the chat flow
-      router.push('/menu'); // Navigate back to menu or handle further actions
+      // Call the onFormSubmit callback to trigger the next step
+      onFormSubmit();
+
     } catch (error) {
       console.error('Failed to submit form:', error);
       alert('An error occurred while submitting the form.');
     }
   };
+
 
   return (
     <div className="space-y-4 bg-white p-4 rounded-lg shadow-md">
@@ -247,3 +251,4 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
 };
 
 export default PrefilledForm;
+

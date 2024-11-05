@@ -1,9 +1,5 @@
-// components/FileUploader.tsx
-
-import React, { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+//Components/FileUploader.tsx
+import React, { useState, useEffect } from 'react';
 
 interface FileUploaderProps {
   onUploadComplete: (urls: string[]) => void;
@@ -19,6 +15,25 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onUploadComplete }) => {
     }
   };
 
+  // Automatically trigger upload when files are selected
+  useEffect(() => {
+    if (files.length > 0) {
+      handleUpload();
+    }
+  }, [files]);
+
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const base64String = (reader.result as string).split(',')[1];
+        resolve(base64String);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleUpload = async () => {
     if (files.length === 0) return;
 
@@ -27,19 +42,28 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onUploadComplete }) => {
 
     try {
       for (const file of files) {
-        const { data, error } = await supabase.storage
-          .from('expense-reports/scanned-report-files')
-          .upload(`${file.name}-${Date.now()}`, file);
+        const base64Content = await convertToBase64(file);
 
-        if (error) throw error;
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fileName: `${file.name}-${Date.now()}`,
+            fileContent: base64Content,
+          }),
+        });
 
-        const { publicUrl } = supabase.storage
-          .from('expense-reports/scanned-report-files')
-          .getPublicUrl(data.path);
+        if (!response.ok) {
+          throw new Error('Failed to upload file');
+        }
 
-        urls.push(publicUrl);
+        const result = await response.json();
+        urls.push(result.url);
       }
 
+      // Notify parent component of completion
       onUploadComplete(urls);
       setFiles([]);
     } catch (error) {
