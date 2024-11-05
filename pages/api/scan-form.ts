@@ -1,7 +1,6 @@
 // pages/api/scan-form.ts
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
 import vision from '@google-cloud/vision';
 import OpenAI from 'openai';
 import sharp from 'sharp';
@@ -16,23 +15,10 @@ export const config = {
   },
 };
 
-// Initialize Supabase
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
-
 // Initialize Google Vision
-let visionClient;
-try {
-  const keyPath = path.join(process.cwd(), 'local-humanitarian-web-chat-1f81cd59311e.json');
-  visionClient = new vision.ImageAnnotatorClient({
-    keyFilename: keyPath,
-  });
-  console.log('Vision client initialized successfully');
-} catch (error) {
-  console.error('Vision client initialization error:', error);
-}
+const visionClient = new vision.ImageAnnotatorClient({
+  keyFilename: path.join(process.cwd(), 'local-humanitarian-web-chat-1f81cd59311e.json'),
+});
 
 // Initialize OpenAI
 const openai = new OpenAI({
@@ -40,14 +26,12 @@ const openai = new OpenAI({
 });
 
 // Function to parse multipart/form-data using formidable
-async function parseForm(
-  req: NextApiRequest
-): Promise<{ filePath: string }> {
+async function parseForm(req: NextApiRequest): Promise<{ filePath: string }> {
   const uploadDir = path.join(process.cwd(), 'uploads');
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
   const form = formidable({
-    multiples: false, // Handle single file upload
+    multiples: false,
     keepExtensions: true,
     uploadDir: uploadDir,
   });
@@ -58,7 +42,7 @@ async function parseForm(
         reject(err);
         return;
       }
-      console.log('Files received:', files); // Log to inspect the files object
+      console.log('Files received:', files); // Log the files object
       const file = files.file[0] as formidable.File;
       if (!file) {
         reject(new Error('No file uploaded'));
@@ -70,44 +54,26 @@ async function parseForm(
 }
 
 // Function to preprocess the image and convert to binary for Google Vision
-async function preprocessImageToBuffer(
-  imagePath: string
-): Promise<Buffer> {
-  try {
-    console.log('Attempting to process image at path:', imagePath);
+async function preprocessImageToBuffer(imagePath: string): Promise<Buffer> {
+  console.log('Attempting to process image at path:', imagePath);
 
-    // Load, grayscale, and re-encode the image as JPEG in-memory
-    const processedImageBuffer = await sharp(imagePath)
-      .grayscale() // Convert to grayscale
-      .modulate({ brightness: 1.2, contrast: 1.5 }) // Adjust brightness and contrast
-      .jpeg({ quality: 90 }) // Re-encode as JPEG
-      .toBuffer();
+  const processedImageBuffer = await sharp(imagePath)
+    .grayscale()
+    .modulate({ brightness: 1.2, contrast: 1.5 })
+    .jpeg({ quality: 90 })
+    .toBuffer();
 
-    console.log('Image successfully processed and ready for OCR.');
-    return processedImageBuffer;
-  } catch (error: any) {
-    console.error('Error during image preprocessing:', error.message);
-    throw new Error(`Preprocessing failed: ${error.message}`);
-  }
+  console.log('Image successfully processed and ready for OCR.');
+  return processedImageBuffer;
 }
 
 // Function to run Google Vision OCR on the processed image buffer
 async function googleVisionOCR(imageBuffer: Buffer): Promise<string> {
-  try {
-    // Pass the image buffer directly to the textDetection method
-    const [result] = await visionClient.textDetection(imageBuffer);
-    const detections = result.textAnnotations;
-
-    const ocrText =
-      detections && detections.length
-        ? detections[0].description!.trim()
-        : 'Not found';
-    console.log('Google Vision OCR Output:', ocrText);
-    return ocrText;
-  } catch (error: any) {
-    console.error(`Google Vision OCR failed: ${error.message}`);
-    throw new Error(`Google Vision OCR failed: ${error.message}`);
-  }
+  const [result] = await visionClient.textDetection(imageBuffer);
+  const detections = result.textAnnotations;
+  const ocrText = detections && detections.length ? detections[0].description!.trim() : 'Not found';
+  console.log('Google Vision OCR Output:', ocrText);
+  return ocrText;
 }
 
 // Function to clean extracted text
@@ -116,9 +82,7 @@ function cleanExtractedText(rawText: string): string {
 }
 
 // OpenAI GPT-based classification
-async function chatGPTClassification(
-  rawText: string
-): Promise<string> {
+async function chatGPTClassification(rawText: string): Promise<any> {
   const cleanedText = cleanExtractedText(rawText);
   const prompt = `
 I have extracted the following text from a financial report form. The text contains multiple sections including a date, ERR number, an activity table, a financial summary, and responses to additional questions.
@@ -156,18 +120,81 @@ Please extract the following information and structure it accordingly:
     temperature: 0.7,
   });
 
-  const openAIOutput =
-    response.choices[0].message?.content ||
-    'An error occurred while processing the data.';
+  const openAIOutput = response.choices[0].message?.content || 'An error occurred while processing the data.';
   console.log('OpenAI Response:', openAIOutput);
-  return openAIOutput;
-}
+
+  // Parse OpenAI response into structured data
+  const structuredData = parseOpenAIResponse(openAIOutput);
+  return structuredData;
+  }
+
+  // Function to parse OpenAI response to structured form fields
+  function parseOpenAIResponse(response: string) {
+    const structuredData = {
+      date: '',
+      err_id: '',  // matches frontend expectation
+      expenses: [],  // matches frontend expectation
+      total_grant: '',
+      total_other_sources: '',
+      total_expenses: '',
+      remainder: '',
+      additional_excess_expenses: '',
+      additional_surplus_use: '',
+      lessons_learned: '',
+      additional_training_needs: '',
+    };
+
+    // Extract data based on expected format
+    const dateMatch = response.match(/Date:\s*(\d{2}\/\d{2}\/\d{2})/);
+    const errNumberMatch = response.match(/ERR Number:\s*(\d+)/);
+
+    structuredData.date = dateMatch ? dateMatch[1] : '';
+    structuredData.err_id = errNumberMatch ? errNumberMatch[1] : '';  // Corrected to `err_id`
+
+    // Extract activities in the activity table
+    const activityRegex = /- Activity:\s*(.+?)\s*- Description of Expenses:\s*(.+?)\s*- Payment Date:\s*(\d{2}\/\d{2})\s*- Seller\/Recipient Details:\s*(.+?)\s*- Payment Method:\s*(.+?)\s*- Receipt Number:\s*(\d+)\s*- Expenses:\s*(\d+)/g;
+    let match;
+    while ((match = activityRegex.exec(response)) !== null) {
+      structuredData.expenses.push({
+        activity: match[1],
+        description: match[2],
+        payment_date: match[3],
+        seller: match[4],
+        payment_method: match[5],
+        receipt_no: match[6],
+        amount: match[7],
+      });
+    }
+
+    // Extract financial summary as flat fields
+    const totalExpensesMatch = response.match(/Total Expenses in SDG:\s*(\d+)/);
+    const totalGrantReceivedMatch = response.match(/Total Grant Received:\s*(\d+)/);
+    const totalOtherSourcesMatch = response.match(/Total Amount from Other Sources:\s*(\d+)/);
+    const remainderMatch = response.match(/Remainder:\s*(\d+)/);
+
+    structuredData.total_expenses = totalExpensesMatch ? totalExpensesMatch[1] : '';
+    structuredData.total_grant = totalGrantReceivedMatch ? totalGrantReceivedMatch[1] : '';
+    structuredData.total_other_sources = totalOtherSourcesMatch ? totalOtherSourcesMatch[1] : '';
+    structuredData.remainder = remainderMatch ? remainderMatch[1] : '';
+
+    // Extract additional questions as flat fields
+    const excessExpensesMatch = response.match(/excess expenses\?\s*(.+)/);
+    const surplusUseMatch = response.match(/surplus if expenses were less than the grant received\?\s*(.+)/);
+    const lessonsLearnedMatch = response.match(/budget planning\?\s*(.+)/);
+    const trainingNeedsMatch = response.match(/training needs or opportunities\?\s*(.+)/);
+
+    structuredData.additional_excess_expenses = excessExpensesMatch ? excessExpensesMatch[1] : '';
+    structuredData.additional_surplus_use = surplusUseMatch ? surplusUseMatch[1] : '';
+    structuredData.lessons_learned = lessonsLearnedMatch ? lessonsLearnedMatch[1] : '';
+    structuredData.additional_training_needs = trainingNeedsMatch ? trainingNeedsMatch[1] : '';
+
+    return structuredData;
+  }
+
+
 
 // API Route Handler
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
@@ -176,22 +203,15 @@ export default async function handler(
   try {
     const { filePath } = await parseForm(req);
 
-    // Perform preprocessing
     const processedImageBuffer = await preprocessImageToBuffer(filePath);
-
-    // Perform OCR and classification
     const rawText = await googleVisionOCR(processedImageBuffer);
-    const structuredResponse = await chatGPTClassification(rawText);
+    const structuredData = await chatGPTClassification(rawText);
 
-    // Send the structured response back to the client
-    res.status(200).json({ message: structuredResponse });
+    res.status(200).json({ message: 'Data processed successfully', data: structuredData });
 
-    // Clean up the uploaded file
     fs.unlinkSync(filePath);
   } catch (error: any) {
     console.error(`Processing error: ${error.message}`);
-    res
-      .status(500)
-      .json({ error: `Error processing scan: ${error.message}` });
+    res.status(500).json({ error: `Error processing scan: ${error.message}` });
   }
 }
