@@ -1,6 +1,7 @@
 // pages/fill-form.tsx
 import React, { useState } from 'react';
 import FormBubble from '../components/FormBubble';
+import { useRouter } from 'next/router'; 
 
 const FillForm: React.FC = () => {
     const [expenses, setExpenses] = useState([
@@ -19,6 +20,8 @@ const FillForm: React.FC = () => {
         additional_training_needs: '',
         lessons: ''
     });
+    const [formSubmitted, setFormSubmitted] = useState(false);
+    const router = useRouter();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -74,6 +77,7 @@ const FillForm: React.FC = () => {
 
         if (response.ok) {
             alert('Form submitted successfully!');
+            setFormSubmitted(true);
         } else {
             alert('Failed to submit the form');
         }
@@ -81,6 +85,7 @@ const FillForm: React.FC = () => {
 
     return (
         <FormBubble>
+            {!formSubmitted ? (
             <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded-lg shadow-md">
                 <label>
                     ERR ID (required)
@@ -148,7 +153,15 @@ const FillForm: React.FC = () => {
                 </label>
                 <button type="submit" className="bg-green-500 text-white py-2 px-4 rounded">Submit</button>
             </form>
-        </FormBubble>
+        ) : (
+            // Show "Return to Main Menu" button after form submission
+            <div className="text-center mt-4">
+                <button onClick={() => router.push('/menu')} className="bg-blue-500 text-white py-2 px-4 rounded">
+                    Return to Main Menu
+                </button>
+            </div>
+        )}
+    </FormBubble>
     );
 };
 
