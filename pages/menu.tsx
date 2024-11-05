@@ -31,6 +31,7 @@ const Menu = () => {
     const handleMenuSelection = async (selection: string) => {
         setShowFillForm(false);
         setShowScanForm(false);
+        setPrefilledData(null); // Clear previous prefilled data
         setShowMenu(false);
 
         if (selection === 'fill-form') {

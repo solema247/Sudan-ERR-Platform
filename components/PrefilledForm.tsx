@@ -1,6 +1,7 @@
 // components/PrefilledForm.tsx
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/router';
 
 interface ExpenseEntry {
   activity: string;
@@ -29,6 +30,7 @@ interface PrefilledFormProps {
 }
 
 const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     date: data.date || '',
     err_id: data.err_id || '',
@@ -53,6 +55,31 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
     const newExpenses = [...formData.expenses];
     newExpenses[index] = { ...newExpenses[index], [name]: value };
     setFormData({ ...formData, expenses: newExpenses });
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('/api/submit-prefilled-form', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server Error: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('Form submitted successfully:', result.message);
+
+      // After successful submission, redirect or update the chat flow
+      router.push('/menu'); // Navigate back to menu or handle further actions
+    } catch (error) {
+      console.error('Failed to submit form:', error);
+      alert('An error occurred while submitting the form.');
+    }
   };
 
   return (
@@ -208,6 +235,13 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
           className="w-full p-2 border rounded"
         />
       </label>
+
+      <button
+        onClick={handleSubmit}
+        className="bg-blue-500 text-white py-2 px-4 rounded"
+      >
+        Submit Form
+      </button>
     </div>
   );
 };
