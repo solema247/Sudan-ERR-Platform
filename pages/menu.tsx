@@ -36,6 +36,18 @@ const Menu = () => {
         }
     };
 
+    // Callback to navigate back to the main menu
+    const navigateToMenu = () => {
+        setShowFillForm(false);
+        setShowScanForm(false);
+        setShowMenu(true);
+    };
+
+    // Callback to reset and allow form submission again
+    const submitAnotherForm = () => {
+        setShowFillForm(true);
+    };
+
     return (
         <ChatContainer>
             {showIntro && (
@@ -67,13 +79,18 @@ const Menu = () => {
 
             {showFillForm && (
                 <MessageBubble timestamp={getCurrentTimestamp()}>
-                    <FillForm />
+                    <FillForm 
+                        onReturnToMenu={navigateToMenu} 
+                        onSubmitAnotherForm={submitAnotherForm} 
+                    />
                 </MessageBubble>
             )}
 
             {showScanForm && (
                 <MessageBubble timestamp={getCurrentTimestamp()}>
-                    <ScanForm />
+                    <ScanForm 
+                        onReturnToMenu={navigateToMenu} 
+                    />
                 </MessageBubble>
             )}
         </ChatContainer>
