@@ -1,3 +1,5 @@
+// components/PrefilledForm.tsx
+
 import React, { useState } from 'react';
 
 interface ExpenseEntry {
@@ -54,7 +56,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
   };
 
   return (
-    <form className="space-y-4 bg-white p-4 rounded-lg shadow-md">
+    <div className="space-y-4 bg-white p-4 rounded-lg shadow-md">
       <label>
         ERR ID
         <input
@@ -63,7 +65,6 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
           onChange={handleInputChange}
           value={formData.err_id}
           className="w-full p-2 border rounded"
-          placeholder="ERR ID"
         />
       </label>
       <label>
@@ -74,7 +75,6 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
           onChange={handleInputChange}
           value={formData.date}
           className="w-full p-2 border rounded"
-          placeholder="Date"
         />
       </label>
 
@@ -90,7 +90,6 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
                 value={expense.activity}
                 onChange={(e) => handleExpenseChange(index, e)}
                 className="w-full p-2 border rounded"
-                placeholder="Activity"
               />
             </label>
             <label>
@@ -101,7 +100,6 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
                 value={expense.description}
                 onChange={(e) => handleExpenseChange(index, e)}
                 className="w-full p-2 border rounded"
-                placeholder="Description"
               />
             </label>
             <label>
@@ -122,7 +120,6 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
                 value={expense.seller}
                 onChange={(e) => handleExpenseChange(index, e)}
                 className="w-full p-2 border rounded"
-                placeholder="Seller"
               />
             </label>
             <label>
@@ -145,7 +142,6 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
                 value={expense.receipt_no}
                 onChange={(e) => handleExpenseChange(index, e)}
                 className="w-full p-2 border rounded"
-                placeholder="Receipt No."
               />
             </label>
             <label>
@@ -156,7 +152,6 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
                 value={expense.amount}
                 onChange={(e) => handleExpenseChange(index, e)}
                 className="w-full p-2 border rounded"
-                placeholder="Amount"
               />
             </label>
           </div>
@@ -170,7 +165,6 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
           onChange={handleInputChange}
           value={formData.total_grant}
           className="w-full p-2 border rounded"
-          placeholder="Total Grant"
         />
       </label>
       <label>Total Other Sources
@@ -180,7 +174,6 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
           onChange={handleInputChange}
           value={formData.total_other_sources}
           className="w-full p-2 border rounded"
-          placeholder="Total Other Sources"
         />
       </label>
       <label>How did you cover excess expenses?
@@ -189,7 +182,6 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
           onChange={handleInputChange}
           value={formData.additional_excess_expenses}
           className="w-full p-2 border rounded"
-          placeholder="How did you cover excess expenses?"
         />
       </label>
       <label>How would you spend the surplus?
@@ -198,7 +190,6 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
           onChange={handleInputChange}
           value={formData.additional_surplus_use}
           className="w-full p-2 border rounded"
-          placeholder="How would you spend the surplus?"
         />
       </label>
       <label>Additional training needs
@@ -207,7 +198,6 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
           onChange={handleInputChange}
           value={formData.additional_training_needs}
           className="w-full p-2 border rounded"
-          placeholder="Additional training needs"
         />
       </label>
       <label>Lessons learned in budget planning
@@ -216,10 +206,9 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data }) => {
           onChange={handleInputChange}
           value={formData.lessons_learned}
           className="w-full p-2 border rounded"
-          placeholder="Lessons learned in budget planning"
         />
       </label>
-    </form>
+    </div>
   );
 };
 

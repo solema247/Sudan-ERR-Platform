@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react';
 import ScanBubble from '../components/ScanBubble';
-import { useRouter } from 'next/router';
+import MessageBubble from '../components/MessageBubble';
+import PrefilledForm from '../components/PrefilledForm';
 
 const ScanForm: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const [structuredData, setStructuredData] = useState<any>(null); // State for structured data
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -36,13 +37,10 @@ const ScanForm: React.FC = () => {
       }
 
       const data = await response.json();
-      console.log('Scan successful, navigating to prefilled form', data);
+      console.log('Scan successful, displaying prefilled form in chat', data);
 
-      // Save the structured data in localStorage
-      localStorage.setItem('prefillData', JSON.stringify(data.data));
-
-      // Redirect to the pre-filled form page
-      router.push('/scan-prefill-form');
+      // Store the structured data in state
+      setStructuredData(data.data);
     } catch (error) {
       console.error('Error uploading file:', error);
       alert('Failed to scan the form.');
@@ -52,19 +50,28 @@ const ScanForm: React.FC = () => {
   };
 
   return (
-    <ScanBubble>
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Scan Form</h2>
-        <input type="file" accept="image/*" onChange={handleFileChange} />
-        <button
-          onClick={handleUpload}
-          className="bg-blue-500 text-white py-2 px-4 rounded"
-          disabled={!file || isLoading}
-        >
-          {isLoading ? 'Processing...' : 'Upload and Scan'}
-        </button>
-      </div>
-    </ScanBubble>
+    <>
+      <ScanBubble>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Scan Form</h2>
+          <input type="file" accept="image/*" onChange={handleFileChange} />
+          <button
+            onClick={handleUpload}
+            className="bg-blue-500 text-white py-2 px-4 rounded"
+            disabled={!file || isLoading}
+          >
+            {isLoading ? 'Processing...' : 'Upload and Scan'}
+          </button>
+        </div>
+      </ScanBubble>
+
+      {/* Conditionally render PrefilledForm as a chat bubble */}
+      {structuredData && (
+        <MessageBubble>
+          <PrefilledForm data={structuredData} />
+        </MessageBubble>
+      )}
+    </>
   );
 };
 
