@@ -63,20 +63,15 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => 
     try {
       const response = await fetch('/api/submit-prefilled-form', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        throw new Error(`Server Error: ${response.statusText}`);
-      }
-
+      if (!response.ok) throw new Error(`Server Error: ${response.statusText}`);
       const result = await response.json();
       console.log('Form submitted successfully:', result.message);
 
-      // Call the onFormSubmit callback to trigger the next step
+      // Call onFormSubmit to proceed without removing the form
       onFormSubmit();
 
     } catch (error) {
@@ -84,6 +79,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => 
       alert('An error occurred while submitting the form.');
     }
   };
+
 
 
   return (

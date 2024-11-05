@@ -2,29 +2,19 @@ import React, { useState } from "react";
 import ScanBubble from "../components/ScanBubble";
 import MessageBubble from "../components/MessageBubble";
 import PrefilledForm from "../components/PrefilledForm";
-import FileUploader from "../components/FileUploader"; // Import FileUploader
+import FileUploader from "../components/FileUploader";
 
 const ScanForm: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [structuredData, setStructuredData] = useState<any>(null);
-  const [showFileUploader, setShowFileUploader] = useState(false); // Add state
+  const [structuredData, setStructuredData] = useState<any>(null); // Stores scanned data
+  const [showFileUploader, setShowFileUploader] = useState(false); // Controls FileUploader visibility
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
       console.log("File selected:", e.target.files[0].name);
     }
-  };
-
-  const handleFormSubmit = () => {
-    // Show the FileUploader after form submission
-    setShowFileUploader(true);
-  };
-
-  const handleUploadComplete = () => {
-    // Define actions after file upload, e.g., navigate to menu
-    // router.push('/menu');
   };
 
   const handleUpload = async () => {
@@ -48,7 +38,7 @@ const ScanForm: React.FC = () => {
 
       const data = await response.json();
       console.log("Scan successful, displaying prefilled form in chat", data);
-      setStructuredData(data.data);
+      setStructuredData(data.data); // Move to Step 2
     } catch (error) {
       console.error("Error uploading file:", error);
       alert("Failed to scan the form.");
@@ -57,8 +47,20 @@ const ScanForm: React.FC = () => {
     }
   };
 
+  const handleFormSubmit = () => {
+    // Only show FileUploader after PrefilledForm submission
+    setShowFileUploader(true);
+  };
+
+  const handleUploadComplete = () => {
+    alert("Files uploaded successfully!");
+    setShowFileUploader(false);
+    setStructuredData(null); // Reset structured data if starting fresh
+  };
+
   return (
     <>
+      {/* Step 1: Display File Input for Scanning */}
       {!structuredData && !showFileUploader && (
         <ScanBubble>
           <div className="space-y-4">
@@ -75,12 +77,14 @@ const ScanForm: React.FC = () => {
         </ScanBubble>
       )}
 
+      {/* Step 2: Display Prefilled Form if structuredData is available */}
       {structuredData && !showFileUploader && (
         <MessageBubble>
           <PrefilledForm data={structuredData} onFormSubmit={handleFormSubmit} />
         </MessageBubble>
       )}
 
+      {/* Step 3: Display FileUploader only after PrefilledForm submission */}
       {showFileUploader && (
         <MessageBubble>
           <FileUploader onUploadComplete={handleUploadComplete} />
