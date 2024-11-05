@@ -85,31 +85,43 @@ function cleanExtractedText(rawText: string): string {
 async function chatGPTClassification(rawText: string): Promise<any> {
   const cleanedText = cleanExtractedText(rawText);
   const prompt = `
-I have extracted the following text from a financial report form. The text contains multiple sections including a date, ERR number, an activity table, a financial summary, and responses to additional questions.
-Here is the text:
-${cleanedText}
-Please extract the following information and structure it accordingly:
-1. Date: Identify the date from the text.
-2. ERR Number: Extract the ERR number.
-3. Activity Table: Identify each row in the activity table and organize the data into the following fields:
-   - Activity
-   - Description of Expenses
-   - Payment Date
-   - Seller/Recipient Details
-   - Payment Method (Cash/Bank App)
-   - Receipt Number
-   - Expenses
-4. Financial Summary: Extract the following fields:
-   - Total Expenses
-   - Total Grant Received
-   - Total Amount from Other Sources
-   - Remainder
-5. Additional Questions: Extract responses to the following questions:
-   - How did you cover excess expenses?
-   - How would you spend the surplus if expenses were less than the grant received?
-   - What lessons did you learn about budget planning?
-   - Were there any additional training needs or opportunities?
-`;
+  I have extracted the following text from a financial report form. The text contains multiple sections, including a date, ERR number, an activity table, a financial summary, and responses to additional questions. 
+  Here is the text:
+  ${cleanedText}
+
+  Please extract the information and structure it in the following JSON format:
+
+  {
+    "date": "DD/MM/YY",
+    "err_id": "ERR Number",
+    "expenses": [
+      {
+        "activity": "Activity description",
+        "description": "Description of Expenses",
+        "payment_date": "DD/MM",
+        "seller": "Seller/Recipient Details",
+        "payment_method": "Payment Method (Cash/Bank App)",
+        "receipt_no": "Receipt Number",
+        "amount": "Expenses amount"
+      },
+      ...
+    ],
+    "financial_summary": {
+      "total_expenses": "Total Expenses in SDG",
+      "total_grant_received": "Total Grant Received",
+      "total_other_sources": "Total Amount from Other Sources",
+      "remainder": "Remaining amount"
+    },
+    "additional_questions": {
+      "excess_expenses": "Response to covering excess expenses",
+      "surplus_use": "Response to surplus spending",
+      "lessons_learned": "Response about budget planning lessons",
+      "training_needs": "Response about additional training needs"
+    }
+  }
+
+  Make sure to follow this structure exactly. Return only the JSON output without additional text.
+  `;
 
   console.log('Prompt sent to OpenAI:', prompt);
 
@@ -128,68 +140,93 @@ Please extract the following information and structure it accordingly:
   return structuredData;
   }
 
-  // Function to parse OpenAI response to structured form fields
-  function parseOpenAIResponse(response: string) {
-    const structuredData = {
-      date: '',
-      err_id: '',  // matches frontend expectation
-      expenses: [],  // matches frontend expectation
-      total_grant: '',
-      total_other_sources: '',
-      total_expenses: '',
-      remainder: '',
-      additional_excess_expenses: '',
-      additional_surplus_use: '',
-      lessons_learned: '',
-      additional_training_needs: '',
+// Function to parse OpenAI response to structured form fields
+function parseOpenAIResponse(response: string) {
+  try {
+    // Attempt to parse JSON response directly, assuming OpenAI now returns JSON format
+    const parsedResponse = JSON.parse(response);
+
+    return {
+      date: parsedResponse.date || '',
+      err_id: parsedResponse.err_id || '',
+      expenses: parsedResponse.expenses?.map((expense: any) => ({
+        activity: expense.activity || '',
+        description: expense.description || '',
+        payment_date: expense.payment_date || '',
+        seller: expense.seller || '',
+        payment_method: expense.payment_method || 'cash',
+        receipt_no: expense.receipt_no || '',
+        amount: expense.amount || '',
+      })) || [],
+      total_grant: parsedResponse.total_grant || '',
+      total_other_sources: parsedResponse.total_other_sources || '',
+      total_expenses: parsedResponse.total_expenses || '',
+      remainder: parsedResponse.remainder || '',
+      additional_excess_expenses: parsedResponse.additional_excess_expenses || '',
+      additional_surplus_use: parsedResponse.additional_surplus_use || '',
+      lessons_learned: parsedResponse.lessons_learned || '',
+      additional_training_needs: parsedResponse.additional_training_needs || '',
     };
-
-    // Extract data based on expected format
-    const dateMatch = response.match(/Date:\s*(\d{2}\/\d{2}\/\d{2})/);
-    const errNumberMatch = response.match(/ERR Number:\s*(\d+)/);
-
-    structuredData.date = dateMatch ? dateMatch[1] : '';
-    structuredData.err_id = errNumberMatch ? errNumberMatch[1] : '';  // Corrected to `err_id`
-
-    // Extract activities in the activity table
-    const activityRegex = /- Activity:\s*(.+?)\s*- Description of Expenses:\s*(.+?)\s*- Payment Date:\s*(\d{2}\/\d{2})\s*- Seller\/Recipient Details:\s*(.+?)\s*- Payment Method:\s*(.+?)\s*- Receipt Number:\s*(\d+)\s*- Expenses:\s*(\d+)/g;
-    let match;
-    while ((match = activityRegex.exec(response)) !== null) {
-      structuredData.expenses.push({
-        activity: match[1],
-        description: match[2],
-        payment_date: match[3],
-        seller: match[4],
-        payment_method: match[5],
-        receipt_no: match[6],
-        amount: match[7],
-      });
-    }
-
-    // Extract financial summary as flat fields
-    const totalExpensesMatch = response.match(/Total Expenses in SDG:\s*(\d+)/);
-    const totalGrantReceivedMatch = response.match(/Total Grant Received:\s*(\d+)/);
-    const totalOtherSourcesMatch = response.match(/Total Amount from Other Sources:\s*(\d+)/);
-    const remainderMatch = response.match(/Remainder:\s*(\d+)/);
-
-    structuredData.total_expenses = totalExpensesMatch ? totalExpensesMatch[1] : '';
-    structuredData.total_grant = totalGrantReceivedMatch ? totalGrantReceivedMatch[1] : '';
-    structuredData.total_other_sources = totalOtherSourcesMatch ? totalOtherSourcesMatch[1] : '';
-    structuredData.remainder = remainderMatch ? remainderMatch[1] : '';
-
-    // Extract additional questions as flat fields
-    const excessExpensesMatch = response.match(/excess expenses\?\s*(.+)/);
-    const surplusUseMatch = response.match(/surplus if expenses were less than the grant received\?\s*(.+)/);
-    const lessonsLearnedMatch = response.match(/budget planning\?\s*(.+)/);
-    const trainingNeedsMatch = response.match(/training needs or opportunities\?\s*(.+)/);
-
-    structuredData.additional_excess_expenses = excessExpensesMatch ? excessExpensesMatch[1] : '';
-    structuredData.additional_surplus_use = surplusUseMatch ? surplusUseMatch[1] : '';
-    structuredData.lessons_learned = lessonsLearnedMatch ? lessonsLearnedMatch[1] : '';
-    structuredData.additional_training_needs = trainingNeedsMatch ? trainingNeedsMatch[1] : '';
-
-    return structuredData;
+  } catch (error) {
+    console.error("Error parsing OpenAI response:", error);
+    // Fallback: Regular expression parsing if JSON parsing fails (legacy support)
+    return parseUsingRegex(response);
   }
+}
+
+// Fallback function using regular expressions if JSON parsing fails
+function parseUsingRegex(response: string) {
+  const structuredData = {
+    date: '',
+    err_id: '',
+    expenses: [],
+    total_grant: '',
+    total_other_sources: '',
+    total_expenses: '',
+    remainder: '',
+    additional_excess_expenses: '',
+    additional_surplus_use: '',
+    lessons_learned: '',
+    additional_training_needs: '',
+  };
+
+  // Helper function to extract a single field
+  const extractField = (regex: RegExp) => (response.match(regex)?.[1] || '').trim();
+
+  // Extract data based on expected format
+  structuredData.date = extractField(/Date:\s*(\d{2}\/\d{2}\/\d{2})/);
+  structuredData.err_id = extractField(/ERR Number:\s*(\d+)/);
+
+  // Extract activity table entries
+  const activityRegex = /- Activity:\s*(.+?)\s*- Description of Expenses:\s*(.+?)\s*- Payment Date:\s*(\d{2}\/\d{2})\s*- Seller\/Recipient Details:\s*(.+?)\s*- Payment Method:\s*(.+?)\s*- Receipt Number:\s*(\d+)\s*- Expenses:\s*(\d+)/g;
+  let match;
+  while ((match = activityRegex.exec(response)) !== null) {
+    structuredData.expenses.push({
+      activity: match[1],
+      description: match[2],
+      payment_date: match[3],
+      seller: match[4],
+      payment_method: match[5],
+      receipt_no: match[6],
+      amount: match[7],
+    });
+  }
+
+  // Extract financial summary fields
+  structuredData.total_expenses = extractField(/Total Expenses in SDG:\s*(\d+)/);
+  structuredData.total_grant = extractField(/Total Grant Received:\s*(\d+)/);
+  structuredData.total_other_sources = extractField(/Total Amount from Other Sources:\s*(\d+)/);
+  structuredData.remainder = extractField(/Remainder:\s*(\d+)/);
+
+  // Extract additional questions
+  structuredData.additional_excess_expenses = extractField(/excess expenses\?\s*(.+)/);
+  structuredData.additional_surplus_use = extractField(/surplus if expenses were less than the grant received\?\s*(.+)/);
+  structuredData.lessons_learned = extractField(/budget planning\?\s*(.+)/);
+  structuredData.additional_training_needs = extractField(/training needs or opportunities\?\s*(.+)/);
+
+  return structuredData;
+}
+
 
 
 
