@@ -1,3 +1,4 @@
+// pages/scan-form.tsx
 import React, { useState } from "react";
 import ScanBubble from "../components/ScanBubble";
 import MessageBubble from "../components/MessageBubble";
@@ -40,7 +41,7 @@ const ScanForm: React.FC = () => {
       const data = await response.json();
       console.log("Scan successful, displaying prefilled form in chat", data);
 
-      // Add PrefilledForm as a new chat step, keeping the upload prompt visible
+      // Add PrefilledForm as a new chat step
       setStructuredData(data.data);
       setChatSteps((prevSteps) => [
         ...prevSteps,
@@ -68,15 +69,46 @@ const ScanForm: React.FC = () => {
   };
 
   const handleUploadComplete = () => {
-    alert("Files uploaded successfully!");
+    // Remove the alert if you prefer the success message in the chat
+    // alert('Files uploaded successfully!');
+
     setShowFileUploader(false);
     setStructuredData(null); // Reset structured data if starting fresh
+
+    // Append the success message and options to the chatSteps
+    setChatSteps((prevSteps) => [
+      ...prevSteps,
+      <MessageBubble key="uploadSuccess">
+        <div>
+          <p>Form and photos uploaded successfully!</p>
+          <div className="flex space-x-4 mt-2">
+            <button
+              onClick={() => {
+                setFile(null);
+                setStructuredData(null);
+                setShowFileUploader(false);
+                setChatSteps([]); // Reset chat steps to restart scan form flow
+              }}
+              className="bg-green-500 text-white py-2 px-4 rounded"
+            >
+              Scan Another Form
+            </button>
+            <button
+              onClick={() => window.location.href = '/menu'} // Redirect back to menu
+              className="bg-blue-500 text-white py-2 px-4 rounded"
+            >
+              Return to Menu
+            </button>
+          </div>
+        </div>
+      </MessageBubble>
+    ]);
   };
 
   return (
     <>
-      {/* Step 1: Display File Input for Scanning as the first chat bubble */}
-      {!structuredData && !showFileUploader && (
+      {/* Display File Input for Scanning as the first chat bubble */}
+      {!structuredData && !showFileUploader && chatSteps.length === 0 && (
         <ScanBubble>
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">Scan Form</h2>
