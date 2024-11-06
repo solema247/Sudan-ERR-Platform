@@ -68,13 +68,14 @@ const Menu = () => {
             )}
 
             {showMenu && (
-                <div className="w-full max-w-md mx-auto space-y-1 mt-0"> {/* Shared width and reduced spacing */}
+                <div className="w-full max-w-md mx-auto space-y-1 -mt-1"> {/* Shared width and reduced spacing */}
                     <MessageBubble
-                        text="Select an option:"
+                        text="Choose a Reporting Method"
                         timestamp={getCurrentTimestamp()}
+                        fullWidth 
                     />
-                    <div className="grid grid-cols-1 gap-0"> {/* Minimal gap between buttons */}
-                        <Button text="Report Free Form" onClick={() => handleMenuSelection('free-form')} className="w-full" />
+                    <div className="grid grid-cols-1 -gap-1"> {/* Minimal gap between buttons */}
+
                         <Button text="Report Fill Form" onClick={() => handleMenuSelection('fill-form')} className="w-full" />
                         <Button text="Report Scan Form" onClick={() => handleMenuSelection('scan-form')} className="w-full" />
                         <Button text="Exit" onClick={() => router.push('/')} className="w-full" />

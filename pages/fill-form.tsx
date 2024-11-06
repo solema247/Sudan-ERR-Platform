@@ -86,7 +86,7 @@ const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () =
     return (
         <FormBubble>
             {!formSubmitted ? (
-                <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded-lg shadow-md">
+                <form onSubmit={handleSubmit} className="space-y-3 bg-white p-2 rounded-lg shadow-md">
                     <label>
                         ERR ID (required)
                         <input type="text" name="err_id" onChange={handleInputChange} value={formData.err_id} required className="w-full p-2 border rounded" placeholder="ERR ID" />
@@ -96,9 +96,9 @@ const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () =
                         <input type="date" name="date" onChange={handleInputChange} value={formData.date} required className="w-full p-2 border rounded" placeholder="Date" />
                     </label>
 
-                    <div className="swipeable-cards flex overflow-x-auto space-x-4">
+                    <div className="swipeable-cards flex overflow-x-auto space-x-2">
                         {expenses.map((expense, index) => (
-                            <div key={index} className="min-w-[200px] p-4 border rounded bg-gray-100">
+                            <div key={index} className="min-w-[200px] p-4 rounded bg-gray-50">
                                 <h4>Expense Entry {index + 1}</h4>
                                 <label>Activity
                                     <input type="text" name="activity" value={expense.activity} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Activity" />
