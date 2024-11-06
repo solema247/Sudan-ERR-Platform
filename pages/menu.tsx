@@ -58,7 +58,7 @@ const Menu = () => {
             {showIntro && (
                 <>
                     <MessageBubble
-                        text="Welcome to the chatbot! Click Start to begin."
+                        text="***Welcome to the Sudan ERR chatbot!*** This chatbot will help you with reporting on ERR impact and sharing information with the community and donors. Click ***Start*** to begin."
                         timestamp={getCurrentTimestamp()}
                     />
                     <div className="text-center">

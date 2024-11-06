@@ -1,24 +1,78 @@
-Welcome to the NextJS base template bootstrapped using the `create-next-app`. This template supports TypeScript, but you can use normal JavaScript as well.
+Sudan ERR Chatbot - Financial Report Management System
 
-## Getting Started
+A Next.js-based chatbot application designed to process and manage financial reports through form scanning and data extraction.
 
-Hit the run button to start the development server.
+FEATURES
+--------
+* Dual Reporting Methods:
+  - Form Scanning: Upload and process physical forms
+  - Digital Form Filling: Direct data entry option
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+* Advanced Document Processing:
+  - Image preprocessing using OpenCV
+  - OCR using Google Cloud Vision API
+  - Intelligent text extraction and structuring using OpenAI GPT
+  - Form data validation and processing
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on `/api/hello`. This endpoint can be edited in `pages/api/hello.ts`.
+* Security:
+  - User authentication with ERR ID and PIN
+  - Secure session management
+  - Integration with Supabase backend
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+TECH STACK
+----------
+* Frontend: Next.js, React, TypeScript
+* Backend: Next.js API Routes
+* Image Processing: 
+  - Sharp for image optimization
+  - OpenCV Python for preprocessing
+* AI/ML:
+  - Google Cloud Vision for OCR
+  - OpenAI GPT for text processing
+* Database: Supabase
+* Authentication: Custom session-based auth
 
-## Learn More
+SETUP
+-----
+1. Clone the repository
+2. Install dependencies:
+   npm install
 
-To learn more about Next.js, take a look at the following resources:
+3. Configure environment variables:
+   OPENAI_API_KEY=your_key
+   SUPABASE_URL=your_url
+   SUPABASE_SERVICE_KEY=your_key
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Run the development server:
+   npm run dev
 
-## Productionizing your Next App
+API ENDPOINTS
+------------
+* /api/login: User authentication
+* /api/scan-form: Form scanning and processing
+* Additional endpoints for form management
 
-To make your next App run smoothly in production make sure to deploy your project with [Repl Deployments](https://docs.replit.com/hosting/deployments/about-deployments)!
+DEVELOPMENT
+-----------
+The project uses Next.js and TypeScript. To maintain code quality:
+npm run lint
+npm run build
 
-You can also produce a production build by running `npm run build` and [changing the run command](https://docs.replit.com/programming-ide/configuring-repl#run) to `npm run start`.
+PRODUCTION DEPLOYMENT
+--------------------
+For production deployment:
+1. Build the project:
+   npm run build
+
+2. Start the production server:
+   npm run start
+
+LICENSE
+-------
+
+This project is currently licensed under a private license for use by the Sudan Localization Coordination Council and Local Humanitarian organizations. Unauthorized distribution or modification is prohibited.
+
+
+CONTACT
+-------
+For questions or collaboration requests, please contact Santiago at santi.lema.247@gmail.com.
