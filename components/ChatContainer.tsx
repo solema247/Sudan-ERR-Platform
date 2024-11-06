@@ -8,12 +8,14 @@ const ChatContainer = ({ children }: ChatContainerProps) => {
     return (
         <div className="flex flex-col h-screen bg-gray-50">
             {/* Header */}
-            <div className="bg-gradient-to-r from-teal-500 to-green-500 text-white px-4 py-3 flex items-center justify-between rounded-t-lg shadow-md">
+            <div className="bg-gradient-to-r from-teal-500 to-green-500 text-white px-4 py-3 flex items-center rounded-t-lg shadow-md">
                 <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-gray-200"></div> {/* Placeholder avatar */}
-                    <div className="font-semibold text-sm md:text-base">Web Chat</div>
+                    <div>
+                        <div className="font-bold text-sm md:text-base">Sudan ERR Chatbot</div>
+                        <div className="text-xs md:text-sm text-gray-200">Online</div>
+                    </div>
                 </div>
-                <div className="text-xs md:text-sm">Online</div>
             </div>
 
             {/* Message Area */}
