@@ -48,6 +48,11 @@ const Menu = () => {
         setShowFillForm(true);
     };
 
+    // Add the submitAnotherForm function for ScanForm
+    const submitAnotherScanForm = () => {
+      setShowScanForm(true);
+    };
+
     return (
         <ChatContainer>
             {showIntro && (
@@ -87,11 +92,12 @@ const Menu = () => {
             )}
 
             {showScanForm && (
-                <MessageBubble timestamp={getCurrentTimestamp()}>
-                    <ScanForm 
-                        onReturnToMenu={navigateToMenu} 
-                    />
-                </MessageBubble>
+              <MessageBubble>
+                <ScanForm 
+                  onReturnToMenu={navigateToMenu} 
+                  onSubmitAnotherForm={submitAnotherScanForm}
+                />
+              </MessageBubble>
             )}
         </ChatContainer>
     );

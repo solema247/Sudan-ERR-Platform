@@ -5,7 +5,12 @@ import MessageBubble from "../components/MessageBubble";
 import PrefilledForm from "../components/PrefilledForm";
 import FileUploader from "../components/FileUploader";
 
-const ScanForm: React.FC = () => {
+interface ScanFormProps {
+  onReturnToMenu: () => void;
+  onSubmitAnotherForm?: () => void;
+}
+
+const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm }) => {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [structuredData, setStructuredData] = useState<any>(null);
@@ -69,11 +74,8 @@ const ScanForm: React.FC = () => {
   };
 
   const handleUploadComplete = () => {
-    // Remove the alert if you prefer the success message in the chat
-    // alert('Files uploaded successfully!');
-
     setShowFileUploader(false);
-    setStructuredData(null); // Reset structured data if starting fresh
+    setStructuredData(null);
 
     // Append the success message and options to the chatSteps
     setChatSteps((prevSteps) => [
@@ -88,13 +90,23 @@ const ScanForm: React.FC = () => {
                 setStructuredData(null);
                 setShowFileUploader(false);
                 setChatSteps([]); // Reset chat steps to restart scan form flow
+                // Call onSubmitAnotherForm if provided
+                if (onSubmitAnotherForm) {
+                  onSubmitAnotherForm();
+                } else {
+                  // Default behavior: reset to initial state
+                  setFile(null);
+                  setStructuredData(null);
+                  setShowFileUploader(false);
+                  setChatSteps([]);
+                }
               }}
               className="bg-green-500 text-white py-2 px-4 rounded"
             >
               Scan Another Form
             </button>
             <button
-              onClick={() => window.location.href = '/menu'} // Redirect back to menu
+              onClick={onReturnToMenu} // Use the callback prop here
               className="bg-blue-500 text-white py-2 px-4 rounded"
             >
               Return to Menu

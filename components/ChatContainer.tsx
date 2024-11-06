@@ -1,4 +1,3 @@
-// ChatContainer.tsx
 import { ReactNode } from 'react';
 
 interface ChatContainerProps {
@@ -7,30 +6,32 @@ interface ChatContainerProps {
 
 const ChatContainer = ({ children }: ChatContainerProps) => {
     return (
-        <div className="flex flex-col h-screen bg-gray-100">
+        <div className="flex flex-col h-screen bg-gray-50">
             {/* Header */}
-            <div className="bg-[#128C7E] text-white px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 rounded-full bg-gray-200"></div> {/* Placeholder avatar */}
-                    <div className="font-bold text-sm md:text-base">Web Chat</div>
+            <div className="bg-gradient-to-r from-teal-500 to-green-500 text-white px-4 py-3 flex items-center justify-between rounded-t-lg shadow-md">
+                <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-200"></div> {/* Placeholder avatar */}
+                    <div className="font-semibold text-sm md:text-base">Web Chat</div>
                 </div>
                 <div className="text-xs md:text-sm">Online</div>
             </div>
 
             {/* Message Area */}
-            <div className="flex-1 overflow-y-auto px-4" id="chat-box">
+            <div className="flex-1 overflow-y-auto p-4 space-y-2" id="chat-box">
                 {children}
             </div>
 
             {/* Input Area */}
-            <div className="bg-white p-2 md:p-4 flex items-center space-x-2 border-t">
+            <div className="bg-white p-3 md:p-4 flex items-center space-x-2 border-t shadow-inner">
                 <button className="p-2"><i className="fa fa-paperclip text-gray-500"></i></button>
                 <input
                     type="text"
                     placeholder="Type a message..."
                     className="flex-1 p-2 border rounded-full focus:outline-none text-sm md:text-base"
                 />
-                <button className="p-2 bg-[#25D366] text-white rounded-full"><i className="fa fa-paper-plane"></i></button>
+                <button className="p-2 bg-[#25D366] text-white rounded-full transition-transform transform hover:scale-105">
+                    <i className="fa fa-paper-plane"></i>
+                </button>
             </div>
         </div>
     );
