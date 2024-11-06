@@ -1,3 +1,4 @@
+// pages/menu.tsx
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import ChatContainer from '../components/ChatContainer';
@@ -20,7 +21,6 @@ const Menu = () => {
     const router = useRouter();
 
     const handleStartClick = () => {
-        setShowIntro(false);
         setShowMenu(true);
     };
 
@@ -68,19 +68,20 @@ const Menu = () => {
             )}
 
             {showMenu && (
-                <>
+                <div className="w-full max-w-md mx-auto space-y-1 mt-0"> {/* Shared width and reduced spacing */}
                     <MessageBubble
                         text="Select an option:"
                         timestamp={getCurrentTimestamp()}
                     />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-4">
-                        <Button text="Report Free Form" onClick={() => handleMenuSelection('free-form')} />
-                        <Button text="Report Fill Form" onClick={() => handleMenuSelection('fill-form')} />
-                        <Button text="Report Scan Form" onClick={() => handleMenuSelection('scan-form')} />
-                        <Button text="Exit" onClick={() => router.push('/')} />
+                    <div className="grid grid-cols-1 gap-0"> {/* Minimal gap between buttons */}
+                        <Button text="Report Free Form" onClick={() => handleMenuSelection('free-form')} className="w-full" />
+                        <Button text="Report Fill Form" onClick={() => handleMenuSelection('fill-form')} className="w-full" />
+                        <Button text="Report Scan Form" onClick={() => handleMenuSelection('scan-form')} className="w-full" />
+                        <Button text="Exit" onClick={() => router.push('/')} className="w-full" />
                     </div>
-                </>
+                </div>
             )}
+
 
             {showFillForm && (
                 <MessageBubble timestamp={getCurrentTimestamp()}>
