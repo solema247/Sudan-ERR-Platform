@@ -17,8 +17,9 @@ export const config = {
 
 // Initialize Google Vision
 const visionClient = new vision.ImageAnnotatorClient({
-  keyFilename: path.join(process.cwd(), 'local-humanitarian-web-chat-1f81cd59311e.json'),
+  credentials: JSON.parse(process.env.GOOGLE_VISION!),
 });
+
 
 // Initialize OpenAI
 const openai = new OpenAI({
