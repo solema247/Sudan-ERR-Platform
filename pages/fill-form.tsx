@@ -84,89 +84,79 @@ const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () =
     };
 
     return (
-        <FormBubble>
+        <>
             {!formSubmitted ? (
-                <form onSubmit={handleSubmit} className="space-y-3 bg-white p-2 rounded-lg shadow-md">
-                    <label>
-                        ERR ID (required)
-                        <input type="text" name="err_id" onChange={handleInputChange} value={formData.err_id} required className="w-full p-2 border rounded" placeholder="ERR ID" />
-                    </label>
-                    <label>
-                        Date (required)
-                        <input type="date" name="date" onChange={handleInputChange} value={formData.date} required className="w-full p-2 border rounded" placeholder="Date" />
-                    </label>
+                <FormBubble>
+                    <form onSubmit={handleSubmit} className="space-y-3 bg-white p-2 rounded-lg">
+                        <label>
+                            ERR ID (required)
+                            <input type="text" name="err_id" onChange={handleInputChange} value={formData.err_id} required className="w-full p-2 border rounded" placeholder="ERR ID" />
+                        </label>
+                        <label>
+                            Date (required)
+                            <input type="date" name="date" onChange={handleInputChange} value={formData.date} required className="w-full p-2 border rounded" placeholder="Date" />
+                        </label>
 
-                    <div className="swipeable-cards flex overflow-x-auto space-x-2">
-                        {expenses.map((expense, index) => (
-                            <div key={index} className="min-w-[200px] p-4 rounded bg-gray-50">
-                                <h4>Expense Entry {index + 1}</h4>
-                                <label>Activity
-                                    <input type="text" name="activity" value={expense.activity} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Activity" />
-                                </label>
-                                <label>Description
-                                    <input type="text" name="description" value={expense.description} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Description" />
-                                </label>
-                                <label>Payment Date
-                                    <input type="date" name="payment_date" value={expense.payment_date} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" />
-                                </label>
-                                <label>Seller
-                                    <input type="text" name="seller" value={expense.seller} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Seller" />
-                                </label>
-                                <label>Payment Method
-                                    <select name="payment_method" value={expense.payment_method} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded">
-                                        <option value="cash">Cash</option>
-                                        <option value="bank app">Bank App</option>
-                                    </select>
-                                </label>
-                                <label>Receipt No.
-                                    <input type="text" name="receipt_no" value={expense.receipt_no} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Receipt No." />
-                                </label>
-                                <label>Amount
-                                    <input type="number" name="amount" value={expense.amount} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Amount" />
-                                </label>
-                            </div>
-                        ))}
-                    </div>
-                    <button type="button" onClick={addExpenseCard} className="bg-blue-500 text-white py-2 px-4 rounded">Add Expense</button>
-
-                    <label>Total Grant (required)
-                        <input type="number" name="total_grant" onChange={handleInputChange} value={formData.total_grant} required className="w-full p-2 border rounded" placeholder="Total Grant" />
-                    </label>
-                    <label>Total Other Sources (required)
-                        <input type="number" name="total_other_sources" onChange={handleInputChange} value={formData.total_other_sources} required className="w-full p-2 border rounded" placeholder="Total Other Sources" />
-                    </label>
-                    <label>How did you cover excess expenses?
+                        <div className="swipeable-cards flex overflow-x-auto space-x-2">
+                            {expenses.map((expense, index) => (
+                                <div key={index} className="min-w-[200px] p-4 rounded bg-gray-50">
+                                    <h4>Expense Entry {index + 1}</h4>
+                                    <label>Activity
+                                        <input type="text" name="activity" value={expense.activity} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Activity" />
+                                    </label>
+                                    <label>Description
+                                        <input type="text" name="description" value={expense.description} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Description" />
+                                    </label>
+                                    <label>Payment Date
+                                        <input type="date" name="payment_date" value={expense.payment_date} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" />
+                                    </label>
+                                    <label>Seller
+                                        <input type="text" name="seller" value={expense.seller} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Seller" />
+                                    </label>
+                                    <label>Payment Method
+                                        <select name="payment_method" value={expense.payment_method} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded">
+                                            <option value="cash">Cash</option>
+                                            <option value="bank app">Bank App</option>
+                                        </select>
+                                    </label>
+                                    <label>Receipt No.
+                                        <input type="text" name="receipt_no" value={expense.receipt_no} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Receipt No." />
+                                    </label>
+                                    <label>Amount
+                                        <input type="number" name="amount" value={expense.amount} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Amount" />
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                        <button type="button" onClick={addExpenseCard} className="bg-green-500 text-white py-2 px-4 rounded">Add Expense</button>
+                        <div className="w-full mt-4"> 
+                            <input type="number" name="total_grant" onChange={handleInputChange} value={formData.total_grant} required className="w-full p-2 border rounded" placeholder="Total Grant (required)" />
+                        </div>    
+                        <input type="number" name="total_other_sources" onChange={handleInputChange} value={formData.total_other_sources} required className="w-full p-2 border rounded" placeholder="Total Other Sources (required)" />
                         <textarea name="additional_excess_expenses" onChange={handleInputChange} value={formData.additional_excess_expenses} className="w-full p-2 border rounded" placeholder="How did you cover excess expenses?" />
-                    </label>
-                    <label>How would you spend the surplus?
                         <textarea name="additional_surplus_use" onChange={handleInputChange} value={formData.additional_surplus_use} className="w-full p-2 border rounded" placeholder="How would you spend the surplus?" />
-                    </label>
-                    <label>Additional training needs
                         <textarea name="additional_training_needs" onChange={handleInputChange} value={formData.additional_training_needs} className="w-full p-2 border rounded" placeholder="Additional training needs" />
-                    </label>
-                    <label>Lessons learned in budget planning
                         <textarea name="lessons" onChange={handleInputChange} value={formData.lessons} className="w-full p-2 border rounded" placeholder="Lessons learned in budget planning" />
-                    </label>
 
-                    <label>File Upload
-                        <input type="file" onChange={handleFileChange} className="w-full p-2 border rounded" />
-                    </label>
-                    <button type="submit" className="bg-green-500 text-white py-2 px-4 rounded">Submit</button>
-                </form>
+                        <label>File Upload
+                            <input type="file" onChange={handleFileChange} className="w-full p-2 border rounded" />
+                        </label>
+                        <button type="submit" className="bg-green-500 text-white py-2 px-4 rounded">Submit</button>
+                    </form>
+                </FormBubble>
             ) : (
                 <>
                     <MessageBubble>
                         Form submitted successfully!
                     </MessageBubble>
-                    <MessageBubble>
-                        <div className="flex space-x-2">
-                            <Button text="Submit Another Form" onClick={onSubmitAnotherForm} />
-                            <Button text="Return to Main Menu" onClick={onReturnToMenu} />
-                        </div>
-                    </MessageBubble>
+
+                    <div className="flex justify-center space-x-4 mt-2">
+                        <Button text="Submit Another Form" onClick={onSubmitAnotherForm} />
+                        <Button text="Return to Main Menu" onClick={onReturnToMenu} />
+                    </div>
                 </>
             )}
-        </FormBubble>
+        </>
     );
 };
 
