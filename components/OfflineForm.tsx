@@ -1,5 +1,6 @@
 // components/OfflineForm.tsx
 import React, { useState } from 'react';
+import { Buffer } from 'buffer'; 
 
 interface OfflineFormProps {
   onClose: () => void;
@@ -51,12 +52,22 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
     }
   };
 
-  // Add the handleSubmit function**
-  const handleSubmit = () => {
+  // Add the handleSubmit function
+  const handleSubmit = async () => {
+    // Encode the file if it exists
+    const fileContent = file ? await file.arrayBuffer() : null;
+    const encodedFile = file
+      ? {
+          name: file.name,
+          type: file.type,
+          content: Buffer.from(fileContent!).toString('base64'),
+        }
+      : null;
+
     const offlineData = {
-      formData: { ...formData, expenses: undefined }, // Remove expenses from formData
+      formData: { ...formData, expenses: undefined }, 
       expenses: formData.expenses,
-      file,
+      file: encodedFile,
     };
 
     if (navigator.onLine) {
@@ -68,7 +79,7 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
       })
         .then((res) => res.json())
         .then((data) => {
-          if (data.success) {
+          if (data.message === 'Form submitted successfully!') { 
             alert('Form submitted successfully!');
             onSubmitSuccess();
           } else {
@@ -87,6 +98,7 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
       onClose();
     }
   };
+
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-start">
