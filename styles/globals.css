@@ -48,3 +48,9 @@ p {
 .text-gray-400 {
   color: #9CA3AF;
 }
+
+.modal-container {
+  max-height: 80vh; /* Adjust based on your needs */
+  overflow-y: auto; /* Enable vertical scrolling */
+  width: 100%; /* Ensure it fits the available width */
+}
