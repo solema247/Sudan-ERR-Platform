@@ -51,8 +51,13 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
     }
   };
 
+  // Add the handleSubmit function**
   const handleSubmit = () => {
-    const offlineData = { ...formData, file };
+    const offlineData = {
+      formData: { ...formData, expenses: undefined }, // Remove expenses from formData
+      expenses: formData.expenses,
+      file,
+    };
 
     if (navigator.onLine) {
       // Attempt immediate submission if online
