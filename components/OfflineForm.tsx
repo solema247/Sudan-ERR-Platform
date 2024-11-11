@@ -99,38 +99,6 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
     }
   };
 
-  // *useEffect
-  useEffect(() => {
-    const handleOnline = async () => {
-      const offlineQueue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
-      if (offlineQueue.length > 0) {
-        for (const queuedData of offlineQueue) {
-          try {
-            const response = await fetch('/api/offline-mode', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(queuedData),
-            });
-            const data = await response.json();
-            if (data.message === 'Form submitted successfully!') {
-              // Remove from queue
-              const updatedQueue = JSON.parse(localStorage.getItem('offlineQueue') || '[]').filter((item: any) => item !== queuedData);
-              localStorage.setItem('offlineQueue', JSON.stringify(updatedQueue));
-            }
-          } catch {
-            // Stop processing on first failure
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener('online', handleOnline);
-      return () => {
-        window.removeEventListener('online', handleOnline);
-      };
-    }, []);
-
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-start">
