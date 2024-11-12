@@ -7,7 +7,7 @@ interface ScanBubbleProps {
 
 const ScanBubble: React.FC<ScanBubbleProps> = ({ children }) => {
     return (
-        <div className="w-full max-w-md mx-auto px-4 my-2 bg-white rounded-lg shadow-md">
+        <div className="w-full max-w-md mx-auto px-4 my-2 bg-white rounded-lg">
             {children}
         </div>
     );

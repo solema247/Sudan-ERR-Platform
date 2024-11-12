@@ -51,9 +51,9 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
       setStructuredData(data.data);
       setChatSteps((prevSteps) => [
         ...prevSteps,
-        <MessageBubble key="prefilledForm">
+        <ScanBubble key="prefilledForm">
           <PrefilledForm data={data.data} onFormSubmit={handleFormSubmit} />
-        </MessageBubble>
+        </ScanBubble>
       ]);
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -68,9 +68,9 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     setShowFileUploader(true);
     setChatSteps((prevSteps) => [
       ...prevSteps,
-      <MessageBubble key="fileUploader">
+      <ScanBubble key="fileUploader">
         <FileUploader onUploadComplete={handleUploadComplete} />
-      </MessageBubble>
+      </ScanBubble>
     ]);
   };
 
@@ -81,7 +81,7 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     // Append the success message and options to the chatSteps
     setChatSteps((prevSteps) => [
       ...prevSteps,
-      <MessageBubble key="uploadSuccess">
+      <ScanBubble key="uploadSuccess">
         <div>
           <p>Form and photos uploaded successfully!</p>
           <div className="flex space-x-4 mt-2">
@@ -103,7 +103,7 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
             />
           </div>
         </div>
-      </MessageBubble>
+      </ScanBubble>
     ]);
   };
 
@@ -111,29 +111,36 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     <>
       {/* Display File Input for Scanning as the first chat bubble */}
       {!structuredData && !showFileUploader && chatSteps.length === 0 && (
-        <ScanBubble>
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Scan Form</h2>
-            <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition-all cursor-pointer inline-flex items-center justify-center">
+      <ScanBubble>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Scan Form</h2>
+          {/* Instruction Text */}
+          <p className="text-gray-700">
+            Please upload an image of the form you want to scan, and then click "Upload and Scan" to process it.
+          </p>
+          {/* Stack Choose File and Upload and Scan buttons vertically, aligned to the left */}
+          <div className="flex flex-col items-start space-y-2">
+            <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg cursor-pointer inline-flex items-center justify-center">
               Choose File
               <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleFileChange} 
-                  className="hidden" 
+                type="file" 
+                accept="image/*" 
+                onChange={handleFileChange} 
+                className="hidden" 
               />
             </label>
-            {file && <span className="text-gray-600 ml-2">{file.name}</span>} {/* Display selected file name */}
+            {file && <span className="text-gray-600">{file.name}</span>} {/* Display selected file name */}
 
             <button
               onClick={handleUpload}
-              className="bg-primaryGreen text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition-all"
+              className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all"
               disabled={!file || isLoading}
             >
               {isLoading ? "Processing..." : "Upload and Scan"}
             </button>
           </div>
-        </ScanBubble>
+        </div>
+      </ScanBubble>
       )}
 
       {/* Render all chat steps sequentially */}

@@ -84,7 +84,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => 
 
 
   return (
-    <div className="space-y-4 bg-white p-4 rounded-lg shadow-md">
+    <div className="space-y-4 bg-white p-4 rounded-lg">
       <label>
         ERR ID
         <input
@@ -240,7 +240,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => 
           text="Submit Form"
           onClick={handleSubmit} // Keep the original function
           type="button"
-          className="bg-primaryGreen text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition-all"
+          className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all"
       />
     </div>
   );
