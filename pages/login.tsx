@@ -1,9 +1,11 @@
 // pages/login.tsx
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import OfflineForm from '../components/OfflineForm';
+import LogoImage from '../public/avatar.JPG'; // Adjust the path as needed
 
 const Login = () => {
     const [errId, setErrId] = useState('');
@@ -40,9 +42,22 @@ const Login = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
-            <h1 className="text-2xl font-bold mb-4">Login</h1>
-            <form onSubmit={handleLogin} className="flex flex-col items-center space-y-4">
+        <div className="flex flex-col items-center justify-center min-h-screen px-4">
+            {/* Logo and Title */}
+            <div className="flex flex-col items-center mb-6">
+                <Image
+                    src={LogoImage}
+                    alt="Sudan Emergency Response Logo"
+                    width={100} // Adjust size for mobile-friendly layout
+                    height={100}
+                    className="mb-2"
+                />
+                <h1 className="text-xl font-bold text-center">Sudan Emergency Response Rooms Bot</h1>
+            </div>
+
+            <h1 className="text-2xl font-bold mb-4"></h1>
+
+            <form onSubmit={handleLogin} className="flex flex-col items-center space-y-4 w-full max-w-xs">
                 <Input
                     type="text"
                     placeholder="Enter ERR ID"
@@ -55,15 +70,16 @@ const Login = () => {
                     value={pin}
                     onChange={(e) => setPin(e.target.value)}
                 />
-                <Button text="Login" color="bg-blue-500" />
+                <Button text="Login" />
             </form>
+
             {error && <p className="text-red-500 mt-2">{error}</p>}
 
             <button
                 onClick={handleOfflineModeClick}
                 className="mt-4 text-blue-500 underline"
             >
-                Offline Mode: Free Form
+                Offline Mode: Upload Form
             </button>
 
             {showOfflineForm && (
