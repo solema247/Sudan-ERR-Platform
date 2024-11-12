@@ -46,6 +46,8 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => 
     lessons_learned: data.lessons_learned || '',
     additional_training_needs: data.additional_training_needs || '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -61,25 +63,29 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => 
 
   //Components/PreFilledForm.tsx
   const handleSubmit = async () => {
-    try {
-      const response = await fetch('/api/submit-prefilled-form', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      setIsSubmitting(true); // Start processing
+      try {
+        const response = await fetch('/api/submit-prefilled-form', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
 
-      if (!response.ok) throw new Error(`Server Error: ${response.statusText}`);
-      const result = await response.json();
-      console.log('Form submitted successfully:', result.message);
+        if (!response.ok) throw new Error(`Server Error: ${response.statusText}`);
+        const result = await response.json();
+        console.log('Form submitted successfully:', result.message);
 
-      // Call onFormSubmit to proceed without removing the form
-      onFormSubmit();
+        setIsSubmitted(true); // Mark as submitted
+        onFormSubmit(); // Proceed without removing the form
 
-    } catch (error) {
-      console.error('Failed to submit form:', error);
-      alert('An error occurred while submitting the form.');
-    }
-  };
+      } catch (error) {
+        console.error('Failed to submit form:', error);
+        alert('An error occurred while submitting the form.');
+      } finally {
+        setIsSubmitting(false); // Stop processing
+      }
+    };
+
 
 
 
@@ -237,9 +243,10 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => 
         />
       </label>
       <Button
-          text="Submit Form"
-          onClick={handleSubmit} // Keep the original function
+          text={isSubmitting ? "Processing..." : isSubmitted ? "Submitted" : "Submit Form"}
+          onClick={handleSubmit}
           type="button"
+          disabled={isSubmitting || isSubmitted} // Disable button during processing or after submission
           className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all"
       />
     </div>
