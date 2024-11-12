@@ -1,4 +1,4 @@
-// componenents/MessageBubble.tsx
+// components/MessageBubble.tsx
 import { FC, ReactNode, useEffect, useState } from 'react';
 
 interface MessageBubbleProps {
@@ -21,7 +21,12 @@ const MessageBubble: FC<MessageBubbleProps> = ({ text, isOutgoing = false, times
         <div className={`flex ${isOutgoing ? 'justify-end' : 'justify-start'} mb-2 ${fullWidth ? 'w-full' : 'w-auto'}`}>
             <div className={`${fullWidth ? 'w-full' : 'max-w-sm md:max-w-md lg:max-w-lg'} p-3 rounded-2xl ${isOutgoing ? 'bg-[#DCF8C6]' : 'bg-white'} shadow-md`}>
                 <div className="text-gray-700 font-normal text-base md:text-lg leading-relaxed">
-                    {children || text}
+                    {children ? (
+                        children
+                    ) : (
+                        // Render HTML safely if 'text' contains HTML tags
+                        <span dangerouslySetInnerHTML={{ __html: text || '' }} />
+                    )}
                 </div>
                 {clientTimestamp && (
                     <span className="text-xs text-gray-400 -mt-1 block text-right"> {/* Reduced margin and size */}
@@ -34,8 +39,3 @@ const MessageBubble: FC<MessageBubbleProps> = ({ text, isOutgoing = false, times
 };
 
 export default MessageBubble;
-
-
-
-
-

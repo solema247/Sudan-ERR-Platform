@@ -74,7 +74,7 @@ const Menu = () => {
                     </div>
                     {/* Description text aligned to the left in a MessageBubble */}
                     <MessageBubble
-                        text="This chatbot will help you with reporting on ERR impact and sharing information with the community and donors. Click Start to begin."
+                        text="This chatbot will help you with reporting on ERR impact and sharing information with the community and donors.<strong> Click Start to begin.</strong>"
                         timestamp={getCurrentTimestamp()}
                     />
                     <div className="text-center">

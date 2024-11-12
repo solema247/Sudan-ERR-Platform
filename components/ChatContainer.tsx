@@ -9,7 +9,7 @@ const ChatContainer = ({ children }: ChatContainerProps) => {
     return (
         <div className="flex flex-col h-screen bg-gray-50">
             {/* Header */}
-            <div className="bg-gradient-to-r from-teal-500 to-green-500 text-white px-4 py-3 flex items-center rounded-t-lg shadow-md">
+            <div className="bg-gradient-to-r from-primaryGreen to-green-600 text-white px-4 py-3 flex items-center rounded-t-lg shadow-md">
                 <div className="flex items-center space-x-3">
                     {/* Avatar Image */}
                     <Image
