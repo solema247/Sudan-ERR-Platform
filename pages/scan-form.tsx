@@ -4,6 +4,7 @@ import ScanBubble from "../components/ScanBubble";
 import MessageBubble from "../components/MessageBubble";
 import PrefilledForm from "../components/PrefilledForm";
 import FileUploader from "../components/FileUploader";
+import Button from "../components/Button";
 
 interface ScanFormProps {
   onReturnToMenu: () => void;
@@ -84,33 +85,22 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
         <div>
           <p>Form and photos uploaded successfully!</p>
           <div className="flex space-x-4 mt-2">
-            <button
+            <Button
+              text="Scan Another Form"
               onClick={() => {
                 setFile(null);
                 setStructuredData(null);
                 setShowFileUploader(false);
                 setChatSteps([]); // Reset chat steps to restart scan form flow
-                // Call onSubmitAnotherForm if provided
                 if (onSubmitAnotherForm) {
                   onSubmitAnotherForm();
-                } else {
-                  // Default behavior: reset to initial state
-                  setFile(null);
-                  setStructuredData(null);
-                  setShowFileUploader(false);
-                  setChatSteps([]);
                 }
               }}
-              className="bg-green-500 text-white py-2 px-4 rounded"
-            >
-              Scan Another Form
-            </button>
-            <button
+            />
+            <Button
+              text="Return to Menu"
               onClick={onReturnToMenu} // Use the callback prop here
-              className="bg-blue-500 text-white py-2 px-4 rounded"
-            >
-              Return to Menu
-            </button>
+            />
           </div>
         </div>
       </MessageBubble>

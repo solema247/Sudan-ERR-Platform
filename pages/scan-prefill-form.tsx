@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import PrefilledForm from '../components/PrefilledForm';
 import FileUploader from '../components/FileUploader';
-import MessageBubble from '../components/MessageBubble'; // Ensure MessageBubble is imported
+import MessageBubble from '../components/MessageBubble'; 
+import Button from '../components/Button'; 
 
 const ScanPrefillForm: React.FC = () => {
   const [structuredData, setStructuredData] = useState<any>(null);
@@ -85,12 +86,20 @@ const ScanPrefillForm: React.FC = () => {
             <p>Form and photos uploaded successfully!</p>
           </MessageBubble>
           <MessageBubble>
-            <button onClick={() => setShowFileUploader(false)} className="bg-blue-500 text-white py-2 px-4 rounded mt-4">
-              Scan Another Form
-            </button>
-            <button onClick={() => window.location.href = '/menu'} className="bg-green-500 text-white py-2 px-4 rounded mt-4 ml-2">
-              Return to Menu
-            </button>
+            <div className="flex space-x-4 mt-2">
+              <Button
+                text="Scan Another Form"
+                onClick={() => {
+                  setShowFileUploader(false); // Reset to allow new scan
+                  setShowCompletionOptions(false); // Hide completion options
+                  setStructuredData(null); // Reset structured data if needed
+                }}
+              />
+              <Button
+                text="Return to Menu"
+                onClick={() => (window.location.href = '/menu')}
+              />
+            </div>
           </MessageBubble>
         </>
       )}
