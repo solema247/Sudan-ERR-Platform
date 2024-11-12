@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import Image from 'next/image';
 
 interface ChatContainerProps {
     children: ReactNode;
@@ -10,7 +11,14 @@ const ChatContainer = ({ children }: ChatContainerProps) => {
             {/* Header */}
             <div className="bg-gradient-to-r from-teal-500 to-green-500 text-white px-4 py-3 flex items-center rounded-t-lg shadow-md">
                 <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-200"></div> {/* Placeholder avatar */}
+                    {/* Avatar Image */}
+                    <Image
+                        src="/avatar.JPG" // Path to the avatar image
+                        alt="Chatbot Avatar"
+                        width={40}
+                        height={40}
+                        className="rounded-full"
+                    />
                     <div>
                         <div className="font-bold text-sm md:text-base">Sudan ERR Chatbot</div>
                         <div className="text-xs md:text-sm text-gray-200">Online</div>
