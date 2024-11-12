@@ -70,7 +70,7 @@ const Login = () => {
                     value={pin}
                     onChange={(e) => setPin(e.target.value)}
                 />
-                <Button text="Login" />
+                <Button text="Login" type="submit" />
             </form>
 
             {error && <p className="text-red-500 mt-2">{error}</p>}

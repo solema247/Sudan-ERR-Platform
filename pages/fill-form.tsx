@@ -128,7 +128,7 @@ const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () =
                                 </div>
                             ))}
                         </div>
-                        <button type="button" onClick={addExpenseCard} className="bg-green-500 text-white py-2 px-4 rounded">Add Expense</button>
+                        <Button text="Add Expense" onClick={addExpenseCard} />
                         <div className="w-full mt-4"> 
                             <input type="number" name="total_grant" onChange={handleInputChange} value={formData.total_grant} required className="w-full p-2 border rounded" placeholder="Total Grant (required)" />
                         </div>    
@@ -141,7 +141,7 @@ const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () =
                         <label>File Upload
                             <input type="file" onChange={handleFileChange} className="w-full p-2 border rounded" />
                         </label>
-                        <button type="submit" className="bg-green-500 text-white py-2 px-4 rounded">Submit</button>
+                        <Button text="Submit" type="submit" />
                     </form>
                 </FormBubble>
             ) : (
