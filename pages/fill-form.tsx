@@ -138,9 +138,18 @@ const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () =
                         <textarea name="additional_training_needs" onChange={handleInputChange} value={formData.additional_training_needs} className="w-full p-2 border rounded" placeholder="Additional training needs" />
                         <textarea name="lessons" onChange={handleInputChange} value={formData.lessons} className="w-full p-2 border rounded" placeholder="Lessons learned in budget planning" />
 
-                        <label>File Upload
-                            <input type="file" onChange={handleFileChange} className="w-full p-2 border rounded" />
-                        </label>
+                        <div className="flex flex-col space-y-2">
+                            <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition-all cursor-pointer inline-flex items-center justify-center">
+                                Choose File
+                                <input 
+                                    type="file" 
+                                    onChange={handleFileChange} 
+                                    className="hidden" 
+                                />
+                            </label>
+                            {file && <span className="text-gray-600">{file.name}</span>} {/* Display selected file name */}
+                        </div>
+
                         <Button text="Submit" type="submit" />
                     </form>
                 </FormBubble>

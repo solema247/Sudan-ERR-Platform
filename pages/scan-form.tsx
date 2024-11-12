@@ -124,10 +124,20 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
         <ScanBubble>
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">Scan Form</h2>
-            <input type="file" accept="image/*" onChange={handleFileChange} />
+            <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition-all cursor-pointer inline-flex items-center justify-center">
+              Choose File
+              <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleFileChange} 
+                  className="hidden" 
+              />
+            </label>
+            {file && <span className="text-gray-600 ml-2">{file.name}</span>} {/* Display selected file name */}
+
             <button
               onClick={handleUpload}
-              className="bg-blue-500 text-white py-2 px-4 rounded"
+              className="bg-primaryGreen text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition-all"
               disabled={!file || isLoading}
             >
               {isLoading ? "Processing..." : "Upload and Scan"}
