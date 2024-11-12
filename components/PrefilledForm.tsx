@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
+import Button from '../components/Button'; 
 
 interface ExpenseEntry {
   activity: string;
@@ -235,13 +236,12 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => 
           className="w-full p-2 border rounded"
         />
       </label>
-
-      <button
-        onClick={handleSubmit}
-        className="bg-blue-500 text-white py-2 px-4 rounded"
-      >
-        Submit Form
-      </button>
+      <Button
+          text="Submit Form"
+          onClick={handleSubmit} // Keep the original function
+          type="button"
+          className="bg-primaryGreen text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition-all"
+      />
     </div>
   );
 };
