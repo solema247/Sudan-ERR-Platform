@@ -185,7 +185,13 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
               />
             </div>
           ))}
-          <button type="button" onClick={addExpenseCard} className="bg-blue-500 text-white py-1 px-3 rounded mb-2">Add Expense</button>
+          <button 
+            type="button" 
+            onClick={addExpenseCard} 
+            className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all mb-2"
+          >
+            Add Expense
+          </button>
           <input 
             type="number" 
             name="total_grant" 
@@ -230,14 +236,29 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
             placeholder="Lessons learned in budget planning" 
             className="w-full p-1 border rounded mb-2" 
           />
-          <input 
-            type="file" 
-            onChange={handleFileChange} 
-            className="w-full p-1 border rounded mb-2" 
-          />
-          <div className="flex justify-end space-x-2 mt-3">
-            <button type="button" onClick={onClose} className="bg-gray-400 text-white py-1 px-3 rounded">Close</button>
-            <button type="submit" className="bg-green-500 text-white py-1 px-3 rounded">Submit</button>
+          <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg cursor-pointer hover:bg-green-700 transition-all inline-flex items-center mb-2">
+            Choose File
+            <input 
+              type="file" 
+              onChange={handleFileChange} 
+              className="hidden" 
+            />
+          </label>
+          <span className="text-gray-600 ml-2">{file ? file.name : "No file chosen"}</span>
+          <div className="flex justify-end space-x-4 mt-3">
+            <button 
+              type="button" 
+              onClick={onClose} 
+              className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all"
+            >
+              Close
+            </button>
+            <button 
+              type="submit" 
+              className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all"
+            >
+              Submit
+            </button>
           </div>
         </form>
       </div>
