@@ -20,7 +20,7 @@ const ChatContainer = ({ children }: ChatContainerProps) => {
                         className="rounded-full"
                     />
                     <div>
-                        <div className="font-bold text-sm md:text-base">Sudan ERR Chatbot</div>
+                        <div className="font-bold text-sm md:text-base">Sudan Emergency Response Rooms Bot</div>
                         <div className="text-xs md:text-sm text-gray-200">Online</div>
                     </div>
                 </div>

@@ -1,11 +1,13 @@
 // pages/menu.tsx
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 import ChatContainer from '../components/ChatContainer';
 import MessageBubble from '../components/MessageBubble';
 import Button from '../components/Button';
 import FillForm from '../pages/fill-form';
 import ScanForm from '../pages/scan-form';
+import LogoImage from '../public/avatar.JPG'; // Import the logo image
 
 const getCurrentTimestamp = () => {
     const now = new Date();
@@ -57,8 +59,22 @@ const Menu = () => {
         <ChatContainer>
             {showIntro && (
                 <>
+                    {/* Logo and Title aligned to the left */}
+                    <div className="flex items-center mb-4 space-x-4">
+                        <Image
+                            src={LogoImage}
+                            alt="Chatbot Logo"
+                            width={80} // Smaller width to be around 60% of the bubble width
+                            height={80}
+                            className="rounded"
+                        />
+                        <div className="text-left font-bold text-lg">
+                            Welcome to the Sudan ERR Bot
+                        </div>
+                    </div>
+                    {/* Description text aligned to the left in a MessageBubble */}
                     <MessageBubble
-                        text="***Welcome to the Sudan ERR chatbot!*** This chatbot will help you with reporting on ERR impact and sharing information with the community and donors. Click ***Start*** to begin."
+                        text="This chatbot will help you with reporting on ERR impact and sharing information with the community and donors. Click Start to begin."
                         timestamp={getCurrentTimestamp()}
                     />
                     <div className="text-center">
@@ -83,7 +99,6 @@ const Menu = () => {
                 </div>
             )}
 
-
             {showFillForm && (
                 <MessageBubble timestamp={getCurrentTimestamp()}>
                     <FillForm 
@@ -106,3 +121,4 @@ const Menu = () => {
 };
 
 export default Menu;
+
