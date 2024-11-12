@@ -87,10 +87,8 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => 
     };
 
 
-
-
   return (
-    <div className="space-y-4 bg-white p-4 rounded-lg">
+    <div className="w-full space-y-4 bg-white rounded-lg">
       <label>
         ERR ID
         <input
