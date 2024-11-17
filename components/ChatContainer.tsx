@@ -1,19 +1,22 @@
+//componenets/ChatContainer.tsx
 import { ReactNode } from 'react';
 import Image from 'next/image';
+import { useTranslation } from 'react-i18next';
 
 interface ChatContainerProps {
     children: ReactNode;
 }
 
 const ChatContainer = ({ children }: ChatContainerProps) => {
+    const { t } = useTranslation('chat');
+
     return (
         <div className="flex flex-col h-screen bg-gray-50">
             {/* Header */}
             <div className="bg-gradient-to-r from-primaryGreen to-green-600 text-white px-4 py-3 flex items-center rounded-t-lg shadow-md">
                 <div className="flex items-center space-x-3">
-                    {/* Avatar Image */}
                     <Image
-                        src="/avatar.JPG" // Path to the avatar image
+                        src="/avatar.JPG"
                         alt="Chatbot Avatar"
                         width={40}
                         height={40}
@@ -21,7 +24,7 @@ const ChatContainer = ({ children }: ChatContainerProps) => {
                     />
                     <div>
                         <div className="font-bold text-sm md:text-base">Sudan Emergency Response Rooms Bot</div>
-                        <div className="text-xs md:text-sm text-gray-200">Online</div>
+                        <div className="text-xs md:text-sm text-gray-200">{t('onlineStatus')}</div>
                     </div>
                 </div>
             </div>
@@ -36,7 +39,7 @@ const ChatContainer = ({ children }: ChatContainerProps) => {
                 <button className="p-2"><i className="fa fa-paperclip text-gray-500"></i></button>
                 <input
                     type="text"
-                    placeholder="Type a message..."
+                    placeholder={t('typePlaceholder')}
                     className="flex-1 p-2 border rounded-full focus:outline-none text-sm md:text-base"
                 />
                 <button className="p-2 bg-[#25D366] text-white rounded-full transition-transform transform hover:scale-105">
@@ -48,3 +51,4 @@ const ChatContainer = ({ children }: ChatContainerProps) => {
 };
 
 export default ChatContainer;
+

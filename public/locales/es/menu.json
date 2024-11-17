@@ -1,0 +1,9 @@
+{
+  "welcomeMessage": "Bienvenido al Bot de Sudan ERR",
+  "introMessage": "Este chatbot te ayudará a informar sobre el impacto de ERR y compartir información con la comunidad y los donantes.<strong> Haz clic en Comenzar para empezar.</strong>",
+  "startButton": "Comenzar",
+  "chooseMethod": "Elige un método de informe",
+  "reportFillForm": "Formulario para completar",
+  "reportScanForm": "Formulario escaneado",
+  "exit": "Salir"
+}

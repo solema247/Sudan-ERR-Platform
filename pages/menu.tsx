@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
+import { useTranslation } from 'react-i18next';
 import ChatContainer from '../components/ChatContainer';
 import MessageBubble from '../components/MessageBubble';
 import Button from '../components/Button';
@@ -21,6 +22,7 @@ const Menu = () => {
     const [showScanForm, setShowScanForm] = useState(false);
 
     const router = useRouter();
+    const { t, i18n } = useTranslation('menu');
 
     const handleStartClick = () => {
         setShowMenu(true);
@@ -38,63 +40,75 @@ const Menu = () => {
         }
     };
 
-    // Callback to navigate back to the main menu
     const navigateToMenu = () => {
         setShowFillForm(false);
         setShowScanForm(false);
         setShowMenu(true);
     };
 
-    // Callback to reset and allow form submission again
     const submitAnotherForm = () => {
         setShowFillForm(true);
     };
 
-    // Add the submitAnotherForm function for ScanForm
     const submitAnotherScanForm = () => {
-      setShowScanForm(true);
+        setShowScanForm(true);
+    };
+
+    const switchLanguage = (lang: string) => {
+        i18n.changeLanguage(lang);
+        router.push(router.pathname, router.asPath, { locale: lang });
     };
 
     return (
         <ChatContainer>
+            {/* Language Switcher */}
+            <div className="flex justify-center items-center mb-4 space-x-4">
+                <button onClick={() => switchLanguage('en')} className="mx-2 text-blue-500 hover:underline">
+                    English
+                </button>
+                <button onClick={() => switchLanguage('ar')} className="mx-2 text-blue-500 hover:underline">
+                    العربية
+                </button>
+                <button onClick={() => switchLanguage('es')} className="mx-2 text-blue-500 hover:underline">
+                    Español
+                </button>
+            </div>
+
             {showIntro && (
                 <>
-                    {/* Logo and Title aligned to the left */}
                     <div className="flex items-center mb-4 space-x-4">
                         <Image
                             src={LogoImage}
-                            alt="Chatbot Logo"
-                            width={80} // Smaller width to be around 60% of the bubble width
+                            alt={t('logoAlt')} // Translated alt text
+                            width={80}
                             height={80}
                             className="rounded"
                         />
                         <div className="text-left font-bold text-lg">
-                            Welcome to the Sudan ERR Bot
+                            {t('welcomeMessage')}
                         </div>
                     </div>
-                    {/* Description text aligned to the left in a MessageBubble */}
                     <MessageBubble
-                        text="This chatbot will help you with reporting on ERR impact and sharing information with the community and donors.<strong> Click Start to begin.</strong>"
+                        text={t('introMessage')}
                         timestamp={getCurrentTimestamp()}
                     />
                     <div className="text-center">
-                        <Button text="Start" onClick={handleStartClick} />
+                        <Button text={t('startButton')} onClick={handleStartClick} />
                     </div>
                 </>
             )}
 
             {showMenu && (
-                <div className="w-full max-w-md mx-auto space-y-1 -mt-1"> {/* Shared width and reduced spacing */}
+                <div className="w-full max-w-md mx-auto space-y-1 -mt-1">
                     <MessageBubble
-                        text="Choose a Reporting Method"
+                        text={t('chooseMethod')}
                         timestamp={getCurrentTimestamp()}
-                        fullWidth 
+                        fullWidth
                     />
-                    <div className="grid grid-cols-1 -gap-1"> {/* Minimal gap between buttons */}
-
-                        <Button text="Report Fill Form" onClick={() => handleMenuSelection('fill-form')} className="w-full" />
-                        <Button text="Report Scan Form" onClick={() => handleMenuSelection('scan-form')} className="w-full" />
-                        <Button text="Exit" onClick={() => router.push('/')} className="w-full" />
+                    <div className="grid grid-cols-1 -gap-1">
+                        <Button text={t('reportFillForm')} onClick={() => handleMenuSelection('fill-form')} className="w-full" />
+                        <Button text={t('reportScanForm')} onClick={() => handleMenuSelection('scan-form')} className="w-full" />
+                        <Button text={t('exit')} onClick={() => router.push('/')} className="w-full" />
                     </div>
                 </div>
             )}
@@ -109,16 +123,15 @@ const Menu = () => {
             )}
 
             {showScanForm && (
-              <MessageBubble>
-                <ScanForm 
-                  onReturnToMenu={navigateToMenu} 
-                  onSubmitAnotherForm={submitAnotherScanForm}
-                />
-              </MessageBubble>
+                <MessageBubble>
+                    <ScanForm 
+                        onReturnToMenu={navigateToMenu} 
+                        onSubmitAnotherForm={submitAnotherScanForm}
+                    />
+                </MessageBubble>
             )}
         </ChatContainer>
     );
 };
 
 export default Menu;
-

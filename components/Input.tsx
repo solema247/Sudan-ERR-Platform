@@ -2,7 +2,7 @@ import { FC } from 'react';
 
 interface InputProps {
     type: string;
-    placeholder: string;
+    placeholder: string; // Placeholder text is passed as a prop
     value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }

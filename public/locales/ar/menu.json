@@ -1,0 +1,9 @@
+{
+  "welcomeMessage": "مرحبًا بك في روبوت Sudan ERR",
+  "introMessage": "سيساعدك هذا الروبوت في الإبلاغ عن تأثير ERR ومشاركة المعلومات مع المجتمع والمتبرعين.<strong> اضغط ابدأ للبدء.</strong>",
+  "startButton": "ابدأ",
+  "chooseMethod": "اختر طريقة الإبلاغ",
+  "reportFillForm": "تعبئة النموذج",
+  "reportScanForm": "النموذج الممسوح",
+  "exit": "خروج"
+}
