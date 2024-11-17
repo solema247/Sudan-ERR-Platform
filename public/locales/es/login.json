@@ -1,0 +1,11 @@
+{
+  "welcomeMessage": "Bienvenido al Bot de Sudan Emergency Response Rooms",
+  "errIdPlaceholder": "Ingrese ID ERR",
+  "pinPlaceholder": "Ingrese PIN",
+  "loginButton": "Iniciar sesión",
+  "loginError": "Error de inicio de sesión. Verifique sus credenciales.",
+  "offlineModeButton": "Modo sin conexión: Subir formulario",
+  "closeButton": "Cerrar",
+  "logoAlt": "Logo de Sudan Emergency Response Rooms"
+}
+

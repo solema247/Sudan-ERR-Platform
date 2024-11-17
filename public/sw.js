@@ -8,35 +8,53 @@ const urlsToCache = [
   '/styles/globals.css',
   '/favicon.ico',
   '/manifest.json',
+  '/locales/en/login.json',
+  '/locales/ar/login.json',
+  '/locales/es/login.json',
 ];
 
 // Install event: cache static assets
 self.addEventListener('install', (event) => {
   console.log('Service Worker: Install event triggered');
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('Opened cache');
-      return cache.addAll(urlsToCache);
-    }).catch((error) => {
-      console.error('Failed to cache assets on install:', error);
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
+      .catch((error) => console.error('Failed to cache assets on install:', error))
   );
 });
 
 // Fetch event: serve from cache or fetch from network
 self.addEventListener('fetch', (event) => {
   console.log('Service Worker: Fetch event for', event.request.url);
+
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).catch(() => {
-        // Return offline page for navigation requests when offline
-        if (event.request.mode === 'navigate') {
-          return caches.match('/offline-mode');
+    caches.match(event.request)
+      .then((response) => {
+        if (response) {
+          return response;
         }
-      });
-    }).catch((error) => {
-      console.error('Fetch failed:', error);
-    })
+
+        return fetch(event.request)
+          .then((fetchResponse) => {
+            return caches.open(CACHE_NAME).then((cache) => {
+              // Dynamically cache fetched files for offline use
+              if (event.request.url.includes('/locales/')) {
+                cache.put(event.request, fetchResponse.clone());
+              }
+              return fetchResponse;
+            });
+          })
+          .catch(() => {
+            // Return offline page for navigation requests when offline
+            if (event.request.mode === 'navigate') {
+              return caches.match('/offline-mode');
+            }
+          });
+      })
+      .catch((error) => console.error('Fetch failed:', error))
   );
 });
 
@@ -46,7 +64,8 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.filter((cacheName) => cacheName !== CACHE_NAME)
+        cacheNames
+          .filter((cacheName) => cacheName !== CACHE_NAME)
           .map((cacheName) => caches.delete(cacheName))
       );
     })
@@ -97,12 +116,8 @@ function openDatabase() {
         db.createObjectStore('offlineQueue', { keyPath: 'id', autoIncrement: true });
       }
     };
-    request.onsuccess = () => {
-      resolve(request.result);
-    };
-    request.onerror = () => {
-      reject(request.error);
-    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
   });
 }
 
@@ -112,12 +127,8 @@ async function getStoredForms() {
     const transaction = db.transaction('offlineQueue', 'readonly');
     const store = transaction.objectStore('offlineQueue');
     const request = store.getAll();
-    request.onsuccess = () => {
-      resolve(request.result);
-    };
-    request.onerror = () => {
-      reject(request.error);
-    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
   });
 }
 
@@ -142,8 +153,6 @@ async function removeStoredForm(formData) {
         resolve();
       }
     };
-    request.onerror = () => {
-      reject(request.error);
-    };
+    request.onerror = () => reject(request.error);
   });
 }

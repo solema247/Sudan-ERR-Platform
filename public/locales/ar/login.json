@@ -1,0 +1,10 @@
+{
+  "welcomeMessage": "مرحبًا بك في روبوت Sudan Emergency Response Rooms",
+  "errIdPlaceholder": "أدخل معرف ERR",
+  "pinPlaceholder": "أدخل كلمة المرور",
+  "loginButton": "تسجيل الدخول",
+  "loginError": "فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك.",
+  "offlineModeButton": "الوضع دون اتصال: تحميل النموذج",
+  "closeButton": "إغلاق",
+  "logoAlt": "شعار Sudan Emergency Response Rooms"
+}
