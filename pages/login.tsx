@@ -1,18 +1,32 @@
 // pages/login.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import OfflineForm from '../components/OfflineForm';
-import LogoImage from '../public/avatar.JPG'; // Adjust the path as needed
+import LogoImage from '../public/avatar.JPG';
 
 const Login = () => {
     const [errId, setErrId] = useState('');
     const [pin, setPin] = useState('');
     const [error, setError] = useState('');
     const [showOfflineForm, setShowOfflineForm] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
     const router = useRouter();
+
+    useEffect(() => {
+        const handleOfflineFormSubmitted = (event) => {
+            setSuccessMessage(event.detail.message);
+            setTimeout(() => setSuccessMessage(''), 3000); // Hide after 3 seconds
+        };
+
+        // Listen for the custom event
+        window.addEventListener('offlineFormSubmitted', handleOfflineFormSubmitted);
+
+        // Clean up the event listener when the component unmounts
+        return () => window.removeEventListener('offlineFormSubmitted', handleOfflineFormSubmitted);
+    }, []);
 
     const handleLogin = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -48,14 +62,19 @@ const Login = () => {
                 <Image
                     src={LogoImage}
                     alt="Sudan Emergency Response Logo"
-                    width={100} // Adjust size for mobile-friendly layout
+                    width={100} 
                     height={100}
                     className="mb-2"
                 />
                 <h1 className="text-xl font-bold text-center">Sudan Emergency Response Rooms Bot</h1>
             </div>
 
-            <h1 className="text-2xl font-bold mb-4"></h1>
+            {/* Temporary Notification */}
+            {successMessage && (
+                <div className="fixed top-4 bg-green-100 text-green-700 p-2 rounded shadow-lg">
+                    {successMessage}
+                </div>
+            )}
 
             <form onSubmit={handleLogin} className="flex flex-col items-center space-y-4 w-full max-w-xs">
                 <Input
