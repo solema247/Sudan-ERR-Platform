@@ -1,0 +1,56 @@
+{
+  "offline_form_title": "Formulario Sin Conexión",
+  "form_submit_success": "¡Formulario enviado con éxito!",
+  "submission_failed": "Error en el envío, por favor intente nuevamente más tarde.",
+  "error_during_submission": "Se produjo un error durante el envío.",
+  "form_saved_offline": "Formulario guardado sin conexión y se enviará cuando vuelva a estar en línea.",
+  "choose_file": "Elegir archivo",
+  "no_file_chosen": "No se eligió ningún archivo",
+  "close": "Cerrar",
+  "submit": "Enviar",
+  "expense_entry": "Entrada de gasto {{index}}",
+  "fields": {
+    "err_id": "ID ERR",
+    "date": "Fecha",
+    "total_grant": "Subvención Total",
+    "total_other_sources": "Total de otras fuentes",
+    "additional_excess_expenses": "¿Cómo cubriste los gastos adicionales?",
+    "additional_surplus_use": "¿Cómo gastarías el excedente?",
+    "additional_training_needs": "Necesidades de capacitación adicional",
+    "lessons": "Lecciones aprendidas en la planificación del presupuesto",
+    "activity": "Actividad",
+    "description": "Descripción",
+    "payment_date": "Fecha de Pago",
+    "seller": "Vendedor",
+    "payment_method": "Método de Pago",
+    "receipt_no": "Número de recibo",
+    "amount": "Monto"
+  },
+  "labels": {
+    "date": "Fecha",
+    "payment_date": "Fecha de Pago"
+  },
+  "payment_methods": {
+    "cash": "Efectivo",
+    "bank_app": "Aplicación Bancaria"
+  },
+  "buttons": {
+    "add_expense": "Añadir Gasto"
+  },
+  "placeholders": {
+    "err_id": "ID ERR (obligatorio)",
+    "activity": "Actividad",
+    "description": "Descripción",
+    "payment_date": "Fecha de Pago",
+    "seller": "Vendedor",
+    "receipt_no": "Número de recibo",
+    "amount": "Monto",
+    "total_grant": "Subvención Total",
+    "total_other_sources": "Total de otras fuentes",
+    "additional_excess_expenses": "¿Cómo cubriste los gastos adicionales?",
+    "additional_surplus_use": "¿Cómo gastarías el excedente?",
+    "additional_training_needs": "Necesidades de capacitación adicional",
+    "lessons": "Lecciones aprendidas en la planificación del presupuesto"
+  },
+  "add_expense": "Añadir Gasto"
+}

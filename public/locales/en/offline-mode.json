@@ -1,0 +1,56 @@
+{
+  "offline_form_title": "Offline Form",
+  "form_submit_success": "Form submitted successfully!",
+  "submission_failed": "Submission failed, please try again later.",
+  "error_during_submission": "Error occurred during submission.",
+  "form_saved_offline": "Form saved offline and will be submitted when you are back online.",
+  "choose_file": "Choose File",
+  "no_file_chosen": "No file chosen",
+  "close": "Close",
+  "submit": "Submit",
+  "expense_entry": "Expense Entry {{index}}",
+  "fields": {
+    "err_id": "ERR ID",
+    "date": "Date",
+    "total_grant": "Total Grant",
+    "total_other_sources": "Total Other Sources",
+    "additional_excess_expenses": "How did you cover excess expenses?",
+    "additional_surplus_use": "How would you spend the surplus?",
+    "additional_training_needs": "Additional training needs",
+    "lessons": "Lessons learned in budget planning",
+    "activity": "Activity",
+    "description": "Description",
+    "payment_date": "Payment Date",
+    "seller": "Seller",
+    "payment_method": "Payment Method",
+    "receipt_no": "Receipt No.",
+    "amount": "Amount"
+  },
+  "labels": {
+    "date": "Date",
+    "payment_date": "Payment Date"
+  },
+  "payment_methods": {
+    "cash": "Cash",
+    "bank_app": "Bank App"
+  },
+  "buttons": {
+    "add_expense": "Add Expense"
+  },
+  "placeholders": {
+    "err_id": "ERR ID (required)",
+    "activity": "Activity",
+    "description": "Description",
+    "payment_date": "Payment Date",
+    "seller": "Seller",
+    "receipt_no": "Receipt No.",
+    "amount": "Amount",
+    "total_grant": "Total Grant",
+    "total_other_sources": "Total Other Sources",
+    "additional_excess_expenses": "How did you cover excess expenses?",
+    "additional_surplus_use": "How would you spend the surplus?",
+    "additional_training_needs": "Additional training needs",
+    "lessons": "Lessons learned in budget planning"
+  },
+  "add_expense": "Add Expense"
+}

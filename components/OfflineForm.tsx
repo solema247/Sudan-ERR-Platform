@@ -1,6 +1,7 @@
 // components/OfflineForm.tsx
-import React, { useState, useEffect } from 'react';
-import { Buffer } from 'buffer'; 
+import React, { useState } from 'react';
+import { Buffer } from 'buffer';
+import { useTranslation } from 'react-i18next';
 
 interface OfflineFormProps {
   onClose: () => void;
@@ -8,6 +9,7 @@ interface OfflineFormProps {
 }
 
 const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) => {
+  const { t } = useTranslation('offlineMode'); // Load translations from offlineForm.json
   const [formData, setFormData] = useState({
     err_id: '',
     date: '',
@@ -52,9 +54,7 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
     }
   };
 
-  // Add the handleSubmit function
   const handleSubmit = async () => {
-    // Encode the file if it exists
     const fileContent = file ? await file.arrayBuffer() : null;
     const encodedFile = file
       ? {
@@ -65,13 +65,12 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
       : null;
 
     const offlineData = {
-      formData: { ...formData, expenses: undefined }, 
+      formData: { ...formData, expenses: undefined },
       expenses: formData.expenses,
       file: encodedFile,
     };
 
     if (navigator.onLine) {
-      // Attempt immediate submission if online
       fetch('/api/offline-mode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -79,185 +78,183 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
       })
         .then((res) => res.json())
         .then((data) => {
-          if (data.message === 'Form submitted successfully!') { 
-            alert('Form submitted successfully!');
+          if (data.message === t('form_submit_success')) {
+            alert(t('form_submit_success'));
             onSubmitSuccess();
           } else {
-            alert('Submission failed, please try again later.');
+            alert(t('submission_failed'));
           }
         })
         .catch(() => {
-          alert('Error occurred during submission.');
+          alert(t('error_during_submission'));
         });
     } else {
-      // Queue data if offline
       const offlineQueue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
       offlineQueue.push(offlineData);
       localStorage.setItem('offlineQueue', JSON.stringify(offlineQueue));
-      alert('Form saved offline and will be submitted when you are back online.');
+      alert(t('form_saved_offline'));
       onClose();
     }
   };
 
-
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-start">
       <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-lg overflow-y-auto max-h-screen">
-        <h2 className="text-xl font-semibold mb-1">Offline Form</h2>
+        <h2 className="text-xl font-semibold mb-1">{t('offline_form_title')}</h2>
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-          <input 
-            type="text" 
-            name="err_id" 
-            onChange={handleInputChange} 
-            value={formData.err_id} 
-            placeholder="ERR ID (required)" 
-            required 
-            className="w-full p-1 border rounded mb-2" 
+          <input
+            type="text"
+            name="err_id"
+            onChange={handleInputChange}
+            value={formData.err_id}
+            placeholder={t('placeholders.err_id')}
+            required
+            className="w-full p-1 border rounded mb-2"
           />
-          <label className="block mb-1">Date (required)</label>
-          <input 
-            type="date" 
-            name="date" 
-            onChange={handleInputChange} 
-            value={formData.date} 
-            required 
-            className="w-full p-1 border rounded mb-2" 
+          <label className="block mb-1">{t('labels.date')}</label>
+          <input
+            type="date"
+            name="date"
+            onChange={handleInputChange}
+            value={formData.date}
+            required
+            className="w-full p-1 border rounded mb-2"
           />
           {formData.expenses.map((expense, index) => (
             <div key={index} className="mb-2 p-2 bg-gray-50 rounded">
-              <h4 className="text-lg font-medium mb-1">Expense Entry {index + 1}</h4>
-              <input 
-                type="text" 
-                name="activity" 
-                value={expense.activity} 
-                onChange={(e) => handleExpenseChange(index, e)} 
-                placeholder="Activity" 
-                className="w-full p-1 border rounded mb-1" 
+              <h4 className="text-lg font-medium mb-1">{t('expense_entry', { index: index + 1 })}</h4>
+              <input
+                type="text"
+                name="activity"
+                value={expense.activity}
+                onChange={(e) => handleExpenseChange(index, e)}
+                placeholder={t('placeholders.activity')}
+                className="w-full p-1 border rounded mb-1"
               />
-              <input 
-                type="text" 
-                name="description" 
-                value={expense.description} 
-                onChange={(e) => handleExpenseChange(index, e)} 
-                placeholder="Description" 
-                className="w-full p-1 border rounded mb-1" 
+              <input
+                type="text"
+                name="description"
+                value={expense.description}
+                onChange={(e) => handleExpenseChange(index, e)}
+                placeholder={t('placeholders.description')}
+                className="w-full p-1 border rounded mb-1"
               />
-              <label className="block mb-1">Payment Date</label>
-              <input 
-                type="date" 
-                name="payment_date" 
-                value={expense.payment_date} 
-                onChange={(e) => handleExpenseChange(index, e)} 
-                className="w-full p-1 border rounded mb-1" 
+              <label className="block mb-1">{t('labels.payment_date')}</label>
+              <input
+                type="date"
+                name="payment_date"
+                value={expense.payment_date}
+                onChange={(e) => handleExpenseChange(index, e)}
+                className="w-full p-1 border rounded mb-1"
               />
-              <input 
-                type="text" 
-                name="seller" 
-                value={expense.seller} 
-                onChange={(e) => handleExpenseChange(index, e)} 
-                placeholder="Seller" 
-                className="w-full p-1 border rounded mb-1" 
+              <input
+                type="text"
+                name="seller"
+                value={expense.seller}
+                onChange={(e) => handleExpenseChange(index, e)}
+                placeholder={t('placeholders.seller')}
+                className="w-full p-1 border rounded mb-1"
               />
-              <select 
-                name="payment_method" 
-                value={expense.payment_method} 
-                onChange={(e) => handleExpenseChange(index, e)} 
+              <select
+                name="payment_method"
+                value={expense.payment_method}
+                onChange={(e) => handleExpenseChange(index, e)}
                 className="w-full p-1 border rounded mb-1"
               >
-                <option value="cash">Cash</option>
-                <option value="bank app">Bank App</option>
+                <option value="cash">{t('payment_methods.cash')}</option>
+                <option value="bank app">{t('payment_methods.bank_app')}</option>
               </select>
-              <input 
-                type="text" 
-                name="receipt_no" 
-                value={expense.receipt_no} 
-                onChange={(e) => handleExpenseChange(index, e)} 
-                placeholder="Receipt No." 
-                className="w-full p-1 border rounded mb-1" 
+              <input
+                type="text"
+                name="receipt_no"
+                value={expense.receipt_no}
+                onChange={(e) => handleExpenseChange(index, e)}
+                placeholder={t('placeholders.receipt_no')}
+                className="w-full p-1 border rounded mb-1"
               />
-              <input 
-                type="number" 
-                name="amount" 
-                value={expense.amount} 
-                onChange={(e) => handleExpenseChange(index, e)} 
-                placeholder="Amount" 
-                className="w-full p-1 border rounded mb-1" 
+              <input
+                type="number"
+                name="amount"
+                value={expense.amount}
+                onChange={(e) => handleExpenseChange(index, e)}
+                placeholder={t('placeholders.amount')}
+                className="w-full p-1 border rounded mb-1"
               />
             </div>
           ))}
-          <button 
-            type="button" 
-            onClick={addExpenseCard} 
+          <button
+            type="button"
+            onClick={addExpenseCard}
             className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all mb-2"
           >
-            Add Expense
+            {t('add_expense')}
           </button>
-          <input 
-            type="number" 
-            name="total_grant" 
-            onChange={handleInputChange} 
-            value={formData.total_grant} 
-            placeholder="Total Grant" 
-            className="w-full p-1 border rounded mb-2" 
+          <input
+            type="number"
+            name="total_grant"
+            onChange={handleInputChange}
+            value={formData.total_grant}
+            placeholder={t('placeholders.total_grant')}
+            className="w-full p-1 border rounded mb-2"
           />
-          <input 
-            type="number" 
-            name="total_other_sources" 
-            onChange={handleInputChange} 
-            value={formData.total_other_sources} 
-            placeholder="Total Other Sources" 
-            className="w-full p-1 border rounded mb-2" 
+          <input
+            type="number"
+            name="total_other_sources"
+            onChange={handleInputChange}
+            value={formData.total_other_sources}
+            placeholder={t('placeholders.total_other_sources')}
+            className="w-full p-1 border rounded mb-2"
           />
-          <textarea 
-            name="additional_excess_expenses" 
-            onChange={handleInputChange} 
-            value={formData.additional_excess_expenses} 
-            placeholder="How did you cover excess expenses?" 
-            className="w-full p-1 border rounded mb-2" 
+          <textarea
+            name="additional_excess_expenses"
+            onChange={handleInputChange}
+            value={formData.additional_excess_expenses}
+            placeholder={t('placeholders.additional_excess_expenses')}
+            className="w-full p-1 border rounded mb-2"
           />
-          <textarea 
-            name="additional_surplus_use" 
-            onChange={handleInputChange} 
-            value={formData.additional_surplus_use} 
-            placeholder="How would you spend the surplus?" 
-            className="w-full p-1 border rounded mb-2" 
+          <textarea
+            name="additional_surplus_use"
+            onChange={handleInputChange}
+            value={formData.additional_surplus_use}
+            placeholder={t('placeholders.additional_surplus_use')}
+            className="w-full p-1 border rounded mb-2"
           />
-          <textarea 
-            name="additional_training_needs" 
-            onChange={handleInputChange} 
-            value={formData.additional_training_needs} 
-            placeholder="Additional training needs" 
-            className="w-full p-1 border rounded mb-2" 
+          <textarea
+            name="additional_training_needs"
+            onChange={handleInputChange}
+            value={formData.additional_training_needs}
+            placeholder={t('placeholders.additional_training_needs')}
+            className="w-full p-1 border rounded mb-2"
           />
-          <textarea 
-            name="lessons" 
-            onChange={handleInputChange} 
-            value={formData.lessons} 
-            placeholder="Lessons learned in budget planning" 
-            className="w-full p-1 border rounded mb-2" 
+          <textarea
+            name="lessons"
+            onChange={handleInputChange}
+            value={formData.lessons}
+            placeholder={t('placeholders.lessons')}
+            className="w-full p-1 border rounded mb-2"
           />
           <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg cursor-pointer hover:bg-green-700 transition-all inline-flex items-center mb-2">
-            Choose File
-            <input 
-              type="file" 
-              onChange={handleFileChange} 
-              className="hidden" 
+            {t('choose_file')}
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="hidden"
             />
           </label>
-          <span className="text-gray-600 ml-2">{file ? file.name : "No file chosen"}</span>
+          <span className="text-gray-600 ml-2">{file ? file.name : t('no_file_chosen')}</span>
           <div className="flex justify-end space-x-4 mt-3">
-            <button 
-              type="button" 
-              onClick={onClose} 
+            <button
+              type="button"
+              onClick={onClose}
               className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all"
             >
-              Close
+              {t('close')}
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all"
             >
-              Submit
+              {t('submit')}
             </button>
           </div>
         </form>

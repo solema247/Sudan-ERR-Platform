@@ -1,0 +1,56 @@
+{
+  "offline_form_title": "النموذج دون اتصال",
+  "form_submit_success": "تم تقديم النموذج بنجاح!",
+  "submission_failed": "فشل الإرسال، يرجى المحاولة مرة أخرى لاحقًا.",
+  "error_during_submission": "حدث خطأ أثناء الإرسال.",
+  "form_saved_offline": "تم حفظ النموذج دون اتصال وسيتم تقديمه عند العودة إلى الاتصال.",
+  "choose_file": "اختر ملف",
+  "no_file_chosen": "لم يتم اختيار ملف",
+  "close": "إغلاق",
+  "submit": "إرسال",
+  "expense_entry": "مدخل المصروفات {{index}}",
+  "fields": {
+    "err_id": "معرف ERR",
+    "date": "التاريخ",
+    "total_grant": "إجمالي المنحة",
+    "total_other_sources": "إجمالي المصادر الأخرى",
+    "additional_excess_expenses": "كيف غطيت المصروفات الإضافية؟",
+    "additional_surplus_use": "كيف ستنفق الفائض؟",
+    "additional_training_needs": "احتياجات التدريب الإضافية",
+    "lessons": "الدروس المستفادة في تخطيط الميزانية",
+    "activity": "النشاط",
+    "description": "الوصف",
+    "payment_date": "تاريخ الدفع",
+    "seller": "البائع",
+    "payment_method": "طريقة الدفع",
+    "receipt_no": "رقم الإيصال",
+    "amount": "المبلغ"
+  },
+  "labels": {
+    "date": "التاريخ",
+    "payment_date": "تاريخ الدفع"
+  },
+  "payment_methods": {
+    "cash": "نقدًا",
+    "bank_app": "تطبيق بنكي"
+  },
+  "buttons": {
+    "add_expense": "إضافة مصروف"
+  },
+  "placeholders": {
+    "err_id": "معرف ERR (إجباري)",
+    "activity": "النشاط",
+    "description": "الوصف",
+    "payment_date": "تاريخ الدفع",
+    "seller": "البائع",
+    "receipt_no": "رقم الإيصال",
+    "amount": "المبلغ",
+    "total_grant": "إجمالي المنحة",
+    "total_other_sources": "إجمالي المصادر الأخرى",
+    "additional_excess_expenses": "كيف غطيت المصروفات الإضافية؟",
+    "additional_surplus_use": "كيف ستنفق الفائض؟",
+    "additional_training_needs": "احتياجات التدريب الإضافية",
+    "lessons": "الدروس المستفادة في تخطيط الميزانية"
+  },
+  "add_expense": "إضافة مصروف"
+}
