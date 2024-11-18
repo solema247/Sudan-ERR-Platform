@@ -7,6 +7,7 @@ import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 import formidable from 'formidable';
+import { franc } from 'franc';
 
 // Disable Next.js's default body parsing to allow for file uploads
 export const config = {
@@ -19,7 +20,6 @@ export const config = {
 const visionClient = new vision.ImageAnnotatorClient({
   credentials: JSON.parse(process.env.GOOGLE_VISION!),
 });
-
 
 // Initialize OpenAI
 const openai = new OpenAI({
@@ -70,7 +70,10 @@ async function preprocessImageToBuffer(imagePath: string): Promise<Buffer> {
 
 // Function to run Google Vision OCR on the processed image buffer
 async function googleVisionOCR(imageBuffer: Buffer): Promise<string> {
-  const [result] = await visionClient.textDetection(imageBuffer);
+  const [result] = await visionClient.textDetection({
+    image: { content: imageBuffer },
+    imageContext: { languageHints: ['en', 'ar', 'es'] },
+  });
   const detections = result.textAnnotations;
   const ocrText = detections && detections.length ? detections[0].description!.trim() : 'Not found';
   console.log('Google Vision OCR Output:', ocrText);
@@ -82,47 +85,28 @@ function cleanExtractedText(rawText: string): string {
   return rawText.replace(/[\n\r]+/g, ' ').trim();
 }
 
+// Function to detect language of the text
+function detectLanguage(text: string): string {
+  const langCode = franc(text);
+  console.log('Detected language code:', langCode);
+  if (langCode === 'ara') return 'ar';
+  if (langCode === 'spa') return 'es';
+  return 'en';
+}
+
+// Function to get prompt based on detected language
+function getPromptForLanguage(language: string, cleanedText: string): string {
+  const promptPath = path.join(process.cwd(), 'public', 'locales', language, 'prompts.json');
+  const promptData = JSON.parse(fs.readFileSync(promptPath, 'utf-8'));
+  const promptTemplate = promptData.prompt;
+  return promptTemplate.replace('${cleanedText}', cleanedText);
+}
+
 // OpenAI GPT-based classification
 async function chatGPTClassification(rawText: string): Promise<any> {
   const cleanedText = cleanExtractedText(rawText);
-  const prompt = `
-  I have extracted the following text from a financial report form. The text contains multiple sections, including a date, ERR number, an activity table, a financial summary, and responses to additional questions. 
-  Here is the text:
-  ${cleanedText}
-
-  Please extract the information and structure it in the following JSON format:
-
-  {
-    "date": "DD/MM/YY",
-    "err_id": "ERR Number",
-    "expenses": [
-      {
-        "activity": "Activity description",
-        "description": "Description of Expenses",
-        "payment_date": "DD/MM",
-        "seller": "Seller/Recipient Details",
-        "payment_method": "Payment Method (Cash/Bank App)",
-        "receipt_no": "Receipt Number",
-        "amount": "Expenses amount"
-      },
-      ...
-    ],
-    "financial_summary": {
-      "total_expenses": "Total Expenses in SDG",
-      "total_grant_received": "Total Grant Received",
-      "total_other_sources": "Total Amount from Other Sources",
-      "remainder": "Remaining amount"
-    },
-    "additional_questions": {
-      "excess_expenses": "Response to covering excess expenses",
-      "surplus_use": "Response to surplus spending",
-      "lessons_learned": "Response about budget planning lessons",
-      "training_needs": "Response about additional training needs"
-    }
-  }
-
-  Make sure to follow this structure exactly. Return only the JSON output without additional text.
-  `;
+  const detectedLanguage = detectLanguage(cleanedText);
+  const prompt = getPromptForLanguage(detectedLanguage, cleanedText);
 
   console.log('Prompt sent to OpenAI:', prompt);
 
@@ -139,7 +123,7 @@ async function chatGPTClassification(rawText: string): Promise<any> {
   // Parse OpenAI response into structured data
   const structuredData = parseOpenAIResponse(openAIOutput);
   return structuredData;
-  }
+}
 
 // Function to parse OpenAI response to structured form fields
 function parseOpenAIResponse(response: string) {
@@ -169,7 +153,7 @@ function parseOpenAIResponse(response: string) {
       additional_training_needs: parsedResponse.additional_questions?.training_needs || '',
     };
   } catch (error) {
-    console.error("Error parsing OpenAI response:", error);
+    console.error('Error parsing OpenAI response:', error);
     return {}; // Return an empty object or handle fallback parsing if needed
   }
 }
@@ -227,9 +211,6 @@ function parseUsingRegex(response: string) {
   return structuredData;
 }
 
-
-
-
 // API Route Handler
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -252,3 +233,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(500).json({ error: `Error processing scan: ${error.message}` });
   }
 }
+

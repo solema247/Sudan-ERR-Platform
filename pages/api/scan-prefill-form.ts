@@ -1,20 +1,36 @@
 // pages/api/scan-prefill-form.ts
 
 import { NextApiRequest, NextApiResponse } from 'next';
+import i18n from '../../lib/i18n'; // Import i18n for translations
 
-// Endpoint to handle the structured data and send it to the frontend
-export default async (req: NextApiRequest, res: NextApiResponse) => {
-  if (req.method === 'POST') {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Ensure the request method is POST
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', ['POST']);
+    const errorMessage = i18n.t('errors.method_not_allowed', { lng: req.headers['accept-language'] || 'en' });
+    return res.status(405).json({ error: errorMessage });
+  }
+
+  try {
     const structuredData = req.body;
 
+    // Validate the incoming data
     if (!structuredData) {
-      return res.status(400).json({ error: 'No structured data received' });
+      const errorMessage = i18n.t('errors.no_data_received', { lng: req.headers['accept-language'] || 'en' });
+      return res.status(400).json({ error: errorMessage });
     }
 
-    // Directly send structured data response to the frontend
+    // Log structured data for debugging (optional, can remove in production)
+    console.log('Structured data received:', structuredData);
+
+    // Respond with the structured data
     return res.status(200).json(structuredData);
-  } else {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).end(`Method ${req.method} Not Allowed`);
+  } catch (error: any) {
+    // Log and handle unexpected errors
+    console.error('Unexpected error in scan-prefill-form:', error.message);
+
+    const errorMessage = i18n.t('errors.internal_server_error', { lng: req.headers['accept-language'] || 'en' });
+    return res.status(500).json({ error: errorMessage });
   }
-};
+}
+

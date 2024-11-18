@@ -1,0 +1,52 @@
+{
+  "title": "Escanear Formulario",
+  "instruction": "Por favor, suba una imagen del formulario que desea escanear y luego haga clic en \"Subir y Escanear\" para procesarlo.",
+  "choose_file": "Elegir Archivo",
+  "upload_and_scan": "Subir y Escanear",
+  "processing": "Procesando...",
+  "form_success": "¡Formulario y fotos subidos con éxito!",
+  "scan_another_form": "Escanear Otro Formulario",
+  "return_to_menu": "Volver al Menú",
+  "prefilled_form_title": "Formulario Prellenado",
+  "upload_photos_title": "Subir Fotos",
+  "loading": "Cargando...",
+  "no_data_available": "No hay datos disponibles",
+  "submit_form": "Enviar Formulario",
+  "field_labels": {
+    "err_id": "ID de ERR",
+    "date": "Fecha",
+    "activity": "Actividad",
+    "description": "Descripción",
+    "payment_date": "Fecha de Pago",
+    "seller": "Vendedor",
+    "payment_method": "Método de Pago",
+    "receipt_no": "Número de Recibo",
+    "amount": "Monto",
+    "total_grant": "Subvención Total",
+    "total_other_sources": "Total de Otras Fuentes",
+    "additional_excess_expenses": "¿Cómo cubrió los gastos adicionales?",
+    "additional_surplus_use": "¿Cómo usaría el excedente?",
+    "lessons_learned": "Lecciones aprendidas en la planificación presupuestaria",
+    "additional_training_needs": "Necesidades adicionales de capacitación"
+  },
+  "button_text": {
+    "submit": "Enviar",
+    "processing": "Procesando...",
+    "submitted": "Enviado"
+  },
+  "errors": {
+    "upload_failed": "Error al subir los archivos.",
+    "scan_failed": "Error al escanear el formulario.",
+    "submit_failed": "Ocurrió un error al enviar el formulario.",
+    "method_not_allowed": "Método no permitido.",
+    "summary_insert_failed": "Error al guardar el resumen del informe.",
+    "expense_insert_failed": "Error al guardar una o más entradas de gastos.",
+    "internal_server_error": "Ocurrió un error inesperado mientras procesábamos su solicitud.",
+    "file_required": "Se requieren el nombre y contenido del archivo.",
+    "upload_failed": "Error al subir los archivos."
+  },
+  "messages": {
+    "form_submission_success": "¡Formulario enviado con éxito!",
+    "form_success": "¡Formulario y fotos subidos con éxito!"
+  }
+}

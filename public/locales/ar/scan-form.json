@@ -1,0 +1,52 @@
+{
+  "title": "مسح النموذج",
+  "instruction": "يرجى تحميل صورة للنموذج الذي تريد مسحه، ثم النقر على \"تحميل ومسح\" لمعالجته.",
+  "choose_file": "اختر ملف",
+  "upload_and_scan": "تحميل ومسح",
+  "processing": "جاري المعالجة...",
+  "form_success": "تم تحميل النموذج والصور بنجاح!",
+  "scan_another_form": "مسح نموذج آخر",
+  "return_to_menu": "العودة إلى القائمة",
+  "prefilled_form_title": "نموذج مُعبأ مسبقاً",
+  "upload_photos_title": "تحميل الصور",
+  "loading": "جاري التحميل...",
+  "no_data_available": "لا توجد بيانات متاحة",
+  "submit_form": "إرسال النموذج",
+  "field_labels": {
+    "err_id": "معرف الخطأ",
+    "date": "التاريخ",
+    "activity": "النشاط",
+    "description": "الوصف",
+    "payment_date": "تاريخ الدفع",
+    "seller": "البائع",
+    "payment_method": "طريقة الدفع",
+    "receipt_no": "رقم الإيصال",
+    "amount": "المبلغ",
+    "total_grant": "إجمالي المنحة",
+    "total_other_sources": "إجمالي المصادر الأخرى",
+    "additional_excess_expenses": "كيف قمت بتغطية النفقات الزائدة؟",
+    "additional_surplus_use": "كيف ستستخدم الفائض؟",
+    "lessons_learned": "الدروس المستفادة في تخطيط الميزانية",
+    "additional_training_needs": "احتياجات تدريب إضافية"
+  },
+  "button_text": {
+    "submit": "إرسال",
+    "processing": "جاري المعالجة...",
+    "submitted": "تم الإرسال"
+  },
+  "errors": {
+    "upload_failed": "فشل تحميل الملفات.",
+    "scan_failed": "فشل مسح النموذج.",
+    "submit_failed": "حدث خطأ أثناء إرسال النموذج.",
+    "method_not_allowed": "الطريقة غير مسموح بها.",
+    "summary_insert_failed": "فشل في حفظ ملخص التقرير.",
+    "expense_insert_failed": "فشل في حفظ واحد أو أكثر من إدخالات النفقات.",
+    "internal_server_error": "حدث خطأ غير متوقع أثناء معالجة طلبك.",
+    "file_required": "اسم الملف والمحتوى مطلوبان.",
+    "upload_failed": "فشل في تحميل الملفات."
+  },
+  "messages": {
+    "form_submission_success": "تم تقديم النموذج بنجاح!",
+    "form_success": "تم تحميل الاستمارة والصور بنجاح!"
+  }
+}

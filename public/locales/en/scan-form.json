@@ -1,0 +1,57 @@
+{
+  "title": "Scan Form",
+  "instruction": "Please upload an image of the form you want to scan, and then click \"Upload and Scan\" to process it.",
+  "choose_file": "Choose File",
+  "upload_and_scan": "Upload and Scan",
+  "processing": "Processing...",
+  "form_success": "Form and photos uploaded successfully!",
+  "scan_another_form": "Scan Another Form",
+  "return_to_menu": "Return to Menu",
+  "prefilled_form_title": "Prefilled Form",
+  "upload_photos_title": "Upload Photos",
+  "loading": "Loading...",
+  "no_data_available": "No data available",
+  "submit_form": "Submit Form",
+  "field_labels": {
+    "err_id": "ERR ID",
+    "date": "Date",
+    "activity": "Activity",
+    "description": "Description",
+    "payment_date": "Payment Date",
+    "seller": "Seller",
+    "payment_method": "Payment Method",
+    "receipt_no": "Receipt No.",
+    "amount": "Amount",
+    "total_grant": "Total Grant",
+    "total_other_sources": "Total Other Sources",
+    "additional_excess_expenses": "How did you cover excess expenses?",
+    "additional_surplus_use": "How would you spend the surplus?",
+    "lessons_learned": "Lessons learned in budget planning",
+    "additional_training_needs": "Additional training needs"
+  },
+  "button_text": {
+    "submit": "Submit",
+    "processing": "Processing...",
+    "submitted": "Submitted"
+  },
+  "payment_methods": {
+    "cash": "Cash",
+    "bank_app": "Bank App"
+  },
+  "expense_entry": "Expense Entry {{index}}",
+  "errors": {
+    "upload_failed": "Failed to upload files.",
+    "scan_failed": "Failed to scan the form.",
+    "submit_failed": "An error occurred while submitting the form.",
+    "method_not_allowed": "Method not allowed.",
+    "summary_insert_failed": "Failed to save the report summary.",
+    "expense_insert_failed": "Failed to save one or more expense entries.",
+    "internal_server_error": "An unexpected error occurred while processing your request.",
+    "file_required": "File name and content are required.",
+    "upload_failed": "Failed to upload files."
+  },
+  "messages": {
+    "form_submission_success": "Form submitted successfully!",
+    "form_success": "Form and photos uploaded successfully!"
+  }
+}

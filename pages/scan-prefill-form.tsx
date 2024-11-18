@@ -1,94 +1,96 @@
 // pages/scan-prefill-form.tsx
-import React, { useState, useEffect } from 'react';
-import PrefilledForm from '../components/PrefilledForm';
-import FileUploader from '../components/FileUploader';
-import MessageBubble from '../components/MessageBubble'; 
-import Button from '../components/Button'; 
+import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next"; // i18n hook
+import PrefilledForm from "../components/PrefilledForm";
+import FileUploader from "../components/FileUploader";
+import MessageBubble from "../components/MessageBubble";
+import Button from "../components/Button";
 
 const ScanPrefillForm: React.FC = () => {
+  const { t } = useTranslation("scan-form"); // Load translations from scan-form.json
   const [structuredData, setStructuredData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showFileUploader, setShowFileUploader] = useState(false);
   const [showCompletionOptions, setShowCompletionOptions] = useState(false);
 
   useEffect(() => {
-    const data = localStorage.getItem('prefillData');
+    const data = localStorage.getItem("prefillData");
     if (data) {
       try {
         const parsedData = JSON.parse(data);
-        if (parsedData && parsedData.date && parsedData.expenses) { 
+        if (parsedData && parsedData.date && parsedData.expenses) {
           setStructuredData(parsedData);
         } else {
-          console.error('Invalid prefill data structure');
+          console.error(t("errors.invalid_data"));
         }
       } catch (error) {
-        console.error('Failed to parse prefill data:', error);
+        console.error(t("errors.failed_to_parse_data"), error);
       }
     } else {
-      console.error('No prefill data found in localStorage');
+      console.error(t("errors.no_data_found"));
     }
     setLoading(false);
-  }, []);
+  }, [t]);
 
   const handleFormSubmit = async (formData: any) => {
     try {
-      const response = await fetch('/api/submit-prefilled-form', {
-        method: 'POST',
+      const response = await fetch("/api/submit-prefilled-form", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit form');
+        throw new Error(t("errors.submit_failed"));
       }
 
       const result = await response.json();
-      console.log('Form submitted successfully:', result);
+      console.log(t("form_submit_success"), result);
 
       setShowFileUploader(true);
     } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('Failed to submit the form. Please try again.');
+      console.error(t("errors.submit_failed"), error);
+      alert(t("errors.submit_failed"));
     }
   };
 
   const handleUploadComplete = () => {
-    alert('Files uploaded successfully!');
+    alert(t("upload_success"));
     setShowFileUploader(false);
     setShowCompletionOptions(true);
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>{t("loading")}</div>;
   }
 
   if (!structuredData) {
-    return <div>No data available</div>;
+    return <div>{t("no_data_available")}</div>;
   }
 
   return (
     <div className="p-4">
       {!showFileUploader && !showCompletionOptions ? (
         <>
-          <h2 className="text-lg font-semibold mb-4">Prefilled Form</h2>
+          <h2 className="text-lg font-semibold mb-4">{t("prefilled_form_title")}</h2>
           <PrefilledForm data={structuredData} onFormSubmit={handleFormSubmit} />
         </>
       ) : showFileUploader ? (
         <>
-          <h2 className="text-lg font-semibold mb-4">Upload Photos</h2>
+          <h2 className="text-lg font-semibold mb-4">{t("upload_photos_title")}</h2>
           <FileUploader onUploadComplete={handleUploadComplete} />
         </>
       ) : (
         <>
           <MessageBubble>
-            <p>Form and photos uploaded successfully!</p>
+            <p>{t("form_success")}</p>
           </MessageBubble>
           <MessageBubble>
             <div className="flex space-x-4 mt-2">
               <Button
-                text="Scan Another Form"
+                text={t("scan_another_form")}
                 onClick={() => {
                   setShowFileUploader(false); // Reset to allow new scan
                   setShowCompletionOptions(false); // Hide completion options
@@ -96,8 +98,8 @@ const ScanPrefillForm: React.FC = () => {
                 }}
               />
               <Button
-                text="Return to Menu"
-                onClick={() => (window.location.href = '/menu')}
+                text={t("return_to_menu")}
+                onClick={() => (window.location.href = "/menu")}
               />
             </div>
           </MessageBubble>
@@ -108,3 +110,4 @@ const ScanPrefillForm: React.FC = () => {
 };
 
 export default ScanPrefillForm;
+
