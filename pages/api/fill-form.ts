@@ -24,7 +24,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 additional_training_needs = '',
                 lessons = '',
                 expenses = [],
-                file
+                file,
+                language // Dynamically added language field
             } = req.body;
 
             // Generate a unique report ID
@@ -47,7 +48,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     surplus_use: additional_surplus_use,
                     training: additional_training_needs,
                     lessons,
-                    total_expenses
+                    total_expenses,
+                    language // Add language field
                 }]);
 
             if (summaryError) throw new Error("Failed to insert data into MAG F4 Summary");
@@ -73,7 +75,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         seller,
                         payment_method,
                         receipt_no,
-                        expense_amount: parseFloat(amount) || 0
+                        expense_amount: parseFloat(amount) || 0,
+                        language // Add language field for each expense
                     }]);
 
                 if (expenseError) throw new Error("Failed to insert expense data");

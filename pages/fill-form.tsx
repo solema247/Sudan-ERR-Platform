@@ -1,11 +1,12 @@
 // pages/fill-form.tsx
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import FormBubble from '../components/FormBubble';
-import MessageBubble from '../components/MessageBubble'; 
+import MessageBubble from '../components/MessageBubble';
 import Button from '../components/Button';
 
-
 const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () => void }> = ({ onReturnToMenu, onSubmitAnotherForm }) => {
+    const { t } = useTranslation('fillForm'); // Use translations for the "fill-form" namespace
     const [expenses, setExpenses] = useState([
         { activity: '', description: '', payment_date: '', seller: '', payment_method: 'cash', receipt_no: '', amount: '' },
         { activity: '', description: '', payment_date: '', seller: '', payment_method: 'cash', receipt_no: '', amount: '' },
@@ -57,7 +58,7 @@ const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () =
         e.preventDefault();
 
         if (!formData.err_id || !formData.date || !formData.total_grant || !formData.total_other_sources) {
-            alert('Please fill in all required summary fields.');
+            alert(t('requiredFieldsAlert'));
             return;
         }
 
@@ -79,7 +80,7 @@ const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () =
         if (response.ok) {
             setFormSubmitted(true);
         } else {
-            alert('Failed to submit the form');
+            alert(t('submissionFailed'));
         }
     };
 
@@ -89,79 +90,180 @@ const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () =
                 <FormBubble>
                     <form onSubmit={handleSubmit} className="space-y-3 bg-white p-2 rounded-lg">
                         <label>
-                            ERR ID (required)
-                            <input type="text" name="err_id" onChange={handleInputChange} value={formData.err_id} required className="w-full p-2 border rounded" placeholder="ERR ID" />
+                            {t('errId')}
+                            <input
+                                type="text"
+                                name="err_id"
+                                onChange={handleInputChange}
+                                value={formData.err_id}
+                                required
+                                className="w-full p-2 border rounded"
+                                placeholder={t('errId')}
+                            />
                         </label>
                         <label>
-                            Date (required)
-                            <input type="date" name="date" onChange={handleInputChange} value={formData.date} required className="w-full p-2 border rounded" placeholder="Date" />
+                            {t('date')}
+                            <input
+                                type="date"
+                                name="date"
+                                onChange={handleInputChange}
+                                value={formData.date}
+                                required
+                                className="w-full p-2 border rounded"
+                            />
                         </label>
 
                         <div className="swipeable-cards flex overflow-x-auto space-x-2">
                             {expenses.map((expense, index) => (
                                 <div key={index} className="min-w-[200px] p-4 rounded bg-gray-50">
-                                    <h4>Expense Entry {index + 1}</h4>
-                                    <label>Activity
-                                        <input type="text" name="activity" value={expense.activity} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Activity" />
+                                    <h4>{t('expenseEntry', { index: index + 1 })}</h4>
+                                    <label>{t('activity')}
+                                        <input
+                                            type="text"
+                                            name="activity"
+                                            value={expense.activity}
+                                            onChange={(e) => handleExpenseChange(index, e)}
+                                            className="w-full p-2 border rounded"
+                                            placeholder={t('activity')}
+                                        />
                                     </label>
-                                    <label>Description
-                                        <input type="text" name="description" value={expense.description} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Description" />
+                                    <label>{t('description')}
+                                        <input
+                                            type="text"
+                                            name="description"
+                                            value={expense.description}
+                                            onChange={(e) => handleExpenseChange(index, e)}
+                                            className="w-full p-2 border rounded"
+                                            placeholder={t('description')}
+                                        />
                                     </label>
-                                    <label>Payment Date
-                                        <input type="date" name="payment_date" value={expense.payment_date} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" />
+                                    <label>{t('paymentDate')}
+                                        <input
+                                            type="date"
+                                            name="payment_date"
+                                            value={expense.payment_date}
+                                            onChange={(e) => handleExpenseChange(index, e)}
+                                            className="w-full p-2 border rounded"
+                                        />
                                     </label>
-                                    <label>Seller
-                                        <input type="text" name="seller" value={expense.seller} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Seller" />
+                                    <label>{t('seller')}
+                                        <input
+                                            type="text"
+                                            name="seller"
+                                            value={expense.seller}
+                                            onChange={(e) => handleExpenseChange(index, e)}
+                                            className="w-full p-2 border rounded"
+                                            placeholder={t('seller')}
+                                        />
                                     </label>
-                                    <label>Payment Method
-                                        <select name="payment_method" value={expense.payment_method} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded">
-                                            <option value="cash">Cash</option>
-                                            <option value="bank app">Bank App</option>
+                                    <label>{t('paymentMethod')}
+                                        <select
+                                            name="payment_method"
+                                            value={expense.payment_method}
+                                            onChange={(e) => handleExpenseChange(index, e)}
+                                            className="w-full p-2 border rounded"
+                                        >
+                                            <option value="cash">{t('cash')}</option>
+                                            <option value="bank app">{t('bankApp')}</option>
                                         </select>
                                     </label>
-                                    <label>Receipt No.
-                                        <input type="text" name="receipt_no" value={expense.receipt_no} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Receipt No." />
+                                    <label>{t('receiptNo')}
+                                        <input
+                                            type="text"
+                                            name="receipt_no"
+                                            value={expense.receipt_no}
+                                            onChange={(e) => handleExpenseChange(index, e)}
+                                            className="w-full p-2 border rounded"
+                                            placeholder={t('receiptNo')}
+                                        />
                                     </label>
-                                    <label>Amount
-                                        <input type="number" name="amount" value={expense.amount} onChange={(e) => handleExpenseChange(index, e)} className="w-full p-2 border rounded" placeholder="Amount" />
+                                    <label>{t('amount')}
+                                        <input
+                                            type="number"
+                                            name="amount"
+                                            value={expense.amount}
+                                            onChange={(e) => handleExpenseChange(index, e)}
+                                            className="w-full p-2 border rounded"
+                                            placeholder={t('amount')}
+                                        />
                                     </label>
                                 </div>
                             ))}
                         </div>
-                        <Button text="Add Expense" onClick={addExpenseCard} />
-                        <div className="w-full mt-4"> 
-                            <input type="number" name="total_grant" onChange={handleInputChange} value={formData.total_grant} required className="w-full p-2 border rounded" placeholder="Total Grant (required)" />
-                        </div>    
-                        <input type="number" name="total_other_sources" onChange={handleInputChange} value={formData.total_other_sources} required className="w-full p-2 border rounded" placeholder="Total Other Sources (required)" />
-                        <textarea name="additional_excess_expenses" onChange={handleInputChange} value={formData.additional_excess_expenses} className="w-full p-2 border rounded" placeholder="How did you cover excess expenses?" />
-                        <textarea name="additional_surplus_use" onChange={handleInputChange} value={formData.additional_surplus_use} className="w-full p-2 border rounded" placeholder="How would you spend the surplus?" />
-                        <textarea name="additional_training_needs" onChange={handleInputChange} value={formData.additional_training_needs} className="w-full p-2 border rounded" placeholder="Additional training needs" />
-                        <textarea name="lessons" onChange={handleInputChange} value={formData.lessons} className="w-full p-2 border rounded" placeholder="Lessons learned in budget planning" />
+                        <Button text={t('addExpense')} onClick={addExpenseCard} />
+                        <div className="w-full mt-4">
+                            <input
+                                type="number"
+                                name="total_grant"
+                                onChange={handleInputChange}
+                                value={formData.total_grant}
+                                required
+                                className="w-full p-2 border rounded"
+                                placeholder={t('totalGrant')}
+                            />
+                        </div>
+                        <input
+                            type="number"
+                            name="total_other_sources"
+                            onChange={handleInputChange}
+                            value={formData.total_other_sources}
+                            required
+                            className="w-full p-2 border rounded"
+                            placeholder={t('totalOtherSources')}
+                        />
+                        <textarea
+                            name="additional_excess_expenses"
+                            onChange={handleInputChange}
+                            value={formData.additional_excess_expenses}
+                            className="w-full p-2 border rounded"
+                            placeholder={t('excessExpenses')}
+                        />
+                        <textarea
+                            name="additional_surplus_use"
+                            onChange={handleInputChange}
+                            value={formData.additional_surplus_use}
+                            className="w-full p-2 border rounded"
+                            placeholder={t('surplusUse')}
+                        />
+                        <textarea
+                            name="additional_training_needs"
+                            onChange={handleInputChange}
+                            value={formData.additional_training_needs}
+                            className="w-full p-2 border rounded"
+                            placeholder={t('trainingNeeds')}
+                        />
+                        <textarea
+                            name="lessons"
+                            onChange={handleInputChange}
+                            value={formData.lessons}
+                            className="w-full p-2 border rounded"
+                            placeholder={t('lessonsLearned')}
+                        />
 
                         <div className="flex flex-col space-y-2">
                             <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition-all cursor-pointer inline-flex items-center justify-center">
-                                Choose File
-                                <input 
-                                    type="file" 
-                                    onChange={handleFileChange} 
-                                    className="hidden" 
+                                {t('chooseFile')}
+                                <input
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    className="hidden"
                                 />
                             </label>
-                            {file && <span className="text-gray-600">{file.name}</span>} {/* Display selected file name */}
+                            {file && <span className="text-gray-600">{file.name}</span>}
                         </div>
 
-                        <Button text="Submit" type="submit" />
+                        <Button text={t('submit')} type="submit" />
                     </form>
                 </FormBubble>
             ) : (
                 <>
                     <MessageBubble>
-                        Form submitted successfully!
+                        {t('formSuccess')}
                     </MessageBubble>
 
                     <div className="flex justify-center space-x-4 mt-2">
-                        <Button text="Submit Another Form" onClick={onSubmitAnotherForm} />
-                        <Button text="Return to Main Menu" onClick={onReturnToMenu} />
+                        <Button text={t('submitAnother')} onClick={onSubmitAnotherForm} />
+                        <Button text={t('returnToMenu')} onClick={onReturnToMenu} />
                     </div>
                 </>
             )}
@@ -170,3 +272,4 @@ const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () =
 };
 
 export default FillForm;
+
