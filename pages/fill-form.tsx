@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import FormBubble from '../components/FormBubble';
 import MessageBubble from '../components/MessageBubble';
 import Button from '../components/Button';
+import i18n from '../lib/i18n'; // Ensure this is properly imported
 
 const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () => void }> = ({ onReturnToMenu, onSubmitAnotherForm }) => {
     const { t } = useTranslation('fillForm'); // Use translations for the "fill-form" namespace
@@ -24,6 +25,9 @@ const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () =
         lessons: ''
     });
     const [formSubmitted, setFormSubmitted] = useState(false);
+
+    // Get the current language
+    const currentLanguage = i18n.language;
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -68,7 +72,8 @@ const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () =
         const submissionData = {
             ...formData,
             expenses: completedExpenses,
-            file: file ? { name: file.name, type: file.type, content: Buffer.from(fileContent!).toString('base64') } : null
+            file: file ? { name: file.name, type: file.type, content: Buffer.from(fileContent!).toString('base64') } : null,
+            language: currentLanguage // Include the current language dynamically
         };
 
         const response = await fetch('/api/fill-form', {
@@ -272,4 +277,5 @@ const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () =
 };
 
 export default FillForm;
+
 

@@ -1,10 +1,11 @@
-// pages/api/fill-form.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
+// Initialize Supabase client
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
 
+// Function to generate unique ERR report ID
 function generateErrReportId(err_id: string): string {
     const prefix = err_id.slice(0, 3);
     const randomDigits = crypto.randomInt(10000, 99999);
@@ -14,6 +15,7 @@ function generateErrReportId(err_id: string): string {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'POST') {
         try {
+            // Destructure the incoming request body
             const {
                 err_id,
                 date,
@@ -28,20 +30,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 language // Dynamically added language field
             } = req.body;
 
+            if (!language) {
+                throw new Error('Language field is missing in the request payload.');
+            }
+
             // Generate a unique report ID
             const err_report_id = generateErrReportId(err_id || '');
 
             // Calculate the total expenses from completed cards
             const total_expenses = expenses.reduce((acc: number, exp: any) => acc + (parseFloat(exp.amount) || 0), 0);
 
-            // Insert summary data into MAG F4 Summary table, including report_date and timestamp for created_at
-            const { data: summaryData, error: summaryError } = await supabase
+            // Insert data into MAG F4 Summary table
+            const { error: summaryError } = await supabase
                 .from('MAG F4 Summary')
                 .insert([{
                     err_id,
                     err_report_id,
-                    report_date: date || new Date().toISOString(), // Save the submitted date as report_date
-                    created_at: new Date().toISOString(), // Automatically set to current timestamp
+                    report_date: date || new Date().toISOString(),
+                    created_at: new Date().toISOString(),
                     total_grant,
                     total_other_sources,
                     excess_expenses: additional_excess_expenses,
@@ -52,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     language // Add language field
                 }]);
 
-            if (summaryError) throw new Error("Failed to insert data into MAG F4 Summary");
+            if (summaryError) throw new Error('Failed to insert data into MAG F4 Summary');
 
             // Insert completed expense entries into MAG F4 Expenses table
             for (const expense of expenses) {
@@ -79,13 +85,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         language // Add language field for each expense
                     }]);
 
-                if (expenseError) throw new Error("Failed to insert expense data");
+                if (expenseError) throw new Error('Failed to insert expense data');
             }
 
-            // Handle file upload with unique identifier to avoid duplicates
+            // Handle file upload if file exists
             if (file) {
                 const uniqueFileName = `reports/${file.name}-${crypto.randomUUID()}`;
-                const { data: uploadData, error: uploadError } = await supabase
+                const { error: uploadError } = await supabase
                     .storage
                     .from('expense-reports')
                     .upload(uniqueFileName, Buffer.from(file.content, 'base64'), { contentType: file.type });
@@ -98,13 +104,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     .from('expense-reports')
                     .getPublicUrl(uniqueFileName);
 
-                // Update the files column in the MAG F4 Summary table with the public URL
+                // Update files column in MAG F4 Summary table
                 await supabase
                     .from('MAG F4 Summary')
                     .update({ files: publicUrl })
                     .eq('err_report_id', err_report_id);
             }
 
+            // Respond with success message
             res.status(200).json({ message: 'Form submitted successfully!' });
         } catch (error) {
             console.error('Error submitting form:', error);
