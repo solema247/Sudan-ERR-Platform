@@ -1,5 +1,5 @@
 // pages/menu.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +23,17 @@ const Menu = () => {
 
     const router = useRouter();
     const { t, i18n } = useTranslation('menu');
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const response = await fetch('/api/validate-session', { credentials: 'include' });
+            if (!response.ok) {
+                router.push('/login'); // Redirect to login if session is invalid
+            }
+        };
+
+        checkAuth();
+    }, [router]);
 
     const handleStartClick = () => {
         setShowMenu(true);
