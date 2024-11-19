@@ -2,6 +2,8 @@
   "title": "Scan Form",
   "instruction": "Please upload an image of the form you want to scan, and then click \"Upload and Scan\" to process it.",
   "choose_file": "Choose File",
+  "choose_files": "Choose Files",
+  "uploading": "Uploading...",
   "upload_and_scan": "Upload and Scan",
   "processing": "Processing...",
   "form_success": "Form and photos uploaded successfully!",

@@ -1,7 +1,9 @@
 {
-  "title": "Escanear Formulario",
-  "instruction": "Por favor, suba una imagen del formulario que desea escanear y luego haga clic en \"Subir y Escanear\" para procesarlo.",
-  "choose_file": "Elegir Archivo",
+  "title": "Formulario de Escaneo",
+  "instruction": "Por favor, sube una imagen del formulario que deseas escanear y luego haz clic en \"Subir y Escanear\" para procesarlo.",
+  "choose_file": "Seleccionar Archivo",
+  "choose_files": "Seleccionar Archivos",
+  "uploading": "Subiendo...",
   "upload_and_scan": "Subir y Escanear",
   "processing": "Procesando...",
   "form_success": "¡Formulario y fotos subidos con éxito!",
@@ -13,7 +15,7 @@
   "no_data_available": "No hay datos disponibles",
   "submit_form": "Enviar Formulario",
   "field_labels": {
-    "err_id": "ID de ERR",
+    "err_id": "ID de Emergencia",
     "date": "Fecha",
     "activity": "Actividad",
     "description": "Descripción",
@@ -24,16 +26,21 @@
     "amount": "Monto",
     "total_grant": "Subvención Total",
     "total_other_sources": "Total de Otras Fuentes",
-    "additional_excess_expenses": "¿Cómo cubrió los gastos adicionales?",
-    "additional_surplus_use": "¿Cómo usaría el excedente?",
-    "lessons_learned": "Lecciones aprendidas en la planificación presupuestaria",
-    "additional_training_needs": "Necesidades adicionales de capacitación"
+    "additional_excess_expenses": "¿Cómo cubriste los gastos adicionales?",
+    "additional_surplus_use": "¿Cómo usarías el excedente?",
+    "lessons_learned": "Lecciones aprendidas en planificación presupuestaria",
+    "additional_training_needs": "Necesidades de capacitación adicionales"
   },
   "button_text": {
     "submit": "Enviar",
     "processing": "Procesando...",
     "submitted": "Enviado"
   },
+  "payment_methods": {
+    "cash": "Efectivo",
+    "bank_app": "Aplicación Bancaria"
+  },
+  "expense_entry": "Entrada de Gastos {{index}}",
   "errors": {
     "upload_failed": "Error al subir los archivos.",
     "scan_failed": "Error al escanear el formulario.",
@@ -41,8 +48,8 @@
     "method_not_allowed": "Método no permitido.",
     "summary_insert_failed": "Error al guardar el resumen del informe.",
     "expense_insert_failed": "Error al guardar una o más entradas de gastos.",
-    "internal_server_error": "Ocurrió un error inesperado mientras procesábamos su solicitud.",
-    "file_required": "Se requieren el nombre y contenido del archivo.",
+    "internal_server_error": "Ocurrió un error inesperado al procesar tu solicitud.",
+    "file_required": "Se requieren el nombre del archivo y su contenido.",
     "upload_failed": "Error al subir los archivos."
   },
   "messages": {
