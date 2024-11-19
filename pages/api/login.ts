@@ -1,3 +1,4 @@
+//pages/api/login.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '../../lib/supabaseClient';
 import { v4 as uuidv4 } from 'uuid'; // For unique session IDs

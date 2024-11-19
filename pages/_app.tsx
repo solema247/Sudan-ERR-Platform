@@ -1,3 +1,4 @@
+//pages/_app.tsx
 import { useEffect } from 'react';
 import '../styles/globals.css';
 import { registerServiceWorker } from '../lib/serviceWorkerRegistration';
