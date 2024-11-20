@@ -1,9 +1,17 @@
 {
-  "welcomeMessage": "مرحبًا بك في روبوت Sudan ERR",
-  "introMessage": "سيساعدك هذا الروبوت في الإبلاغ عن تأثير ERR ومشاركة المعلومات مع المجتمع والمتبرعين.<strong> اضغط ابدأ للبدء.</strong>",
+  "welcomeMessage": "مرحبًا بك في بوت ERR السودان",
+  "introMessage": "سيساعدك بوت ERR في تقديم طلبات المشاريع والإبلاغ عن تأثير ERR ومشاركة المعلومات مع المجتمع والجهات المانحة.<strong> اضغط على بدء للبدء.</strong>",
   "startButton": "ابدأ",
-  "chooseMethod": "اختر طريقة الإبلاغ",
-  "reportFillForm": "تعبئة النموذج",
-  "reportScanForm": "النموذج الممسوح",
+  "chooseMainMenu": "اختر <strong> المشاريع </strong> لتقديم طلبات المشاريع ومراجعة الحالة. اختر <strong> التقارير </strong> للإبلاغ عن مشاريعك الحالية.",
+  "projects": "المشاريع",
+  "reporting": "التقارير",
+  "exitChat": "إنهاء الدردشة",
+  "projectsInstructions": "يرجى اختيار خيار لتقديم طلب مشروع أو مراجعة حالة المشروع.",
+  "reportingInstructions": "يرجى اختيار خيار للإبلاغ عن طريق ملء نموذج أو تحميل صورة للنموذج.",
+  "projectApplication": "تقديم طلب مشروع",
+  "projectStatus": "حالة المشروع",
+  "reportFillForm": "الإبلاغ عن طريق ملء نموذج",
+  "reportScanForm": "الإبلاغ عن طريق صورة نموذج",
+  "returnToMainMenu": "العودة إلى القائمة الرئيسية",
   "exit": "خروج"
 }

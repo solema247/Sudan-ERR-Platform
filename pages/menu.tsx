@@ -10,7 +10,7 @@ import FillForm from '../pages/fill-form';
 import ScanForm from '../pages/scan-form';
 import ProjectApplication from '../pages/project-application';
 import ProjectStatus from '../pages/project-status';
-import LogoImage from '../public/avatar.JPG'; // Import the logo image
+import LogoImage from '../public/avatar.JPG';
 
 const getCurrentTimestamp = () => {
     const now = new Date();
@@ -18,8 +18,7 @@ const getCurrentTimestamp = () => {
 };
 
 const Menu = () => {
-    const [showIntro, setShowIntro] = useState(true);
-    const [showMenu, setShowMenu] = useState(false);
+    const [currentMenu, setCurrentMenu] = useState('main'); // Tracks the current menu
     const [showFillForm, setShowFillForm] = useState(false);
     const [showScanForm, setShowScanForm] = useState(false);
     const [showProjectApplication, setShowProjectApplication] = useState(false);
@@ -39,34 +38,31 @@ const Menu = () => {
         checkAuth();
     }, [router]);
 
-    const handleStartClick = () => {
-        setShowMenu(true);
-    };
+    useEffect(() => {
+        // Dynamically set the text direction (RTL or LTR) based on the current language
+        const direction = i18n.language === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.setAttribute('dir', direction);
+        document.documentElement.setAttribute('lang', i18n.language);
+    }, [i18n.language]);
 
-    const handleMenuSelection = (selection: string) => {
+    const handleMenuSelection = (menu: string) => {
+        setCurrentMenu(menu);
         setShowFillForm(false);
         setShowScanForm(false);
         setShowProjectApplication(false);
         setShowProjectStatus(false);
-        setShowMenu(false);
-
-        if (selection === 'fill-form') {
-            setShowFillForm(true);
-        } else if (selection === 'scan-form') {
-            setShowScanForm(true);
-        } else if (selection === 'project-application') {
-            setShowProjectApplication(true);
-        } else if (selection === 'project-status') {
-            setShowProjectStatus(true);
-        }
     };
 
-    const navigateToMenu = () => {
+    const handleWorkflowSelection = (workflow: string) => {
         setShowFillForm(false);
         setShowScanForm(false);
         setShowProjectApplication(false);
         setShowProjectStatus(false);
-        setShowMenu(true);
+
+        if (workflow === 'fill-form') setShowFillForm(true);
+        if (workflow === 'scan-form') setShowScanForm(true);
+        if (workflow === 'project-application') setShowProjectApplication(true);
+        if (workflow === 'project-status') setShowProjectStatus(true);
     };
 
     return (
@@ -84,12 +80,12 @@ const Menu = () => {
                 </button>
             </div>
 
-            {showIntro && (
+            {currentMenu === 'main' && (
                 <>
                     <div className="flex items-center mb-4 space-x-4">
                         <Image
                             src={LogoImage}
-                            alt={t('logoAlt')} // Translated alt text
+                            alt={t('logoAlt')}
                             width={80}
                             height={80}
                             className="rounded"
@@ -101,51 +97,88 @@ const Menu = () => {
                     <MessageBubble
                         text={t('introMessage')}
                         timestamp={getCurrentTimestamp()}
+                        fullWidth
                     />
-                    <div className="text-center">
-                        <Button text={t('startButton')} onClick={handleStartClick} />
+                    <MessageBubble
+                        text={t('chooseMainMenu')}
+                        timestamp={getCurrentTimestamp()}
+                        fullWidth
+                    />
+                    <div className="grid grid-cols-1 space-y-2">
+                        <Button text={t('projects')} onClick={() => handleMenuSelection('projects')} className="w-full" />
+                        <Button text={t('reporting')} onClick={() => handleMenuSelection('reporting')} className="w-full" />
+                        <Button text={t('exitChat')} onClick={() => router.push('/login')} className="w-full" />
                     </div>
                 </>
             )}
 
-            {showMenu && (
-                <div className="w-full max-w-md mx-auto space-y-1 -mt-1">
+            {currentMenu === 'projects' && (
+                <>
                     <MessageBubble
-                        text={t('chooseMethod')}
+                        text={t('projectsInstructions')}
                         timestamp={getCurrentTimestamp()}
                         fullWidth
                     />
-                    <div className="grid grid-cols-1 -gap-1">
-                        <Button text={t('reportFillForm')} onClick={() => handleMenuSelection('fill-form')} className="w-full" />
-                        <Button text={t('reportScanForm')} onClick={() => handleMenuSelection('scan-form')} className="w-full" />
-                        <Button text={t('projectApplication')} onClick={() => handleMenuSelection('project-application')} className="w-full" />
-                        <Button text={t('projectStatus')} onClick={() => handleMenuSelection('project-status')} className="w-full" />
-                        <Button text={t('exit')} onClick={() => router.push('/')} className="w-full" />
+                    <div className="grid grid-cols-1 space-y-2">
+                        <Button
+                            text={t('projectApplication')}
+                            onClick={() => handleWorkflowSelection('project-application')}
+                            className="w-full"
+                        />
+                        <Button
+                            text={t('projectStatus')}
+                            onClick={() => handleWorkflowSelection('project-status')}
+                            className="w-full"
+                        />
+                        <Button text={t('returnToMainMenu')} onClick={() => handleMenuSelection('main')} className="w-full" />
                     </div>
-                </div>
+                </>
+            )}
+
+            {currentMenu === 'reporting' && (
+                <>
+                    <MessageBubble
+                        text={t('reportingInstructions')}
+                        timestamp={getCurrentTimestamp()}
+                        fullWidth
+                    />
+                    <div className="grid grid-cols-1 space-y-2">
+                        <Button
+                            text={t('reportFillForm')}
+                            onClick={() => handleWorkflowSelection('fill-form')}
+                            className="w-full"
+                        />
+                        <Button
+                            text={t('reportScanForm')}
+                            onClick={() => handleWorkflowSelection('scan-form')}
+                            className="w-full"
+                        />
+                        <Button text={t('returnToMainMenu')} onClick={() => handleMenuSelection('main')} className="w-full" />
+                    </div>
+                </>
             )}
 
             {showFillForm && (
-                <MessageBubble timestamp={getCurrentTimestamp()}>
-                    <FillForm onReturnToMenu={navigateToMenu} />
+                <MessageBubble>
+                    <FillForm onReturnToMenu={() => handleMenuSelection('reporting')} />
                 </MessageBubble>
             )}
 
             {showScanForm && (
                 <MessageBubble>
-                    <ScanForm onReturnToMenu={navigateToMenu} />
+                    <ScanForm onReturnToMenu={() => handleMenuSelection('reporting')} />
                 </MessageBubble>
             )}
 
             {showProjectApplication && (
                 <MessageBubble>
-                    <ProjectApplication onReturnToMenu={navigateToMenu} />
+                    <ProjectApplication onReturnToMenu={() => handleMenuSelection('projects')} />
                 </MessageBubble>
             )}
 
             {showProjectStatus && (
                 <MessageBubble>
-                    <ProjectStatus />
+                    <ProjectStatus onReturnToMenu={() => handleMenuSelection('projects')} />
                 </MessageBubble>
             )}
         </ChatContainer>
@@ -153,4 +186,8 @@ const Menu = () => {
 };
 
 export default Menu;
+
+
+
+
 
