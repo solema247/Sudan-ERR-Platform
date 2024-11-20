@@ -12,6 +12,8 @@ i18n.use(initReactI18next).init({
       scanForm: require("../public/locales/en/scan-form.json"),
       prompts: require("../public/locales/en/prompts.json"),
       offlineMode: require("../public/locales/en/offline-mode.json"),
+      projectApplication: require("../public/locales/en/project-application.json"),
+      projectStatus: require("../public/locales/en/project-status.json"),
     },
     ar: {
       login: require("../public/locales/ar/login.json"),
@@ -21,6 +23,8 @@ i18n.use(initReactI18next).init({
       scanForm: require("../public/locales/ar/scan-form.json"),
       prompts: require("../public/locales/ar/prompts.json"),
       offlineMode: require("../public/locales/ar/offline-mode.json"),
+      projectApplication: require("../public/locales/ar/project-application.json"),
+      projectStatus: require("../public/locales/ar/project-status.json"),
     },
     es: {
       login: require("../public/locales/es/login.json"),
@@ -30,6 +34,8 @@ i18n.use(initReactI18next).init({
       scanForm: require("../public/locales/es/scan-form.json"),
       prompts: require("../public/locales/es/prompts.json"),
       offlineMode: require("../public/locales/es/offline-mode.json"),
+      projectApplication: require("../public/locales/es/project-application.json"),
+      projectStatus: require("../public/locales/es/project-status.json"),
     },
   },
   lng: "en", // Default language
@@ -40,3 +46,4 @@ i18n.use(initReactI18next).init({
 });
 
 export default i18n;
+

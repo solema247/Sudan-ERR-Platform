@@ -8,6 +8,8 @@ import MessageBubble from '../components/MessageBubble';
 import Button from '../components/Button';
 import FillForm from '../pages/fill-form';
 import ScanForm from '../pages/scan-form';
+import ProjectApplication from '../pages/project-application';
+import ProjectStatus from '../pages/project-status';
 import LogoImage from '../public/avatar.JPG'; // Import the logo image
 
 const getCurrentTimestamp = () => {
@@ -20,6 +22,8 @@ const Menu = () => {
     const [showMenu, setShowMenu] = useState(false);
     const [showFillForm, setShowFillForm] = useState(false);
     const [showScanForm, setShowScanForm] = useState(false);
+    const [showProjectApplication, setShowProjectApplication] = useState(false);
+    const [showProjectStatus, setShowProjectStatus] = useState(false);
 
     const router = useRouter();
     const { t, i18n } = useTranslation('menu');
@@ -42,45 +46,40 @@ const Menu = () => {
     const handleMenuSelection = (selection: string) => {
         setShowFillForm(false);
         setShowScanForm(false);
+        setShowProjectApplication(false);
+        setShowProjectStatus(false);
         setShowMenu(false);
 
         if (selection === 'fill-form') {
             setShowFillForm(true);
         } else if (selection === 'scan-form') {
             setShowScanForm(true);
+        } else if (selection === 'project-application') {
+            setShowProjectApplication(true);
+        } else if (selection === 'project-status') {
+            setShowProjectStatus(true);
         }
     };
 
     const navigateToMenu = () => {
         setShowFillForm(false);
         setShowScanForm(false);
+        setShowProjectApplication(false);
+        setShowProjectStatus(false);
         setShowMenu(true);
-    };
-
-    const submitAnotherForm = () => {
-        setShowFillForm(true);
-    };
-
-    const submitAnotherScanForm = () => {
-        setShowScanForm(true);
-    };
-
-    const switchLanguage = (lang: string) => {
-        i18n.changeLanguage(lang);
-        router.push(router.pathname, router.asPath, { locale: lang });
     };
 
     return (
         <ChatContainer>
             {/* Language Switcher */}
             <div className="flex justify-center items-center mb-4 space-x-4">
-                <button onClick={() => switchLanguage('en')} className="mx-2 text-blue-500 hover:underline">
+                <button onClick={() => i18n.changeLanguage('en')} className="mx-2 text-blue-500 hover:underline">
                     English
                 </button>
-                <button onClick={() => switchLanguage('ar')} className="mx-2 text-blue-500 hover:underline">
+                <button onClick={() => i18n.changeLanguage('ar')} className="mx-2 text-blue-500 hover:underline">
                     العربية
                 </button>
-                <button onClick={() => switchLanguage('es')} className="mx-2 text-blue-500 hover:underline">
+                <button onClick={() => i18n.changeLanguage('es')} className="mx-2 text-blue-500 hover:underline">
                     Español
                 </button>
             </div>
@@ -119,6 +118,8 @@ const Menu = () => {
                     <div className="grid grid-cols-1 -gap-1">
                         <Button text={t('reportFillForm')} onClick={() => handleMenuSelection('fill-form')} className="w-full" />
                         <Button text={t('reportScanForm')} onClick={() => handleMenuSelection('scan-form')} className="w-full" />
+                        <Button text={t('projectApplication')} onClick={() => handleMenuSelection('project-application')} className="w-full" />
+                        <Button text={t('projectStatus')} onClick={() => handleMenuSelection('project-status')} className="w-full" />
                         <Button text={t('exit')} onClick={() => router.push('/')} className="w-full" />
                     </div>
                 </div>
@@ -126,19 +127,25 @@ const Menu = () => {
 
             {showFillForm && (
                 <MessageBubble timestamp={getCurrentTimestamp()}>
-                    <FillForm 
-                        onReturnToMenu={navigateToMenu} 
-                        onSubmitAnotherForm={submitAnotherForm} 
-                    />
+                    <FillForm onReturnToMenu={navigateToMenu} />
                 </MessageBubble>
             )}
 
             {showScanForm && (
                 <MessageBubble>
-                    <ScanForm 
-                        onReturnToMenu={navigateToMenu} 
-                        onSubmitAnotherForm={submitAnotherScanForm}
-                    />
+                    <ScanForm onReturnToMenu={navigateToMenu} />
+                </MessageBubble>
+            )}
+
+            {showProjectApplication && (
+                <MessageBubble>
+                    <ProjectApplication onReturnToMenu={navigateToMenu} />
+                </MessageBubble>
+            )}
+
+            {showProjectStatus && (
+                <MessageBubble>
+                    <ProjectStatus />
                 </MessageBubble>
             )}
         </ChatContainer>
@@ -146,3 +153,4 @@ const Menu = () => {
 };
 
 export default Menu;
+

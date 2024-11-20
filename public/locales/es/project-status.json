@@ -1,0 +1,14 @@
+{
+  "projectStatusTitle": "Estado del Proyecto",
+  "project": "Proyecto",
+  "state": "Estado",
+  "locality": "Localidad",
+  "status": "Estado",
+  "submittedAt": "Fecha de Envío",
+  "pending": "Pendiente",
+  "approved": "Aprobado",
+  "declined": "Rechazado",
+  "noProjectsFound": "No se encontraron proyectos.",
+  "loading": "Cargando...",
+  "returnToMenu": "Volver al Menú"
+}
