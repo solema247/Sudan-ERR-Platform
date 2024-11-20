@@ -178,7 +178,7 @@ const Menu = () => {
 
             {showProjectStatus && (
                 <MessageBubble>
-                    <ProjectStatus onReturnToMenu={() => handleMenuSelection('projects')} />
+                    <ProjectStatus onReturnToMenu={() => handleMenuSelection('main')} />
                 </MessageBubble>
             )}
         </ChatContainer>

@@ -1,4 +1,3 @@
-//pages/api/project-status.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '../../lib/supabaseClient';
 import { validateJWT } from '../../lib/auth'; // Import JWT validation helper
@@ -17,16 +16,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             // Fetch project applications for the logged-in user's ERR ID
             const { data, error } = await supabase
                 .from('err_projects')
-                .select('id, state, locality, planned_activities, expenses, status, submitted_at')
-                .eq('user_id', user.err_id);
+                .select(
+                    'id, state, locality, planned_activities, expenses, status, submitted_at'
+                )
+                .eq('err', user.err_id); // Match using the 'err' column
 
             if (error) {
-                return res.status(500).json({ success: false, message: 'Error fetching project applications' });
+                console.error('Error fetching project applications:', error);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Error fetching project applications',
+                });
             }
 
-            return res.status(200).json({ success: true, projects: data });
+            // Format projects with a human-readable title
+            const formattedProjects = data.map((project) => ({
+                id: project.id,
+                title: `${project.state || 'Unknown State'} - ${
+                    project.locality || 'Unknown Locality'
+                }`,
+                planned_activities: project.planned_activities,
+                expenses: project.expenses,
+                status: project.status,
+                submitted_at: project.submitted_at,
+            }));
+
+            return res.status(200).json({ success: true, projects: formattedProjects });
         } catch (error) {
-            return res.status(500).json({ success: false, message: 'Server error', error });
+            console.error('Server error during project status retrieval:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Server error',
+                error: error.message,
+            });
         }
     }
 

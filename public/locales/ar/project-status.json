@@ -1,14 +1,14 @@
 {
-  "projectStatusTitle": "Project Status",
-  "project": "Project",
-  "state": "State",
-  "locality": "Locality",
-  "status": "Status",
-  "submittedAt": "Submitted At",
-  "pending": "Pending",
-  "approved": "Approved",
-  "declined": "Declined",
-  "noProjectsFound": "No projects found.",
-  "loading": "Loading...",
-  "returnToMenu": "Return to Menu"
+  "projectStatusTitle": "حالة المشروع",
+  "project": "المشروع",
+  "state": "الولاية",
+  "locality": "المحلية",
+  "status": "الحالة",
+  "submittedAt": "تاريخ التقديم",
+  "pending": "قيد الانتظار",
+  "approved": "موافق عليه",
+  "declined": "مرفوض",
+  "noProjectsFound": "لم يتم العثور على مشاريع.",
+  "loading": "جاري التحميل...",
+  "returnToMenu": "العودة إلى القائمة"
 }

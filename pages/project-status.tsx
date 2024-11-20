@@ -4,7 +4,11 @@ import { useTranslation } from 'react-i18next';
 import MessageBubble from '../components/MessageBubble';
 import Button from '../components/Button';
 
-const ProjectStatus: React.FC = () => {
+interface ProjectStatusProps {
+    onReturnToMenu: () => void;
+}
+
+const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu }) => {
     const { t, i18n } = useTranslation('projectStatus'); // Use translations for the "project-status" namespace
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -32,29 +36,29 @@ const ProjectStatus: React.FC = () => {
 
     return (
         <div className="space-y-4 p-4">
+            {/* Page Title */}
             <h2 className="text-xl font-bold">{t('projectStatusTitle')}</h2>
 
+            {/* Loading Indicator */}
             {loading ? (
                 <MessageBubble>{t('loading')}</MessageBubble>
             ) : projects.length > 0 ? (
                 <div className="space-y-4">
+                    {/* Display Each Project */}
                     {projects.map((project, index) => (
                         <div
                             key={project.id || index}
                             className="p-4 border rounded-lg shadow-md bg-white"
                         >
-                            <h3 className="font-bold">{t('project')}: {index + 1}</h3>
-                            <p>
-                                <strong>{t('state')}:</strong> {project.state}
-                            </p>
-                            <p>
-                                <strong>{t('locality')}:</strong> {project.locality}
-                            </p>
+                            <h3 className="font-bold">
+                                {t('project')}: {project.title}
+                            </h3>
                             <p>
                                 <strong>{t('status')}:</strong> {t(project.status)}
                             </p>
                             <p>
-                                <strong>{t('submittedAt')}:</strong> {new Date(project.submitted_at).toLocaleString(i18n.language)}
+                                <strong>{t('submittedAt')}:</strong>{' '}
+                                {new Date(project.submitted_at).toLocaleString(i18n.language)}
                             </p>
                         </div>
                     ))}
@@ -63,9 +67,12 @@ const ProjectStatus: React.FC = () => {
                 <MessageBubble>{t('noProjectsFound')}</MessageBubble>
             )}
 
-            <Button text={t('returnToMenu')} onClick={() => window.history.back()} />
+            {/* Return to Menu Button */}
+            <Button text={t('returnToMenu')} onClick={onReturnToMenu} />
         </div>
     );
 };
 
 export default ProjectStatus;
+
+
