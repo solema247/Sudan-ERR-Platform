@@ -1,7 +1,7 @@
 // pages/api/project-application.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '../../lib/supabaseClient';
-import { validateJWT } from '../../lib/auth'; // Import JWT validation helper
+import { validateJWT } from '../../lib/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -14,11 +14,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
 
-        // Step 2: Handle GET method for fetching dropdown options
+        // Step 2: Handle GET request for fetching dropdown options
         if (req.method === 'GET') {
-            const { language } = req.query;
-
             try {
+                // Force language to 'en' as Supabase tables contain only English values
+                const language = 'en';
+
+                // Fetch planned activities, expense categories, and states
                 const [plannedActivitiesResult, expenseCategoriesResult, statesResultRaw] = await Promise.all([
                     supabase.from('planned_activities').select('id, name').eq('language', language),
                     supabase.from('expense_categories').select('id, name').eq('language', language),
@@ -32,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
 
                 // Group localities by state_name
-                const groupedStates = statesResultRaw.data.reduce((acc: any, item: any) => {
+                const groupedStates = statesResultRaw.data.reduce((acc: any[], item: any) => {
                     const state = acc.find((s: any) => s.state_name === item.state_name);
                     if (state) {
                         state.localities.push(item.locality);
@@ -42,6 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return acc;
                 }, []);
 
+                // Send the dropdown options in the response
                 return res.status(200).json({
                     success: true,
                     plannedActivities: plannedActivitiesResult.data || [],
@@ -58,7 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         }
 
-        // Step 3: Handle POST method for submitting project applications
+        // Step 3: Handle POST request for submitting project applications
         if (req.method === 'POST') {
             const {
                 date,
@@ -73,7 +76,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 estimated_timeframe,
                 additional_support,
                 officer_name,
-                language,
             } = req.body;
 
             console.log('Received POST data:', {
@@ -89,16 +91,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 estimated_timeframe,
                 additional_support,
                 officer_name,
-                language,
             });
 
-            // Validate JSONB fields
-            const validatedPlannedActivities = Array.isArray(planned_activities)
-                ? planned_activities
-                : [];
+            // Validate planned_activities and expenses fields
+            const validatedPlannedActivities = Array.isArray(planned_activities) ? planned_activities : [];
             const validatedExpenses = Array.isArray(expenses) ? expenses : [];
 
             try {
+                // Insert project application into Supabase
                 const { data, error } = await supabase.from('err_projects').insert([
                     {
                         date,
@@ -113,7 +113,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         estimated_timeframe,
                         additional_support,
                         officer_name,
-                        language: language || 'en', // Default to 'en' if undefined
+                        language: 'en', // Default language is English
                     },
                 ]);
 
@@ -142,7 +142,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         }
 
-        // Step 4: Handle unsupported methods
+        // Step 4: Handle unsupported HTTP methods
         res.setHeader('Allow', ['GET', 'POST']);
         return res.status(405).json({ success: false, message: 'Method not allowed' });
     } catch (error) {
@@ -154,5 +154,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
     }
 }
-
-

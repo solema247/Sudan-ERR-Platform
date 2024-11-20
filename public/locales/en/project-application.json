@@ -45,5 +45,13 @@
   "Children’s Activities": "Children’s Activities",
   "Productive Activities": "Productive Activities",
   "Protection & Evacuation": "Protection & Evacuation",
-  "Others (please specify)": "Others (please specify)"
+  "Others (please specify)": "Others (please specify)",
+  "quantity": "Quantity",
+  "activityDuration": "Activity Duration",
+  "placeOfOperation": "Place of Operation",
+  "description": "Description",
+  "frequency": "Frequency",
+  "unitPrice": "Unit Price",
+  "addRow": "Add Row",
+  "remove": "Remove"
 }

@@ -45,5 +45,13 @@
   "Children’s Activities": "أنشطة الأطفال",
   "Productive Activities": "الأنشطة الإنتاجية",
   "Protection & Evacuation": "الحماية والإخلاء",
-  "Others (please specify)": "أخرى (يرجى التحديد)"
+  "Others (please specify)": "أخرى (يرجى التحديد)",
+  "quantity": "الكمية",
+  "activityDuration": "مدة النشاط",
+  "placeOfOperation": "مكان التنفيذ",
+  "description": "الوصف",
+  "frequency": "التكرار",
+  "unitPrice": "سعر الوحدة",
+  "addRow": "إضافة صف",
+  "remove": "إزالة"
 }

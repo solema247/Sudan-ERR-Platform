@@ -1,5 +1,6 @@
 //components.DynamicActivityForm.tsx
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface DynamicActivityFormProps {
   title: string;
@@ -12,51 +13,52 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
   options,
   onChange,
 }) => {
-  const getFields = (title: string) => {
-    switch (title) {
-      case 'Planned Activities':
-        return {
-          fieldNames: {
-            field1: 'quantity',
-            field2: 'activityDuration',
-            field3: 'placeOfOperation',
-          },
-          placeholders: {
-            field1: 'Quantity',
-            field2: 'Activity Duration',
-            field3: 'Place of Operation',
-          },
-        };
-      case 'Expenses':
-        return {
-          fieldNames: {
-            field1: 'description',
-            field2: 'frequency',
-            field3: 'unitPrice',
-          },
-          placeholders: {
-            field1: 'Description',
-            field2: 'Freq.',
-            field3: 'Unit Price',
-          },
-        };
-      default:
-        return {
-          fieldNames: {
-            field1: 'field1',
-            field2: 'field2',
-            field3: 'field3',
-          },
-          placeholders: {
-            field1: 'Field 1',
-            field2: 'Field 2',
-            field3: 'Field 3',
-          },
-        };
+  const { t } = useTranslation('projectApplication');
+
+  const getFields = (translatedTitle: string) => {
+    if (translatedTitle === t('plannedActivities')) {
+      return {
+        fieldNames: {
+          field1: 'quantity',
+          field2: 'activityDuration',
+          field3: 'placeOfOperation',
+        },
+        placeholders: {
+          field1: t('quantity'),
+          field2: t('activityDuration'),
+          field3: t('placeOfOperation'),
+        },
+      };
+    } else if (translatedTitle === t('expenses')) {
+      return {
+        fieldNames: {
+          field1: 'description',
+          field2: 'frequency',
+          field3: 'unitPrice',
+        },
+        placeholders: {
+          field1: t('description'),
+          field2: t('frequency'),
+          field3: t('unitPrice'),
+        },
+      };
     }
+    return {
+      fieldNames: {
+        field1: 'field1',
+        field2: 'field2',
+        field3: 'field3',
+      },
+      placeholders: {
+        field1: t('field1'),
+        field2: t('field2'),
+        field3: t('field3'),
+      },
+    };
   };
 
-  const { fieldNames, placeholders } = getFields(title);
+  const translatedTitle = t(title); // Translate title dynamically
+  const { fieldNames, placeholders } = getFields(translatedTitle);
 
   const [rows, setRows] = useState([
     {
@@ -68,8 +70,8 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
   ]);
 
   const handleAddRow = () => {
-    setRows([
-      ...rows,
+    setRows((prevRows) => [
+      ...prevRows,
       {
         selectedOption: '',
         [fieldNames.field1]: '',
@@ -94,13 +96,16 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
 
   return (
     <div className="space-y-4 bg-gray-50 p-4 rounded-lg shadow-md">
-      <h3 className="font-bold text-lg">{title}</h3>
+      {/* Form Title */}
+      <h3 className="font-bold text-lg">{translatedTitle}</h3>
+
+      {/* Form Rows */}
       {rows.map((row, index) => (
         <div
           key={index}
           className="flex flex-wrap items-center space-y-2 border-b pb-2 mb-2"
         >
-          {/* Dropdown */}
+          {/* Dropdown for Activities/Expenses */}
           <select
             className="w-full md:w-1/4 p-2 border rounded"
             value={row.selectedOption}
@@ -108,7 +113,7 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
               handleRowChange(index, 'selectedOption', e.target.value)
             }
           >
-            <option value="">{title}</option>
+            <option value="">{translatedTitle}</option>
             {options.map((option) => (
               <option key={option.id} value={option.name}>
                 {option.name}
@@ -116,7 +121,7 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
             ))}
           </select>
 
-          {/* Input 1 */}
+          {/* Input Field 1 */}
           <input
             type="text"
             placeholder={placeholders.field1}
@@ -127,7 +132,7 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
             }
           />
 
-          {/* Input 2 */}
+          {/* Input Field 2 */}
           <input
             type="text"
             placeholder={placeholders.field2}
@@ -138,7 +143,7 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
             }
           />
 
-          {/* Input 3 */}
+          {/* Input Field 3 */}
           <input
             type="text"
             placeholder={placeholders.field3}
@@ -149,27 +154,32 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
             }
           />
 
-          {/* Remove Button */}
+          {/* Remove Row Button */}
           <button
             type="button"
             className="bg-red-500 text-white px-4 py-2 rounded ml-2"
             onClick={() => handleRemoveRow(index)}
           >
-            Remove
+            {t('remove')}
           </button>
         </div>
       ))}
+
+      {/* Add Row Button */}
       <button
         type="button"
         className="bg-primaryGreen text-white px-4 py-2 rounded"
         onClick={handleAddRow}
       >
-        Add Row
+        {t('addRow')}
       </button>
     </div>
   );
 };
 
 export default DynamicActivityForm;
+
+
+
 
 

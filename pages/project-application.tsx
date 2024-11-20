@@ -1,4 +1,4 @@
-// pages/project-application.tsx
+//pages/project-application.tsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../components/Button';
@@ -40,8 +40,20 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                 const res = await fetch(`/api/project-application?language=${i18n.language}`);
                 if (res.ok) {
                     const data = await res.json();
-                    setPlannedActivities(data.plannedActivities);
-                    setExpenseCategories(data.expenseCategories);
+
+                    // Map fetched data to translation keys
+                    const translatedPlannedActivities = data.plannedActivities.map((activity: any) => ({
+                        id: activity.id,
+                        name: t(activity.name), // Map `name` to translation key
+                    }));
+
+                    const translatedExpenseCategories = data.expenseCategories.map((expense: any) => ({
+                        id: expense.id,
+                        name: t(expense.name), // Map `name` to translation key
+                    }));
+
+                    setPlannedActivities(translatedPlannedActivities);
+                    setExpenseCategories(translatedExpenseCategories);
                     setStateLocality({ states: data.states, localities: [] });
                 } else {
                     console.error('Failed to fetch dropdown options');
@@ -54,7 +66,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
         };
 
         fetchOptions();
-    }, [i18n.language]);
+    }, [i18n.language, t]); // Include `t` for dynamic translations
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -257,7 +269,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             />
                         </label>
 
-                        {/* Officer Phone */}
+                        {/* Officer Name */}
                         <label>
                             {t('officerName')}
                             <input
@@ -292,4 +304,3 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
 };
 
 export default ProjectApplication;
-

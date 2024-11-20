@@ -45,5 +45,13 @@
   "Children’s Activities": "Actividades para niños",
   "Productive Activities": "Actividades productivas",
   "Protection & Evacuation": "Protección y evacuación",
-  "Others (please specify)": "Otros (por favor especifique)"
+  "Others (please specify)": "Otros (por favor especifique)",
+  "quantity": "Cantidad",
+  "activityDuration": "Duración de la actividad",
+  "placeOfOperation": "Lugar de operación",
+  "description": "Descripción",
+  "frequency": "Frecuencia",
+  "unitPrice": "Precio unitario",
+  "addRow": "Añadir fila",
+  "remove": "Eliminar"
 }
