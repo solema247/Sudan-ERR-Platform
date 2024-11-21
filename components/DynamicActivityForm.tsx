@@ -95,7 +95,7 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
   };
 
   return (
-    <div className="space-y-4 bg-gray-50 p-4 rounded-lg shadow-md">
+    <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
       {/* Form Title */}
       <h3 className="font-bold text-lg">{translatedTitle}</h3>
 

@@ -111,7 +111,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
         <>
             {!formSubmitted ? (
                 <FormBubble>
-                    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded-lg shadow-md">
+                    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded-lg">
                         {/* Date */}
                         <label>
                             {t('date')}
