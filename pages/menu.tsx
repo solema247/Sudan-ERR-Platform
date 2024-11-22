@@ -8,6 +8,7 @@ import MessageBubble from '../components/MessageBubble';
 import Button from '../components/Button';
 import FillForm from '../pages/fill-form';
 import ScanForm from '../pages/scan-form';
+import ScanCustomForm from '../pages/scan-custom-form'; // Import the new component
 import ProjectApplication from '../pages/project-application';
 import ProjectStatus from '../pages/project-status';
 import LogoImage from '../public/avatar.JPG';
@@ -21,6 +22,7 @@ const Menu = () => {
     const [currentMenu, setCurrentMenu] = useState('main'); // Tracks the current menu
     const [showFillForm, setShowFillForm] = useState(false);
     const [showScanForm, setShowScanForm] = useState(false);
+    const [showScanCustomForm, setShowScanCustomForm] = useState(false); // New state
     const [showProjectApplication, setShowProjectApplication] = useState(false);
     const [showProjectStatus, setShowProjectStatus] = useState(false);
 
@@ -49,6 +51,7 @@ const Menu = () => {
         setCurrentMenu(menu);
         setShowFillForm(false);
         setShowScanForm(false);
+        setShowScanCustomForm(false); // Reset state
         setShowProjectApplication(false);
         setShowProjectStatus(false);
     };
@@ -56,11 +59,13 @@ const Menu = () => {
     const handleWorkflowSelection = (workflow: string) => {
         setShowFillForm(false);
         setShowScanForm(false);
+        setShowScanCustomForm(false); // Reset state
         setShowProjectApplication(false);
         setShowProjectStatus(false);
 
         if (workflow === 'fill-form') setShowFillForm(true);
         if (workflow === 'scan-form') setShowScanForm(true);
+        if (workflow === 'scan-custom-form') setShowScanCustomForm(true); // Handle new workflow
         if (workflow === 'project-application') setShowProjectApplication(true);
         if (workflow === 'project-status') setShowProjectStatus(true);
     };
@@ -153,6 +158,11 @@ const Menu = () => {
                             onClick={() => handleWorkflowSelection('scan-form')}
                             className="w-full"
                         />
+                        <Button
+                            text={t('reportScanCustomForm')} // New button
+                            onClick={() => handleWorkflowSelection('scan-custom-form')} // New handler
+                            className="w-full"
+                        />
                         <Button text={t('returnToMainMenu')} onClick={() => handleMenuSelection('main')} className="w-full" />
                     </div>
                 </>
@@ -167,6 +177,12 @@ const Menu = () => {
             {showScanForm && (
                 <MessageBubble>
                     <ScanForm onReturnToMenu={() => handleMenuSelection('reporting')} />
+                </MessageBubble>
+            )}
+
+            {showScanCustomForm && (
+                <MessageBubble>
+                    <ScanCustomForm onReturnToMenu={() => handleMenuSelection('reporting')} />
                 </MessageBubble>
             )}
 
@@ -186,6 +202,7 @@ const Menu = () => {
 };
 
 export default Menu;
+
 
 
 
