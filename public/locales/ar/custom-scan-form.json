@@ -4,7 +4,7 @@
   "choose_file": "اختر ملف",
   "upload_and_scan": "تحميل ومسح",
   "processing": "جاري المعالجة...",
-  "ocr_results": "نتائج التعرف الضوئي على الحروف",
+  "ocr_results": "نتائج التعرف الضوئي",
   "ocr_output_title": "النص المستخرج من التعرف الضوئي",
   "uploaded_image_alt": "معاينة للصورة المحملة",
   "unused_text_title": "النص غير المستخدم",
@@ -19,19 +19,26 @@
   "scan_success": "تمت معالجة المسح بنجاح.",
   "review_and_edit": "مراجعة وتحرير النموذج",
   "completion": "الإكمال: {{completion}}%",
+  "general": {
+    "date": "التاريخ",
+    "err_id": "معرّف غرفة الطوارئ"
+  },
   "financial_summary": {
+    "title": "الملخص المالي",
     "total_expenses": "إجمالي النفقات",
     "total_grant_received": "إجمالي المنحة المستلمة",
     "total_other_sources": "إجمالي المصادر الأخرى",
     "remainder": "المبلغ المتبقي"
   },
   "additional_questions": {
+    "title": "أسئلة إضافية",
     "excess_expenses": "النفقات الزائدة",
     "surplus_use": "استخدام الفائض",
     "lessons_learned": "الدروس المستفادة",
     "training_needs": "احتياجات التدريب"
   },
   "expenses": {
+    "title": "النفقات",
     "activity": "النشاط",
     "description": "الوصف",
     "payment_date": "تاريخ الدفع",

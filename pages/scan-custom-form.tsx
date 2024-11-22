@@ -7,7 +7,7 @@ import Button from "../components/Button";
 import CustomFormReview from "../components/CustomFormReview";
 
 const ScanCustomForm: React.FC = () => {
-    const { t, i18n } = useTranslation("scanCustomForm");
+    const { t, i18n } = useTranslation("customScanForm");
     const [file, setFile] = useState<File | null>(null);
     const [localImageUrl, setLocalImageUrl] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);

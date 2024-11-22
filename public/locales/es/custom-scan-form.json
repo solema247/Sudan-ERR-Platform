@@ -1,10 +1,10 @@
 {
   "title": "Formulario de escaneo personalizado",
-  "instruction": "Por favor, sube una imagen del formulario escaneado. Asegúrate de que sea claro y legible.",
+  "instruction": "Por favor, cargue una imagen del formulario escaneado. Asegúrese de que sea clara y legible.",
   "choose_file": "Seleccionar archivo",
-  "upload_and_scan": "Subir y escanear",
+  "upload_and_scan": "Cargar y escanear",
   "processing": "Procesando...",
-  "ocr_results": "Resultados del OCR",
+  "ocr_results": "Resultados OCR",
   "ocr_output_title": "Texto extraído del OCR",
   "uploaded_image_alt": "Vista previa de la imagen cargada",
   "unused_text_title": "Texto no utilizado",
@@ -12,33 +12,40 @@
   "potentially_useful_information": "Información potencialmente útil",
   "no_data_available": "No hay datos disponibles",
   "errors": {
-    "no_file_selected": "Por favor, selecciona un archivo antes de continuar.",
-    "scan_failed": "El escaneo falló. Inténtalo de nuevo.",
+    "no_file_selected": "Por favor, seleccione un archivo antes de continuar.",
+    "scan_failed": "El escaneo falló. Por favor, intente de nuevo.",
     "server_error": "Error del servidor. Código de estado: {{status}}"
   },
-  "scan_success": "Escaneo procesado con éxito.",
+  "scan_success": "El escaneo se procesó correctamente.",
   "review_and_edit": "Revisar y editar formulario",
-  "completion": "Progreso: {{completion}}%",
+  "completion": "Completado: {{completion}}%",
+  "general": {
+    "date": "Fecha",
+    "err_id": "ID de emergencia"
+  },
   "financial_summary": {
+    "title": "Resumen financiero",
     "total_expenses": "Gastos totales",
     "total_grant_received": "Subvención total recibida",
     "total_other_sources": "Total de otras fuentes",
     "remainder": "Remanente"
   },
   "additional_questions": {
-    "excess_expenses": "Gastos excesivos",
+    "title": "Preguntas adicionales",
+    "excess_expenses": "Gastos excedentes",
     "surplus_use": "Uso del excedente",
     "lessons_learned": "Lecciones aprendidas",
-    "training_needs": "Necesidades de formación"
+    "training_needs": "Necesidades de capacitación"
   },
   "expenses": {
+    "title": "Gastos",
     "activity": "Actividad",
     "description": "Descripción",
     "payment_date": "Fecha de pago",
     "seller": "Vendedor",
     "payment_method": "Método de pago",
     "receipt_no": "Número de recibo",
-    "amount": "Monto"
+    "amount": "Cantidad"
   },
   "buttons": {
     "submit": "Enviar",

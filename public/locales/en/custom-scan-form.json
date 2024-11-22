@@ -19,19 +19,26 @@
   "scan_success": "Scan processed successfully.",
   "review_and_edit": "Review and Edit Form",
   "completion": "Completion: {{completion}}%",
+  "general": {
+    "date": "Date",
+    "err_id": "ERR ID"
+  },
   "financial_summary": {
+    "title": "Financial Summary",
     "total_expenses": "Total Expenses",
     "total_grant_received": "Total Grant Received",
     "total_other_sources": "Total Other Sources",
     "remainder": "Remainder"
   },
   "additional_questions": {
+    "title": "Additional Questions",
     "excess_expenses": "Excess Expenses",
     "surplus_use": "Surplus Use",
     "lessons_learned": "Lessons Learned",
     "training_needs": "Training Needs"
   },
   "expenses": {
+    "title": "Expenses",
     "activity": "Activity",
     "description": "Description",
     "payment_date": "Payment Date",
