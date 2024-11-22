@@ -137,8 +137,8 @@ async function classifyWithChatGPT(language: string, ocrText: string): Promise<a
 async function uploadToSupabase(filePath: string, fileName: string): Promise<string> {
   const fileBuffer = fs.readFileSync(filePath);
   const { data, error } = await supabase.storage
-    .from('scanned_forms') // Replace with your Supabase storage bucket name
-    .upload(`uploads/${Date.now()}-${fileName}`, fileBuffer, {
+    .from('expense-reports') // Updated bucket name
+    .upload(`custom-reports/${Date.now()}-${fileName}`, fileBuffer, { // Updated folder path
       cacheControl: '3600',
       upsert: false,
       contentType: 'image/jpeg',
@@ -150,7 +150,7 @@ async function uploadToSupabase(filePath: string, fileName: string): Promise<str
   }
 
   // Generate public URL
-  const { publicUrl } = supabase.storage.from('scanned_forms').getPublicUrl(data.path);
+  const { publicUrl } = supabase.storage.from('expense-reports').getPublicUrl(data.path); // Updated bucket name
   console.log('File uploaded to Supabase with URL:', publicUrl);
   return publicUrl;
 }

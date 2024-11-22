@@ -131,10 +131,30 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
   // Handle form submission
   const handleSubmit = async () => {
     setIsSubmitting(true);
+
     try {
-      await onSubmit(formData);
+      // Make the API call to submit the form data
+      const response = await fetch("/api/submit-custom-form", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData), // Send the updated formData to the backend
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error submitting the form:", errorText);
+        alert(t("errors.submit_failed")); // Display error message to the user
+        return;
+      }
+
+      const result = await response.json();
+      console.log("Form submitted successfully:", result);
+      alert(t("messages.form_submission_success")); // Show success message to the user
     } catch (error) {
-      console.error(t("errors.submit_failed"), error);
+      console.error("Error during form submission:", error);
+      alert(t("errors.internal_server_error"));
     } finally {
       setIsSubmitting(false);
     }
