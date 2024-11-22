@@ -1,0 +1,48 @@
+{
+  "title": "Custom Scan Form",
+  "instruction": "Please upload an image of the scanned form. Make sure it is clear and readable.",
+  "choose_file": "Choose File",
+  "upload_and_scan": "Upload and Scan",
+  "processing": "Processing...",
+  "ocr_results": "OCR Results",
+  "ocr_output_title": "Extracted OCR Text",
+  "uploaded_image_alt": "Preview of uploaded image",
+  "unused_text_title": "Unused Text",
+  "likely_ocr_errors": "Likely OCR Errors",
+  "potentially_useful_information": "Potentially Useful Information",
+  "no_data_available": "No data available",
+  "errors": {
+    "no_file_selected": "Please select a file before proceeding.",
+    "scan_failed": "The scan failed. Please try again.",
+    "server_error": "Server error. Status code: {{status}}"
+  },
+  "scan_success": "Scan processed successfully.",
+  "review_and_edit": "Review and Edit Form",
+  "completion": "Completion: {{completion}}%",
+  "financial_summary": {
+    "total_expenses": "Total Expenses",
+    "total_grant_received": "Total Grant Received",
+    "total_other_sources": "Total Other Sources",
+    "remainder": "Remainder"
+  },
+  "additional_questions": {
+    "excess_expenses": "Excess Expenses",
+    "surplus_use": "Surplus Use",
+    "lessons_learned": "Lessons Learned",
+    "training_needs": "Training Needs"
+  },
+  "expenses": {
+    "activity": "Activity",
+    "description": "Description",
+    "payment_date": "Payment Date",
+    "seller": "Seller",
+    "payment_method": "Payment Method",
+    "receipt_no": "Receipt No.",
+    "amount": "Amount"
+  },
+  "buttons": {
+    "submit": "Submit",
+    "hide_unused_text": "Hide Unused Text",
+    "show_unused_text": "Show Unused Text"
+  }
+}

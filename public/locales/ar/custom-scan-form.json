@@ -1,0 +1,48 @@
+{
+  "title": "نموذج المسح المخصص",
+  "instruction": "يرجى تحميل صورة للنموذج الممسوح ضوئيًا. تأكد من أنها واضحة ومقروءة.",
+  "choose_file": "اختر ملف",
+  "upload_and_scan": "تحميل ومسح",
+  "processing": "جاري المعالجة...",
+  "ocr_results": "نتائج التعرف الضوئي على الحروف",
+  "ocr_output_title": "النص المستخرج من التعرف الضوئي",
+  "uploaded_image_alt": "معاينة للصورة المحملة",
+  "unused_text_title": "النص غير المستخدم",
+  "likely_ocr_errors": "الأخطاء المحتملة للتعرف الضوئي",
+  "potentially_useful_information": "معلومات محتملة الاستخدام",
+  "no_data_available": "لا توجد بيانات",
+  "errors": {
+    "no_file_selected": "يرجى اختيار ملف قبل المتابعة.",
+    "scan_failed": "فشل المسح. يرجى المحاولة مرة أخرى.",
+    "server_error": "خطأ في الخادم. رمز الحالة: {{status}}"
+  },
+  "scan_success": "تمت معالجة المسح بنجاح.",
+  "review_and_edit": "مراجعة وتحرير النموذج",
+  "completion": "الإكمال: {{completion}}%",
+  "financial_summary": {
+    "total_expenses": "إجمالي النفقات",
+    "total_grant_received": "إجمالي المنحة المستلمة",
+    "total_other_sources": "إجمالي المصادر الأخرى",
+    "remainder": "المبلغ المتبقي"
+  },
+  "additional_questions": {
+    "excess_expenses": "النفقات الزائدة",
+    "surplus_use": "استخدام الفائض",
+    "lessons_learned": "الدروس المستفادة",
+    "training_needs": "احتياجات التدريب"
+  },
+  "expenses": {
+    "activity": "النشاط",
+    "description": "الوصف",
+    "payment_date": "تاريخ الدفع",
+    "seller": "البائع",
+    "payment_method": "طريقة الدفع",
+    "receipt_no": "رقم الإيصال",
+    "amount": "المبلغ"
+  },
+  "buttons": {
+    "submit": "إرسال",
+    "hide_unused_text": "إخفاء النص غير المستخدم",
+    "show_unused_text": "عرض النص غير المستخدم"
+  }
+}

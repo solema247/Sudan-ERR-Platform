@@ -1,5 +1,6 @@
 //components/CustomFormReview.tsx
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Button from "./Button";
 
 interface ExpenseEntry {
@@ -38,6 +39,7 @@ interface CustomFormReviewProps {
 }
 
 const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) => {
+  const { t } = useTranslation("customScanForm");
   const [formData, setFormData] = useState(data);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completionPercentage, setCompletionPercentage] = useState(0);
@@ -52,13 +54,20 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
       Object.keys(obj).forEach((key) => {
         totalFields++;
         const value = obj[key];
+        // Check if the field is not empty
         if (
           value &&
           value !== "" &&
-          value !== "غير متوفر" && // Exclude "غير متوفر" as incomplete
-          value !== "Not available"
+          value !== "غير متوفر" && // Explicitly check raw Arabic value
+          value !== "Not available" // Explicitly check raw English value
         ) {
-          completedFields++;
+          // Check for valid date format (only for date fields)
+          if (key.includes("date")) {
+            const isValidDate = !isNaN(Date.parse(value)); // Ensure value is a valid date
+            if (isValidDate) completedFields++;
+          } else {
+            completedFields++;
+          }
         }
       });
     };
@@ -89,10 +98,23 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
   // Handle general field changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
+
+    // Check if the field belongs to financial_summary
+    if (name in (formData.financial_summary || {})) {
+      setFormData((prevState) => ({
+        ...prevState,
+        financial_summary: {
+          ...prevState.financial_summary,
+          [name]: value, // Update the specific field in financial_summary
+        },
+      }));
+    } else {
+      // Update top-level fields
+      setFormData((prevState) => ({
+        ...prevState,
+        [name]: value,
+      }));
+    }
   };
 
   // Handle changes for expense fields
@@ -112,7 +134,7 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
     try {
       await onSubmit(formData);
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error(t("errors.submit_failed"), error);
     } finally {
       setIsSubmitting(false);
     }
@@ -127,12 +149,12 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
           style={{ width: `${completionPercentage}%` }}
         ></div>
       </div>
-      <p className="text-sm text-gray-700 mb-4">{`Completion: ${completionPercentage}%`}</p>
+      <p className="text-sm text-gray-700 mb-4">{t("completion", { completion: completionPercentage })}</p>
 
       {/* General Information */}
-      <h2 className="text-lg font-semibold mb-4">Review and Edit Form</h2>
+      <h2 className="text-lg font-semibold mb-4">{t("review_and_edit")}</h2>
       <div className="mb-4">
-        <label className="block mb-2 font-semibold">Date</label>
+        <label className="block mb-2 font-semibold">{t("general.date")}</label>
         <input
           type="date"
           name="date"
@@ -143,7 +165,7 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
       </div>
 
       <div className="mb-4">
-        <label className="block mb-2 font-semibold">ERR ID</label>
+        <label className="block mb-2 font-semibold">{t("general.err_id")}</label>
         <input
           type="text"
           name="err_id"
@@ -154,174 +176,76 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
       </div>
 
       {/* Expenses Section */}
-      <h3 className="text-md font-semibold mt-6 mb-2">Expenses</h3>
+      <h3 className="text-md font-semibold mt-6 mb-2">{t("expenses.title")}</h3>
       {formData.expenses && formData.expenses.length > 0 ? (
         formData.expenses.map((expense, index) => (
           <div key={index} className="mb-4 p-3 border rounded bg-gray-50 space-y-2">
-            <label>
-              Activity
-              <input
-                type="text"
-                name="activity"
-                value={expense.activity || ""}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className="w-full p-2 border rounded"
-              />
-            </label>
-            <label>
-              Description
-              <input
-                type="text"
-                name="description"
-                value={expense.description || ""}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className="w-full p-2 border rounded"
-              />
-            </label>
-            <label>
-              Payment Date
-              <input
-                type="date"
-                name="payment_date"
-                value={expense.payment_date || ""}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className="w-full p-2 border rounded"
-              />
-            </label>
-            <label>
-              Seller
-              <input
-                type="text"
-                name="seller"
-                value={expense.seller || ""}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className="w-full p-2 border rounded"
-              />
-            </label>
-            <label>
-              Payment Method
-              <select
-                name="payment_method"
-                value={expense.payment_method || ""}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className="w-full p-2 border rounded"
-              >
-                <option value="cash">Cash</option>
-                <option value="bank_app">Bank App</option>
-              </select>
-            </label>
-            <label>
-              Receipt No.
-              <input
-                type="text"
-                name="receipt_no"
-                value={expense.receipt_no || ""}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className="w-full p-2 border rounded"
-              />
-            </label>
-            <label>
-              Amount
-              <input
-                type="number"
-                name="amount"
-                value={expense.amount || ""}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className="w-full p-2 border rounded"
-              />
-            </label>
+            {Object.keys(expense).map((key) => (
+              <label key={key}>
+                {t(`expenses.${key}`)}
+                <input
+                  type={key === "payment_date" ? "date" : "text"} // Render calendar picker for payment_date
+                  name={key}
+                  value={expense[key] || ""}
+                  onChange={(e) => handleExpenseChange(index, e)}
+                  className="w-full p-2 border rounded"
+                />
+              </label>
+            ))}
           </div>
         ))
       ) : (
-        <p>No expenses available.</p>
+        <p>{t("expenses.no_expenses")}</p>
       )}
 
       {/* Financial Summary */}
-      <h3 className="text-md font-semibold mt-6 mb-2">Financial Summary</h3>
+      <h3 className="text-md font-semibold mt-6 mb-2">{t("financial_summary.title")}</h3>
       <div className="space-y-4">
-        <label>Total Expenses</label>
-        <input
-          type="number"
-          name="total_expenses"
-          value={formData.financial_summary?.total_expenses || ""}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded"
-        />
-        <label>Total Grant Received</label>
-        <input
-          type="number"
-          name="total_grant_received"
-          value={formData.financial_summary?.total_grant_received || ""}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded"
-        />
-        <label>Total Other Sources</label>
-        <input
-          type="number"
-          name="total_other_sources"
-          value={formData.financial_summary?.total_other_sources || ""}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded"
-        />
-        <label>Remainder</label>
-        <input
-          type="number"
-          name="remainder"
-          value={formData.financial_summary?.remainder || ""}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded"
-        />
+        {Object.keys(formData.financial_summary || {}).map((key) => (
+          <label key={key}>
+            {t(`financial_summary.${key}`)}
+            <input
+              type="text"
+              name={key}
+              value={formData.financial_summary?.[key] || ""}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+            />
+          </label>
+        ))}
       </div>
 
       {/* Additional Questions */}
-      <h3 className="text-md font-semibold mt-6 mb-2">Additional Questions</h3>
+      <h3 className="text-md font-semibold mt-6 mb-2">{t("additional_questions.title")}</h3>
       <div className="space-y-4">
-        <label>Excess Expenses</label>
-        <textarea
-          name="excess_expenses"
-          value={formData.additional_questions?.excess_expenses || ""}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded"
-        />
-        <label>Surplus Use</label>
-        <textarea
-          name="surplus_use"
-          value={formData.additional_questions?.surplus_use || ""}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded"
-        />
-        <label>Lessons Learned</label>
-        <textarea
-          name="lessons_learned"
-          value={formData.additional_questions?.lessons_learned || ""}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded"
-        />
-        <label>Training Needs</label>
-        <textarea
-          name="training_needs"
-          value={formData.additional_questions?.training_needs || ""}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded"
-        />
+        {Object.keys(formData.additional_questions || {}).map((key) => (
+          <label key={key}>
+            {t(`additional_questions.${key}`)}
+            <textarea
+              name={key}
+              value={formData.additional_questions?.[key] || ""}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+            />
+          </label>
+        ))}
       </div>
 
       {/* Unused Text Section */}
       {formData.unused_text && (
         <div className="mt-6">
           <Button
-            text={showUnusedText ? "Hide Unused Text" : "Show Unused Text"}
+            text={t(showUnusedText ? "buttons.hide_unused_text" : "buttons.show_unused_text")}
             onClick={() => setShowUnusedText(!showUnusedText)}
           />
           {showUnusedText && (
             <div className="bg-gray-100 p-4 rounded mt-4">
-              <h3 className="text-md font-semibold">Unused Text</h3>
+              <h3 className="text-md font-semibold">{t("unused_text_title")}</h3>
               <p>
-                <strong>Likely OCR Errors:</strong> {formData.unused_text?.likely_ocr_errors || "None"}
+                <strong>{t("likely_ocr_errors")}:</strong> {formData.unused_text?.likely_ocr_errors || t("no_data_available")}
               </p>
               <p>
-                <strong>Potentially Useful Information:</strong>{" "}
-                {formData.unused_text?.potentially_useful_information || "None"}
+                <strong>{t("potentially_useful_information")}:</strong> {formData.unused_text?.potentially_useful_information || t("no_data_available")}
               </p>
             </div>
           )}
@@ -331,7 +255,7 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
       {/* Submit Button */}
       <div className="mt-6">
         <Button
-          text={isSubmitting ? "Submitting..." : "Submit"}
+          text={isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
           onClick={handleSubmit}
           disabled={isSubmitting}
         />
@@ -341,6 +265,7 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
 };
 
 export default CustomFormReview;
+
 
 
 

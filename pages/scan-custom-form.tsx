@@ -111,7 +111,9 @@ const ScanCustomForm: React.FC = () => {
                         </div>
                         <div>
                             <h3 className="text-md font-semibold">{t("ocr_output_title")}</h3>
-                            <pre className="bg-gray-100 p-2 rounded">{ocrOutput}</pre>
+                            <div className="bg-gray-100 p-2 rounded max-h-40 overflow-y-scroll border border-gray-300">
+                                <pre className="whitespace-pre-wrap">{ocrOutput}</pre>
+                            </div>
                         </div>
                     </div>
                 </CustomScanBubble>
@@ -126,27 +128,6 @@ const ScanCustomForm: React.FC = () => {
                         // Handle form submission logic here
                     }}
                 />
-            )}
-
-            {/* Display unused text categorization */}
-            {unusedText && (
-                <CustomScanBubble>
-                    <div>
-                        <h3 className="text-md font-semibold">{t("unused_text_title")}</h3>
-                        <div>
-                            <strong>{t("likely_ocr_errors")}</strong>
-                            <pre className="bg-gray-100 p-2 rounded">
-                                {unusedText?.likely_ocr_errors || t("no_data_available")}
-                            </pre>
-                        </div>
-                        <div>
-                            <strong>{t("potentially_useful_information")}</strong>
-                            <pre className="bg-gray-100 p-2 rounded">
-                                {unusedText?.potentially_useful_information || t("no_data_available")}
-                            </pre>
-                        </div>
-                    </div>
-                </CustomScanBubble>
             )}
         </>
     );
