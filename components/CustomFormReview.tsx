@@ -42,6 +42,7 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
   const { t } = useTranslation("customScanForm");
   const [formData, setFormData] = useState(data);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false); 
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [showUnusedText, setShowUnusedText] = useState(false);
 
@@ -130,38 +131,41 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
 
   // Handle form submission
   const handleSubmit = async () => {
-    setIsSubmitting(true);
+      setIsSubmitting(true);
 
-    try {
-      // Make the API call to submit the form data
-      const response = await fetch("/api/submit-custom-form", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData), // Send the updated formData to the backend
-      });
+      try {
+          const response = await fetch("/api/submit-custom-form", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify(formData),
+          });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Error submitting the form:", errorText);
-        alert(t("errors.submit_failed")); // Display error message to the user
-        return;
+          if (!response.ok) {
+              const errorText = await response.text();
+              console.error("Error submitting the form:", errorText);
+              alert(t("errors.submit_failed"));
+              return;
+          }
+
+          const result = await response.json();
+          console.log("Form submitted successfully:", result);
+
+          setFormSubmitted(true); // Mark form as submitted
+
+          // Call the onSubmit prop to notify parent component
+          onSubmit(formData); 
+      } catch (error) {
+          console.error("Error during form submission:", error);
+          alert(t("errors.internal_server_error"));
+      } finally {
+          setIsSubmitting(false);
       }
-
-      const result = await response.json();
-      console.log("Form submitted successfully:", result);
-      alert(t("messages.form_submission_success")); // Show success message to the user
-    } catch (error) {
-      console.error("Error during form submission:", error);
-      alert(t("errors.internal_server_error"));
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
-    <div className="p-4 bg-white rounded shadow">
+    <div className="p-4 bg-white rounded">
       {/* Progress Bar */}
       <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
         <div
@@ -275,9 +279,15 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
       {/* Submit Button */}
       <div className="mt-6">
         <Button
-          text={isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
+          text={
+            formSubmitted
+              ? t("buttons.submitted") // Show "Submitted" after success
+              : isSubmitting
+              ? t("buttons.submitting") // Show "Submitting..." while processing
+              : t("buttons.submit") // Default "Submit"
+          }
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || formSubmitted} // Disable button after submission
         />
       </div>
     </div>

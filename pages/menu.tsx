@@ -181,9 +181,15 @@ const Menu = () => {
             )}
 
             {showScanCustomForm && (
-                <MessageBubble>
-                    <ScanCustomForm onReturnToMenu={() => handleMenuSelection('reporting')} />
-                </MessageBubble>
+            <MessageBubble>
+                <ScanCustomForm
+                    onReturnToMenu={() => handleMenuSelection('reporting')}
+                    onSubmitAnotherForm={() => {
+                        setShowScanCustomForm(false);
+                        setTimeout(() => setShowScanCustomForm(true), 0); // Reset and reinitialize the Scan Custom Form workflow
+                    }}
+                />
+            </MessageBubble>
             )}
 
             {showProjectApplication && (

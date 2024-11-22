@@ -49,7 +49,11 @@
   },
   "buttons": {
     "submit": "Enviar",
+    "submitting": "Enviando...",
+    "submitted": "Enviado",
     "hide_unused_text": "Ocultar texto no utilizado",
     "show_unused_text": "Mostrar texto no utilizado"
-  }
+  },
+  "submitAnother": "Enviar otro formulario",
+  "returnToMenu": "Volver al menú"
 }

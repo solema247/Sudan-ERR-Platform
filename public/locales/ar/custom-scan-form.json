@@ -49,7 +49,11 @@
   },
   "buttons": {
     "submit": "إرسال",
+    "submitting": "جاري الإرسال...",
+    "submitted": "تم الإرسال",
     "hide_unused_text": "إخفاء النص غير المستخدم",
     "show_unused_text": "عرض النص غير المستخدم"
-  }
+  },
+  "submitAnother": "إرسال نموذج آخر",
+  "returnToMenu": "العودة إلى القائمة"
 }

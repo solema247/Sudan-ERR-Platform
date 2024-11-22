@@ -49,7 +49,11 @@
   },
   "buttons": {
     "submit": "Submit",
+    "submitting": "Submitting...",
+    "submitted": "Submitted",
     "hide_unused_text": "Hide Unused Text",
     "show_unused_text": "Show Unused Text"
-  }
+  },
+  "submitAnother": "Submit Another Form",
+  "returnToMenu": "Return to Menu"
 }
