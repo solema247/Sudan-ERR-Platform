@@ -1,3 +1,4 @@
+//lib/auth.ts
 import jwt from 'jsonwebtoken';
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY; // Secret key from environment variables

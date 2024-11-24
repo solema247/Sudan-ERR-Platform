@@ -1,3 +1,4 @@
+//components/CustomScanBubble.tsx
 import React, { ReactNode } from "react";
 
 interface CustomScanBubbleProps {

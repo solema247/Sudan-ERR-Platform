@@ -1,4 +1,4 @@
-// pages/menu.tsx
+// /pages/menu.tsx
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -22,13 +22,16 @@ const Menu = () => {
     const [currentMenu, setCurrentMenu] = useState('main'); // Tracks the current menu
     const [showFillForm, setShowFillForm] = useState(false);
     const [showScanForm, setShowScanForm] = useState(false);
-    const [showScanCustomForm, setShowScanCustomForm] = useState(false); // New state
+    const [showScanCustomForm, setShowScanCustomForm] = useState(false);
     const [showProjectApplication, setShowProjectApplication] = useState(false);
     const [showProjectStatus, setShowProjectStatus] = useState(false);
+    const [projects, setProjects] = useState([]); // Stores active projects
+    const [selectedProject, setSelectedProject] = useState(null); // Stores selected project
 
     const router = useRouter();
     const { t, i18n } = useTranslation('menu');
 
+    // Validate session on load
     useEffect(() => {
         const checkAuth = async () => {
             const response = await fetch('/api/validate-session', { credentials: 'include' });
@@ -40,32 +43,56 @@ const Menu = () => {
         checkAuth();
     }, [router]);
 
+    // Fetch active projects when 'reporting' menu is selected
     useEffect(() => {
-        // Dynamically set the text direction (RTL or LTR) based on the current language
+        if (currentMenu === 'reporting') {
+            const fetchProjects = async () => {
+                try {
+                    const response = await fetch('/api/get-projects', { credentials: 'include' });
+                    const data = await response.json();
+                    if (data.success) {
+                        setProjects(data.projects);
+                    } else {
+                        console.error('Error fetching projects:', data.message);
+                    }
+                } catch (error) {
+                    console.error('Unexpected error fetching projects:', error);
+                }
+            };
+
+            fetchProjects();
+        }
+    }, [currentMenu]);
+
+    // Update direction and language attributes dynamically
+    useEffect(() => {
         const direction = i18n.language === 'ar' ? 'rtl' : 'ltr';
         document.documentElement.setAttribute('dir', direction);
         document.documentElement.setAttribute('lang', i18n.language);
     }, [i18n.language]);
 
+    // Menu selection handler
     const handleMenuSelection = (menu: string) => {
         setCurrentMenu(menu);
         setShowFillForm(false);
         setShowScanForm(false);
-        setShowScanCustomForm(false); // Reset state
+        setShowScanCustomForm(false);
         setShowProjectApplication(false);
         setShowProjectStatus(false);
+        setSelectedProject(null); // Reset selected project when navigating away
     };
 
+    // Workflow selection handler
     const handleWorkflowSelection = (workflow: string) => {
         setShowFillForm(false);
         setShowScanForm(false);
-        setShowScanCustomForm(false); // Reset state
+        setShowScanCustomForm(false);
         setShowProjectApplication(false);
         setShowProjectStatus(false);
 
         if (workflow === 'fill-form') setShowFillForm(true);
         if (workflow === 'scan-form') setShowScanForm(true);
-        if (workflow === 'scan-custom-form') setShowScanCustomForm(true); // Handle new workflow
+        if (workflow === 'scan-custom-form') setShowScanCustomForm(true);
         if (workflow === 'project-application') setShowProjectApplication(true);
         if (workflow === 'project-status') setShowProjectStatus(true);
     };
@@ -85,6 +112,7 @@ const Menu = () => {
                 </button>
             </div>
 
+            {/* Main Menu */}
             {currentMenu === 'main' && (
                 <>
                     <div className="flex items-center mb-4 space-x-4">
@@ -117,33 +145,33 @@ const Menu = () => {
                 </>
             )}
 
-            {currentMenu === 'projects' && (
+            {/* Project Selection for Reporting */}
+            {currentMenu === 'reporting' && !selectedProject && (
                 <>
                     <MessageBubble
-                        text={t('projectsInstructions')}
+                        text={t('selectProject')}
                         timestamp={getCurrentTimestamp()}
                         fullWidth
                     />
                     <div className="grid grid-cols-1 space-y-2">
-                        <Button
-                            text={t('projectApplication')}
-                            onClick={() => handleWorkflowSelection('project-application')}
-                            className="w-full"
-                        />
-                        <Button
-                            text={t('projectStatus')}
-                            onClick={() => handleWorkflowSelection('project-status')}
-                            className="w-full"
-                        />
+                        {projects.map((project: any) => (
+                            <Button
+                                key={project.id}
+                                text={`${project.project_objectives} (${project.locality})`}
+                                onClick={() => setSelectedProject(project)}
+                                className="w-full"
+                            />
+                        ))}
                         <Button text={t('returnToMainMenu')} onClick={() => handleMenuSelection('main')} className="w-full" />
                     </div>
                 </>
             )}
 
-            {currentMenu === 'reporting' && (
+            {/* Reporting Menu for Selected Project */}
+            {currentMenu === 'reporting' && selectedProject && (
                 <>
                     <MessageBubble
-                        text={t('reportingInstructions')}
+                        text={t('reportingInstructions', { project: selectedProject.project_objectives })}
                         timestamp={getCurrentTimestamp()}
                         fullWidth
                     />
@@ -159,37 +187,40 @@ const Menu = () => {
                             className="w-full"
                         />
                         <Button
-                            text={t('reportScanCustomForm')} // New button
-                            onClick={() => handleWorkflowSelection('scan-custom-form')} // New handler
+                            text={t('reportScanCustomForm')}
+                            onClick={() => handleWorkflowSelection('scan-custom-form')}
                             className="w-full"
                         />
+                        <Button text={t('selectDifferentProject')} onClick={() => setSelectedProject(null)} className="w-full" />
                         <Button text={t('returnToMainMenu')} onClick={() => handleMenuSelection('main')} className="w-full" />
                     </div>
                 </>
             )}
 
+            {/* Other workflows */}
             {showFillForm && (
                 <MessageBubble>
-                    <FillForm onReturnToMenu={() => handleMenuSelection('reporting')} />
+                    <FillForm project={selectedProject} onReturnToMenu={() => handleMenuSelection('reporting')} />
                 </MessageBubble>
             )}
 
             {showScanForm && (
                 <MessageBubble>
-                    <ScanForm onReturnToMenu={() => handleMenuSelection('reporting')} />
+                    <ScanForm project={selectedProject} onReturnToMenu={() => handleMenuSelection('reporting')} />
                 </MessageBubble>
             )}
 
             {showScanCustomForm && (
-            <MessageBubble>
-                <ScanCustomForm
-                    onReturnToMenu={() => handleMenuSelection('reporting')}
-                    onSubmitAnotherForm={() => {
-                        setShowScanCustomForm(false);
-                        setTimeout(() => setShowScanCustomForm(true), 0); // Reset and reinitialize the Scan Custom Form workflow
-                    }}
-                />
-            </MessageBubble>
+                <MessageBubble>
+                    <ScanCustomForm
+                        project={selectedProject}
+                        onReturnToMenu={() => handleMenuSelection('reporting')}
+                        onSubmitAnotherForm={() => {
+                            setShowScanCustomForm(false);
+                            setTimeout(() => setShowScanCustomForm(true), 0); // Reset workflow
+                        }}
+                    />
+                </MessageBubble>
             )}
 
             {showProjectApplication && (
@@ -208,9 +239,3 @@ const Menu = () => {
 };
 
 export default Menu;
-
-
-
-
-
-
