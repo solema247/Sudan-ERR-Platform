@@ -1,4 +1,3 @@
-//pages/project-application.tsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../components/Button';
@@ -12,6 +11,8 @@ interface ProjectApplicationProps {
 
 const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu }) => {
     const { t, i18n } = useTranslation('projectApplication');
+
+    // State Management
     const [plannedActivities, setPlannedActivities] = useState([]);
     const [expenseCategories, setExpenseCategories] = useState([]);
     const [stateLocality, setStateLocality] = useState({ states: [], localities: [] });
@@ -40,18 +41,14 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                 const res = await fetch(`/api/project-application?language=${i18n.language}`);
                 if (res.ok) {
                     const data = await res.json();
-
-                    // Map fetched data to translation keys
                     const translatedPlannedActivities = data.plannedActivities.map((activity: any) => ({
                         id: activity.id,
-                        name: t(activity.name), // Map `name` to translation key
+                        name: t(activity.name),
                     }));
-
                     const translatedExpenseCategories = data.expenseCategories.map((expense: any) => ({
                         id: expense.id,
-                        name: t(expense.name), // Map `name` to translation key
+                        name: t(expense.name),
                     }));
-
                     setPlannedActivities(translatedPlannedActivities);
                     setExpenseCategories(translatedExpenseCategories);
                     setStateLocality({ states: data.states, localities: [] });
@@ -66,13 +63,15 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
         };
 
         fetchOptions();
-    }, [i18n.language, t]); // Include `t` for dynamic translations
+    }, [i18n.language, t]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    // Handle input changes for the form
+    const handleInputChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    ) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
 
-        // Dynamically update localities based on selected state
         if (name === 'state') {
             const selectedState = stateLocality.states.find((state: any) => state.state_name === value);
             const localities = selectedState ? selectedState.localities : [];
@@ -80,11 +79,10 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
         }
     };
 
+    // Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-
-        console.log('Submitting form data:', formData);
 
         try {
             const res = await fetch('/api/project-application', {
@@ -209,7 +207,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             />
                         </label>
 
-                        {/* Estimated Number of Beneficiaries */}
+                        {/* Estimated Beneficiaries */}
                         <label>
                             {t('estimatedBeneficiaries')}
                             <input
@@ -284,20 +282,27 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             />
                         </label>
 
-                        <Button type="submit" text={loading ? t('loading') : t('submit')} disabled={loading} />
+                        {/* Submit Button */}
+                        <Button
+                            type="submit"
+                            text={loading ? t('loading') : t('submit')}
+                            disabled={loading}
+                        />
                     </form>
                 </FormBubble>
             ) : (
-                <MessageBubble>
-                    {t('formSubmitted')}
-                    <Button
-                        text={t('returnToMenu')}
-                        onClick={() => {
-                            setFormSubmitted(false);
-                            onReturnToMenu(); // Trigger menu navigation
-                        }}
-                    />
-                </MessageBubble>
+                <>
+                    <MessageBubble>{t('formSubmitted')}</MessageBubble>
+                    <div className="flex justify-center mt-4">
+                        <Button
+                            text={t('returnToMenu')}
+                            onClick={() => {
+                                setFormSubmitted(false);
+                                onReturnToMenu();
+                            }}
+                        />
+                    </div>
+                </>
             )}
         </>
     );

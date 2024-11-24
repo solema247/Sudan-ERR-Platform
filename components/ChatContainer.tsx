@@ -33,22 +33,10 @@ const ChatContainer = ({ children }: ChatContainerProps) => {
             <div className="flex-1 overflow-y-auto p-4 space-y-2" id="chat-box">
                 {children}
             </div>
-
-            {/* Input Area */}
-            <div className="bg-white p-3 md:p-4 flex items-center space-x-2 border-t shadow-inner">
-                <button className="p-2"><i className="fa fa-paperclip text-gray-500"></i></button>
-                <input
-                    type="text"
-                    placeholder={t('typePlaceholder')}
-                    className="flex-1 p-2 border rounded-full focus:outline-none text-sm md:text-base"
-                />
-                <button className="p-2 bg-[#25D366] text-white rounded-full transition-transform transform hover:scale-105">
-                    <i className="fa fa-paper-plane"></i>
-                </button>
-            </div>
         </div>
     );
 };
 
 export default ChatContainer;
+
 
