@@ -105,47 +105,47 @@ async function preprocessImage(imagePath: string): Promise<Buffer> {
     .sharpen() // Add sharpening for better text edge clarity
     .modulate({ brightness: 1.2, contrast: 1.5 })
     .withMetadata() // Retain orientation metadata
+    .linear(1, -10) // Enhance contrast further
+    .extend({ top: 10, bottom: 10, left: 10, right: 10 }) // Add padding for clean OCR bounding
     .jpeg({ quality: 90 })
     .toBuffer();
 }
 
 // Perform OCR using Google Vision
 function reconstructTextWithLayout(fullTextAnnotation: any): string {
-  let text = '';
+  let rows: { y: number; rowText: string }[] = []; // Store rows by `y` coordinate
+
   for (const page of fullTextAnnotation.pages) {
     for (const block of page.blocks) {
-      // Log bounding box coordinates for debugging
-      console.log(
-        `Block detected at (${block.boundingBox.vertices
-          .map((v: any) => `${v.x},${v.y}`)
-          .join(' - ')})`
-      );
+      for (const paragraph of block.paragraphs) {
+        let paragraphRow: { y: number; text: string }[] = [];
 
-      // Sort paragraphs by vertical position
-      const sortedParagraphs = block.paragraphs.sort((a: any, b: any) => {
-        return a.boundingBox.vertices[0].y - b.boundingBox.vertices[0].y;
-      });
-
-      let blockText = '';
-      for (const paragraph of sortedParagraphs) {
-        // Log paragraph bounding box details
-        console.log(
-          `Paragraph at (${paragraph.boundingBox.vertices
-            .map((v: any) => `${v.x},${v.y}`)
-            .join(' - ')})`
-        );
-
-        let paragraphText = '';
-        for (const word of paragraph.words.reverse()) { // Reverse for RTL
+        for (const word of paragraph.words) {
           const wordText = word.symbols.map((s: any) => s.text).join('');
-          paragraphText += wordText + ' ';
+          const y = word.boundingBox.vertices[0].y; // Get top y-coordinate of the word
+          paragraphRow.push({ y, text: wordText });
         }
-        blockText += paragraphText.trim() + '\n';
+
+        // Group words with similar y-coordinates into one row
+        const groupedRow = paragraphRow.reduce((acc, word) => {
+          if (acc.length === 0 || Math.abs(acc[acc.length - 1].y - word.y) > 10) {
+            acc.push({ y: word.y, rowText: word.text });
+          } else {
+            acc[acc.length - 1].rowText += ` ${word.text}`;
+          }
+          return acc;
+        }, [] as { y: number; rowText: string }[]);
+
+        rows.push(...groupedRow);
       }
-      text += blockText.trim() + '\n\n';
     }
   }
-  return text.trim();
+
+  // Combine all rows and return as string
+  return rows
+    .sort((a, b) => a.y - b.y) // Sort rows by vertical position
+    .map((row) => row.rowText)
+    .join('\n');
 }
 
 // Updated OCR Function
@@ -162,10 +162,9 @@ async function googleVisionOCR(imageBuffer: Buffer): Promise<string> {
   }
 
   const reconstructedText = reconstructTextWithLayout(fullTextAnnotation);
-  console.log('Google Vision OCR Output:', reconstructedText);
+  console.log('Grouped OCR Output:', reconstructedText);
   return reconstructedText;
 }
-
 
 
 // Detect language from OCR text
