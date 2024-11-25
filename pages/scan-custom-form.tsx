@@ -6,14 +6,19 @@ import CustomScanBubble from "../components/CustomScanBubble";
 import Button from "../components/Button";
 import CustomFormReview from "../components/CustomFormReview";
 import MessageBubble from "../components/MessageBubble";
-import { useRouter } from 'next/router';
+import { useRouter } from "next/router";
 
 interface ScanCustomFormProps {
+  project: any; // The selected project passed from the menu
   onReturnToMenu: () => void;
   onSubmitAnotherForm: () => void;
 }
 
-const ScanCustomForm: React.FC<ScanCustomFormProps> = ({ onReturnToMenu, onSubmitAnotherForm }) => {
+const ScanCustomForm: React.FC<ScanCustomFormProps> = ({
+  project,
+  onReturnToMenu,
+  onSubmitAnotherForm,
+}) => {
   const { t, i18n } = useTranslation("customScanForm");
   const [file, setFile] = useState<File | null>(null);
   const [localImageUrl, setLocalImageUrl] = useState<string | null>(null);
@@ -37,14 +42,15 @@ const ScanCustomForm: React.FC<ScanCustomFormProps> = ({ onReturnToMenu, onSubmi
   // Handle file upload and API request
   const handleUpload = async () => {
     if (!file) {
-      alert(t("errors.no_file_selected")); // Handle case where no file is selected
+      alert(t("errors.no_file_selected"));
       return;
     }
 
     setIsLoading(true);
     const formData = new FormData();
-    formData.append("file", file); // Ensure file is appended with correct name
+    formData.append("file", file);
     formData.append("language", i18n.language);
+    formData.append("projectId", project.id);  
 
     try {
       const response = await fetch("/api/scan-custom-form", {
@@ -73,7 +79,6 @@ const ScanCustomForm: React.FC<ScanCustomFormProps> = ({ onReturnToMenu, onSubmi
     }
   };
 
-  // Render UI
   return (
     <>
       {/* File upload UI */}
@@ -81,13 +86,15 @@ const ScanCustomForm: React.FC<ScanCustomFormProps> = ({ onReturnToMenu, onSubmi
         <CustomScanBubble>
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">{t("title")}</h2>
-            <p className="text-gray-700">{t("instruction")}</p>
+            <p className="text-gray-700">
+              {t("instruction", { project: project.project_objectives })}
+            </p>
             <div className="flex flex-col items-start space-y-2">
               <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg cursor-pointer inline-flex items-center justify-center">
                 {t("choose_file")}
                 <input
                   type="file"
-                  name="file" // Added name attribute to match the backend expectation
+                  name="file"
                   accept="image/*"
                   onChange={handleFileChange}
                   className="hidden"
@@ -131,11 +138,10 @@ const ScanCustomForm: React.FC<ScanCustomFormProps> = ({ onReturnToMenu, onSubmi
       {/* Render editable form */}
       {structuredData && showReviewForm && (
         <CustomFormReview
-          data={structuredData}
+          data={{ ...structuredData, project }}
           onSubmit={(updatedData) => {
             console.log("Updated Data:", updatedData);
-            setFormSubmitted(true); // Mark form as submitted
-            // Do not reset showReviewForm and structuredData to keep the form displayed
+            setFormSubmitted(true);
           }}
         />
       )}
@@ -143,12 +149,10 @@ const ScanCustomForm: React.FC<ScanCustomFormProps> = ({ onReturnToMenu, onSubmi
       {/* Show the buttons after form submission */}
       {formSubmitted && (
         <>
-          {/* The form remains visible */}
           <div className="flex justify-center space-x-4 mt-4">
             <Button
               text={t("submitAnother")}
               onClick={() => {
-                // Reset all relevant states for a new scan
                 setFormSubmitted(false);
                 setFile(null);
                 setLocalImageUrl(null);
@@ -159,10 +163,7 @@ const ScanCustomForm: React.FC<ScanCustomFormProps> = ({ onReturnToMenu, onSubmi
                 setShowReviewForm(false);
               }}
             />
-            <Button
-              text={t("returnToMenu")}
-              onClick={onReturnToMenu}
-            />
+            <Button text={t("returnToMenu")} onClick={onReturnToMenu} />
           </div>
         </>
       )}
@@ -171,3 +172,4 @@ const ScanCustomForm: React.FC<ScanCustomFormProps> = ({ onReturnToMenu, onSubmi
 };
 
 export default ScanCustomForm;
+

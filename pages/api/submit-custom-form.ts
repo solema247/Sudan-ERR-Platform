@@ -1,3 +1,4 @@
+//pages/api/submit-custom-form.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import i18n from '../../lib/i18n'; // Import i18n for translations
@@ -20,6 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       financial_summary,
       additional_questions,
       expenses,
+      projectMetadata, // New: Project metadata passed with the form
     } = req.body;
 
     console.log('[INFO] Received form submission:', req.body);
@@ -44,6 +46,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       surplus_use: additional_questions?.surplus_use || null,
       lessons: additional_questions?.lessons_learned || null,
       training: additional_questions?.training_needs || null,
+      project_name: projectMetadata?.project_name || null, // Include project metadata
+      project_objectives: projectMetadata?.objectives || null,
+      beneficiaries: projectMetadata?.beneficiaries || null,
     };
 
     console.log('[INFO] Summary data to insert:', summaryData);
@@ -76,6 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         payment_method,
         receipt_no,
         expense_amount: parseFloat(amount) || 0,
+        project_name: projectMetadata?.project_name || null, // Include project metadata
       };
 
       console.log('[INFO] Expense data to insert:', expenseData);
@@ -100,4 +106,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(500).json({ error: errorMessage });
   }
 }
+
 
