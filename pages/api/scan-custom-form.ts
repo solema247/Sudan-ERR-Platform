@@ -8,6 +8,8 @@ import path from 'path';
 import formidable from 'formidable';
 import { franc } from 'franc';
 import { createClient } from '@supabase/supabase-js';
+import { execSync } from 'child_process';
+
 
 // Disable body parsing for file uploads
 export const config = {
@@ -99,51 +101,58 @@ async function fetchProjectMetadata(projectId: string) {
 
 // Preprocess the image for OCR
 async function preprocessImage(imagePath: string): Promise<Buffer> {
-  console.log('Preprocessing image:', imagePath);
-  return sharp(imagePath)
-    .grayscale()
-    .sharpen() // Add sharpening for better text edge clarity
-    .modulate({ brightness: 1.2, contrast: 1.5 })
-    .withMetadata() // Retain orientation metadata
-    .linear(1, -10) // Enhance contrast further
-    .extend({ top: 10, bottom: 10, left: 10, right: 10 }) // Add padding for clean OCR bounding
-    .jpeg({ quality: 90 })
-    .toBuffer();
+  const outputPath = `${imagePath}_processed.png`; // Temporary processed file path
+
+  try {
+    // Call the enhanced Python preprocessing script
+    execSync(`python3 preprocess.py ${imagePath} ${outputPath}`, { stdio: 'inherit' });
+
+    // Read and return the processed image as a Buffer
+    return fs.readFileSync(outputPath);
+  } catch (error) {
+    console.error('Error during image preprocessing:', error);
+    throw new Error('Image preprocessing failed.');
+  } finally {
+    // Clean up the temporary processed image
+    if (fs.existsSync(outputPath)) {
+      fs.unlinkSync(outputPath);
+    }
+  }
 }
 
 // Perform OCR using Google Vision
 function reconstructTextWithLayout(fullTextAnnotation: any): string {
-  let rows: { y: number; rowText: string }[] = []; // Store rows by `y` coordinate
+  let rows: { y: number; x: number; text: string }[] = []; // Store rows by `y` and `x` coordinates
 
   for (const page of fullTextAnnotation.pages) {
     for (const block of page.blocks) {
       for (const paragraph of block.paragraphs) {
-        let paragraphRow: { y: number; text: string }[] = [];
-
         for (const word of paragraph.words) {
           const wordText = word.symbols.map((s: any) => s.text).join('');
-          const y = word.boundingBox.vertices[0].y; // Get top y-coordinate of the word
-          paragraphRow.push({ y, text: wordText });
+          const y = word.boundingBox.vertices[0].y; // Top y-coordinate of the word
+          const x = word.boundingBox.vertices[0].x; // Top x-coordinate of the word
+          rows.push({ y, x, text: wordText });
         }
-
-        // Group words with similar y-coordinates into one row
-        const groupedRow = paragraphRow.reduce((acc, word) => {
-          if (acc.length === 0 || Math.abs(acc[acc.length - 1].y - word.y) > 10) {
-            acc.push({ y: word.y, rowText: word.text });
-          } else {
-            acc[acc.length - 1].rowText += ` ${word.text}`;
-          }
-          return acc;
-        }, [] as { y: number; rowText: string }[]);
-
-        rows.push(...groupedRow);
       }
     }
   }
 
-  // Combine all rows and return as string
-  return rows
-    .sort((a, b) => a.y - b.y) // Sort rows by vertical position
+  // Group words into rows based on y-coordinate proximity
+  const groupedRows = rows
+    .sort((a, b) => a.y - b.y || a.x - b.x) // Sort by y first, then x for left-to-right order
+    .reduce((acc: { y: number; rowText: string }[], word) => {
+      const lastRow = acc[acc.length - 1];
+      if (lastRow && Math.abs(lastRow.y - word.y) < 15) {
+        // Append to the same row if y-coordinates are close
+        lastRow.rowText += ` ${word.text}`;
+      } else {
+        acc.push({ y: word.y, rowText: word.text }); // Start a new row
+      }
+      return acc;
+    }, []);
+
+  // Preserve rows with columns identified
+  return groupedRows
     .map((row) => row.rowText)
     .join('\n');
 }
@@ -152,7 +161,7 @@ function reconstructTextWithLayout(fullTextAnnotation: any): string {
 async function googleVisionOCR(imageBuffer: Buffer): Promise<string> {
   const [result] = await visionClient.documentTextDetection({
     image: { content: imageBuffer },
-    imageContext: { languageHints: ['en', 'ar'] },
+    imageContext: { languageHints: ['ar', 'en'] }, // Arabic prioritized
   });
 
   const fullTextAnnotation = result.fullTextAnnotation;
@@ -169,6 +178,9 @@ async function googleVisionOCR(imageBuffer: Buffer): Promise<string> {
 
 // Detect language from OCR text
 function detectLanguage(ocrText: string): string {
+  // Normalize Arabic numerals to standard digits (e.g., ٣٠٠٠ -> 3000)
+  ocrText = ocrText.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+
   const langCode = franc(ocrText);
   console.log('Detected language code:', langCode);
 
@@ -177,7 +189,7 @@ function detectLanguage(ocrText: string): string {
 
   if (langCode === 'ara') return 'ar';
   if (langCode === 'eng') return 'en';
-  return 'ar';
+  return 'ar'; // Default to Arabic if uncertain
 }
 
 // Function to generate the prompt with validation
@@ -202,14 +214,16 @@ function getPromptForLanguage(language: string, cleanedText: string, projectMeta
     const remainder = calculatedFields.remainder.toString();
 
     return promptData.prompt
-      .replace('${cleanedText}', cleanedText)
-      .replace('${projectMetadata.project_objectives}', projectObjectives)
-      .replace('${projectMetadata.intended_beneficiaries}', beneficiaries)
-      .replace('${projectMetadata.err_id}', errId)
-      .replace('${financial_summary.total_grant_received}', totalGrantReceived)
-      .replace('${financial_summary.total_expenses}', totalExpenses)
-      .replace('${financial_summary.remainder}', remainder)
-      .replace('${expenses.activity}', activities); // Include activity from metadata
+    .replace('${cleanedText}', cleanedText)
+    .replace('${projectMetadata.project_objectives}', projectObjectives)
+    .replace('${projectMetadata.intended_beneficiaries}', beneficiaries)
+    .replace('${projectMetadata.err_id}', errId)
+    .replace('${financial_summary.total_grant_received}', totalGrantReceived)
+    .replace('${financial_summary.total_expenses}', totalExpenses)
+    .replace('${financial_summary.remainder}', remainder)
+    .replace('${expenses.activity}', activities)
+    .replace('${table_processing}', "Detect and structure tables by identifying columns (e.g., Item, Quantity, Price) and rows.")
+    .replace('${metadata_hint}', "Ensure metadata fields like 'Project Objectives' and 'Beneficiaries' are linked correctly.");
   } catch (error) {
     console.error(`Error loading custom-prompts.json for language: ${language}`, error);
     throw new Error(`Failed to load custom-prompts.json for language: ${language}`);
@@ -239,7 +253,10 @@ async function classifyWithChatGPT(language: string, ocrText: string, projectMet
     remainder
   };
 
-  const cleanedText = ocrText.replace(/[\n\r]+/g, ' ').trim();
+  const cleanedText = ocrText
+  .replace(/[\u0000-\u001F]+/g, '')  // Remove control characters
+  .replace(/\s+/g, ' ')              // Normalize spaces
+  .trim(); 
   const prompt = getPromptForLanguage(language, cleanedText, projectMetadata, calculatedFields);
 
   console.log('Prompt sent to OpenAI:', prompt);
@@ -248,13 +265,25 @@ async function classifyWithChatGPT(language: string, ocrText: string, projectMet
     model: 'gpt-3.5-turbo',
     messages: [{ role: 'user', content: prompt }],
     max_tokens: 1500,
-    temperature: 0.7,
+    temperature: 0,
   });
 
   const openAIOutput = response.choices[0]?.message?.content || '{}';
-  console.log('OpenAI Response:', openAIOutput);
+  console.log('OpenAI Response (raw):', openAIOutput);
 
-  return JSON.parse(openAIOutput);
+  let parsedOutput;
+  try {
+    parsedOutput = JSON.parse(openAIOutput);
+  } catch (error) {
+    console.error('Error parsing OpenAI response as JSON:', error);
+    console.error('Raw OpenAI Response:', openAIOutput);
+
+    // Return raw response for debugging or throw an error
+    throw new Error('Invalid JSON response from OpenAI.');
+  }
+
+  return parsedOutput;
+
 }
 
 // Upload file to Supabase Storage
@@ -294,8 +323,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const projectMetadata = await fetchProjectMetadata(projectId);
 
-    const processedImage = await preprocessImage(filePath);
-    const ocrText = await googleVisionOCR(processedImage);
+    const processedImage = await preprocessImage(filePath); // Uses Python for preprocessing
+    const ocrText = await googleVisionOCR(processedImage); // Process preprocessed image with OCR
+
 
     const detectedLanguage = detectLanguage(ocrText);
 

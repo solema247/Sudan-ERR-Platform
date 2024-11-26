@@ -145,6 +145,34 @@ const Menu = () => {
                 </>
             )}
 
+            {/* Add this new block for the 'projects' menu */}
+            {currentMenu === 'projects' && (
+                <>
+                    <MessageBubble
+                        text={t('projectsInstructions')}
+                        timestamp={getCurrentTimestamp()}
+                        fullWidth
+                    />
+                    <div className="grid grid-cols-1 space-y-2">
+                        <Button
+                            text={t('projectApplication')}
+                            onClick={() => handleWorkflowSelection('project-application')}
+                            className="w-full"
+                        />
+                        <Button
+                            text={t('projectStatus')}
+                            onClick={() => handleWorkflowSelection('project-status')}
+                            className="w-full"
+                        />
+                        <Button
+                            text={t('returnToMainMenu')}
+                            onClick={() => handleMenuSelection('main')}
+                            className="w-full"
+                        />
+                    </div>
+                </>
+            )}
+
             {/* Project Selection for Reporting */}
             {currentMenu === 'reporting' && !selectedProject && (
                 <>

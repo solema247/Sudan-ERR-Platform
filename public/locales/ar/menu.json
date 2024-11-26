@@ -14,5 +14,7 @@
   "reportScanForm": "الإبلاغ عن طريق مسح النموذج",
   "reportScanCustomForm": "الإبلاغ عن طريق مسح نموذج مخصص",
   "returnToMainMenu": "العودة إلى القائمة الرئيسية",
-  "exit": "خروج"
+  "exit": "خروج",
+  "selectProject": "اختر مشروعًا للمتابعة مع التقرير.",
+  "selectDifferentProject": "اختر مشروعًا مختلفًا لمتابعة التقرير."
 }

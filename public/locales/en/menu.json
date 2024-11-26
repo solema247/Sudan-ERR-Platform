@@ -14,5 +14,7 @@
   "reportScanForm": "Report Scan Form",
   "reportScanCustomForm": "Report Scan Custom Form",
   "returnToMainMenu": "Return to Main Menu",
-  "exit": "Exit"
+  "exit": "Exit",
+  "selectProject": "Select a project to continue with reporting.",
+  "selectDifferentProject": "Select a Different Project"
 }

@@ -14,5 +14,7 @@
   "reportScanForm": "Informe con Formulario Escaneado",
   "reportScanCustomForm": "Informe con Formulario Escaneado Personalizado",
   "returnToMainMenu": "Volver al Menú Principal",
-  "exit": "Salir"
+  "exit": "Salir",
+  "selectProject": "Selecciona un proyecto para continuar con el informe.",
+  "selectDifferentProject": "Selecciona un proyecto diferente para continuar con el informe."
 }
