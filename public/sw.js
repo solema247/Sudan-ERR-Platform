@@ -11,6 +11,9 @@ const urlsToCache = [
   '/locales/en/login.json',
   '/locales/ar/login.json',
   '/locales/es/login.json',
+  '/locales/en/home.json',
+  '/locales/ar/home.json',
+  '/locales/es/home.json'
 ];
 
 // Install event: cache static assets

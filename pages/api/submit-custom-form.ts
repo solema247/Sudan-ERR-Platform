@@ -67,8 +67,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     for (const expense of expenses) {
       const { activity, description, payment_date, seller, payment_method, receipt_no, amount } = expense;
 
-      if (!(activity && description && payment_date && seller && receipt_no && amount)) {
-        console.warn('[WARN] Skipping incomplete expense entry:', expense);
+      // Relax validation for optional fields: payment_date, payment_method, and receipt_no
+      if (!(activity && description && amount && seller)) {
+        console.warn('[WARN] Skipping expense entry due to missing required fields:', expense);
         continue;
       }
 
@@ -76,12 +77,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         err_report_id,
         expense_activity: activity,
         expense_description: description,
-        payment_date,
+        payment_date: payment_date || null, // Allow null if not provided
         seller,
-        payment_method,
-        receipt_no,
+        payment_method: payment_method || 'Not Available', // Provide default if missing
+        receipt_no: receipt_no || 'Not Available', // Provide default if missing
         expense_amount: parseFloat(amount) || 0,
-        project_name: projectMetadata?.project_name || null, // Include project metadata
       };
 
       console.log('[INFO] Expense data to insert:', expenseData);
@@ -106,5 +106,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(500).json({ error: errorMessage });
   }
 }
-
-
