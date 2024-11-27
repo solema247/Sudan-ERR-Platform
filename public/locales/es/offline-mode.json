@@ -1,56 +1,62 @@
 {
-  "offline_form_title": "Formulario Sin Conexión",
+  "offline_form_title": "Formulario sin conexión",
+  "instructions_title": "Cómo usar el modo sin conexión",
+  "instructions_step_1": "Toca 'Abrir formulario' para completarlo.",
+  "instructions_step_2": "Rellena los campos y toca 'Enviar'.",
+  "instructions_step_3": "Tu formulario se subirá automáticamente cuando vuelvas a estar en línea.",
+  "open_form_button": "Abrir formulario",
   "form_submit_success": "¡Formulario enviado con éxito!",
-  "submission_failed": "Error en el envío, por favor intente nuevamente más tarde.",
-  "error_during_submission": "Se produjo un error durante el envío.",
-  "form_saved_offline": "Formulario guardado sin conexión y se enviará cuando vuelva a estar en línea.",
+  "submission_failed": "El envío falló. Por favor, inténtalo de nuevo más tarde.",
+  "error_during_submission": "Ocurrió un error durante el envío.",
+  "form_saved_offline": "El formulario se guardó sin conexión y se enviará automáticamente cuando vuelvas a estar en línea.",
   "choose_file": "Elegir archivo",
-  "no_file_chosen": "No se eligió ningún archivo",
+  "no_file_chosen": "No se ha elegido ningún archivo",
   "close": "Cerrar",
   "submit": "Enviar",
+  "return_home_button": "Volver a Inicio",
   "expense_entry": "Entrada de gasto {{index}}",
   "fields": {
-    "err_id": "ID ERR",
+    "err_id": "ID de ERR",
     "date": "Fecha",
-    "total_grant": "Subvención Total",
+    "total_grant": "Subvención total",
     "total_other_sources": "Total de otras fuentes",
     "additional_excess_expenses": "¿Cómo cubriste los gastos adicionales?",
-    "additional_surplus_use": "¿Cómo gastarías el excedente?",
-    "additional_training_needs": "Necesidades de capacitación adicional",
+    "additional_surplus_use": "¿Cómo usarías el excedente?",
+    "additional_training_needs": "Necesidades de capacitación adicionales",
     "lessons": "Lecciones aprendidas en la planificación del presupuesto",
     "activity": "Actividad",
     "description": "Descripción",
-    "payment_date": "Fecha de Pago",
+    "payment_date": "Fecha de pago",
     "seller": "Vendedor",
-    "payment_method": "Método de Pago",
+    "payment_method": "Método de pago",
     "receipt_no": "Número de recibo",
     "amount": "Monto"
   },
   "labels": {
     "date": "Fecha",
-    "payment_date": "Fecha de Pago"
+    "payment_date": "Fecha de pago"
   },
   "payment_methods": {
     "cash": "Efectivo",
-    "bank_app": "Aplicación Bancaria"
+    "bank_app": "Aplicación bancaria"
   },
   "buttons": {
-    "add_expense": "Añadir Gasto"
+    "add_expense": "Agregar gasto"
   },
   "placeholders": {
-    "err_id": "ID ERR (obligatorio)",
+    "err_id": "ID de ERR (obligatorio)",
     "activity": "Actividad",
     "description": "Descripción",
-    "payment_date": "Fecha de Pago",
+    "payment_date": "Fecha de pago",
     "seller": "Vendedor",
     "receipt_no": "Número de recibo",
     "amount": "Monto",
-    "total_grant": "Subvención Total",
+    "total_grant": "Subvención total",
     "total_other_sources": "Total de otras fuentes",
     "additional_excess_expenses": "¿Cómo cubriste los gastos adicionales?",
-    "additional_surplus_use": "¿Cómo gastarías el excedente?",
-    "additional_training_needs": "Necesidades de capacitación adicional",
+    "additional_surplus_use": "¿Cómo usarías el excedente?",
+    "additional_training_needs": "Necesidades de capacitación adicionales",
     "lessons": "Lecciones aprendidas en la planificación del presupuesto"
   },
-  "add_expense": "Añadir Gasto"
+  "add_expense": "Agregar gasto"
 }

@@ -1,5 +1,10 @@
 {
   "offline_form_title": "Offline Form",
+  "instructions_title": "How to Use Offline Mode",
+  "instructions_step_1": "Tap 'Open Form' to fill out the form.",
+  "instructions_step_2": "Complete the fields and tap 'Submit'.",
+  "instructions_step_3": "Your form will upload automatically when you're back online.",
+  "open_form_button": "Open Form",
   "form_submit_success": "Form submitted successfully!",
   "submission_failed": "Submission failed, please try again later.",
   "error_during_submission": "Error occurred during submission.",
@@ -8,6 +13,7 @@
   "no_file_chosen": "No file chosen",
   "close": "Close",
   "submit": "Submit",
+  "return_home_button": "Return to Home",
   "expense_entry": "Expense Entry {{index}}",
   "fields": {
     "err_id": "ERR ID",
