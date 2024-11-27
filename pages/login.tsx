@@ -1,4 +1,5 @@
 // pages/login.tsx
+// pages/login.tsx
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next'; // Import translation hook
@@ -62,6 +63,11 @@ const Login = () => {
     const handleOfflineModeClick = () => setShowOfflineForm(true);
     const closeOfflineForm = () => setShowOfflineForm(false);
 
+    // Navigate back to the home page
+    const handleBackToHome = () => {
+        router.push('/');
+    };
+
     // Language Switcher
     const switchLanguage = async (lang: string) => {
         await i18n.changeLanguage(lang); // Synchronize i18next
@@ -92,6 +98,16 @@ const Login = () => {
                 </button>
                 <button onClick={() => switchLanguage('es')} className="mx-2">
                     Español
+                </button>
+            </div>
+
+            {/* Back to Home Button */}
+            <div className="mb-4">
+                <button
+                    onClick={handleBackToHome}
+                    className="text-blue-500 underline"
+                >
+                    {t('backToHome')} {/* Translate "Back to Home" */}
                 </button>
             </div>
 
@@ -152,4 +168,5 @@ const Login = () => {
 };
 
 export default Login;
+
 

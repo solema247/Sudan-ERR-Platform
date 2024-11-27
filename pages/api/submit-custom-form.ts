@@ -21,7 +21,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       financial_summary,
       additional_questions,
       expenses,
-      projectMetadata, // New: Project metadata passed with the form
+      projectMetadata, 
+      fileUrl,
     } = req.body;
 
     console.log('[INFO] Received form submission:', req.body);
@@ -49,6 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       project_name: projectMetadata?.project_name || null, // Include project metadata
       project_objectives: projectMetadata?.objectives || null,
       beneficiaries: projectMetadata?.beneficiaries || null,
+      files: fileUrl || null, 
     };
 
     console.log('[INFO] Summary data to insert:', summaryData);

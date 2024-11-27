@@ -15,6 +15,7 @@ i18n.use(initReactI18next).init({
       offlineMode: require("../public/locales/en/offline-mode.json"),
       projectApplication: require("../public/locales/en/project-application.json"),
       projectStatus: require("../public/locales/en/project-status.json"),
+      home: require("../public/locales/en/home.json"),
     },
     ar: {
       login: require("../public/locales/ar/login.json"),
@@ -27,6 +28,7 @@ i18n.use(initReactI18next).init({
       offlineMode: require("../public/locales/ar/offline-mode.json"),
       projectApplication: require("../public/locales/ar/project-application.json"),
       projectStatus: require("../public/locales/ar/project-status.json"),
+      home: require("../public/locales/ar/home.json"),
     },
     es: {
       login: require("../public/locales/es/login.json"),
@@ -39,6 +41,7 @@ i18n.use(initReactI18next).init({
       offlineMode: require("../public/locales/es/offline-mode.json"),
       projectApplication: require("../public/locales/es/project-application.json"),
       projectStatus: require("../public/locales/es/project-status.json"),
+      home: require("../public/locales/es/home.json"),
     },
   },
   lng: "en", // Default language

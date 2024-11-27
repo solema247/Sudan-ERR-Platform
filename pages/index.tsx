@@ -2,6 +2,7 @@
 import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
 import Button from '../components/Button';
+import Image from 'next/image';
 
 const Home = () => {
     const router = useRouter();
@@ -20,7 +21,17 @@ const Home = () => {
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
             {/* Logo and Title */}
             <div className="text-center mb-8">
-                <h1 className="text-4xl font-bold text-primaryGreen">
+                {/* Centered Icon */}
+                <div className="flex justify-center mb-4">
+                    <Image
+                        src="/icons/icon-512x512.png"
+                        alt="App Icon"
+                        width={100}
+                        height={100}
+                    />
+                </div>
+                {/* Welcome Message */}
+                <h1 className="text-2xl font-bold text-black">
                     {t('welcome')}
                 </h1>
             </div>
@@ -57,4 +68,6 @@ const Home = () => {
 };
 
 export default Home;
+
+
 

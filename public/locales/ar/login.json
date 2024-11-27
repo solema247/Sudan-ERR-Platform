@@ -1,10 +1,12 @@
 {
-  "welcomeMessage": "مرحبًا بك في روبوت Sudan Emergency Response Rooms",
-  "errIdPlaceholder": "أدخل معرف ERR",
-  "pinPlaceholder": "أدخل كلمة المرور",
+  "welcomeMessage": "مرحبًا بكم في شات بوت ERR",
+  "errIdPlaceholder": "أدخل معرف ERR الخاص بك",
+  "pinPlaceholder": "أدخل رمز PIN الخاص بك",
   "loginButton": "تسجيل الدخول",
-  "loginError": "فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك.",
-  "offlineModeButton": "الوضع دون اتصال: تحميل النموذج",
-  "closeButton": "إغلاق",
-  "logoAlt": "شعار Sudan Emergency Response Rooms"
+  "offlineModeButton": "الوضع غير المتصل",
+  "backToHome": "العودة إلى الصفحة الرئيسية",
+  "loginError": "بيانات الاعتماد غير صحيحة. حاول مرة أخرى.",
+  "unexpectedError": "حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى لاحقًا.",
+  "closeButton": "إغلاق"
 }
+

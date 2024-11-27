@@ -6,5 +6,6 @@
   "loginError": "Login failed. Please check your credentials.",
   "offlineModeButton": "Offline Mode: Upload Form",
   "closeButton": "Close",
-  "logoAlt": "Sudan Emergency Response Rooms Logo"
+  "logoAlt": "Sudan Emergency Response Rooms Logo",
+  "backToHome": "Back to Home"
 }

@@ -288,13 +288,16 @@ async function classifyWithChatGPT(language: string, ocrText: string, projectMet
 
 // Upload file to Supabase Storage
 async function uploadToSupabase(filePath: string, fileName: string): Promise<string> {
-  const fileBuffer = fs.readFileSync(filePath);
+  const fileBuffer = fs.readFileSync(filePath); // Read the file from the path
+  const uploadPath = `custom-reports/${Date.now()}-${fileName}`; // Generate a unique file path
+
+  // Upload the file to Supabase Storage
   const { data, error } = await supabase.storage
     .from('expense-reports')
-    .upload(`custom-reports/${Date.now()}-${fileName}`, fileBuffer, {
-      cacheControl: '3600',
-      upsert: false,
-      contentType: 'image/jpeg',
+    .upload(uploadPath, fileBuffer, {
+      cacheControl: '3600', // Set cache control
+      upsert: false, // Avoid overwriting existing files
+      contentType: 'image/jpeg', // Set appropriate content type
     });
 
   if (error) {
@@ -302,9 +305,24 @@ async function uploadToSupabase(filePath: string, fileName: string): Promise<str
     throw new Error('File upload to Supabase failed');
   }
 
-  const { publicUrl } = supabase.storage.from('expense-reports').getPublicUrl(data.path);
-  console.log('File uploaded to Supabase with URL:', publicUrl);
-  return publicUrl;
+  // Check if the data object has a valid path
+  if (!data || !data.path) {
+    console.error('Error: Upload succeeded but file path is missing in response');
+    throw new Error('Failed to retrieve the uploaded file path from Supabase');
+  }
+
+  // Generate the public URL for the uploaded file
+  const { data: publicUrlData, error: publicUrlError } = supabase.storage
+    .from('expense-reports')
+    .getPublicUrl(uploadPath);
+
+  if (publicUrlError) {
+    console.error('Error generating public URL:', publicUrlError.message);
+    throw new Error('Failed to generate public URL for uploaded file');
+  }
+
+  console.log('File uploaded to Supabase with URL:', publicUrlData.publicUrl);
+  return publicUrlData.publicUrl;
 }
 
 // API Route Handler
@@ -383,19 +401,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Enrich data with projectMetadata
+    // Enrich data with projectMetadata and include fileUrl
+    const publicFileUrl = await uploadToSupabase(filePath, fileName);
+
     const enrichedData = {
       ...structuredData,
       projectMetadata,
+      fileUrl: publicFileUrl, // Include fileUrl directly in structuredData
     };
-
-    const publicFileUrl = await uploadToSupabase(filePath, fileName);
 
     res.status(200).json({
       message: 'Scan processed successfully.',
       ocrText,
-      structuredData: enrichedData,
-      fileUrl: publicFileUrl,
+      structuredData: enrichedData, // fileUrl is now part of structuredData
     });
 
     fs.unlinkSync(filePath);
