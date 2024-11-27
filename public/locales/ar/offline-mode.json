@@ -14,6 +14,12 @@
   "close": "إغلاق",
   "submit": "إرسال",
   "return_home_button": "العودة إلى الصفحة الرئيسية",
+  "submitted_forms_title": "النماذج المقدمة",
+  "submitted_form_id": "رقم النموذج",
+  "submitted_form_date": "تاريخ التقديم",
+  "submitted_form_status": "تم التقديم",
+  "clear_list_button": "مسح القائمة",
+  "no_submitted_forms": "لا توجد نماذج مقدمة.",
   "expense_entry": "إدخال المصاريف {{index}}",
   "fields": {
     "err_id": "رقم ERR",

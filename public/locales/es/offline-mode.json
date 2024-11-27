@@ -14,6 +14,12 @@
   "close": "Cerrar",
   "submit": "Enviar",
   "return_home_button": "Volver a Inicio",
+  "submitted_forms_title": "Formularios enviados",
+  "submitted_form_id": "ID del formulario",
+  "submitted_form_date": "Fecha de envío",
+  "submitted_form_status": "Enviado",
+  "clear_list_button": "Limpiar lista",
+  "no_submitted_forms": "No hay formularios enviados disponibles.",
   "expense_entry": "Entrada de gasto {{index}}",
   "fields": {
     "err_id": "ID de ERR",

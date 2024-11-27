@@ -14,6 +14,12 @@
   "close": "Close",
   "submit": "Submit",
   "return_home_button": "Return to Home",
+  "submitted_forms_title": "Submitted Forms",
+  "submitted_form_id": "Form ID",
+  "submitted_form_date": "Submission Date",
+  "submitted_form_status": "Submitted",
+  "clear_list_button": "Clear List",
+  "no_submitted_forms": "No submitted forms available.",
   "expense_entry": "Expense Entry {{index}}",
   "fields": {
     "err_id": "ERR ID",

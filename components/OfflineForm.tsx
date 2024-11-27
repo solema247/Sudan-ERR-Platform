@@ -89,9 +89,11 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
           alert(t('error_during_submission'));
         });
     } else {
-      const offlineQueue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
-      offlineQueue.push(offlineData);
-      localStorage.setItem('offlineQueue', JSON.stringify(offlineQueue));
+      // Update only session-specific offlineSessionQueue
+      const offlineSessionQueue = JSON.parse(localStorage.getItem('offlineSessionQueue') || '[]');
+      offlineSessionQueue.push(offlineData);
+      localStorage.setItem('offlineSessionQueue', JSON.stringify(offlineSessionQueue));
+
       alert(t('form_saved_offline'));
       onClose();
     }

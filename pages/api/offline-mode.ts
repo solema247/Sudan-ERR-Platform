@@ -152,9 +152,15 @@ export default async function handler(
       }
     }
 
+    // Clear the offlineSessionQueue in localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('offlineSessionQueue');
+    }
+
     res.status(200).json({ message: 'Form submitted successfully!' });
   } catch (error: any) {
     console.error('Error processing submission:', error.message || error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
+
