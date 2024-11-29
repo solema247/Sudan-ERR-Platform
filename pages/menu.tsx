@@ -11,7 +11,8 @@ import ScanForm from '../pages/scan-form';
 import ScanCustomForm from '../pages/scan-custom-form'; // Import the new component
 import ProjectApplication from '../pages/project-application';
 import ProjectStatus from '../pages/project-status';
-import LogoImage from '../public/avatar.JPG';
+const LogoImage = '/icons/icon-512x512.png'; 
+
 
 const getCurrentTimestamp = () => {
     const now = new Date();
@@ -116,8 +117,8 @@ const Menu = () => {
             {currentMenu === 'main' && (
                 <>
                     <div className="flex items-center mb-4 space-x-4">
-                        <Image
-                            src={LogoImage}
+                        <img
+                            src={LogoImage} // Public path
                             alt={t('logoAlt')}
                             width={80}
                             height={80}
@@ -228,7 +229,14 @@ const Menu = () => {
             {/* Other workflows */}
             {showFillForm && (
                 <MessageBubble>
-                    <FillForm project={selectedProject} onReturnToMenu={() => handleMenuSelection('reporting')} />
+                    <FillForm 
+                        project={selectedProject} 
+                        onReturnToMenu={() => handleMenuSelection('reporting')} 
+                        onSubmitAnotherForm={() => {
+                            setShowFillForm(false);
+                            setTimeout(() => setShowFillForm(true), 0); // Reset workflow
+                        }}
+                    />
                 </MessageBubble>
             )}
 

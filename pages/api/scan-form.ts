@@ -59,10 +59,11 @@ async function preprocessImageToBuffer(imagePath: string): Promise<Buffer> {
   console.log('Attempting to process image at path:', imagePath);
 
   const processedImageBuffer = await sharp(imagePath)
-    .grayscale()
-    .modulate({ brightness: 1.2, contrast: 1.5 })
-    .jpeg({ quality: 90 })
-    .toBuffer();
+  .grayscale()
+  .modulate({ brightness: 1.2 }) // Remove 'contrast'
+  .linear(1.5, -128 * 1.5 + 128) // Apply contrast adjustment
+  .jpeg({ quality: 90 })
+  .toBuffer();
 
   console.log('Image successfully processed and ready for OCR.');
   return processedImageBuffer;

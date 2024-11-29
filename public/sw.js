@@ -23,11 +23,16 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
-        return cache.addAll(urlsToCache);
+        return Promise.all(
+          urlsToCache.map((url) =>
+            cache.add(url).catch((err) => console.error(`Failed to cache ${url}:`, err))
+          )
+        );
       })
       .catch((error) => console.error('Failed to cache assets on install:', error))
   );
 });
+
 
 // Fetch event: serve from cache or fetch from network
 self.addEventListener('fetch', (event) => {
@@ -53,7 +58,18 @@ self.addEventListener('fetch', (event) => {
           .catch(() => {
             // Return offline page for navigation requests when offline
             if (event.request.mode === 'navigate') {
-              return caches.match('/offline-mode');
+              return caches.match('/offline-mode').then((fallbackResponse) => {
+                if (fallbackResponse) {
+                  return fallbackResponse;
+                }
+                console.error('Offline fallback not available in cache.');
+                return fetch(event.request).catch(() =>
+                  new Response('Offline page not available.', {
+                    status: 503,
+                    headers: { 'Content-Type': 'text/plain' },
+                  })
+                );
+              });
             }
           });
       })

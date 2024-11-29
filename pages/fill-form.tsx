@@ -6,7 +6,11 @@ import MessageBubble from '../components/MessageBubble';
 import Button from '../components/Button';
 import i18n from '../lib/i18n'; // Ensure this is properly imported
 
-const FillForm: React.FC<{ onReturnToMenu: () => void; onSubmitAnotherForm: () => void }> = ({ onReturnToMenu, onSubmitAnotherForm }) => {
+const FillForm: React.FC<{ 
+    project: any | null; 
+    onReturnToMenu: () => void; 
+    onSubmitAnotherForm: () => void; 
+}> = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
     const { t } = useTranslation('fillForm'); // Use translations for the "fill-form" namespace
     const [expenses, setExpenses] = useState([
         { activity: '', description: '', payment_date: '', seller: '', payment_method: 'cash', receipt_no: '', amount: '' },

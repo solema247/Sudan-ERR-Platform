@@ -28,7 +28,7 @@ interface PrefilledFormProps {
     lessons_learned?: string;
     additional_training_needs?: string;
   };
-  onFormSubmit: () => void; // Callback for form submission
+  onFormSubmit: (formData: any) => void;  
 }
 
 const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => {
@@ -80,7 +80,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => 
       console.log(t("form_submit_success"), result.message);
 
       setIsSubmitted(true); // Mark as submitted
-      onFormSubmit(); // Trigger callback
+      onFormSubmit(formData);// Trigger callback
     } catch (error) {
       console.error(t("errors.submit_failed"), error);
       alert(t("errors.submit_failed"));

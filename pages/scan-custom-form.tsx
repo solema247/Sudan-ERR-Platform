@@ -87,7 +87,7 @@ const ScanCustomForm: React.FC<ScanCustomFormProps> = ({
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">{t("title")}</h2>
             <p className="text-gray-700">
-              {t("instruction", { project: project.project_objectives })}
+              {t("instruction", { project: project?.project_objectives || t("default_project_objectives") })}
             </p>
             <div className="flex flex-col items-start space-y-2">
               <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg cursor-pointer inline-flex items-center justify-center">

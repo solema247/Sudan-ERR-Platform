@@ -1,6 +1,6 @@
 {
   "welcomeMessage": "Bienvenido al Bot ERR de Sudán",
-  "introMessage": "El bot ERR te ayudará con las solicitudes de proyectos, informes sobre el impacto de ERR y a compartir información con la comunidad y los donantes.<strong> Haz clic en Comenzar para iniciar.</strong>",
+  "introMessage": "El bot ERR te ayudará con las solicitudes de proyectos, informes sobre el impacto de ERR y a compartir información con la comunidad y los donantes.",
   "startButton": "Comenzar",
   "chooseMainMenu": "Elige <strong> Proyectos </strong> para solicitar proyectos y revisar el estado. Elige <strong> Informes </strong> para informar sobre tus proyectos existentes.",
   "projects": "Proyectos",

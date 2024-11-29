@@ -36,9 +36,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Get the public URL of the uploaded file
-    const { publicUrl } = supabase.storage
+    const { data: publicUrlData } = supabase.storage
       .from('expense-reports/scanned-report-files')
       .getPublicUrl(data.path);
+
+    if (!publicUrlData || !publicUrlData.publicUrl) {
+      throw new Error('Failed to generate the public URL for the uploaded file.');
+    }
+
+    const publicUrl = publicUrlData.publicUrl;
 
     res.status(200).json({ url: publicUrl, message: t('form_success') });
   } catch (error) {

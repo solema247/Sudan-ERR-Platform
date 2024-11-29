@@ -1,5 +1,5 @@
 // pages/login.tsx
-// pages/login.tsx
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next'; // Import translation hook
@@ -7,7 +7,7 @@ import Image from 'next/image';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import OfflineForm from '../components/OfflineForm';
-import LogoImage from '../public/avatar.JPG';
+const LogoImage = '/icons/icon-512x512.png';
 import i18n from '../lib/i18n'; 
 
 const Login = () => {
@@ -78,13 +78,14 @@ const Login = () => {
         <div className="flex flex-col items-center justify-center min-h-screen px-4">
             {/* Logo and Title */}
             <div className="flex flex-col items-center mb-6">
-                <Image
-                    src={LogoImage}
-                    alt={t('logoAlt')} // Translate the alt text for the logo
+                <img
+                    src={LogoImage} 
+                    alt={t('logoAlt')} 
                     width={100}
                     height={100}
                     className="mb-2"
                 />
+
                 <h1 className="text-xl font-bold text-center">{t('welcomeMessage')}</h1>
             </div>
 

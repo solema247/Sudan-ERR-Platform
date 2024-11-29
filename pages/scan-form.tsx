@@ -10,6 +10,7 @@ import Button from "../components/Button";
 interface ScanFormProps {
   onReturnToMenu: () => void;
   onSubmitAnotherForm?: () => void;
+  project?: any; // Add project as an optional prop
 }
 
 const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm }) => {

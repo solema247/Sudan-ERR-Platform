@@ -63,7 +63,7 @@ async function parseForm(req: NextApiRequest): Promise<{ filePath: string; fileN
         return;
       }
 
-      const projectId = fields['projectId'] as string;
+      const projectId = fields['projectId'] as unknown as string;
 
       if (!projectId) {
         console.error("Project ID is missing from the form submission");
@@ -179,7 +179,7 @@ async function googleVisionOCR(imageBuffer: Buffer): Promise<string> {
 // Detect language from OCR text
 function detectLanguage(ocrText: string): string {
   // Normalize Arabic numerals to standard digits (e.g., ٣٠٠٠ -> 3000)
-  ocrText = ocrText.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  ocrText = ocrText.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString());
 
   const langCode = franc(ocrText);
   console.log('Detected language code:', langCode);
@@ -312,13 +312,13 @@ async function uploadToSupabase(filePath: string, fileName: string): Promise<str
   }
 
   // Generate the public URL for the uploaded file
-  const { data: publicUrlData, error: publicUrlError } = supabase.storage
-    .from('expense-reports')
-    .getPublicUrl(uploadPath);
+  const { data: publicUrlData } = supabase.storage
+      .from('expense-reports')
+      .getPublicUrl(uploadPath);
 
-  if (publicUrlError) {
-    console.error('Error generating public URL:', publicUrlError.message);
-    throw new Error('Failed to generate public URL for uploaded file');
+  if (!publicUrlData || !publicUrlData.publicUrl) {
+      console.error('Error: Public URL generation failed.');
+      throw new Error('Failed to generate public URL for uploaded file');
   }
 
   console.log('File uploaded to Supabase with URL:', publicUrlData.publicUrl);
@@ -360,7 +360,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       remainder: 0      // Will be updated later
     };
 
-    const structuredData = await classifyWithChatGPT(detectedLanguage, ocrText, projectMetadata, calculatedFields);
+    const structuredData = await classifyWithChatGPT(detectedLanguage, ocrText, projectMetadata);
 
     // Calculate totalExpenses from structuredData.expenses
     const totalExpenses = (structuredData.expenses || []).reduce((sum: number, expense: any) => {

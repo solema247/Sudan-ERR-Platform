@@ -99,10 +99,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (uploadError) throw uploadError;
 
                 // Retrieve the public URL of the uploaded file
-                const { publicUrl } = supabase
+                const { data } = supabase
                     .storage
                     .from('expense-reports')
                     .getPublicUrl(uniqueFileName);
+
+                const publicUrl = data.publicUrl; 
 
                 // Update files column in MAG F4 Summary table
                 await supabase
