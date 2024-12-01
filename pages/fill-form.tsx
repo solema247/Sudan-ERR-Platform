@@ -122,7 +122,7 @@ const FillForm: React.FC<{
                             />
                         </label>
 
-                        <div className="swipeable-cards flex overflow-x-auto space-x-2">
+                        <div className="swipeable-cards flex overflow-x-auto space-x-2 max-w-full">
                             {expenses.map((expense, index) => (
                                 <div key={index} className="min-w-[200px] p-4 rounded bg-gray-50">
                                     <h4>{t('expenseEntry', { index: index + 1 })}</h4>
@@ -155,7 +155,8 @@ const FillForm: React.FC<{
                                             className="w-full p-2 border rounded"
                                         />
                                     </label>
-                                    <label>{t('seller')}
+                                    <div className="mb-2">
+                                        <label>{t('seller')}</label>
                                         <input
                                             type="text"
                                             name="seller"
@@ -164,7 +165,7 @@ const FillForm: React.FC<{
                                             className="w-full p-2 border rounded"
                                             placeholder={t('seller')}
                                         />
-                                    </label>
+                                    </div>
                                     <label>{t('paymentMethod')}
                                         <select
                                             name="payment_method"
@@ -250,7 +251,7 @@ const FillForm: React.FC<{
                         />
 
                         <div className="flex flex-col space-y-2">
-                            <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition-all cursor-pointer inline-flex items-center justify-center">
+                            <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all cursor-pointer inline-flex items-center justify-center">
                                 {t('chooseFile')}
                                 <input
                                     type="file"
@@ -266,9 +267,9 @@ const FillForm: React.FC<{
                 </FormBubble>
             ) : (
                 <>
-                    <MessageBubble>
+                    <div>
                         {t('formSuccess')}
-                    </MessageBubble>
+                    </div>
 
                     <div className="flex justify-center space-x-4 mt-2">
                         <Button text={t('submitAnother')} onClick={onSubmitAnotherForm} />

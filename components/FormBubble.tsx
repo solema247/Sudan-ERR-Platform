@@ -7,7 +7,7 @@ interface FormBubbleProps {
 
 const FormBubble: React.FC<FormBubbleProps> = ({ children }) => {
     return (
-        <div className="w-full px-2 my-1 bg-white rounded-lg">
+        <div className="w-full px-2 bg-white rounded-lg max-w-full overflow-hidden">
             {children}
         </div>
     );
