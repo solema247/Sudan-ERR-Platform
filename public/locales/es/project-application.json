@@ -13,15 +13,15 @@
   "intendedBeneficiaries": "Beneficiarios previstos",
   "enterIntendedBeneficiaries": "¿Quiénes son los beneficiarios previstos de este proyecto en su área?",
   "estimatedBeneficiaries": "Número estimado de beneficiarios",
-  "enterEstimatedBeneficiaries": "¿Cuántos beneficiarios se estima que se beneficiarán de este proyecto?",
+  "enterEstimatedBeneficiaries": "¿Cuántos beneficiarios se estiman para este proyecto?",
   "plannedActivities": "Actividades planificadas",
   "selectActivity": "Seleccione una actividad planificada",
   "expenses": "Gastos",
   "selectExpense": "Seleccione una categoría de gastos",
   "estimatedTimeframe": "Plazo estimado",
-  "enterEstimatedTimeframe": "Plazo estimado para completar todas las actividades y presentar informes",
+  "enterEstimatedTimeframe": "Plazo para completar actividades e informes",
   "additionalSupport": "Apoyo adicional",
-  "enterAdditionalSupport": "¿Se necesitan formas adicionales de apoyo para implementar este proyecto?",
+  "enterAdditionalSupport": "¿Necesita apoyo adicional para el proyecto?",
   "officerName": "Nombre del oficial del programa",
   "enterOfficerName": "Ingrese el nombre del oficial del programa",
   "submit": "Enviar",
@@ -53,5 +53,6 @@
   "frequency": "Frecuencia",
   "unitPrice": "Precio unitario",
   "addRow": "Añadir fila",
-  "remove": "Eliminar"
+  "remove": "Eliminar",
+  "returnToMenu": "Volver al Menú"
 }

@@ -13,15 +13,15 @@
   "intendedBeneficiaries": "المستفيدون المستهدفون",
   "enterIntendedBeneficiaries": "من هم المستفيدون المستهدفون من هذا المشروع في منطقتك؟",
   "estimatedBeneficiaries": "عدد المستفيدين المتوقع",
-  "enterEstimatedBeneficiaries": "كم عدد المستفيدين المتوقع استفادتهم من هذا المشروع؟",
+  "enterEstimatedBeneficiaries": "كم عدد المستفيدين المتوقعين من المشروع؟",
   "plannedActivities": "الأنشطة المخطط لها",
   "selectActivity": "اختر نشاطاً مخططاً",
   "expenses": "المصروفات",
   "selectExpense": "اختر فئة المصروفات",
   "estimatedTimeframe": "الإطار الزمني المتوقع",
-  "enterEstimatedTimeframe": "الإطار الزمني المتوقع لإكمال جميع الأنشطة وتقديم التقارير",
+  "enterEstimatedTimeframe": "الإطار الزمني لإكمال الأنشطة والتقارير",
   "additionalSupport": "الدعم الإضافي",
-  "enterAdditionalSupport": "هل هناك أي أشكال إضافية من الدعم اللازمة لتنفيذ المشروع؟",
+  "enterAdditionalSupport": "هل تحتاج إلى دعم إضافي للمشروع؟",
   "officerName": "اسم مسؤول البرنامج",
   "enterOfficerName": "أدخل اسم مسؤول البرنامج",
   "submit": "إرسال",
@@ -53,5 +53,6 @@
   "frequency": "التكرار",
   "unitPrice": "سعر الوحدة",
   "addRow": "إضافة صف",
-  "remove": "إزالة"
+  "remove": "إزالة",
+  "returnToMenu": "العودة إلى القائمة"
 }

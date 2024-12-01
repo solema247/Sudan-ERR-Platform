@@ -1,3 +1,4 @@
+//pages/project-application.tsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../components/Button';
@@ -108,202 +109,223 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
     return (
         <>
             {!formSubmitted ? (
-                <FormBubble>
-                    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded-lg">
-                        {/* Date */}
-                        <label>
+            <FormBubble>
+                <form onSubmit={handleSubmit} className="space-y-3 bg-white p-3 rounded-lg">
+                    {/* Date */}
+                    <div className="flex items-center">
+                        <label className="text-base font-medium text-gray-700 mr-3">
                             {t('date')}
-                            <input
-                                type="date"
-                                name="date"
-                                value={formData.date}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                                required
-                                disabled={loading}
-                            />
                         </label>
-
-                        {/* ERR ID */}
-                        <label>
-                            {t('errId')}
-                            <input
-                                type="text"
-                                name="err"
-                                value={formData.err}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                                placeholder={t('enterErrId')}
-                                required
-                                disabled={loading}
-                            />
-                        </label>
-
-                        {/* State */}
-                        <label>
-                            {t('state')}
-                            <select
-                                name="state"
-                                value={formData.state}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                                required
-                                disabled={loading}
-                            >
-                                <option value="">{t('selectState')}</option>
-                                {stateLocality.states.map((state: any, idx: number) => (
-                                    <option key={idx} value={state.state_name}>
-                                        {state.state_name}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-
-                        {/* Locality */}
-                        <label>
-                            {t('locality')}
-                            <select
-                                name="locality"
-                                value={formData.locality}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                                required
-                                disabled={loading || !formData.state}
-                            >
-                                <option value="">{t('selectLocality')}</option>
-                                {stateLocality.localities.map((locality: string, idx: number) => (
-                                    <option key={idx} value={locality}>
-                                        {locality}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-
-                        {/* Project Objectives */}
-                        <label>
-                            {t('projectObjectives')}
-                            <textarea
-                                name="project_objectives"
-                                value={formData.project_objectives}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                                placeholder={t('enterProjectObjectives')}
-                                required
-                                disabled={loading}
-                            />
-                        </label>
-
-                        {/* Intended Beneficiaries */}
-                        <label>
-                            {t('intendedBeneficiaries')}
-                            <textarea
-                                name="intended_beneficiaries"
-                                value={formData.intended_beneficiaries}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                                placeholder={t('enterIntendedBeneficiaries')}
-                                required
-                                disabled={loading}
-                            />
-                        </label>
-
-                        {/* Estimated Beneficiaries */}
-                        <label>
-                            {t('estimatedBeneficiaries')}
-                            <input
-                                type="number"
-                                name="estimated_beneficiaries"
-                                value={formData.estimated_beneficiaries}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                                placeholder={t('enterEstimatedBeneficiaries')}
-                                required
-                                disabled={loading}
-                            />
-                        </label>
-
-                        {/* Planned Activities */}
-                        <DynamicActivityForm
-                            title={t('plannedActivities')}
-                            options={plannedActivities}
-                            onChange={(data) =>
-                                setFormData((prev) => ({ ...prev, planned_activities: data }))
-                            }
-                        />
-
-                        {/* Expenses */}
-                        <DynamicActivityForm
-                            title={t('expenses')}
-                            options={expenseCategories}
-                            onChange={(data) =>
-                                setFormData((prev) => ({ ...prev, expenses: data }))
-                            }
-                        />
-
-                        {/* Estimated Timeframe */}
-                        <label>
-                            {t('estimatedTimeframe')}
-                            <textarea
-                                name="estimated_timeframe"
-                                value={formData.estimated_timeframe}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                                placeholder={t('enterEstimatedTimeframe')}
-                                required
-                                disabled={loading}
-                            />
-                        </label>
-
-                        {/* Additional Support */}
-                        <label>
-                            {t('additionalSupport')}
-                            <textarea
-                                name="additional_support"
-                                value={formData.additional_support}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                                placeholder={t('enterAdditionalSupport')}
-                                disabled={loading}
-                            />
-                        </label>
-
-                        {/* Officer Name */}
-                        <label>
-                            {t('officerName')}
-                            <input
-                                type="text"
-                                name="officer_name"
-                                value={formData.officer_name}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                                placeholder={t('enterOfficerName')}
-                                required
-                                disabled={loading}
-                            />
-                        </label>
-
-                        {/* Submit Button */}
-                        <Button
-                            type="submit"
-                            text={loading ? t('loading') : t('submit')}
+                        <input
+                            type="date"
+                            name="date"
+                            value={formData.date}
+                            onChange={handleInputChange}
+                            className="flex-grow p-2 border rounded"
+                            required
                             disabled={loading}
                         />
-                    </form>
-                </FormBubble>
-            ) : (
-                <>
-                    <MessageBubble>{t('formSubmitted')}</MessageBubble>
-                    <div className="flex justify-center mt-4">
-                        <Button
-                            text={t('returnToMenu')}
-                            onClick={() => {
-                                setFormSubmitted(false);
-                                onReturnToMenu();
-                            }}
+                    </div>
+
+                    {/* ERR ID */}
+                    <div className="flex items-center">
+                        <label className="text-base font-medium text-gray-700 mr-3">
+                            {t('errId')}
+                        </label>
+                        <input
+                            type="text"
+                            name="err"
+                            value={formData.err}
+                            onChange={handleInputChange}
+                            className="flex-grow p-2 border rounded"
+                            placeholder={t('enterErrId')}
+                            required
+                            disabled={loading}
                         />
                     </div>
-                </>
-            )}
+
+                    {/* State */}
+                    <div className="mb-3">
+                        <label className="block text-base font-medium text-gray-700 mb-1">
+                            {t('state')}
+                        </label>
+                        <select
+                            name="state"
+                            value={formData.state}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded"
+                            required
+                            disabled={loading}
+                        >
+                            <option value="">{t('selectState')}</option>
+                            {stateLocality.states.map((state: any, idx: number) => (
+                                <option key={idx} value={state.state_name}>
+                                    {state.state_name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Locality */}
+                    <div className="mb-3">
+                        <label className="block text-base font-medium text-gray-700 mb-1">
+                            {t('locality')}
+                        </label>
+                        <select
+                            name="locality"
+                            value={formData.locality}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded"
+                            required
+                            disabled={loading || !formData.state}
+                        >
+                            <option value="">{t('selectLocality')}</option>
+                            {stateLocality.localities.map((locality: string, idx: number) => (
+                                <option key={idx} value={locality}>
+                                    {locality}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Project Objectives */}
+                    <div className="mb-3">
+                        <label className="block text-base font-medium text-gray-700 mb-1">
+                            {t('projectObjectives')}
+                        </label>
+                        <textarea
+                            name="project_objectives"
+                            value={formData.project_objectives}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded"
+                            placeholder={t('enterProjectObjectives')}
+                            required
+                            disabled={loading}
+                        />
+                    </div>
+
+                    {/* Intended Beneficiaries */}
+                    <div className="mb-3">
+                        <label className="block text-base font-medium text-gray-700 mb-1">
+                            {t('intendedBeneficiaries')}
+                        </label>
+                        <textarea
+                            name="intended_beneficiaries"
+                            value={formData.intended_beneficiaries}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded"
+                            placeholder={t('enterIntendedBeneficiaries')}
+                            required
+                            disabled={loading}
+                        />
+                    </div>
+
+                    {/* Estimated Beneficiaries */}
+                    <div className="mb-3">
+                        <label className="block text-base font-medium text-gray-700 mb-1">
+                            {t('estimatedBeneficiaries')}
+                        </label>
+                        <input
+                            type="number"
+                            name="estimated_beneficiaries"
+                            value={formData.estimated_beneficiaries}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded"
+                            placeholder={t('enterEstimatedBeneficiaries')}
+                            required
+                            disabled={loading}
+                        />
+                    </div>
+
+                    {/* Planned Activities */}
+                    <DynamicActivityForm
+                        title={t('plannedActivities')}
+                        options={plannedActivities}
+                        onChange={(data) =>
+                            setFormData((prev) => ({ ...prev, planned_activities: data }))
+                        }
+                    />
+
+                    {/* Expenses */}
+                    <DynamicActivityForm
+                        title={t('expenses')}
+                        options={expenseCategories}
+                        onChange={(data) =>
+                            setFormData((prev) => ({ ...prev, expenses: data }))
+                        }
+                    />
+
+                    {/* Estimated Timeframe */}
+                    <div className="mb-3">
+                        <label className="block text-base font-medium text-gray-700 mb-1">
+                            {t('estimatedTimeframe')}
+                        </label>
+                        <textarea
+                            name="estimated_timeframe"
+                            value={formData.estimated_timeframe}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded"
+                            placeholder={t('enterEstimatedTimeframe')}
+                            required
+                            disabled={loading}
+                        />
+                    </div>
+
+                    {/* Additional Support */}
+                    <div className="mb-3">
+                        <label className="block text-base font-medium text-gray-700 mb-1">
+                            {t('additionalSupport')}
+                        </label>
+                        <textarea
+                            name="additional_support"
+                            value={formData.additional_support}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded"
+                            placeholder={t('enterAdditionalSupport')}
+                            disabled={loading}
+                        />
+                    </div>
+
+                    {/* Officer Name */}
+                    <div className="mb-3">
+                        <label className="block text-base font-medium text-gray-700 mb-1">
+                            {t('officerName')}
+                        </label>
+                        <input
+                            type="text"
+                            name="officer_name"
+                            value={formData.officer_name}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded"
+                            placeholder={t('enterOfficerName')}
+                            required
+                            disabled={loading}
+                        />
+                    </div>
+
+                    {/* Submit Button */}
+                    <Button
+                        type="submit"
+                        text={loading ? t('loading') : t('submit')}
+                        disabled={loading}
+                    />
+                </form>
+            </FormBubble>
+        ) : (
+            <div className="bg-white p-4 rounded-lg">
+                <p className="text-gray-700 text-base font-medium mb-4">{t('formSubmitted')}</p>
+                <div className="flex justify-center">
+                    <Button
+                        text={t('returnToMenu')}
+                        onClick={() => {
+                            setFormSubmitted(false);
+                            onReturnToMenu();
+                        }}
+                    />
+                </div>
+            </div>
+        )}
+
         </>
     );
 };

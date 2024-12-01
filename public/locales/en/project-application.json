@@ -11,7 +11,7 @@
   "projectObjectives": "Project Objectives",
   "enterProjectObjectives": "Clearly outline the project and define its objectives",
   "intendedBeneficiaries": "Intended Beneficiaries",
-  "enterIntendedBeneficiaries": "Who are the intended beneficiaries of this project among the residents of your area?",
+  "enterIntendedBeneficiaries": "Who are the intended beneficiaries in your area?",
   "estimatedBeneficiaries": "Estimated Beneficiaries",
   "enterEstimatedBeneficiaries": "How many beneficiaries are estimated to benefit from this project?",
   "plannedActivities": "Planned Activities",
@@ -19,9 +19,9 @@
   "expenses": "Expenses",
   "selectExpense": "Select an Expense Category",
   "estimatedTimeframe": "Estimated Timeframe",
-  "enterEstimatedTimeframe": "Estimated timeframe for completing all activities and submitting reports",
+  "enterEstimatedTimeframe": "Timeframe to complete activities and submit reports",
   "additionalSupport": "Additional Support",
-  "enterAdditionalSupport": "Are there any additional forms of support needed to implement this project?",
+  "enterAdditionalSupport": "Do you need additional support for this project?",
   "officerName": "Program Officer Name",
   "enterOfficerName": "Enter the Program Officer's name",
   "submit": "Submit",
@@ -53,5 +53,6 @@
   "frequency": "Frequency",
   "unitPrice": "Unit Price",
   "addRow": "Add Row",
-  "remove": "Remove"
+  "remove": "Remove",
+  "returnToMenu": "Return to Menu"
 }
