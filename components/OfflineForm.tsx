@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Buffer } from 'buffer';
 import { useTranslation } from 'react-i18next';
+import { addFormToSessionQueue } from '../lib/sessionUtils';
 
 interface OfflineFormProps {
   onClose: () => void;
@@ -9,7 +10,7 @@ interface OfflineFormProps {
 }
 
 const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) => {
-  const { t } = useTranslation('offlineMode'); // Load translations from offlineForm.json
+  const { t } = useTranslation('offlineMode');
   const [formData, setFormData] = useState({
     err_id: '',
     date: '',
@@ -51,10 +52,22 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFile(e.target.files[0]);
+      console.log('File selected:', e.target.files[0].name);
     }
   };
 
+  const validateFormData = () => {
+    // Check if required fields are empty
+    if (!formData.err_id || !formData.date) {
+      alert(t('form_validation_error'));
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async () => {
+    if (!validateFormData()) return;
+
     const fileContent = file ? await file.arrayBuffer() : null;
     const encodedFile = file
       ? {
@@ -71,6 +84,8 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
     };
 
     if (navigator.onLine) {
+      console.log('Submitting form online:', offlineData);
+
       fetch('/api/offline-mode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,15 +100,14 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
             alert(t('submission_failed'));
           }
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error('Error during submission:', error);
           alert(t('error_during_submission'));
         });
     } else {
-      // Update only session-specific offlineSessionQueue
-      const offlineSessionQueue = JSON.parse(localStorage.getItem('offlineSessionQueue') || '[]');
-      offlineSessionQueue.push(offlineData);
-      localStorage.setItem('offlineSessionQueue', JSON.stringify(offlineSessionQueue));
+      console.log('Saving form offline:', offlineData);
 
+      addFormToSessionQueue(offlineData);
       alert(t('form_saved_offline'));
       onClose();
     }
@@ -266,3 +280,4 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
 };
 
 export default OfflineForm;
+

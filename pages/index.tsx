@@ -3,13 +3,40 @@ import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
 import Button from '../components/Button';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 
 const Home = () => {
     const router = useRouter();
     const { t } = useTranslation('home'); // Use 'home' namespace for translations
 
+    const [isOffline, setIsOffline] = useState(false);
+
+    // Monitor network status
+    useEffect(() => {
+        const handleOnline = () => setIsOffline(false);
+        const handleOffline = () => setIsOffline(true);
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        // Set initial network status
+        setIsOffline(!navigator.onLine);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+
     // Handlers for button navigation
-    const handleLogin = () => router.push('/login');
+    const handleLogin = () => {
+        if (isOffline) {
+            alert(t('offlineError'));
+        } else {
+            router.push('/login');
+        }
+    };
+
     const handleOfflineMode = () => router.push('/offline-mode');
 
     // Language switcher
@@ -34,6 +61,9 @@ const Home = () => {
                 <h1 className="text-2xl font-bold text-black">
                     {t('welcome')}
                 </h1>
+                {isOffline && (
+                    <p className="text-sm text-red-500 mt-2">{t('offlineWarning')}</p>
+                )}
             </div>
 
             {/* Navigation Buttons */}
@@ -68,6 +98,7 @@ const Home = () => {
 };
 
 export default Home;
+
 
 
 

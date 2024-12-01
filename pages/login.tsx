@@ -17,6 +17,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const [showOfflineForm, setShowOfflineForm] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [isOffline, setIsOffline] = useState(false); 
 
     const router = useRouter();
     const { t } = useTranslation('login'); // Load translations for the "login" namespace
@@ -35,10 +36,32 @@ const Login = () => {
         };
     }, []);
 
+    useEffect(() => {
+        const handleOnline = () => setIsOffline(false);
+        const handleOffline = () => setIsOffline(true);
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        // Set initial status
+        setIsOffline(!navigator.onLine);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+    
+
     // Login form submission handler
     const handleLogin = async (event: React.FormEvent) => {
         event.preventDefault();
         setError('');
+
+        if (isOffline) { // Prevent login while offline
+            setError(t('offlineLoginError'));
+            return;
+        }
 
         try {
             const response = await fetch('/api/login', {
@@ -88,6 +111,11 @@ const Login = () => {
 
                 <h1 className="text-xl font-bold text-center">{t('welcomeMessage')}</h1>
             </div>
+
+            {/* Network Status Indicator */}
+            {isOffline && (
+                <p className="text-sm text-red-500 mt-2">{t('offlineWarning')}</p>
+            )}
 
             {/* Language Switcher */}
             <div className="flex justify-center mb-4">
