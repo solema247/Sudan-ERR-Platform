@@ -146,8 +146,10 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => 
                 className="w-full p-2 border rounded"
               />
             </label>
-            <label>
-              {t("field_labels.seller")}
+            <div className="mb-1">
+              <label className="block">
+                {t("field_labels.seller")}
+              </label>
               <input
                 type="text"
                 name="seller"
@@ -155,7 +157,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit }) => 
                 onChange={(e) => handleExpenseChange(index, e)}
                 className="w-full p-2 border rounded"
               />
-            </label>
+            </div>
             <label>
               {t("field_labels.payment_method")}
               <select

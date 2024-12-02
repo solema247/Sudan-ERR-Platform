@@ -3,9 +3,9 @@
   "short_name": "ERR Bot",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#128c7e",
-  "description": "A bot to support the Sudan Emergency Response Rooms.",
+  "background_color": "#F9FAFB",
+  "theme_color": "#15803D",
+  "description": "Sudan Emergency Response Rooms bot",
   "icons": [
     {
       "src": "/icons/icon-144x144.png",

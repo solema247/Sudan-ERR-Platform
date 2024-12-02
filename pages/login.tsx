@@ -98,7 +98,7 @@ const Login = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen px-4">
+        <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-gray-50">
             {/* Logo and Title */}
             <div className="flex flex-col items-center mb-6">
                 <img
