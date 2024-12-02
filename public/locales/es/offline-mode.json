@@ -20,6 +20,12 @@
   "submitted_form_status": "Enviado",
   "clear_list_button": "Limpiar lista",
   "no_submitted_forms": "No hay formularios enviados disponibles.",
+  "status_online": "En línea",
+  "status_offline": "Desconectado",
+  "queued_form_id": "ID del formulario",
+  "queued_form_date": "Fecha del formulario",
+  "queued_form_status_pending": "Pendiente",
+  "unknown": "Desconocido",
   "expense_entry": "Entrada de gasto {{index}}",
   "fields": {
     "err_id": "ID de ERR",

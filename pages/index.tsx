@@ -86,12 +86,13 @@ const Home = () => {
                 >
                     العربية
                 </button>
-                <button
+                
+                {/*<button
                     onClick={() => switchLanguage('es')}
                     className="px-3 py-1 border text-sm rounded border-gray-300 bg-white hover:bg-gray-200"
                 >
                     Español
-                </button>
+                </button>*/}
             </div>
         </div>
     );

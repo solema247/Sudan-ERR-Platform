@@ -54,5 +54,7 @@
   "unitPrice": "Unit Price",
   "addRow": "Add Row",
   "remove": "Remove",
-  "returnToMenu": "Return to Menu"
+  "returnToMenu": "Return to Menu",
+  "button.submit": "Submit",
+  "button.processing": "Processing..."
 }

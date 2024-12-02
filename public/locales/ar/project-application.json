@@ -54,5 +54,7 @@
   "unitPrice": "سعر الوحدة",
   "addRow": "إضافة صف",
   "remove": "إزالة",
-  "returnToMenu": "العودة إلى القائمة"
+  "returnToMenu": "العودة إلى القائمة",
+  "button.submit": "إرسال",
+  "button.processing": "جاري المعالجة..."
 }

@@ -108,9 +108,9 @@ const Menu = () => {
                 <button onClick={() => i18n.changeLanguage('ar')} className="mx-2 text-blue-500 hover:underline">
                     العربية
                 </button>
-                <button onClick={() => i18n.changeLanguage('es')} className="mx-2 text-blue-500 hover:underline">
+                {/*<button onClick={() => i18n.changeLanguage('es')} className="mx-2 text-blue-500 hover:underline">
                     Español
-                </button>
+                </button>*/}
             </div>
 
             {/* Main Menu */}

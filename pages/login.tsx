@@ -125,9 +125,9 @@ const Login = () => {
                 <button onClick={() => switchLanguage('ar')} className="mx-2">
                     العربية
                 </button>
-                <button onClick={() => switchLanguage('es')} className="mx-2">
+                {/*<button onClick={() => switchLanguage('es')} className="mx-2">
                     Español
-                </button>
+                </button>*/}
             </div>
 
             

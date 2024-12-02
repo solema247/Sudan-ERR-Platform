@@ -306,9 +306,10 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                     {/* Submit Button */}
                     <Button
                         type="submit"
-                        text={loading ? t('loading') : t('submit')}
+                        text={loading ? t('button.processing') : t('button.submit')}
                         disabled={loading}
                     />
+
                 </form>
             </FormBubble>
         ) : (

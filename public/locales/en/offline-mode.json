@@ -20,6 +20,12 @@
   "submitted_form_status": "Submitted",
   "clear_list_button": "Clear List",
   "no_submitted_forms": "No submitted forms available.",
+  "status_online": "Online",
+  "status_offline": "Offline",
+  "queued_form_id": "Form ID",
+  "queued_form_date": "Form Date",
+  "queued_form_status_pending": "Pending",
+  "unknown": "Unknown",
   "expense_entry": "Expense Entry {{index}}",
   "fields": {
     "err_id": "ERR ID",

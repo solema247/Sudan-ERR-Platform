@@ -54,5 +54,7 @@
   "unitPrice": "Precio unitario",
   "addRow": "Añadir fila",
   "remove": "Eliminar",
-  "returnToMenu": "Volver al Menú"
+  "returnToMenu": "Volver al Menú",
+  "button.submit": "Enviar",
+  "button.processing": "Procesando..."
 }

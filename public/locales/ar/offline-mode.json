@@ -20,6 +20,12 @@
   "submitted_form_status": "تم التقديم",
   "clear_list_button": "مسح القائمة",
   "no_submitted_forms": "لا توجد نماذج مقدمة.",
+  "status_online": "متصل",
+  "status_offline": "غير متصل",
+  "queued_form_id": "رقم النموذج",
+  "queued_form_date": "تاريخ النموذج",
+  "queued_form_status_pending": "قيد الانتظار",
+  "unknown": "غير معروف",
   "expense_entry": "إدخال المصاريف {{index}}",
   "fields": {
     "err_id": "رقم ERR",
