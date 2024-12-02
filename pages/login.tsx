@@ -130,15 +130,7 @@ const Login = () => {
                 </button>
             </div>
 
-            {/* Back to Home Button */}
-            <div className="mb-4">
-                <button
-                    onClick={handleBackToHome}
-                    className="text-blue-500 underline"
-                >
-                    {t('backToHome')} {/* Translate "Back to Home" */}
-                </button>
-            </div>
+            
 
             {/* Success Message Notification */}
             {successMessage && (
@@ -167,13 +159,15 @@ const Login = () => {
             {/* Error Message */}
             {error && <p className="text-red-500 mt-2">{error}</p>}
 
-            {/* Offline Mode Button */}
-            <button
-                onClick={handleOfflineModeClick}
-                className="mt-4 text-blue-500 underline"
-            >
-                {t('offlineModeButton')} {/* Translate offline mode button */}
-            </button>
+            {/* Back to Home Button */}
+            <div className="mt-2 mb-4">
+                <button
+                    onClick={handleBackToHome}
+                    className="text-blue-500 underline"
+                >
+                    {t('backToHome')} {/* Translate "Back to Home" */}
+                </button>
+            </div>
 
             {/* Offline Form Modal */}
             {showOfflineForm && (
