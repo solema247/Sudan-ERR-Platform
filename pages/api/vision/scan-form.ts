@@ -12,6 +12,8 @@ import { franc } from 'franc';
 /**
  * Scan form
  * 
+ * Submit for Vision API (TODO: Use local processing instead)
+ * 
  * 
  */
 

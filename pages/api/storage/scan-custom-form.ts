@@ -10,6 +10,7 @@ import { franc } from 'franc';
 import { createClient } from '@supabase/supabase-js';
 import { execSync } from 'child_process';
 
+
 /**
  * Scan custom form
  * 
@@ -20,6 +21,8 @@ import { execSync } from 'child_process';
  */
 
 const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET_NAME_IMAGES;
+const FOLDER_PATH = "forms/custom";
+
 
 // Disable body parsing for file uploads
 export const config = {
@@ -299,7 +302,7 @@ async function classifyWithChatGPT(language: string, ocrText: string, projectMet
 // Upload file to Supabase Storage
 async function uploadToSupabase(filePath: string, fileName: string): Promise<string> {
   const fileBuffer = fs.readFileSync(filePath); // Read the file from the path
-  const uploadPath = `custom-reports/${Date.now()}-${fileName}`; // Generate a unique file path
+  const uploadPath = `${FOLDER_PATH}/${Date.now()}-${fileName}`; // Generate a unique file path
 
   // Upload the file to Supabase Storage
   const { data, error } = await supabase.storage

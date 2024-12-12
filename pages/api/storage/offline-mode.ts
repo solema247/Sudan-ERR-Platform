@@ -6,7 +6,7 @@ import crypto from 'crypto';
 /**
  * Offline mode
  * 
- * Submit forms while online. (TODO: ?)
+ * Submit forms while online. (TODO: Confirm that this is right)
  * 
  */
 
@@ -18,6 +18,9 @@ const supabase = createClient(
 );
 
 const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET_NAME_IMAGES;
+const FOLDER_PATH = "forms/filled";
+
+
 
 // Helper function to generate unique report ID
 function generateErrReportId(err_id: string): string {
@@ -50,7 +53,8 @@ export default async function handler(
       ? parseFloat(formData.total_expenses)
       : expenses.reduce((acc: number, exp: any) => acc + (parseFloat(exp.amount) || 0), 0);
 
-    // Insert summary data into the Supabase table
+    // 1. Insert summary data into the Supabase table
+
     const { error: summaryError } = await supabase
       .from('MAG F4 Summary')
       .insert([
@@ -120,13 +124,13 @@ export default async function handler(
       }
     }
 
-    // Handle file upload if present
+    // 2. Handle file upload if present
     if (file && file.content && file.name && file.type) {
       // Decode base64 content
       const buffer = Buffer.from(file.content, 'base64');
 
       // Generate unique filename
-      const uniqueFileName = `reports/${crypto.randomUUID()}-${file.name}`;
+      const uniqueFileName = `${FOLDER_PATH}/${crypto.randomUUID()}-${file.name}`;
 
       // Upload to Supabase storage bucket SUPABASE_STORAGE_BUCKET_NAME_IMAGES
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -140,28 +144,28 @@ export default async function handler(
         throw new Error('Failed to upload file');
       }
 
-      // Get public URL of the uploaded file
-      const { data } = supabase.storage
-          .from(BUCKET_NAME)
-          .getPublicUrl(uniqueFileName);
+      // TODO: Get signed URL of what we put up there.
+      // const { data } = supabase.storage
+      //     .from(BUCKET_NAME)
+      //     .getPublicUrl(uniqueFileName);
 
-      if (!data || !data.publicUrl) {
-          console.error('Error: Public URL is missing or invalid.');
-          throw new Error('Failed to get public URL of the uploaded file');
-      }
+      // if (!data || !data.publicUrl) {
+      //     console.error('Error: Public URL is missing or invalid.');
+      //     throw new Error('Failed to get public URL of the uploaded file');
+      // }
 
-      const publicUrl = data.publicUrl;
+      // const publicUrl = data.publicUrl;
 
-      // Update the summary record with the file URL
-      const { error: updateError } = await supabase
-        .from('MAG F4 Summary')
-        .update({ files: publicUrl })
-        .eq('err_report_id', err_report_id);
+      // // Update the summary record with the file URL
+      // const { error: updateError } = await supabase
+      //   .from('MAG F4 Summary')
+      //   .update({ files: publicUrl })
+      //   .eq('err_report_id', err_report_id);
 
-      if (updateError) {
-        console.error('Error updating summary with file URL:', updateError.message);
-        throw new Error('Failed to update summary with file URL');
-      }
+      // if (updateError) {
+      //   console.error('Error updating summary with file URL:', updateError.message);
+      //   throw new Error('Failed to update summary with file URL');
+      // }
     }
 
     // Clear the offlineSessionQueue in localStorage

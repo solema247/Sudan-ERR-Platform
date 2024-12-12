@@ -2,14 +2,16 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import i18n from '../../../lib/i18n'; // Import i18n directly
 
-const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
-const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET_NAME_IMAGES;
 
 /**
  * Upload
  * 
- * TODO: Unused?
+ * TODO: Is this actually used?
  */
+
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
+const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET_NAME_IMAGES;
+const FOLDER_PATH = 'forms/scanned'
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -34,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Upload the file to Supabase
     const { data, error } = await supabase.storage
-      .from(`${BUCKET_NAME}/scanned-report-files`)
+      .from(`${BUCKET_NAME}/${FOLDER_PATH}`)
       .upload(fileName, Buffer.from(fileContent, 'base64'), {
         contentType: 'application/octet-stream',
       });
@@ -43,9 +45,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       throw error;
     }
 
+    // TODO: Use signed keys.
     // Get the public URL of the uploaded file
     const { data: publicUrlData } = supabase.storage
-      .from('expense-reports/scanned-report-files')
+      .from(`${BUCKET_NAME}/${FOLDER_PATH}`)
       .getPublicUrl(data.path);
 
     if (!publicUrlData || !publicUrlData.publicUrl) {

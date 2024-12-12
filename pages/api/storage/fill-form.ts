@@ -13,6 +13,7 @@ import crypto from 'crypto';
 // Initialize Supabase client
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
 const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET_NAME_IMAGES;
+const FOLDER_PATH = "forms/filled";
 
 // Function to generate unique ERR report ID
 function generateErrReportId(err_id: string): string {
@@ -22,6 +23,9 @@ function generateErrReportId(err_id: string): string {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+
+    // 1. Post to the database
+
     if (req.method === 'POST') {
         try {
             // Destructure the incoming request body
@@ -97,9 +101,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (expenseError) throw new Error('Failed to insert expense data');
             }
 
-            // Handle file upload if file exists
+            // 2. Handle file upload if file exists
             if (file) {
-                const uniqueFileName = `reports/${file.name}-${crypto.randomUUID()}`;
+                const uniqueFileName = `${FOLDER_PATH}/${file.name}-${crypto.randomUUID()}`;
                 const { error: uploadError } = await supabase
                     .storage
                     .from(BUCKET_NAME)
@@ -107,19 +111,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (uploadError) throw uploadError;
 
-                // Retrieve the public URL of the uploaded file
-                const { data } = supabase
-                    .storage
-                    .from(BUCKET_NAME)
-                    .getPublicUrl(uniqueFileName);
+                // TODO: Stick record in new Files table.
+                
+                // // Retrieve the signed URL of the uploaded file
+                // const { data } = supabase
+                //     .storage
+                //     .from(BUCKET_NAME)
+                //     .createSignedUrl
+                //     .getPublicUrl(uniqueFileName);
 
-                const publicUrl = data.publicUrl; 
+                // const publicUrl = data.publicUrl; 
 
-                // Update files column in MAG F4 Summary table
-                await supabase
-                    .from('MAG F4 Summary')
-                    .update({ files: publicUrl })
-                    .eq('err_report_id', err_report_id);
+                // // Update files column in MAG F4 Summary table
+                // await supabase
+                //     .from('MAG F4 Summary')
+                //     .update({ files: publicUrl })
+                //     .eq('err_report_id', err_report_id);
             }
 
             // Respond with success message
