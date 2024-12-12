@@ -1,6 +1,6 @@
 // pages/api/validate-session.ts
 import { NextApiRequest, NextApiResponse } from 'next';
-import { validateJWT } from '../../lib/auth'; // Import the JWT validation helper
+import { validateJWT } from '../../../lib/auth';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
     // Extract the token from the cookie
