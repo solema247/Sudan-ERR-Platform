@@ -9,6 +9,12 @@ import path from 'path';
 import formidable from 'formidable';
 import { franc } from 'franc';
 
+/**
+ * Scan form
+ * 
+ * 
+ */
+
 // Disable Next.js's default body parsing to allow for file uploads
 export const config = {
   api: {

@@ -1,8 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
-import i18n from '../../lib/i18n'; // Import i18n directly
+import i18n from '../../../lib/i18n'; // Import i18n directly
 
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
+const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET_NAME_IMAGES;
+
+/**
+ * Upload
+ * 
+ * TODO: Unused?
+ */
+
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Determine user language and fallback to English
@@ -26,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Upload the file to Supabase
     const { data, error } = await supabase.storage
-      .from('expense-reports/scanned-report-files')
+      .from(`${BUCKET_NAME}/scanned-report-files`)
       .upload(fileName, Buffer.from(fileContent, 'base64'), {
         contentType: 'application/octet-stream',
       });

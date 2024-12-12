@@ -10,6 +10,16 @@ import { franc } from 'franc';
 import { createClient } from '@supabase/supabase-js';
 import { execSync } from 'child_process';
 
+/**
+ * Scan custom form
+ * 
+ * User uploads a file. It's automatically sent to the custom-reports bucket
+ * before it is processed for OCR/OpenAI. (TODO: Alternatively, local processing.)
+ * 
+ * A file link is created that can then be sent along with the form the user updates.
+ */
+
+const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET_NAME_IMAGES;
 
 // Disable body parsing for file uploads
 export const config = {
@@ -293,7 +303,7 @@ async function uploadToSupabase(filePath: string, fileName: string): Promise<str
 
   // Upload the file to Supabase Storage
   const { data, error } = await supabase.storage
-    .from('expense-reports')
+    .from(BUCKET_NAME)
     .upload(uploadPath, fileBuffer, {
       cacheControl: '3600', // Set cache control
       upsert: false, // Avoid overwriting existing files
@@ -313,7 +323,7 @@ async function uploadToSupabase(filePath: string, fileName: string): Promise<str
 
   // Generate the public URL for the uploaded file
   const { data: publicUrlData } = supabase.storage
-      .from('expense-reports')
+      .from(BUCKET_NAME)
       .getPublicUrl(uploadPath);
 
   if (!publicUrlData || !publicUrlData.publicUrl) {

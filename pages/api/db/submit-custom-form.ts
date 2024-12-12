@@ -1,7 +1,7 @@
 //pages/api/submit-custom-form.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
-import i18n from '../../lib/i18n'; // Import i18n for translations
+import i18n from '../../../lib/i18n'; // Import i18n for translations
 
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
 

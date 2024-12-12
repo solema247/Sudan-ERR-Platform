@@ -3,11 +3,21 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
+/**
+ * Offline mode
+ * 
+ * Submit forms while online. (TODO: ?)
+ * 
+ */
+
+
 // Initialize Supabase client
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_KEY!
 );
+
+const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET_NAME_IMAGES;
 
 // Helper function to generate unique report ID
 function generateErrReportId(err_id: string): string {
@@ -118,9 +128,9 @@ export default async function handler(
       // Generate unique filename
       const uniqueFileName = `reports/${crypto.randomUUID()}-${file.name}`;
 
-      // Upload to Supabase storage bucket 'expense-reports'
+      // Upload to Supabase storage bucket SUPABASE_STORAGE_BUCKET_NAME_IMAGES
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('expense-reports')
+        .from(BUCKET_NAME)
         .upload(uniqueFileName, buffer, {
           contentType: file.type,
         });
@@ -132,7 +142,7 @@ export default async function handler(
 
       // Get public URL of the uploaded file
       const { data } = supabase.storage
-          .from('expense-reports')
+          .from(BUCKET_NAME)
           .getPublicUrl(uniqueFileName);
 
       if (!data || !data.publicUrl) {

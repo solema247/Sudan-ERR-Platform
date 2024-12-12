@@ -2,8 +2,17 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
+/**
+ * Fill form
+ * 
+ * User has filled forms and will now upload relevant files and receipts.
+ * This is stored in the table 'Reports.'
+ * 
+ */
+
 // Initialize Supabase client
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
+const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET_NAME_IMAGES;
 
 // Function to generate unique ERR report ID
 function generateErrReportId(err_id: string): string {
@@ -93,7 +102,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const uniqueFileName = `reports/${file.name}-${crypto.randomUUID()}`;
                 const { error: uploadError } = await supabase
                     .storage
-                    .from('expense-reports')
+                    .from(BUCKET_NAME)
                     .upload(uniqueFileName, Buffer.from(file.content, 'base64'), { contentType: file.type });
 
                 if (uploadError) throw uploadError;
@@ -101,7 +110,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 // Retrieve the public URL of the uploaded file
                 const { data } = supabase
                     .storage
-                    .from('expense-reports')
+                    .from(BUCKET_NAME)
                     .getPublicUrl(uniqueFileName);
 
                 const publicUrl = data.publicUrl; 

@@ -1,7 +1,7 @@
 // pages/api/project-application.ts
 import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '../../lib/supabaseClient';
-import { validateJWT } from '../../lib/auth';
+import { supabase } from '../../../lib/supabaseClient';
+import { validateJWT } from '../../../lib/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {

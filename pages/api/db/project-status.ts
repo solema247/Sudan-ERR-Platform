@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '../../lib/supabaseClient';
-import { validateJWT } from '../../lib/auth'; // Import JWT validation helper
+import { supabase } from '../../../lib/supabaseClient';
+import { validateJWT } from '../../../lib/auth'; // Import JWT validation helper
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // Validate the user's session
