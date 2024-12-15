@@ -1,11 +1,11 @@
 {
-  "name": "Sudan ERR Bot",
-  "short_name": "ERR Bot",
+  "name": "Calculator App",
+  "short_name": "Calculator",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F9FAFB",
-  "theme_color": "#15803D",
-  "description": "Sudan Emergency Response Rooms bot",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "description": "A simple calculator app",
   "icons": [
     {
       "src": "/icons/icon-144x144.png",

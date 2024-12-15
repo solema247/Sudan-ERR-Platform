@@ -1,101 +1,26 @@
 //pages/index.tsx
-import { useRouter } from 'next/router';
-import { useTranslation } from 'react-i18next';
-import Button from '../components/Button';
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import Calculator from '../components/Calculator';
+import MainApp from '../components/MainApp'; // Fix: Update the import path to the correct module
 
 const Home = () => {
-    const router = useRouter();
-    const { t } = useTranslation('home'); // Use 'home' namespace for translations
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
 
-    const [isOffline, setIsOffline] = useState(false);
+  const handlePinEntry = (pin: string) => {
+    console.log("Entered PIN:", pin);
+    if (pin === '1234=') {
+      setIsUnlocked(true);
+    } else if (pin === '0000=') {
+      setIsLocked(true);
+    }
+  };
 
-    // Monitor network status
-    useEffect(() => {
-        const handleOnline = () => setIsOffline(false);
-        const handleOffline = () => setIsOffline(true);
+  if (isLocked) {
+    return <div>App is locked. Please contact support.</div>;
+  }
 
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
-
-        // Set initial network status
-        setIsOffline(!navigator.onLine);
-
-        return () => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
-        };
-    }, []);
-
-    // Handlers for button navigation
-    const handleLogin = () => {
-        if (isOffline) {
-            alert(t('offlineError'));
-        } else {
-            router.push('/login');
-        }
-    };
-
-    const handleOfflineMode = () => router.push('/offline-mode');
-
-    // Language switcher
-    const switchLanguage = (lang: string) => {
-        router.push(router.pathname, router.asPath, { locale: lang });
-    };
-
-    return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
-            {/* Logo and Title */}
-            <div className="text-center mb-8">
-                {/* Centered Icon */}
-                <div className="flex justify-center mb-4">
-                    <Image
-                        src="/icons/icon-512x512.png"
-                        alt="App Icon"
-                        width={100}
-                        height={100}
-                    />
-                </div>
-                {/* Welcome Message */}
-                <h1 className="text-2xl font-bold text-black">
-                    {t('welcome')}
-                </h1>
-                {isOffline && (
-                    <p className="text-sm text-red-500 mt-2">{t('offlineWarning')}</p>
-                )}
-            </div>
-
-            {/* Navigation Buttons */}
-            <div className="flex flex-col space-y-4 w-full max-w-sm">
-                <Button text={t('login')} onClick={handleLogin} />
-                <Button text={t('offlineMode')} onClick={handleOfflineMode} />
-            </div>
-
-            {/* Language Switcher */}
-            <div className="flex justify-center mt-6 space-x-4">
-                <button
-                    onClick={() => switchLanguage('en')}
-                    className="px-3 py-1 border text-sm rounded border-gray-300 bg-white hover:bg-gray-200"
-                >
-                    English
-                </button>
-                <button
-                    onClick={() => switchLanguage('ar')}
-                    className="px-3 py-1 border text-sm rounded border-gray-300 bg-white hover:bg-gray-200"
-                >
-                    العربية
-                </button>
-                
-                {/*<button
-                    onClick={() => switchLanguage('es')}
-                    className="px-3 py-1 border text-sm rounded border-gray-300 bg-white hover:bg-gray-200"
-                >
-                    Español
-                </button>*/}
-            </div>
-        </div>
-    );
+  return isUnlocked ? <MainApp /> : <Calculator onPinEntry={handlePinEntry} />;
 };
 
 export default Home;

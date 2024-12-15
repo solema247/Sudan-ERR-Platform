@@ -29,10 +29,10 @@ const openai = new OpenAI({
 });
 
 // Initialize Supabase client
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Parse multipart form-data
 async function parseForm(req: NextApiRequest): Promise<{ filePath: string; fileName: string; projectId: string }> {
