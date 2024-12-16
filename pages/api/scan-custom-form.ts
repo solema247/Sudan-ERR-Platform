@@ -19,9 +19,14 @@ export const config = {
 };
 
 // Initialize Google Vision client
+const googleVisionCredentials = JSON.parse(process.env.GOOGLE_VISION!);
+// Replace literal "\n" with actual newlines
+googleVisionCredentials.private_key = googleVisionCredentials.private_key.replace(/\\n/g, '\n');
+
 const visionClient = new vision.ImageAnnotatorClient({
-  credentials: JSON.parse(process.env.GOOGLE_VISION!),
+  credentials: googleVisionCredentials,
 });
+
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -105,7 +110,7 @@ async function preprocessImage(imagePath: string): Promise<Buffer> {
 
   try {
     // Call the enhanced Python preprocessing script
-    execSync(`python3 preprocess.py ${imagePath} ${outputPath}`, { stdio: 'inherit' });
+    execSync(`python preprocess.py ${imagePath} ${outputPath}`, { stdio: 'inherit' });
 
     // Read and return the processed image as a Buffer
     return fs.readFileSync(outputPath);
