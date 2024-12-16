@@ -19,9 +19,14 @@ export const config = {
 };
 
 // Initialize Google Vision client
+const googleVisionCredentials = JSON.parse(process.env.GOOGLE_VISION!);
+// Replace literal "\n" with actual newlines
+googleVisionCredentials.private_key = googleVisionCredentials.private_key.replace(/\\n/g, '\n');
+
 const visionClient = new vision.ImageAnnotatorClient({
-  credentials: JSON.parse(process.env.GOOGLE_VISION!),
+  credentials: googleVisionCredentials,
 });
+
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -29,10 +34,10 @@ const openai = new OpenAI({
 });
 
 // Initialize Supabase client
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Parse multipart form-data
 async function parseForm(req: NextApiRequest): Promise<{ filePath: string; fileName: string; projectId: string }> {
@@ -105,7 +110,7 @@ async function preprocessImage(imagePath: string): Promise<Buffer> {
 
   try {
     // Call the enhanced Python preprocessing script
-    execSync(`python3 preprocess.py ${imagePath} ${outputPath}`, { stdio: 'inherit' });
+    execSync(`python preprocess.py ${imagePath} ${outputPath}`, { stdio: 'inherit' });
 
     // Read and return the processed image as a Buffer
     return fs.readFileSync(outputPath);

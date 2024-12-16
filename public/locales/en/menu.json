@@ -2,7 +2,7 @@
   "welcomeMessage": "Welcome to the Sudan ERR Bot",
   "introMessage": "The ERR bot will help you with project applications and reporting on ERR impact and sharing information with the community and donors.",
   "startButton": "Start",
-  "chooseMainMenu": "Choose <strong> Projects </strong> to apply for projects and review status. Choose <strong> Reporting </strong> to report on your existing projects.",
+  "chooseMainMenu": "Choose <strong> Projects </strong> to apply for projects and review status. Choose <strong> Reporting </strong> to report on your existing projects. Choose <strong> Feedback </strong> to share your experience.",
   "projects": "Projects",
   "reporting": "Reporting",
   "exitChat": "Exit Chat",
@@ -16,5 +16,8 @@
   "returnToMainMenu": "Return to Main Menu",
   "exit": "Exit",
   "selectProject": "Select a project to continue with reporting.",
-  "selectDifferentProject": "Select a Different Project"
+  "selectDifferentProject": "Select a Different Project",
+  "feedback": "Feedback",
+  "feedbackInstructions": "Please select an option for feedback.",
+  "appFeedback": "App Feedback"
 }

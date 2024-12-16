@@ -11,6 +11,7 @@ import ScanForm from '../pages/scan-form';
 import ScanCustomForm from '../pages/scan-custom-form'; // Import the new component
 import ProjectApplication from '../pages/project-application';
 import ProjectStatus from '../pages/project-status';
+import FeedbackForm from '../components/FeedbackForm'; // Correct import path
 const LogoImage = '/icons/icon-512x512.png'; 
 
 
@@ -141,6 +142,7 @@ const Menu = () => {
                     <div className="grid grid-cols-1 space-y-2">
                         <Button text={t('projects')} onClick={() => handleMenuSelection('projects')} className="w-full" />
                         <Button text={t('reporting')} onClick={() => handleMenuSelection('reporting')} className="w-full" />
+                        <Button text={t('feedback')} onClick={() => setCurrentMenu('feedback')} className="w-full" />
                         <Button text={t('exitChat')} onClick={() => router.push('/login')} className="w-full" />
                     </div>
                 </>
@@ -268,6 +270,36 @@ const Menu = () => {
             {showProjectStatus && (
                 <MessageBubble>
                     <ProjectStatus onReturnToMenu={() => handleMenuSelection('main')} />
+                </MessageBubble>
+            )}
+
+            {/* Feedback Menu */}
+            {currentMenu === 'feedback' && (
+                <>
+                    <MessageBubble
+                        text={t('feedbackInstructions')}
+                        timestamp={getCurrentTimestamp()}
+                        fullWidth
+                    />
+                    <div className="grid grid-cols-1 space-y-2">
+                        <Button
+                            text={t('appFeedback')}
+                            onClick={() => setCurrentMenu('appFeedback')}
+                            className="w-full"
+                        />
+                        <Button
+                            text={t('returnToMainMenu')}
+                            onClick={() => handleMenuSelection('main')}
+                            className="w-full"
+                        />
+                    </div>
+                </>
+            )}
+
+            {/* Feedback Form */}
+            {currentMenu === 'appFeedback' && (
+                <MessageBubble>
+                    <FeedbackForm onReturnToMenu={() => handleMenuSelection('feedback')} />
                 </MessageBubble>
             )}
         </ChatContainer>
