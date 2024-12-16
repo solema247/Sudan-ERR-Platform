@@ -18,7 +18,12 @@ export const config = {
 
 // Initialize Google Vision
 const visionClient = new vision.ImageAnnotatorClient({
-  credentials: JSON.parse(process.env.GOOGLE_VISION!),
+  credentials: (() => {
+    const creds = JSON.parse(process.env.GOOGLE_VISION!);
+    // Very important: convert the string "\n" to real newlines
+    creds.private_key = creds.private_key.replace(/\\n/g, '\n');
+    return creds;
+  })(),
 });
 
 // Initialize OpenAI

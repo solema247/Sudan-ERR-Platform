@@ -23,5 +23,18 @@
   "submit": "Submit",
   "formSuccess": "Form submitted successfully!",
   "submitAnother": "Submit Another Form",
-  "returnToMenu": "Return to Main Menu"
+  "returnToMenu": "Return to Main Menu",
+  "categories": {
+    "Medical Procurements": "Medical Procurements",
+    "Generator Fuel": "Generator Fuel",
+    "Community Kitchen/Food Supply": "Community Kitchen/Food Supply",
+    "Communication & Internet": "Communication & Internet",
+    "Volunteers": "Volunteers",
+    "Women's Activities": "Women's Activities",
+    "Children's Activities": "Children's Activities",
+    "Productive Activities": "Productive Activities",
+    "Protection & Evacuation": "Protection & Evacuation",
+    "Others (please specify)": "Others (please specify)"
+  },
+  "pleaseSelect": "Please Select"
 }

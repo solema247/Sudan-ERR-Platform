@@ -1,17 +1,20 @@
 // pages/fill-form.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import FormBubble from '../components/FormBubble';
 import MessageBubble from '../components/MessageBubble';
 import Button from '../components/Button';
-import i18n from '../lib/i18n'; // Ensure this is properly imported
+import i18n from '../lib/i18n';
+import { createClient } from '@supabase/supabase-js'; // Import Supabase client
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 const FillForm: React.FC<{ 
     project: any | null; 
     onReturnToMenu: () => void; 
     onSubmitAnotherForm: () => void; 
 }> = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
-    const { t } = useTranslation('fillForm'); // Use translations for the "fill-form" namespace
+    const { t } = useTranslation('fillForm');
     const [expenses, setExpenses] = useState([
         { activity: '', description: '', payment_date: '', seller: '', payment_method: 'cash', receipt_no: '', amount: '' },
         { activity: '', description: '', payment_date: '', seller: '', payment_method: 'cash', receipt_no: '', amount: '' },
@@ -29,9 +32,27 @@ const FillForm: React.FC<{
         lessons: ''
     });
     const [formSubmitted, setFormSubmitted] = useState(false);
+    const [categories, setCategories] = useState<{ id: string, name: string, language: string }[]>([]);
 
-    // Get the current language
     const currentLanguage = i18n.language;
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const { data, error } = await supabase
+                .from('expense_categories')
+                .select('id, name, language')
+                .eq('language', 'en');
+
+            if (error) {
+                console.error('Error fetching categories:', error);
+            } else {
+                console.log('Fetched categories:', data);
+                setCategories(data);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -77,7 +98,7 @@ const FillForm: React.FC<{
             ...formData,
             expenses: completedExpenses,
             file: file ? { name: file.name, type: file.type, content: Buffer.from(fileContent!).toString('base64') } : null,
-            language: currentLanguage // Include the current language dynamically
+            language: currentLanguage
         };
 
         const response = await fetch('/api/fill-form', {
@@ -127,14 +148,19 @@ const FillForm: React.FC<{
                                 <div key={index} className="min-w-[200px] p-4 rounded bg-gray-50">
                                     <h4>{t('expenseEntry', { index: index + 1 })}</h4>
                                     <label>{t('activity')}
-                                        <input
-                                            type="text"
+                                        <select
                                             name="activity"
                                             value={expense.activity}
                                             onChange={(e) => handleExpenseChange(index, e)}
                                             className="w-full p-2 border rounded"
-                                            placeholder={t('activity')}
-                                        />
+                                        >
+                                            <option value="">{t('pleaseSelect')}</option>
+                                            {categories.map(category => (
+                                                <option key={category.id} value={category.name}>
+                                                    {t(`categories.${category.name}`)}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </label>
                                     <label>{t('description')}
                                         <input

@@ -22,5 +22,18 @@
   "submit": "إرسال",
   "formSuccess": "تم إرسال النموذج بنجاح!",
   "submitAnother": "إرسال نموذج آخر",
-  "returnToMenu": "العودة إلى القائمة الرئيسية"
+  "returnToMenu": "العودة إلى القائمة الرئيسية",
+  "categories": {
+    "Medical Procurements": "المشتريات الطبية",
+    "Generator Fuel": "وقود المولد",
+    "Community Kitchen/Food Supply": "مطبخ المجتمع/إمدادات الطعام",
+    "Communication & Internet": "الاتصالات والإنترنت",
+    "Volunteers": "المتطوعون",
+    "Women's Activities": "أنشطة النساء",
+    "Children's Activities": "أنشطة الأطفال",
+    "Productive Activities": "أنشطة إنتاجية",
+    "Protection & Evacuation": "الحماية والإخلاء",
+    "Others (please specify)": "أخرى (يرجى التحديد)"
+  },
+  "pleaseSelect": "يرجى الاختيار"
 }

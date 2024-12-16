@@ -22,5 +22,17 @@
   "submit": "Enviar",
   "formSuccess": "¡Formulario enviado con éxito!",
   "submitAnother": "Enviar Otro Formulario",
-  "returnToMenu": "Volver al Menú Principal"
+  "returnToMenu": "Volver al Menú Principal",
+  "categories": {
+    "Medical Procurements": "Adquisiciones Médicas",
+    "Generator Fuel": "Combustible para Generador",
+    "Community Kitchen/Food Supply": "Cocina Comunitaria/Suministro de Alimentos",
+    "Communication & Internet": "Comunicación e Internet",
+    "Volunteers": "Voluntarios",
+    "Women's Activities": "Actividades para Mujeres",
+    "Children's Activities": "Actividades para Niños",
+    "Productive Activities": "Actividades Productivas",
+    "Protection & Evacuation": "Protección y Evacuación",
+    "Others (please specify)": "Otros (por favor especifique)"
+  }
 }
