@@ -5,8 +5,8 @@ import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import ChatContainer from '../components/ChatContainer';
 import MessageBubble from '../components/MessageBubble';
-import Button from '../components/Button';
-import FillForm from '../pages/fill-form';
+import Button from '../components/ui/Button';
+import FillForm from '../components/FillForm';
 import ScanForm from '../pages/scan-form';
 import ScanCustomForm from '../pages/scan-custom-form'; // Import the new component
 import ProjectApplication from '../components/forms/newproject/NewProject';

@@ -1,9 +1,7 @@
-//pages/project-application.tsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import Button from '../../Button';
-import FormBubble from '../../FormBubble';
-import MessageBubble from '../../MessageBubble';
+import Button from '../../ui/Button';
+import FormBubble from '../../cosmetic/FormBubble';
 import DynamicActivityForm from './NewProjectActivities';
 
 interface ProjectApplicationProps {
@@ -11,7 +9,12 @@ interface ProjectApplicationProps {
 }
 
 /**
- * Project application form (F1 form)
+ * Project application form 
+ * 
+ * Known in the F-system as the F1 form
+ * (See Framework for Effective Emergency Response in Sudan)
+ * 
+ * Field data is then posted to the "err-projects" table
  * 
  * @param param0 
  * @returns 
@@ -43,8 +46,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
     const [expenseCategories, setExpenseCategories] = useState([]);
     const [stateLocality, setStateLocality] = useState({ states: [], localities: [] });
 
-    // Fetch dropdown options and state-locality mappings
-    // TODO: Secure this so that it does not come directly from the DB
+    // Fetch dropdown options and state-locality mappings (TODO: Security, see issues)
 
     useEffect(() => {
         const fetchOptions = async () => {
@@ -91,8 +93,10 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
         }
     };
 
-    // Handle form submission
-    const onSubmit = async (e: React.FormEvent) => {
+    // On submission, POST the form to the API.
+    // TODO: Move this into a non-UI file
+
+    const onSubmitNewProjectForm = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
@@ -102,7 +106,6 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
             });
-
             if (res.ok) {
                 setIsFormSubmitted(true);
             } else {
@@ -121,11 +124,14 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
         <>
             {!isFormSubmitted ? (
             <FormBubble>
-                <form onSubmit={onSubmit} className="space-y-3 bg-white p-3 rounded-lg">
+                <form onSubmit={onSubmitNewProjectForm} className="space-y-3 bg-white p-3 rounded-lg">
+
+                    {/* Header TODO: Translate */}
+                    <p className="text-3xl">New Project Application</p>
 
                     {/* Date */}
-                    <div className="flex items-center">
-                        <label className="text-base font-medium text-gray-700 mr-3">
+                    <div className="flex flex-col items-top">
+                        <label className="font-bold block text-base text-black-bold mr-3">
                             {t('date')}
                         </label>
                         <input
@@ -133,15 +139,15 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="date"
                             value={formData.date}
                             onChange={onInputChange}
-                            className="flex-grow p-2 border rounded"
+                            className="text-sm flex-grow p-2 border rounded"
                             required
                             disabled={isLoading}
                         />
                     </div>
 
                     {/* Room ID */}
-                    <div className="flex items-center">
-                        <label className="text-base font-medium text-gray-700 mr-3">
+                    <div className="flex flex-col items-top">
+                        <label className="font-bold block text-base text-black-bold mr-3">
                             {t('errId')}
                         </label>
                         <input
@@ -149,7 +155,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="err"
                             value={formData.err}
                             onChange={onInputChange}
-                            className="flex-grow p-2 border rounded"
+                            className="text-sm flex-grow p-2 border rounded"
                             placeholder={t('enterErrId')}
                             required
                             disabled={isLoading}
@@ -158,14 +164,14 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
 
                     {/* State */}
                     <div className="mb-3">
-                        <label className="block text-base font-medium text-gray-700 mb-1">
+                        <label className="font-bold block text-base text-black-bold mb-1">
                             {t('state')}
                         </label>
                         <select
                             name="state"
                             value={formData.state}
                             onChange={onInputChange}
-                            className="w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded"
                             required
                             disabled={isLoading}
                         >
@@ -180,14 +186,14 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
 
                     {/* Locality */}
                     <div className="mb-3">
-                        <label className="block text-base font-medium text-gray-700 mb-1">
+                        <label className="font-bold block text-base text-black-bold mb-1">
                             {t('locality')}
                         </label>
                         <select
                             name="locality"
                             value={formData.locality}
                             onChange={onInputChange}
-                            className="w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded"
                             required
                             disabled={isLoading || !formData.state}
                         >
@@ -202,14 +208,14 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
 
                     {/* Project Objectives */}
                     <div className="mb-3">
-                        <label className="block text-base font-medium text-gray-700 mb-1">
+                        <label className="font-bold block text-base text-black-bold mb-1">
                             {t('projectObjectives')}
                         </label>
                         <textarea
                             name="project_objectives"
                             value={formData.project_objectives}
                             onChange={onInputChange}
-                            className="w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded"
                             placeholder={t('enterProjectObjectives')}
                             required
                             disabled={isLoading}
@@ -218,14 +224,14 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
 
                     {/* Intended Beneficiaries */}
                     <div className="mb-3">
-                        <label className="block text-base font-medium text-gray-700 mb-1">
+                        <label className="font-bold block text-base text-black-bold mb-1">
                             {t('intendedBeneficiaries')}
                         </label>
                         <textarea
                             name="intended_beneficiaries"
                             value={formData.intended_beneficiaries}
                             onChange={onInputChange}
-                            className="w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded"
                             placeholder={t('enterIntendedBeneficiaries')}
                             required
                             disabled={isLoading}
@@ -234,7 +240,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
 
                     {/* Estimated Beneficiaries */}
                     <div className="mb-3">
-                        <label className="block text-base font-medium text-gray-700 mb-1">
+                        <label className="font-bold block text-base text-black-bold mb-1">
                             {t('estimatedBeneficiaries')}
                         </label>
                         <input
@@ -242,7 +248,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="estimated_beneficiaries"
                             value={formData.estimated_beneficiaries}
                             onChange={onInputChange}
-                            className="w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded"
                             placeholder={t('enterEstimatedBeneficiaries')}
                             required
                             disabled={isLoading}
@@ -269,30 +275,30 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
 
                     {/* Estimated Timeframe */}
                     <div className="mb-3">
-                        <label className="block text-base font-medium text-gray-700 mb-1">
+                        <label className="font-bold block text-base text-black-bold mb-1">
                             {t('estimatedTimeframe')}
                         </label>
                         <textarea
                             name="estimated_timeframe"
                             value={formData.estimated_timeframe}
                             onChange={onInputChange}
-                            className="w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded"
                             placeholder={t('enterEstimatedTimeframe')}
                             required
                             disabled={isLoading}
                         />
                     </div>
 
-                    {/* Additional Support */}
+                    {/* Additional Support - optional */}
                     <div className="mb-3">
-                        <label className="block text-base font-medium text-gray-700 mb-1">
+                        <label className="font-bold block text-base text-black-bold mb-1">
                             {t('additionalSupport')}
                         </label>
                         <textarea
                             name="additional_support"
                             value={formData.additional_support}
                             onChange={onInputChange}
-                            className="w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded"
                             placeholder={t('enterAdditionalSupport')}
                             disabled={isLoading}
                         />
@@ -300,7 +306,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
 
                     {/* Officer Name */}
                     <div className="mb-3">
-                        <label className="block text-base font-medium text-gray-700 mb-1">
+                        <label className="font-bold block text-base text-black-bold mb-1">
                             {t('officerName')}
                         </label>
                         <input
@@ -308,7 +314,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="officer_name"
                             value={formData.officer_name}
                             onChange={onInputChange}
-                            className="w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded"
                             placeholder={t('enterOfficerName')}
                             required
                             disabled={isLoading}
@@ -325,8 +331,9 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                 </form>
             </FormBubble>
         ) : (
+
             <div className="bg-white p-4 rounded-lg">
-                <p className="text-gray-700 text-base font-medium mb-4">{t('formSubmitted')}</p>
+                <p className="text-black-bold text-base mb-4">{t('formSubmitted')}</p>
                 <div className="flex justify-center">
                     <Button
                         text={t('returnToMenu')}

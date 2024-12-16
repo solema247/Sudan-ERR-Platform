@@ -6,16 +6,18 @@ import { useTranslation } from 'react-i18next';
  * Used for repeating for-each fields for, respectively, Planned Activities and Expenses
  * 
  * TODO: Can we do this in a cleaner for-each style
+ * TODO: Replace this translated-title thing with hard enum constants.
+ * 
  */
 
 
-interface DynamicActivityFormProps {
+interface ActivityFormProps {
   title: string;
   options: Array<{ id: string; name: string }>;
   onChange: (data: Array<any>) => void;
 }
 
-const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
+const DynamicActivityForm: React.FC<ActivityFormProps> = ({
   title,
   options,
   onChange,
@@ -106,7 +108,7 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
   return (
     <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
       {/* Form Title */}
-      <h3 className="font-bold text-lg">{translatedTitle}</h3>
+      <h3 className="font-bold text-md">{translatedTitle}</h3>
 
       {/* Form Rows */}
       {rows.map((row, index) => (
@@ -116,7 +118,7 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
         >
           {/* Dropdown for Activities/Expenses */}
           <select
-            className="w-full md:w-1/4 p-2 border rounded"
+            className="text-sm w-full md:w-1/4 p-2 border rounded"
             value={row.selectedOption}
             onChange={(e) =>
               handleRowChange(index, 'selectedOption', e.target.value)
@@ -134,7 +136,7 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
           <input
             type="text"
             placeholder={placeholders.field1}
-            className="w-full md:w-1/4 p-2 border rounded"
+            className="text-sm w-full md:w-1/4 p-2 border rounded"
             value={row[fieldNames.field1]}
             onChange={(e) =>
               handleRowChange(index, fieldNames.field1, e.target.value)
@@ -145,7 +147,7 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
           <input
             type="text"
             placeholder={placeholders.field2}
-            className="w-full md:w-1/4 p-2 border rounded"
+            className="text-sm w-full md:w-1/4 p-2 border rounded"
             value={row[fieldNames.field2]}
             onChange={(e) =>
               handleRowChange(index, fieldNames.field2, e.target.value)
@@ -156,7 +158,7 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
           <input
             type="text"
             placeholder={placeholders.field3}
-            className="w-full md:w-1/4 p-2 border rounded"
+            className="text-sm w-full md:w-1/4 p-2 border rounded"
             value={row[fieldNames.field3]}
             onChange={(e) =>
               handleRowChange(index, fieldNames.field3, e.target.value)
