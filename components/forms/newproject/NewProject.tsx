@@ -1,22 +1,26 @@
 //pages/project-application.tsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import Button from '../components/Button';
-import FormBubble from '../components/FormBubble';
-import MessageBubble from '../components/MessageBubble';
-import DynamicActivityForm from '../components/DynamicActivityForm';
+import Button from '../../Button';
+import FormBubble from '../../FormBubble';
+import MessageBubble from '../../MessageBubble';
+import DynamicActivityForm from './NewProjectActivities';
 
 interface ProjectApplicationProps {
     onReturnToMenu: () => void; // Add prop for menu navigation
 }
 
+/**
+ * Project application form (F1 form)
+ * 
+ * @param param0 
+ * @returns 
+ */
+
 const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu }) => {
     const { t, i18n } = useTranslation('projectApplication');
 
-    // State Management
-    const [plannedActivities, setPlannedActivities] = useState([]);
-    const [expenseCategories, setExpenseCategories] = useState([]);
-    const [stateLocality, setStateLocality] = useState({ states: [], localities: [] });
+    // Form fields
     const [formData, setFormData] = useState({
         date: '',
         err: '',
@@ -31,10 +35,17 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
         additional_support: '',
         officer_name: '',
     });
-    const [formSubmitted, setFormSubmitted] = useState(false);
-    const [loading, setLoading] = useState(false);
+
+    const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+    const [isLoading, setLoading] = useState(false);
+
+    const [plannedActivities, setPlannedActivities] = useState([]);
+    const [expenseCategories, setExpenseCategories] = useState([]);
+    const [stateLocality, setStateLocality] = useState({ states: [], localities: [] });
 
     // Fetch dropdown options and state-locality mappings
+    // TODO: Secure this so that it does not come directly from the DB
+
     useEffect(() => {
         const fetchOptions = async () => {
             setLoading(true);
@@ -67,7 +78,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
     }, [i18n.language, t]);
 
     // Handle input changes for the form
-    const handleInputChange = (
+    const onInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) => {
         const { name, value } = e.target;
@@ -81,7 +92,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
     };
 
     // Handle form submission
-    const handleSubmit = async (e: React.FormEvent) => {
+    const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
@@ -93,7 +104,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
             });
 
             if (res.ok) {
-                setFormSubmitted(true);
+                setIsFormSubmitted(true);
             } else {
                 console.error('Submission failed:', await res.json());
                 alert(t('submissionFailed'));
@@ -108,9 +119,10 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
 
     return (
         <>
-            {!formSubmitted ? (
+            {!isFormSubmitted ? (
             <FormBubble>
-                <form onSubmit={handleSubmit} className="space-y-3 bg-white p-3 rounded-lg">
+                <form onSubmit={onSubmit} className="space-y-3 bg-white p-3 rounded-lg">
+
                     {/* Date */}
                     <div className="flex items-center">
                         <label className="text-base font-medium text-gray-700 mr-3">
@@ -120,14 +132,14 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             type="date"
                             name="date"
                             value={formData.date}
-                            onChange={handleInputChange}
+                            onChange={onInputChange}
                             className="flex-grow p-2 border rounded"
                             required
-                            disabled={loading}
+                            disabled={isLoading}
                         />
                     </div>
 
-                    {/* ERR ID */}
+                    {/* Room ID */}
                     <div className="flex items-center">
                         <label className="text-base font-medium text-gray-700 mr-3">
                             {t('errId')}
@@ -136,11 +148,11 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             type="text"
                             name="err"
                             value={formData.err}
-                            onChange={handleInputChange}
+                            onChange={onInputChange}
                             className="flex-grow p-2 border rounded"
                             placeholder={t('enterErrId')}
                             required
-                            disabled={loading}
+                            disabled={isLoading}
                         />
                     </div>
 
@@ -152,10 +164,10 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                         <select
                             name="state"
                             value={formData.state}
-                            onChange={handleInputChange}
+                            onChange={onInputChange}
                             className="w-full p-2 border rounded"
                             required
-                            disabled={loading}
+                            disabled={isLoading}
                         >
                             <option value="">{t('selectState')}</option>
                             {stateLocality.states.map((state: any, idx: number) => (
@@ -174,10 +186,10 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                         <select
                             name="locality"
                             value={formData.locality}
-                            onChange={handleInputChange}
+                            onChange={onInputChange}
                             className="w-full p-2 border rounded"
                             required
-                            disabled={loading || !formData.state}
+                            disabled={isLoading || !formData.state}
                         >
                             <option value="">{t('selectLocality')}</option>
                             {stateLocality.localities.map((locality: string, idx: number) => (
@@ -196,11 +208,11 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                         <textarea
                             name="project_objectives"
                             value={formData.project_objectives}
-                            onChange={handleInputChange}
+                            onChange={onInputChange}
                             className="w-full p-2 border rounded"
                             placeholder={t('enterProjectObjectives')}
                             required
-                            disabled={loading}
+                            disabled={isLoading}
                         />
                     </div>
 
@@ -212,11 +224,11 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                         <textarea
                             name="intended_beneficiaries"
                             value={formData.intended_beneficiaries}
-                            onChange={handleInputChange}
+                            onChange={onInputChange}
                             className="w-full p-2 border rounded"
                             placeholder={t('enterIntendedBeneficiaries')}
                             required
-                            disabled={loading}
+                            disabled={isLoading}
                         />
                     </div>
 
@@ -229,15 +241,15 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             type="number"
                             name="estimated_beneficiaries"
                             value={formData.estimated_beneficiaries}
-                            onChange={handleInputChange}
+                            onChange={onInputChange}
                             className="w-full p-2 border rounded"
                             placeholder={t('enterEstimatedBeneficiaries')}
                             required
-                            disabled={loading}
+                            disabled={isLoading}
                         />
                     </div>
 
-                    {/* Planned Activities */}
+                    {/* Planned Activities (this is a for-each)  */}
                     <DynamicActivityForm
                         title={t('plannedActivities')}
                         options={plannedActivities}
@@ -246,7 +258,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                         }
                     />
 
-                    {/* Expenses */}
+                    {/* Expenses (this is a for-each) */ }
                     <DynamicActivityForm
                         title={t('expenses')}
                         options={expenseCategories}
@@ -263,11 +275,11 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                         <textarea
                             name="estimated_timeframe"
                             value={formData.estimated_timeframe}
-                            onChange={handleInputChange}
+                            onChange={onInputChange}
                             className="w-full p-2 border rounded"
                             placeholder={t('enterEstimatedTimeframe')}
                             required
-                            disabled={loading}
+                            disabled={isLoading}
                         />
                     </div>
 
@@ -279,10 +291,10 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                         <textarea
                             name="additional_support"
                             value={formData.additional_support}
-                            onChange={handleInputChange}
+                            onChange={onInputChange}
                             className="w-full p-2 border rounded"
                             placeholder={t('enterAdditionalSupport')}
-                            disabled={loading}
+                            disabled={isLoading}
                         />
                     </div>
 
@@ -295,19 +307,19 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             type="text"
                             name="officer_name"
                             value={formData.officer_name}
-                            onChange={handleInputChange}
+                            onChange={onInputChange}
                             className="w-full p-2 border rounded"
                             placeholder={t('enterOfficerName')}
                             required
-                            disabled={loading}
+                            disabled={isLoading}
                         />
                     </div>
 
                     {/* Submit Button */}
                     <Button
                         type="submit"
-                        text={loading ? t('button.processing') : t('button.submit')}
-                        disabled={loading}
+                        text={isLoading ? t('button.processing') : t('button.submit')}
+                        disabled={isLoading}
                     />
 
                 </form>
@@ -319,7 +331,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                     <Button
                         text={t('returnToMenu')}
                         onClick={() => {
-                            setFormSubmitted(false);
+                            setIsFormSubmitted(false);
                             onReturnToMenu();
                         }}
                     />

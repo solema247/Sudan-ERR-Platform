@@ -2,6 +2,13 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+/**
+ * Used for repeating for-each fields for, respectively, Planned Activities and Expenses
+ * 
+ * TODO: Can we do this in a cleaner for-each style
+ */
+
+
 interface DynamicActivityFormProps {
   title: string;
   options: Array<{ id: string; name: string }>;
@@ -16,6 +23,8 @@ const DynamicActivityForm: React.FC<DynamicActivityFormProps> = ({
   const { t } = useTranslation('projectApplication');
 
   const getFields = (translatedTitle: string) => {
+    // TODO: Replace this with a const!!
+    
     if (translatedTitle === t('plannedActivities')) {
       return {
         fieldNames: {
