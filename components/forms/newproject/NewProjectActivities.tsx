@@ -1,196 +1,204 @@
-//components.DynamicActivityForm.tsx
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-
-/**
- * Used for repeating for-each fields for, respectively, Planned Activities and Expenses
- * 
- * TODO: Can we do this in a cleaner for-each style
- * TODO: Replace this translated-title thing with hard enum constants.
- * 
- */
-
+import { Formik, Field, Form, FieldArray } from 'formik';
+import * as Yup from 'yup';
 
 interface ActivityFormProps {
-  title: string;
   options: Array<{ id: string; name: string }>;
-  onChange: (data: Array<any>) => void;
+  onSubmit: (data: any) => void;
 }
 
-const DynamicActivityForm: React.FC<ActivityFormProps> = ({
-  title,
-  options,
-  onChange,
-}) => {
-  const { t } = useTranslation('projectApplication');
+const ActivitySchema = Yup.object().shape({
+  activities: Yup.array().of(
+    Yup.object().shape({
+      selectedActivity: Yup.string().required('Activity is required'),
+      quantity: Yup.number().required('Quantity is required').positive('Must be positive'),
+      duration: Yup.string().required('Duration is required'),
+      placeOfOperation: Yup.string().required('Place of Operation is required'),
+      expenses: Yup.array().of(
+        Yup.object().shape({
+          description: Yup.string().required('Description is required'),
+          amount: Yup.number().required('Amount is required').positive('Amount must be positive'),
+        })
+      ).min(1, 'At least one expense is required') // Require at least one expense
+    })
+  ),
+});
 
-  const getFields = (translatedTitle: string) => {
-    // TODO: Replace this with a const!!
-    
-    if (translatedTitle === t('plannedActivities')) {
-      return {
-        fieldNames: {
-          field1: 'quantity',
-          field2: 'activityDuration',
-          field3: 'placeOfOperation',
-        },
-        placeholders: {
-          field1: t('quantity'),
-          field2: t('activityDuration'),
-          field3: t('placeOfOperation'),
-        },
-      };
-    } else if (translatedTitle === t('expenses')) {
-      return {
-        fieldNames: {
-          field1: 'description',
-          field2: 'frequency',
-          field3: 'unitPrice',
-        },
-        placeholders: {
-          field1: t('description'),
-          field2: t('frequency'),
-          field3: t('unitPrice'),
-        },
-      };
-    }
-    return {
-      fieldNames: {
-        field1: 'field1',
-        field2: 'field2',
-        field3: 'field3',
-      },
-      placeholders: {
-        field1: t('field1'),
-        field2: t('field2'),
-        field3: t('field3'),
-      },
-    };
-  };
-
-  const translatedTitle = t(title); // Translate title dynamically
-  const { fieldNames, placeholders } = getFields(translatedTitle);
-
-  const [rows, setRows] = useState([
-    {
-      selectedOption: '',
-      [fieldNames.field1]: '',
-      [fieldNames.field2]: '',
-      [fieldNames.field3]: '',
-    },
-  ]);
-
-  const handleAddRow = () => {
-    setRows((prevRows) => [
-      ...prevRows,
-      {
-        selectedOption: '',
-        [fieldNames.field1]: '',
-        [fieldNames.field2]: '',
-        [fieldNames.field3]: '',
-      },
-    ]);
-  };
-
-  const handleRowChange = (index: number, field: string, value: string) => {
-    const updatedRows = [...rows];
-    updatedRows[index] = { ...updatedRows[index], [field]: value };
-    setRows(updatedRows);
-    onChange(updatedRows);
-  };
-
-  const handleRemoveRow = (index: number) => {
-    const updatedRows = rows.filter((_, idx) => idx !== index);
-    setRows(updatedRows);
-    onChange(updatedRows);
-  };
+const NewProjectActivities: React.FC<ActivityFormProps> = ({ options, onSubmit }) => {
+  const [showActivityForm, setShowActivityForm] = useState(false);
 
   return (
-    <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
-      {/* Form Title */}
-      <h3 className="font-bold text-md">{translatedTitle}</h3>
+    <Formik
+      initialValues={{
+        activities: [{ selectedActivity: '', quantity: '', duration: '', placeOfOperation: '', expenses: [] }],
+      }}
+      validationSchema={ActivitySchema}
+      onSubmit={(values) => {
+        onSubmit(values);
+      }}
+    >
+      {({ values, errors, touched, handleChange, setFieldValue }) => (
+        <Form className="space-y-6 pb-6">
+          {/* Initial Button to Add First Activity */}
+          {!showActivityForm && (
+            <button
+              type="button"
+              className="text-primaryGreen px-6d"
+              onClick={() => setShowActivityForm(true)}
+            >
+              + Add first activity for this project
+            </button>
+          )}
 
-      {/* Form Rows */}
-      {rows.map((row, index) => (
-        <div
-          key={index}
-          className="flex flex-wrap items-center space-y-2 border-b pb-2 mb-2"
-        >
-          {/* Dropdown for Activities/Expenses */}
-          <select
-            className="text-sm w-full md:w-1/4 p-2 border rounded"
-            value={row.selectedOption}
-            onChange={(e) =>
-              handleRowChange(index, 'selectedOption', e.target.value)
-            }
-          >
-            <option value="">{translatedTitle}</option>
-            {options.map((option) => (
-              <option key={option.id} value={option.name}>
-                {option.name}
-              </option>
-            ))}
-          </select>
+          {/* Activities Form */}
+          {showActivityForm && (
+            <>
+              <FieldArray name="activities">
+                {({ push, remove }) => (
+                  <>
 
-          {/* Input Field 1 */}
-          <input
-            type="text"
-            placeholder={placeholders.field1}
-            className="text-sm w-full md:w-1/4 p-2 border rounded"
-            value={row[fieldNames.field1]}
-            onChange={(e) =>
-              handleRowChange(index, fieldNames.field1, e.target.value)
-            }
-          />
+                    {values.activities.map((activity, activityIndex) => (
+                      <div key={activityIndex} className="space-y-6 p-6 rounded-lg bg-gray-50 shadow-md">
+                        {/* Activity Card */}
+                        <div>
+                          <label htmlFor={`activities[${activityIndex}].selectedActivity`} className="block text-sm font-bold">
+                            Select Activity
+                          </label>
+                          <Field
+                            as="select" 
+                            name={`activities[${activityIndex}].selectedActivity`}
+                            className="w-full p-2 border rounded mt-1 text-sm"
+                          >
+                            <option value="">Select Activity</option>
+                            {options.map((option) => (
+                              <option key={option.id} value={option.name}>
+                                {option.name}
+                              </option>
+                            ))}
+                          </Field>
+                        </div>
 
-          {/* Input Field 2 */}
-          <input
-            type="text"
-            placeholder={placeholders.field2}
-            className="text-sm w-full md:w-1/4 p-2 border rounded"
-            value={row[fieldNames.field2]}
-            onChange={(e) =>
-              handleRowChange(index, fieldNames.field2, e.target.value)
-            }
-          />
+                        <div>
+                          <label htmlFor={`activities[${activityIndex}].quantity`} className="block text-sm font-bold">
+                            Quantity
+                          </label>
+                          <Field
+                            type="number"
+                            name={`activities[${activityIndex}].quantity`}
+                            placeholder="Quantity"
+                            className="w-full p-2 border rounded mt-1 text-sm"
+                          />
+                        </div>
 
-          {/* Input Field 3 */}
-          <input
-            type="text"
-            placeholder={placeholders.field3}
-            className="text-sm w-full md:w-1/4 p-2 border rounded"
-            value={row[fieldNames.field3]}
-            onChange={(e) =>
-              handleRowChange(index, fieldNames.field3, e.target.value)
-            }
-          />
+                        <div>
+                          <label htmlFor={`activities[${activityIndex}].duration`} className="block text-sm font-bold">
+                            Duration
+                          </label>
+                          <Field
+                            type="text"
+                            name={`activities[${activityIndex}].duration`}
+                            placeholder="Duration"
+                            className="w-full p-2 border rounded mt-1 text-sm"
+                          />
+                        </div>
 
-          {/* Remove Row Button */}
-          <button
-            type="button"
-            className="bg-red-500 text-white px-4 py-2 rounded ml-2"
-            onClick={() => handleRemoveRow(index)}
-          >
-            {t('remove')}
-          </button>
-        </div>
-      ))}
+                        <div>
+                          <label htmlFor={`activities[${activityIndex}].placeOfOperation`} className="block text-sm font-bold">
+                            Place of Operation
+                          </label>
+                          <Field
+                            type="text"
+                            name={`activities[${activityIndex}].placeOfOperation`}
+                            placeholder="Place of Operation"
+                            className="w-full p-2 border rounded mt-1 text-sm"
+                          />
+                        </div>
 
-      {/* Add Row Button */}
-      <button
-        type="button"
-        className="bg-primaryGreen text-white px-4 py-2 rounded"
-        onClick={handleAddRow}
-      >
-        {t('addRow')}
-      </button>
-    </div>
+                        <button
+                          type="button"
+                          className="text-red-500"
+                          onClick={() => remove(activityIndex)}
+                        >
+                          Remove  
+                        </button>
+
+                        {/* Expenses for each Activity */}
+                        <div className="space-y-4 mt-6  ">
+                          <h4 className="font-bold text-lg">Expenses for this activity</h4>
+                          <FieldArray name={`activities[${activityIndex}].expenses`}>
+                            {({ push, remove }) => (
+                              <>
+                                {activity.expenses.map((expense, expenseIndex) => (
+                                  <div key={expenseIndex} className="space-y-4 mb-6 bg-slate-300 rounded-lg px-4 py-4 font-bold">
+                                    <div>
+                                      <label htmlFor={`activities[${activityIndex}].expenses[${expenseIndex}].description`} className="block text-sm">
+                                        Expense Description
+                                      </label>
+                                      <Field
+                                        type="text"
+                                        name={`activities[${activityIndex}].expenses[${expenseIndex}].description`}
+                                        placeholder="Expense Description"
+                                        className="w-full p-2 border rounded mt-1 text-sm font-normal"
+                                      />
+                                    </div>
+
+                                    <div>
+                                      <label htmlFor={`activities[${activityIndex}].expenses[${expenseIndex}].amount`} className="block text-sm font-bold">
+                                        Amount
+                                      </label>
+                                      <Field
+                                        type="number"
+                                        name={`activities[${activityIndex}].expenses[${expenseIndex}].amount`}
+                                        placeholder="Amount"
+                                        className="w-full p-2 border rounded mt-1 text-sm font-normal"
+                                      />
+                                    </div>
+
+                                    <button
+                                      type="button"
+                                      className="text-red-700 font-normal"
+                                      onClick={() => remove(expenseIndex)}
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                ))}
+                                <button
+                                  type="button"
+                                  className="py-2 mt-4"
+                                  onClick={() =>
+                                    push({ description: '', amount: '' })
+                                  }
+                                >
+                                  + Add Expense
+                                </button>
+                              </>
+                            )}
+                          </FieldArray>
+                        </div>
+                      </div>
+                    ))}
+                    {/* Only show "Add Another Activity" after at least one expense is added */}
+                    <button
+                      type="button"
+                      className="py-2 rounded mt-4"
+                      onClick={() =>
+                        push({ selectedActivity: '', quantity: '', duration: '', placeOfOperation: '', expenses: [] })
+                      }
+                    >
+                      + Add Another Activity
+                    </button>
+                  </>
+                )}
+              </FieldArray>
+
+              
+            </>
+          )}
+        </Form>
+      )}
+    </Formik>
   );
 };
 
-export default DynamicActivityForm;
-
-
-
-
-
+export default NewProjectActivities;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../ui/Button';
 import FormBubble from '../../cosmetic/FormBubble';
-import DynamicActivityForm from './NewProjectActivities';
+import ActivitiesAndExpenses from './NewProjectActivities';
 
 interface ProjectApplicationProps {
     onReturnToMenu: () => void; // Add prop for menu navigation
@@ -15,6 +15,8 @@ interface ProjectApplicationProps {
  * (See Framework for Effective Emergency Response in Sudan)
  * 
  * Field data is then posted to the "err-projects" table
+ * 
+ * TODO: Make options secure rather than from a public database read
  * 
  * @param param0 
  * @returns 
@@ -127,7 +129,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                 <form onSubmit={onSubmitNewProjectForm} className="space-y-3 bg-white p-3 rounded-lg">
 
                     {/* Header TODO: Translate */}
-                    <p className="text-3xl">New Project Application</p>
+                    <p className="text-3xl">New project application</p>
 
                     {/* Date */}
                     <div className="flex flex-col items-top">
@@ -139,7 +141,8 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="date"
                             value={formData.date}
                             onChange={onInputChange}
-                            className="text-sm flex-grow p-2 border rounded"
+                            className="text-sm flex-grow p-2 border rounded-lg"
+                            placeholder="enter"
                             required
                             disabled={isLoading}
                         />
@@ -155,7 +158,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="err"
                             value={formData.err}
                             onChange={onInputChange}
-                            className="text-sm flex-grow p-2 border rounded"
+                            className="text-sm flex-grow p-2 border rounded-lg"
                             placeholder={t('enterErrId')}
                             required
                             disabled={isLoading}
@@ -171,7 +174,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="state"
                             value={formData.state}
                             onChange={onInputChange}
-                            className="text-sm w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded-lg"
                             required
                             disabled={isLoading}
                         >
@@ -193,7 +196,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="locality"
                             value={formData.locality}
                             onChange={onInputChange}
-                            className="text-sm w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded-lg"
                             required
                             disabled={isLoading || !formData.state}
                         >
@@ -215,7 +218,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="project_objectives"
                             value={formData.project_objectives}
                             onChange={onInputChange}
-                            className="text-sm w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded-lg"
                             placeholder={t('enterProjectObjectives')}
                             required
                             disabled={isLoading}
@@ -231,7 +234,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="intended_beneficiaries"
                             value={formData.intended_beneficiaries}
                             onChange={onInputChange}
-                            className="text-sm w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded-lg"
                             placeholder={t('enterIntendedBeneficiaries')}
                             required
                             disabled={isLoading}
@@ -248,7 +251,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="estimated_beneficiaries"
                             value={formData.estimated_beneficiaries}
                             onChange={onInputChange}
-                            className="text-sm w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded-lg"
                             placeholder={t('enterEstimatedBeneficiaries')}
                             required
                             disabled={isLoading}
@@ -256,22 +259,21 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                     </div>
 
                     {/* Planned Activities (this is a for-each)  */}
-                    <DynamicActivityForm
+
+                    <p className="text-2xl font-bold pt-8">Activities and expenses</p>
+                    
+                    <ActivitiesAndExpenses options={plannedActivities} onSubmit={function (data: any): void {
+                            throw new Error('Function not implemented.');
+                    } }/>
+
+
+                    {/* <DynamicActivityForm
                         title={t('plannedActivities')}
                         options={plannedActivities}
                         onChange={(data) =>
                             setFormData((prev) => ({ ...prev, planned_activities: data }))
                         }
-                    />
-
-                    {/* Expenses (this is a for-each) */ }
-                    <DynamicActivityForm
-                        title={t('expenses')}
-                        options={expenseCategories}
-                        onChange={(data) =>
-                            setFormData((prev) => ({ ...prev, expenses: data }))
-                        }
-                    />
+                    /> */}
 
                     {/* Estimated Timeframe */}
                     <div className="mb-3">
@@ -282,7 +284,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="estimated_timeframe"
                             value={formData.estimated_timeframe}
                             onChange={onInputChange}
-                            className="text-sm w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded-lg"
                             placeholder={t('enterEstimatedTimeframe')}
                             required
                             disabled={isLoading}
@@ -298,7 +300,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="additional_support"
                             value={formData.additional_support}
                             onChange={onInputChange}
-                            className="text-sm w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded-lg"
                             placeholder={t('enterAdditionalSupport')}
                             disabled={isLoading}
                         />
@@ -314,7 +316,7 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                             name="officer_name"
                             value={formData.officer_name}
                             onChange={onInputChange}
-                            className="text-sm w-full p-2 border rounded"
+                            className="text-sm w-full p-2 border rounded-lg"
                             placeholder={t('enterOfficerName')}
                             required
                             disabled={isLoading}
@@ -322,11 +324,14 @@ const ProjectApplication: React.FC<ProjectApplicationProps> = ({ onReturnToMenu 
                     </div>
 
                     {/* Submit Button */}
+                    <div className="container py-4 px-4 mx-0 min-w-full flex flex-col items-center">
+
                     <Button
                         type="submit"
                         text={isLoading ? t('button.processing') : t('button.submit')}
                         disabled={isLoading}
                     />
+                    </div>
 
                 </form>
             </FormBubble>
