@@ -9,7 +9,7 @@ import Button from '../components/ui/Button';
 import FillForm from '../components/FillForm';
 import ScanForm from '../pages/scan-form';
 import ScanCustomForm from '../pages/scan-custom-form'; // Import the new component
-import ProjectApplication from '../components/forms/newproject/NewProject';
+import NewProjectApplication from '../components/forms/newproject/NewProject';
 import ProjectStatus from '../pages/project-status';
 const LogoImage = '/icons/icon-512x512.png'; 
 
@@ -261,7 +261,7 @@ const Menu = () => {
 
             {showProjectApplication && (
                 <MessageBubble>
-                    <ProjectApplication onReturnToMenu={() => handleMenuSelection('projects')} />
+                    <NewProjectApplication onReturnToMenu={() => handleMenuSelection('projects')} />
                 </MessageBubble>
             )}
 

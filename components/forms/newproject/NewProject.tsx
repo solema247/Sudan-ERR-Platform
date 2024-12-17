@@ -4,9 +4,9 @@ import { Formik, Form, Field, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import Button from '../../ui/Button';
 import FormBubble from '../../cosmetic/FormBubble';
-import ActivitiesFieldArray from './ActivitiesFieldArray';
+import ActivitiesFieldArray from './NewProjectActivities';
 
-const ProjectApplication = ({ onReturnToMenu }) => {
+const NewProjectApplication = ({ onReturnToMenu }) => {
   const { t, i18n } = useTranslation('projectApplication');
   const [stateLocality, setStateLocality] = useState({ states: [], localities: [] });
   const [optionsActivities, setOptionsActivities] = useState([]);
@@ -43,14 +43,20 @@ const ProjectApplication = ({ onReturnToMenu }) => {
       Yup.object({
         selectedActivity: Yup.string().required(t('validation.required')),
         quantity: Yup.number().required(t('validation.required')),
+        duration: Yup.string().required(t('validation.required')),
+        placeOfOperation: Yup.string().required(t('validation.required')),
         expenses: Yup.array().of(
           Yup.object({
+            selectedExpense: Yup.string().required(t('validation.required')),
             description: Yup.string().required(t('validation.required')),
             amount: Yup.number().required(t('validation.required')),
-          }),
+          })
         ),
-      }),
+      })
     ),
+    estimated_timeframe: Yup.string().required(t('validation.required')),
+    additional_support: Yup.string(),
+    officer_name: Yup.string().required(t('validation.required')),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -115,7 +121,64 @@ const ProjectApplication = ({ onReturnToMenu }) => {
                   <Field name="err" type="text" className="text-sm w-full p-2 border rounded-lg" placeholder={t('enterErrId')} disabled={isLoading} />
                 </div>
 
+                <div className="mb-3">
+                  <label className="font-bold block text-base text-black-bold mb-1">{t('state')}</label>
+                  <Field name="state" as="select" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading}>
+                    <option value="">{t('selectState')}</option>
+                    {stateLocality.states.map(({ state_name }) => (
+                      <option key={state_name} value={state_name}>
+                        {state_name}
+                      </option>
+                    ))}
+                  </Field>
+                </div>
+
+                <div className="mb-3">
+                  <label className="font-bold block text-base text-black-bold mb-1">{t('locality')}</label>
+                  <Field name="locality" as="select" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading}>
+                    <option value="">{t('selectLocality')}</option>
+                    {stateLocality.localities.map((locality) => (
+                      <option key={locality} value={locality}>
+                        {locality}
+                      </option>
+                    ))}
+                  </Field>
+                </div>
+
                 <ActivitiesFieldArray optionsActivities={optionsActivities} optionsExpenses={optionsExpenses} />
+
+                <div className="mb-3">
+                  <label className="font-bold block text-base text-black-bold mb-1">{t('estimatedTimeframe')}</label>
+                  <Field
+                    as="textarea"
+                    name="estimated_timeframe"
+                    className="text-sm w-full p-2 border rounded-lg"
+                    placeholder={t('enterEstimatedTimeframe')}
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="font-bold block text-base text-black-bold mb-1">{t('additionalSupport')}</label>
+                  <Field
+                    as="textarea"
+                    name="additional_support"
+                    className="text-sm w-full p-2 border rounded-lg"
+                    placeholder={t('enterAdditionalSupport')}
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="font-bold block text-base text-black-bold mb-1">{t('officerName')}</label>
+                  <Field
+                    name="officer_name"
+                    type="text"
+                    className="text-sm w-full p-2 border rounded-lg"
+                    placeholder={t('enterOfficerName')}
+                    disabled={isLoading}
+                  />
+                </div>
 
                 <div className="container py-4 px-4 mx-0 min-w-full flex flex-col items-center">
                   <Button
@@ -133,4 +196,4 @@ const ProjectApplication = ({ onReturnToMenu }) => {
   );
 };
 
-export default ProjectApplication;
+export default NewProjectApplication;
