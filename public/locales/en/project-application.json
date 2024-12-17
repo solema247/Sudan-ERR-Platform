@@ -1,5 +1,6 @@
 {
   "title": "Project Application",
+  "newProjectApplication": "New Project Application",
   "date": "Date",
   "enterDate": "Enter the project date",
   "state": "State",
@@ -45,7 +46,6 @@
   "Children’s Activities": "Children’s Activities",
   "Productive Activities": "Productive Activities",
   "Protection & Evacuation": "Protection & Evacuation",
-  "Others (please specify)": "Others (please specify)",
   "quantity": "Quantity",
   "activityDuration": "Activity Duration",
   "placeOfOperation": "Place of Operation",
