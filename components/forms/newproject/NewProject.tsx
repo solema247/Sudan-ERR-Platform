@@ -12,7 +12,10 @@ const NewProjectApplication = ({ onReturnToMenu }) => {
     };
 
   const { t, i18n } = useTranslation('projectApplication');
-  const [statesAndLocalities, setStatesAndLocalities] = useState({ states: [], localities: [] })
+//   const [stateLocality, setStateLocality] = useState({ states: [], localities: {} });
+  const [availableStates, setAvailableStates] = useState([]);
+  const [localitiesDict, setLocalitiesDict] = useState({});
+  const [relevantLocalities, setRelevantLocalities] = useState([]);
   const [optionsActivities, setOptionsActivities] = useState([]);
   const [optionsExpenses, setOptionsExpenses] = useState([]);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
@@ -37,15 +40,27 @@ const NewProjectApplication = ({ onReturnToMenu }) => {
         if (res.ok) {
           const data = await res.json();
 
-          const uniqueStateNames = data
-          .map(state => state.state_name)
-          .filter((state, index, self) => self.indexOf(state) === index);
-      
-          const stateAndLocalityPairs: StateLocalityPair[] = data.states;
+          if (!Array.isArray(data.states)) {
+            throw new Error('Invalid data format: states should be an array');
+          }
 
-        setOptionsActivities(data.plannedActivities.map(({ id, name }) => ({ value: id, label: t(name) })));
-        setOptionsExpenses(data.expenseCategories.map(({ id, name }) => ({ value: id, label: t(name) })));
-        setStatesAndLocalities({ states: uniqueStateNames, localities: stateAndLocalityPairs });
+          setOptionsActivities(
+            data.plannedActivities.map(({ id, name }) => ({ value: id, label: t(name) }))
+          );
+          setOptionsExpenses(
+            data.expenseCategories.map(({ id, name }) => ({ value: id, label: t(name) }))
+          );
+
+          const stateAndLocalityData = data.states;
+          const localitiesDict = getLocalitiesDict(stateAndLocalityData);
+          console.log(localitiesDict);
+          const availableStates = getAvailableStates(stateAndLocalityData);
+
+          setAvailableStates(availableStates);
+          setLocalitiesDict(localitiesDict);
+
+        } else {
+          throw new Error('Failed to fetch options');
         }
       } catch (error) {
         console.error('Error fetching options:', error);
@@ -80,6 +95,29 @@ const NewProjectApplication = ({ onReturnToMenu }) => {
     additional_support: Yup.string(),
     officer_name: Yup.string().required(t('validation.required')),
   });
+  
+const getAvailableStates = (localitiesData) => {
+    return localitiesData
+    .map( (item) => item.state_name );
+}
+
+const getLocalitiesDict = (localitiesData) => {
+    let dict = {};
+    localitiesData.forEach((item) => {
+        const { state_name, localities } = item; // Destructure the state_name and locality
+
+        if (!dict[state_name]) {
+            dict[state_name] = []; // Initialize array if it doesn't exist
+        }
+        if (!dict[state_name].includes(localities)) {
+            localities.forEach((locality) => {
+                dict[state_name].push(locality); // Add locality if it's not already in the array
+            })
+
+        }
+    })
+    return dict;
+  }
 
   const handleSubmit = async (values, { setSubmitting }) => {
     setLoading(true);
@@ -129,7 +167,7 @@ const NewProjectApplication = ({ onReturnToMenu }) => {
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
-            {({ isSubmitting, values }) => (
+            {({ isSubmitting, values, setFieldValue }) => (
               <Form className="space-y-3 bg-white p-3 rounded-lg">
                 <p className="text-3xl">{t('newProjectApplication')}</p>
 
@@ -145,33 +183,50 @@ const NewProjectApplication = ({ onReturnToMenu }) => {
 
                 <div className="mb-3">
                   <label className="font-bold block text-base text-black-bold mb-1">{t('state')}</label>
-                  <Field name="state" as="select" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading}>
+                  <Field
+                    name="state"
+                    as="select"
+                    className="text-sm w-full p-2 border rounded-lg"
+                    disabled={isLoading}
+                    onChange={(e) => {
+                      const selectedState = e.target.value;
+                      setFieldValue('state', selectedState);
+                      setFieldValue('locality', ''); // Reset locality when state changes
+                      console.log("Appropriate localities would be...");
+                      console.log(localitiesDict[selectedState]);
+                      setRelevantLocalities(localitiesDict[selectedState]);
+                    }}
+                  >
                     <option value="">{t('selectState')}</option>
-                    {
-                        values.state ?
-
-                        statesAndLocalities[values.state]
-                            .map((item) => (
-                              <option key={item.locality} value={item.locality}>
-                                {item.locality}
-                              </option>
-                            ))
-                    }
+                    {availableStates.map((state_name) => (
+                      <option key={state_name} value={state_name}>
+                        {state_name}
+                      </option>
+                    ))}
                   </Field>
                 </div>
 
                 <div className="mb-3">
                   <label className="font-bold block text-base text-black-bold mb-1">{t('locality')}</label>
-                  <Field name="locality" as="select" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading}>
-                    <option value="">{t('selectLocality')}</option>
-
-
-                    {statesAndLocalities.localities.map((locality) => (
-                      <option key={locality} value={locality}>
-                        {locality}
-                      </option>
-                    ))}
-                  </Field>
+                  <Field
+  name="locality"
+  as="select"
+  className="text-sm w-full p-2 border rounded-lg"
+  disabled={!values.state || isLoading}
+>
+  <option value="">{t('selectLocality')}</option>
+  {relevantLocalities && relevantLocalities.length > 0 ? (
+    relevantLocalities.map((locality) => (
+      <option key={locality} value={locality}>
+        {locality}
+      </option>
+    ))
+  ) : (
+    <option key="no" value="Trouble getting localities">
+      {t('troubleGettingLocalities')}
+    </option>
+  )}
+</Field>
                 </div>
 
                 <ActivitiesFieldArray optionsActivities={optionsActivities} optionsExpenses={optionsExpenses} />
