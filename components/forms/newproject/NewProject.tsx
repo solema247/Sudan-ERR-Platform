@@ -7,23 +7,45 @@ import FormBubble from '../../cosmetic/FormBubble';
 import ActivitiesFieldArray from './NewProjectActivities';
 
 const NewProjectApplication = ({ onReturnToMenu }) => {
+    type Dictionary<T> = {
+        [key: string]: T;
+    };
+
   const { t, i18n } = useTranslation('projectApplication');
-  const [stateLocality, setStateLocality] = useState({ states: [], localities: [] });
+  const [statesAndLocalities, setStatesAndLocalities] = useState({ states: [], localities: [] })
   const [optionsActivities, setOptionsActivities] = useState([]);
   const [optionsExpenses, setOptionsExpenses] = useState([]);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [isLoading, setLoading] = useState(false);
 
+  interface StateLocalityPair {
+    state_name: string;
+    locality: string;
+  }
+
   useEffect(() => {
+    /**
+     * Fetches Select options for activities, expenses and localities (which are based on what state you have selected.)
+     * 
+     * TODO: Prevent redundant fetches of data we already have
+     */
+
     const fetchOptions = async () => {
       setLoading(true);
       try {
         const res = await fetch(`/api/project-application?language=${i18n.language}`);
         if (res.ok) {
           const data = await res.json();
-          setOptionsActivities(data.plannedActivities.map(({ id, name }) => ({ value: id, label: t(name) })));
-          setOptionsExpenses(data.expenseCategories.map(({ id, name }) => ({ value: id, label: t(name) })));
-          setStateLocality({ states: data.states, localities: [] });
+
+          const uniqueStateNames = data
+          .map(state => state.state_name)
+          .filter((state, index, self) => self.indexOf(state) === index);
+      
+          const stateAndLocalityPairs: StateLocalityPair[] = data.states;
+
+        setOptionsActivities(data.plannedActivities.map(({ id, name }) => ({ value: id, label: t(name) })));
+        setOptionsExpenses(data.expenseCategories.map(({ id, name }) => ({ value: id, label: t(name) })));
+        setStatesAndLocalities({ states: uniqueStateNames, localities: stateAndLocalityPairs });
         }
       } catch (error) {
         console.error('Error fetching options:', error);
@@ -107,7 +129,7 @@ const NewProjectApplication = ({ onReturnToMenu }) => {
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
-            {({ isSubmitting }) => (
+            {({ isSubmitting, values }) => (
               <Form className="space-y-3 bg-white p-3 rounded-lg">
                 <p className="text-3xl">{t('newProjectApplication')}</p>
 
@@ -125,11 +147,16 @@ const NewProjectApplication = ({ onReturnToMenu }) => {
                   <label className="font-bold block text-base text-black-bold mb-1">{t('state')}</label>
                   <Field name="state" as="select" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading}>
                     <option value="">{t('selectState')}</option>
-                    {stateLocality.states.map(({ state_name }) => (
-                      <option key={state_name} value={state_name}>
-                        {state_name}
-                      </option>
-                    ))}
+                    {
+                        values.state ?
+
+                        statesAndLocalities[values.state]
+                            .map((item) => (
+                              <option key={item.locality} value={item.locality}>
+                                {item.locality}
+                              </option>
+                            ))
+                    }
                   </Field>
                 </div>
 
@@ -137,7 +164,9 @@ const NewProjectApplication = ({ onReturnToMenu }) => {
                   <label className="font-bold block text-base text-black-bold mb-1">{t('locality')}</label>
                   <Field name="locality" as="select" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading}>
                     <option value="">{t('selectLocality')}</option>
-                    {stateLocality.localities.map((locality) => (
+
+
+                    {statesAndLocalities.localities.map((locality) => (
                       <option key={locality} value={locality}>
                         {locality}
                       </option>
