@@ -7,13 +7,8 @@ import FormBubble from '../../cosmetic/FormBubble';
 import ActivitiesFieldArray from './NewProjectActivities';
 
 const NewProjectApplication = ({ onReturnToMenu }) => {
-    type Dictionary<T> = {
-        [key: string]: T;
-    };
-
   const { t, i18n } = useTranslation('projectApplication');
-//   const [stateLocality, setStateLocality] = useState({ states: [], localities: {} });
-  const [availableStates, setAvailableStates] = useState([]);
+  const [availableRegions, setAvailableRegions] = useState([]);
   const [localitiesDict, setLocalitiesDict] = useState({});
   const [relevantLocalities, setRelevantLocalities] = useState([]);
   const [optionsActivities, setOptionsActivities] = useState([]);
@@ -21,16 +16,13 @@ const NewProjectApplication = ({ onReturnToMenu }) => {
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [isLoading, setLoading] = useState(false);
 
-  interface StateLocalityPair {
-    state_name: string;
-    locality: string;
-  }
 
   useEffect(() => {
     /**
      * Fetches Select options for activities, expenses and localities (which are based on what state you have selected.)
      * 
-     * TODO: Prevent redundant fetches of data we already have
+     * "intendedBeneficiaries": "Intended Beneficiaries",
+  "estimatedBeneficiaries": "Estimated Beneficiaries",
      */
 
     const fetchOptions = async () => {
@@ -44,6 +36,7 @@ const NewProjectApplication = ({ onReturnToMenu }) => {
             throw new Error('Invalid data format: states should be an array');
           }
 
+          // Populate <select>
           setOptionsActivities(
             data.plannedActivities.map(({ id, name }) => ({ value: id, label: t(name) }))
           );
@@ -53,10 +46,9 @@ const NewProjectApplication = ({ onReturnToMenu }) => {
 
           const stateAndLocalityData = data.states;
           const localitiesDict = getLocalitiesDict(stateAndLocalityData);
-          console.log(localitiesDict);
           const availableStates = getAvailableStates(stateAndLocalityData);
 
-          setAvailableStates(availableStates);
+          setAvailableRegions(availableStates);
           setLocalitiesDict(localitiesDict);
 
         } else {
@@ -120,6 +112,7 @@ const getLocalitiesDict = (localitiesData) => {
   }
 
   const handleSubmit = async (values, { setSubmitting }) => {
+    console.log("Handle submit here.");
     setLoading(true);
     try {
       const res = await fetch('/api/project-application', {
@@ -171,16 +164,37 @@ const getLocalitiesDict = (localitiesData) => {
               <Form className="space-y-3 bg-white p-3 rounded-lg">
                 <p className="text-3xl">{t('newProjectApplication')}</p>
 
+                {/* Date */}
                 <div className="mb-3">
                   <label className="font-bold block text-base text-black-bold mb-1">{t('date')}</label>
                   <Field name="date" type="date" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
                 </div>
 
+                {/* Room ID */}
                 <div className="mb-3">
                   <label className="font-bold block text-base text-black-bold mb-1">{t('errId')}</label>
                   <Field name="err" type="text" className="text-sm w-full p-2 border rounded-lg" placeholder={t('enterErrId')} disabled={isLoading} />
                 </div>
 
+                 {/* Objectives */}
+                 <div className="mb-3">
+                  <label className="font-bold block text-base text-black-bold mb-1">{t('objectives')}</label>
+                  <Field name="objectives" type="text" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
+                </div>
+
+                {/* Intended beneficiaries */}
+                 <div className="mb-3">
+                  <label className="font-bold block text-base text-black-bold mb-1">{t('intendedBeneficiaries')}</label>
+                  <Field name="intended-beneficiaries" type="text" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
+                </div>
+
+                {/* Estimated beneficiaries*/}
+                 <div className="mb-3">
+                  <label className="font-bold block text-base text-black-bold mb-1">{t('estimatedBeneficiaries')}</label>
+                  <Field name="estimated-beneficiaries" type="number" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
+                </div>
+
+                {/* State or region */}
                 <div className="mb-3">
                   <label className="font-bold block text-base text-black-bold mb-1">{t('state')}</label>
                   <Field
@@ -192,13 +206,11 @@ const getLocalitiesDict = (localitiesData) => {
                       const selectedState = e.target.value;
                       setFieldValue('state', selectedState);
                       setFieldValue('locality', ''); // Reset locality when state changes
-                      console.log("Appropriate localities would be...");
-                      console.log(localitiesDict[selectedState]);
                       setRelevantLocalities(localitiesDict[selectedState]);
                     }}
                   >
                     <option value="">{t('selectState')}</option>
-                    {availableStates.map((state_name) => (
+                    {availableRegions.map((state_name) => (
                       <option key={state_name} value={state_name}>
                         {state_name}
                       </option>
@@ -206,30 +218,36 @@ const getLocalitiesDict = (localitiesData) => {
                   </Field>
                 </div>
 
+                {/* Locality*/}
+
                 <div className="mb-3">
                   <label className="font-bold block text-base text-black-bold mb-1">{t('locality')}</label>
                   <Field
-  name="locality"
-  as="select"
-  className="text-sm w-full p-2 border rounded-lg"
-  disabled={!values.state || isLoading}
->
-  <option value="">{t('selectLocality')}</option>
-  {relevantLocalities && relevantLocalities.length > 0 ? (
-    relevantLocalities.map((locality) => (
-      <option key={locality} value={locality}>
-        {locality}
-      </option>
-    ))
-  ) : (
-    <option key="no" value="Trouble getting localities">
-      {t('troubleGettingLocalities')}
-    </option>
-  )}
-</Field>
+                    name="locality"
+                    as="select"
+                    className="text-sm w-full p-2 border rounded-lg"
+                    disabled={!values.state || isLoading}
+                    >
+                    <option value="">{t('selectLocality')}</option>
+                    {relevantLocalities && relevantLocalities.length > 0 ? (
+                        relevantLocalities.map((locality) => (
+                        <option key={locality} value={locality}>
+                            {locality}
+                        </option>
+                        ))
+                    ) : (
+                        <option key="no" value="Trouble getting localities">
+                        {t('troubleGettingLocalities')}
+                        </option>
+                    )}
+                    </Field>
                 </div>
 
+                {/* Add/remove activities and their expenses */}
+
                 <ActivitiesFieldArray optionsActivities={optionsActivities} optionsExpenses={optionsExpenses} />
+
+                {/* Estimated timeframe */}
 
                 <div className="mb-3">
                   <label className="font-bold block text-base text-black-bold mb-1">{t('estimatedTimeframe')}</label>
@@ -242,6 +260,8 @@ const getLocalitiesDict = (localitiesData) => {
                   />
                 </div>
 
+                {/* Additional support */}
+
                 <div className="mb-3">
                   <label className="font-bold block text-base text-black-bold mb-1">{t('additionalSupport')}</label>
                   <Field
@@ -252,6 +272,8 @@ const getLocalitiesDict = (localitiesData) => {
                     disabled={isLoading}
                   />
                 </div>
+
+                {/* Officer name */}
 
                 <div className="mb-3">
                   <label className="font-bold block text-base text-black-bold mb-1">{t('officerName')}</label>
