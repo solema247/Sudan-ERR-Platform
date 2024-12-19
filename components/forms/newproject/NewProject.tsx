@@ -178,7 +178,7 @@ const getLocalitiesDict = (localitiesData) => {
 
                  {/* Objectives */}
                  <div className="mb-3">
-                  <label className="font-bold block text-base text-black-bold mb-1">{t('objectives')}</label>
+                  <label className="font-bold block text-base text-black-bold mb-1">{t('projectObjectives')}</label>
                   <Field name="objectives" type="text" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
                 </div>
 
