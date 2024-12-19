@@ -1,7 +1,7 @@
 //pages/index.tsx
 import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
-import Button from '../components/Button';
+import Button from '../components/ui/Button';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 

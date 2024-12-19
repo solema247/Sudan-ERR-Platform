@@ -1,9 +1,9 @@
 // pages/fill-form.tsx
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import FormBubble from '../components/FormBubble';
-import MessageBubble from '../components/MessageBubble';
-import Button from '../components/Button';
+import FormBubble from './cosmetic/FormBubble';
+import MessageBubble from './MessageBubble';
+import Button from './ui/Button';
 import i18n from '../lib/i18n'; // Ensure this is properly imported
 
 const FillForm: React.FC<{ 

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import MessageBubble from '../components/MessageBubble';
-import Button from '../components/Button';
+import Button from '../components/ui/Button';
 
 interface ProjectStatusProps {
     onReturnToMenu: () => void;

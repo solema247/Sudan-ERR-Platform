@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next"; // i18n hook
 import PrefilledForm from "../components/PrefilledForm";
-import FileUploader from "../components/FileUploader";
+import FileUploader from "../components/ChooseFiles";
 import MessageBubble from "../components/MessageBubble";
-import Button from "../components/Button";
+import Button from "../components/ui/Button";
 
 const ScanPrefillForm: React.FC = () => {
   const { t } = useTranslation("scan-form"); // Load translations from scan-form.json

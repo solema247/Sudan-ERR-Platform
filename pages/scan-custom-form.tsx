@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import CustomScanBubble from "../components/CustomScanBubble";
-import Button from "../components/Button";
+import CustomScanBubble from "../components/cosmetic/CustomScanBubble";
+import Button from "../components/ui/Button";
 import CustomFormReview from "../components/CustomFormReview";
 import MessageBubble from "../components/MessageBubble";
 import { useRouter } from "next/router";
