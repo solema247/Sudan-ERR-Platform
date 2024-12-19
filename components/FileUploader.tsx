@@ -6,6 +6,15 @@ interface FileUploaderProps {
   onUploadComplete: (urls: string[]) => void;
 }
 
+/**
+  * UI for choosing files to upload.
+  * 
+  * TODO: Move non-UI controller stuff into api or elsewhere
+  * 
+  * @param param0 
+  * @returns 
+*/
+
 const FileUploader: React.FC<FileUploaderProps> = ({ onUploadComplete }) => {
   const { t } = useTranslation("scanForm"); // Use scanForm namespace for translations
   const [files, setFiles] = useState<File[]>([]);

@@ -9,7 +9,7 @@ import Button from '../components/Button';
 import FillForm from '../pages/fill-form';
 import ScanForm from '../pages/scan-form';
 import ScanCustomForm from '../pages/scan-custom-form'; // Import the new component
-import ProjectApplication from '../pages/project-application';
+import ProjectApplication from '../components/forms/NewProject';
 import ProjectStatus from '../pages/project-status';
 import FeedbackForm from '../components/FeedbackForm'; // Correct import path
 const LogoImage = '/icons/icon-512x512.png'; 

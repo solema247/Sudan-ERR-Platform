@@ -1,4 +1,5 @@
 {
+  "newProjectApplication": "طلب مشروع جديد",
   "title": "طلب المشروع",
   "date": "التاريخ",
   "enterDate": "أدخل تاريخ المشروع",
@@ -45,7 +46,6 @@
   "Children’s Activities": "أنشطة الأطفال",
   "Productive Activities": "الأنشطة الإنتاجية",
   "Protection & Evacuation": "الحماية والإخلاء",
-  "Others (please specify)": "أخرى (يرجى التحديد)",
   "quantity": "الكمية",
   "activityDuration": "مدة النشاط",
   "placeOfOperation": "مكان التنفيذ",
@@ -55,6 +55,6 @@
   "addRow": "إضافة صف",
   "remove": "إزالة",
   "returnToMenu": "العودة إلى القائمة",
-  "button.submit": "إرسال",
+  "button.submit": "أرسل هذا المشروع",
   "button.processing": "جاري المعالجة..."
 }
