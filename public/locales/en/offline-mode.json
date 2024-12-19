@@ -70,5 +70,6 @@
     "additional_training_needs": "Additional training needs",
     "lessons": "Lessons learned in budget planning"
   },
-  "add_expense": "Add Expense"
+  "add_expense": "Add Expense",
+  "queued_forms_title": "Queued Forms"
 }

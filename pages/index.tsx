@@ -1,9 +1,11 @@
 //pages/index.tsx
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Calculator from '../components/Calculator';
-import MainApp from '../components/MainApp'; // Fix: Update the import path to the correct module
+import MainApp from '../components/MainApp';
 
 const Home = () => {
+  const { t } = useTranslation('home');
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
 
@@ -17,7 +19,7 @@ const Home = () => {
   };
 
   if (isLocked) {
-    return <div>App is locked. Please contact support.</div>;
+    return <div>{t('appLocked')}</div>;
   }
 
   return isUnlocked ? <MainApp /> : <Calculator onPinEntry={handlePinEntry} />;

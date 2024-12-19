@@ -6,24 +6,21 @@ import { useRouter } from 'next/router';
 import { getSessionQueue, clearSessionQueue, getSubmittedQueue } from '../lib/sessionUtils';
 import dynamic from 'next/dynamic';
 
-
-
 const OfflineMode: React.FC = () => {
-  const { t } = useTranslation('offlineMode'); // Load translations for offline mode
+  const { t, i18n } = useTranslation('offlineMode');
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submissionMessage, setSubmissionMessage] = useState<string | null>(null);
   const [queuedForms, setQueuedForms] = useState<any[]>([]);
   const [submittedForms, setSubmittedForms] = useState<any[]>([]);
-  const [isOnline, setIsOnline] = useState(false); // Initialize to false by default
+  const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setIsOnline(navigator.onLine); // Update only on the client side
+      setIsOnline(navigator.onLine);
     }
   }, []);
 
-  // Load queued and submitted forms on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const fetchQueuedForms = () => {
@@ -79,9 +76,12 @@ const OfflineMode: React.FC = () => {
     localStorage.removeItem('offlineSubmittedQueue');
   };
 
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
-      {/* Network Status */}
       <div
         className={`fixed top-0 left-0 w-full py-2 text-center text-white ${
           isOnline ? 'bg-green-500' : 'bg-red-500'
@@ -90,7 +90,6 @@ const OfflineMode: React.FC = () => {
         {isOnline ? t('status_online') : t('status_offline')}
       </div>
 
-      {/* Instructions */}
       <div className="text-center mb-6">
         <h1 className="text-2xl font-semibold text-black mb-4">{t('instructions_title')}</h1>
         <ul className="text-lg text-gray-700 space-y-2">
@@ -106,9 +105,7 @@ const OfflineMode: React.FC = () => {
         </ul>
       </div>
 
-      {/* Queued and Submitted Forms */}
       <div className="w-full max-w-md mb-6">
-        {/* Queued Forms */}
         {queuedForms.length > 0 && (
           <div className="bg-white p-4 rounded shadow mb-6">
             <h2 className="text-lg font-medium text-gray-800 mb-2">{t('queued_forms_title')}</h2>
@@ -131,7 +128,6 @@ const OfflineMode: React.FC = () => {
           </div>
         )}
 
-        {/* Submitted Forms */}
         {submittedForms.length > 0 ? (
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6 shadow-lg">
             <h2 className="text-xl font-bold text-gray-800 mb-4">{t('submitted_forms_title')}</h2>
@@ -165,14 +161,12 @@ const OfflineMode: React.FC = () => {
         )}
       </div>
 
-      {/* Success Message */}
       {submissionMessage && (
         <div className="bg-green-100 text-green-700 px-4 py-2 rounded shadow mb-6">
           {submissionMessage}
         </div>
       )}
 
-      {/* Open Form Button */}
       <button
         onClick={handleOpenModal}
         className="bg-primaryGreen hover:bg-primaryGreenHover text-white font-medium py-2 px-6 rounded shadow mb-4"
@@ -180,15 +174,22 @@ const OfflineMode: React.FC = () => {
         {t('open_form_button')}
       </button>
 
-      {/* Return to Home Button */}
       <button
         onClick={handleReturnToHome}
-        className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded shadow"
+        className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded shadow mb-4"
       >
         {t('return_home_button')}
       </button>
 
-      {/* Modal */}
+      <div className="flex justify-center space-x-4 mt-4">
+        <button onClick={() => changeLanguage('en')} className="mx-2 text-blue-500 underline">
+          English
+        </button>
+        <button onClick={() => changeLanguage('ar')} className="mx-2 text-blue-500 underline">
+          العربية
+        </button>
+      </div>
+
       {isModalOpen && (
         <OfflineForm onClose={handleCloseModal} onSubmitSuccess={handleSubmitSuccess} />
       )}

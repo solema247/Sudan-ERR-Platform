@@ -70,5 +70,6 @@
     "additional_training_needs": "احتياجات التدريب الإضافية",
     "lessons": "الدروس المستفادة من تخطيط الميزانية"
   },
-  "add_expense": "إضافة مصاريف"
+  "add_expense": "إضافة مصاريف",
+  "queued_forms_title": "النماذج في الانتظار"
 }

@@ -10,7 +10,7 @@ interface OfflineFormProps {
 }
 
 const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) => {
-  const { t } = useTranslation('offlineMode');
+  const { t, i18n } = useTranslation('offlineMode');
   const [formData, setFormData] = useState({
     err_id: '',
     date: '',
@@ -57,7 +57,6 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
   };
 
   const validateFormData = () => {
-    // Check if required fields are empty
     if (!formData.err_id || !formData.date) {
       alert(t('form_validation_error'));
       return false;
@@ -113,10 +112,22 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
     }
   };
 
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
+
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-start">
       <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-lg overflow-y-auto max-h-screen">
         <h2 className="text-xl font-semibold mb-1">{t('offline_form_title')}</h2>
+        <div className="flex justify-center space-x-4 mb-4">
+          <button onClick={() => changeLanguage('en')} className="mx-2 text-blue-500 underline">
+            English
+          </button>
+          <button onClick={() => changeLanguage('ar')} className="mx-2 text-blue-500 underline">
+            العربية
+          </button>
+        </div>
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           <input
             type="text"
