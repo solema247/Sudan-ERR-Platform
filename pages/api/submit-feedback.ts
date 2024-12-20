@@ -14,6 +14,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const { err_id } = user;
 
+        // Convert recommendation string to boolean or null
+        let recommendationValue = null;
+        if (recommendation === 'Yes') recommendationValue = true;
+        if (recommendation === 'No') recommendationValue = false;
+        // 'Maybe' will remain null
+
         const { error } = await supabase
             .from('app_feedback')
             .insert([
@@ -21,12 +27,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     room_id: err_id,
                     task_usability_rating: taskUsabilityRating,
                     main_challenges: mainChallenges,
-                    recommendation: recommendation,
+                    recommendation: recommendationValue,
                 },
             ]);
 
         if (error) {
-            return res.status(500).json({ success: false, message: 'Failed to submit feedback' });
+            console.error('Supabase error:', error);
+            return res.status(500).json({ success: false, message: 'Failed to submit feedback', error: error.message });
         }
 
         return res.status(200).json({ success: true });
