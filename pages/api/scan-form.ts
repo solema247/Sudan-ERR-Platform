@@ -8,6 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import formidable from 'formidable';
 import { franc } from 'franc';
+import os from 'os';
 
 // Disable Next.js's default body parsing to allow for file uploads
 export const config = {
@@ -33,13 +34,13 @@ const openai = new OpenAI({
 
 // Function to parse multipart/form-data using formidable
 async function parseForm(req: NextApiRequest): Promise<{ filePath: string }> {
-  const uploadDir = path.join(process.cwd(), 'uploads');
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+  const uploadDir = os.tmpdir();
 
   const form = formidable({
     multiples: false,
     keepExtensions: true,
-    uploadDir: uploadDir,
+    uploadDir,
+    filename: (name, ext) => `${Date.now()}-${name}${ext}`
   });
 
   return new Promise((resolve, reject) => {
@@ -48,7 +49,7 @@ async function parseForm(req: NextApiRequest): Promise<{ filePath: string }> {
         reject(err);
         return;
       }
-      console.log('Files received:', files); // Log the files object
+      console.log('Files received:', files);
       const file = files.file[0] as formidable.File;
       if (!file) {
         reject(new Error('No file uploaded'));
@@ -224,8 +225,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
+  let filePath: string | null = null;
+
   try {
-    const { filePath } = await parseForm(req);
+    const { filePath: parsedFilePath } = await parseForm(req);
+    filePath = parsedFilePath;
 
     const processedImageBuffer = await preprocessImageToBuffer(filePath);
     const rawText = await googleVisionOCR(processedImageBuffer);
@@ -233,10 +237,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.status(200).json({ message: 'Data processed successfully', data: structuredData });
 
-    fs.unlinkSync(filePath);
   } catch (error: any) {
     console.error(`Processing error: ${error.message}`);
     res.status(500).json({ error: `Error processing scan: ${error.message}` });
+  } finally {
+    // Clean up: Delete the temporary file
+    if (filePath && fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+        console.log('Temporary file cleaned up:', filePath);
+      } catch (cleanupError) {
+        console.error('Error cleaning up temporary file:', cleanupError);
+      }
+    }
   }
 }
 
