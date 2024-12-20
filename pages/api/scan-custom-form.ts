@@ -11,6 +11,7 @@ import { createClient } from '@supabase/supabase-js';
 import { execSync } from 'child_process';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
+import os from 'os';
 
 
 // Disable body parsing for file uploads
@@ -43,10 +44,16 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Parse multipart form-data
 async function parseForm(req: NextApiRequest): Promise<{ filePath: string; fileName: string; projectId: string }> {
-  const uploadDir = path.join(process.cwd(), 'uploads');
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+  // Use os.tmpdir() instead of hardcoded /tmp
+  const uploadDir = os.tmpdir();
 
-  const form = formidable({ multiples: false, keepExtensions: true, uploadDir });
+  const form = formidable({ 
+    multiples: false, 
+    keepExtensions: true, 
+    uploadDir,
+    filename: (name, ext) => `${Date.now()}-${name}${ext}` // Ensure unique filenames
+  });
+
   return new Promise((resolve, reject) => {
     form.parse(req, (err, fields, files) => {
       if (err) {
@@ -111,16 +118,16 @@ async function preprocessImage(imagePath: string): Promise<Buffer> {
   const PREPROCESS_FUNCTION_URL = process.env.PREPROCESS_FUNCTION_URL!;
   const formData = new FormData();
 
-  // Create a read stream from the file
-  const fileStream = fs.createReadStream(imagePath);
-  
-  // Append the file with proper boundary and headers
-  formData.append('image', fileStream, {
-    filename: path.basename(imagePath),
-    contentType: 'image/jpeg',
-  });
-
   try {
+    // Read the file into a buffer first
+    const fileBuffer = fs.readFileSync(imagePath);
+    
+    // Append the buffer with proper boundary and headers
+    formData.append('image', fileBuffer, {
+      filename: path.basename(imagePath),
+      contentType: 'image/jpeg',
+    });
+
     const response = await fetch(PREPROCESS_FUNCTION_URL, {
       method: 'POST',
       body: formData,
@@ -354,8 +361,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
+  let filePath: string | null = null;
+
   try {
-    const { filePath, fileName, projectId } = await parseForm(req);
+    const { filePath: parsedFilePath, fileName, projectId } = await parseForm(req);
+    filePath = parsedFilePath;
 
     if (!projectId) {
       throw new Error('Project ID is required');
@@ -363,9 +373,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const projectMetadata = await fetchProjectMetadata(projectId);
 
-    const processedImage = await preprocessImage(filePath); // Uses Python for preprocessing
-    const ocrText = await googleVisionOCR(processedImage); // Process preprocessed image with OCR
-
+    // Read the file into a buffer before preprocessing
+    const fileBuffer = fs.readFileSync(filePath);
+    const processedImage = await preprocessImage(filePath);
+    const ocrText = await googleVisionOCR(processedImage);
 
     const detectedLanguage = detectLanguage(ocrText);
 
@@ -423,28 +434,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Enrich data with projectMetadata and include fileUrl
+    // Upload to Supabase and get URL
     const publicFileUrl = await uploadToSupabase(filePath, fileName);
 
     const enrichedData = {
       ...structuredData,
       projectMetadata,
-      fileUrl: publicFileUrl, // Include fileUrl directly in structuredData
+      fileUrl: publicFileUrl,
     };
 
     res.status(200).json({
       message: 'Scan processed successfully.',
       ocrText,
-      structuredData: enrichedData, // fileUrl is now part of structuredData
+      structuredData: enrichedData,
     });
 
-    fs.unlinkSync(filePath);
   } catch (error: any) {
     console.error('Error processing scan:', error.message);
     res.status(500).json({
       error: `Processing error: ${error.message || 'Unknown error'}`,
       details: error.stack,
     });
+  } finally {
+    // Clean up: Delete the temporary file
+    if (filePath && fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+        console.log('Temporary file cleaned up:', filePath);
+      } catch (cleanupError) {
+        console.error('Error cleaning up temporary file:', cleanupError);
+      }
+    }
   }
 }
 
