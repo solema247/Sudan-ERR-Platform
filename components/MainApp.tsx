@@ -3,11 +3,25 @@ import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
 import Button from '../components/Button';
 import Image from 'next/image';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
+
+// Initialize PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
 const MainApp = () => {
   const router = useRouter();
   const { t, i18n } = useTranslation('home');
   const [showPDFModal, setShowPDFModal] = useState(false);
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [scale, setScale] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768 ? 0.5 : 0.8;  // Mobile gets 0.5, desktop gets 0.8
+    }
+    return 0.6; // Default fallback
+  });
 
   const handleLogin = () => {
     router.push('/login');
@@ -24,6 +38,10 @@ const MainApp = () => {
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
+
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
+    setNumPages(numPages);
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
@@ -50,7 +68,7 @@ const MainApp = () => {
         </div>
       </div>
 
-      {/* PDF Modal with improved mobile viewing */}
+      {/* PDF Modal with react-pdf */}
       {showPDFModal && (
         <div className="fixed inset-0 z-50 bg-white flex flex-col">
           <div className="bg-white p-4 shadow-md flex justify-between items-center">
@@ -63,28 +81,63 @@ const MainApp = () => {
               </svg>
               {t('backToApp')}
             </button>
-            <a 
-              href="/guides/user-guide.pdf"
-              download="user-guide.pdf"
-              className="text-blue-500"
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={() => setScale(prev => Math.max(0.5, prev - 0.1))}
+                className="text-gray-700"
+              >
+                -
+              </button>
+              <button 
+                onClick={() => setScale(prev => Math.min(2, prev + 0.1))}
+                className="text-gray-700"
+              >
+                +
+              </button>
+              <a 
+                href="/guides/user-guide.pdf"
+                download="user-guide.pdf"
+                className="text-blue-500"
+              >
+                {t('download')}
+              </a>
+            </div>
+          </div>
+          <div className="flex-1 w-full overflow-auto bg-gray-100 flex justify-center">
+            <Document
+              file="/guides/user-guide.pdf"
+              onLoadSuccess={onDocumentLoadSuccess}
+              className="max-w-full"
             >
-              {t('download')}
-            </a>
+              <Page
+                pageNumber={pageNumber}
+                scale={scale}
+                className="shadow-lg m-4"
+                width={window.innerWidth > 768 ? undefined : window.innerWidth - 32}
+              />
+            </Document>
           </div>
-          <div className="flex-1 w-full overflow-hidden">
-            <iframe 
-              src="/guides/user-guide.pdf#view=FitH"
-              className="w-full h-full"
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none',
-                transform: 'scale(1)',
-                transformOrigin: 'top left'
-              }}
-              title="User Guide"
-            />
-          </div>
+          {numPages && (
+            <div className="p-4 flex justify-center items-center space-x-4 bg-white border-t">
+              <button 
+                onClick={() => setPageNumber(prev => Math.max(1, prev - 1))}
+                disabled={pageNumber <= 1}
+                className="text-gray-700 disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <span>
+                Page {pageNumber} of {numPages}
+              </span>
+              <button 
+                onClick={() => setPageNumber(prev => Math.min(numPages, prev + 1))}
+                disabled={pageNumber >= numPages}
+                className="text-gray-700 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
