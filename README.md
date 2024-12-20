@@ -34,8 +34,8 @@ A Next.js-based chatbot application designed to streamline financial reporting f
 
 ## User Guide
 
-Our comprehensive user guide is available in both English and Arabic:
-- [English User Guide (PDF)](public/guides/user-guide-en.pdf)
+Our comprehensive user guide is available:
+- [User Guide](https://drive.google.com/file/d/1Oh-ECQvXZFdZ8VL4KE61m5VzgQHZXmIJ/view?usp=drive_link)
 
 
 ## Tech Stack
@@ -86,24 +86,14 @@ npm run dev
 - `/api/project-status` - Retrieves the status of submitted project applications.
 - `/api/fill-form` - Handles the submission of filled forms with structured data.
 
-## Roadmap
+## Roadmap and Projects
 
-### Q2-Q3 2024
 - Enhanced OCR model specifically trained for Arabic handwritten forms
 - Improved accuracy for local dialects and writing styles
 - Integration with existing OCR datasets
-
-### Q3-Q4 2024
-- F6 Workflow Implementation
-  - Community feedback collection
-  - Iterative improvement system
-  - Impact measurement tools
-
-### 2025 and Beyond
-- Integration with Humanitarian Tech
-  - Connection with OCHA's HPC tools
-  - Integration with ActivityInfo
-  - Compatibility with HDX data standards
+- F6 Workflow Implementation Community feedback collection
+- Integration with wider Humanitarian and Fintech
+ 
 
 ## Development
 
@@ -132,8 +122,17 @@ npm run start
 
 ## License
 
-This project is currently licensed under a private license for use by the Sudan Localization Coordination Council and Local Humanitarian organizations. Unauthorized distribution or modification is prohibited.
+This project is currently licensed under a private license for use by the Sudan Localization Coordination Council, Gisa and Local Humanitarian organizations. Unauthorized distribution or modification is prohibited. Developing plan to make it open source in 2025.
 
 ## Contact
 
 For questions or collaboration requests, please contact Santiago at santi.lema.247@gmail.com.
+
+## Demo Videos
+
+- **App Feedback**: [Watch Video](https://drive.google.com/file/d/1Mga8_WIsi66m93KCMD1v0QD7kOTkajd3/view?usp=sharing)
+- **Financial Reporting F4 Form**: [Watch Video](https://drive.google.com/file/d/1oxEa7l4hd0iJA5hVpeCsrYim3sITRbCs/view?usp=sharing)
+- **Login**: [Watch Video](https://drive.google.com/file/d/1bFAZIaageTYOq96lg2ehPYkF2WlI0lZk/view?usp=drive_link)
+- **Offline Form**: [Watch Video](https://drive.google.com/file/d/13CP-aRQmy_NG38Iqd0UuSMgQMQq07OXp/view?usp=drive_link)
+- **Project Application F1 Form**: [Watch Video](https://drive.google.com/file/d/13CP-aRQmy_NG38Iqd0UuSMgQMQq07OXp/view?usp=drive_link)
+- **Progressive Web App Download**: [Watch Video](https://drive.google.com/file/d/13CP-aRQmy_NG38Iqd0UuSMgQMQq07OXp/view?usp=drive_link)
