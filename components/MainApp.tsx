@@ -16,6 +16,16 @@ const MainApp = () => {
     router.push('/offline-mode');
   };
 
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = '/guides/user-guide.pdf';
+    link.download = 'user-guide.pdf'; // Suggested filename
+    link.setAttribute('download', ''); // Force download rather than open
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
@@ -33,7 +43,7 @@ const MainApp = () => {
         <Button text={t('offlineMode')} onClick={handleOfflineMode} />
         <Button 
           text={t('downloadGuide')}
-          onClick={() => window.open('/guides/user-guide.pdf', '_blank')}
+          onClick={handleDownload}
         />
         <div className="flex justify-center space-x-4 mt-4">
           <button onClick={() => changeLanguage('en')} className="mx-2 text-blue-500 underline">
