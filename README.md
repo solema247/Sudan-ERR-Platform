@@ -42,6 +42,13 @@ A Next.js-based web app designed to streamline ERR reporting and intervention wo
 Our comprehensive user guide is available:
 - [User Guide](https://drive.google.com/file/d/1Oh-ECQvXZFdZ8VL4KE61m5VzgQHZXmIJ/view?usp=drive_link)
 
+## Demo Videos
+- **Progressive Web App Download**: [Watch Video](https://drive.google.com/file/d/13CP-aRQmy_NG38Iqd0UuSMgQMQq07OXp/view?usp=drive_link)
+- **Login**: [Watch Video](https://drive.google.com/file/d/1bFAZIaageTYOq96lg2ehPYkF2WlI0lZk/view?usp=drive_link)
+- **Project Application F1 Form**: [Watch Video](https://drive.google.com/file/d/13CP-aRQmy_NG38Iqd0UuSMgQMQq07OXp/view?usp=drive_link)
+- **Financial Reporting F4 Form**: [Watch Video](https://drive.google.com/file/d/1oxEa7l4hd0iJA5hVpeCsrYim3sITRbCs/view?usp=sharing)
+- **App Feedback**: [Watch Video](https://drive.google.com/file/d/1Mga8_WIsi66m93KCMD1v0QD7kOTkajd3/view?usp=sharing)
+- **Offline Form**: [Watch Video](https://drive.google.com/file/d/13CP-aRQmy_NG38Iqd0UuSMgQMQq07OXp/view?usp=drive_link)
 
 ## Tech Stack
 
@@ -133,11 +140,4 @@ This project is currently licensed under a private license for use by the Sudan 
 
 For questions or collaboration requests, please contact Santiago at santi.lema.247@gmail.com.
 
-## Demo Videos
 
-- **App Feedback**: [Watch Video](https://drive.google.com/file/d/1Mga8_WIsi66m93KCMD1v0QD7kOTkajd3/view?usp=sharing)
-- **Financial Reporting F4 Form**: [Watch Video](https://drive.google.com/file/d/1oxEa7l4hd0iJA5hVpeCsrYim3sITRbCs/view?usp=sharing)
-- **Login**: [Watch Video](https://drive.google.com/file/d/1bFAZIaageTYOq96lg2ehPYkF2WlI0lZk/view?usp=drive_link)
-- **Offline Form**: [Watch Video](https://drive.google.com/file/d/13CP-aRQmy_NG38Iqd0UuSMgQMQq07OXp/view?usp=drive_link)
-- **Project Application F1 Form**: [Watch Video](https://drive.google.com/file/d/13CP-aRQmy_NG38Iqd0UuSMgQMQq07OXp/view?usp=drive_link)
-- **Progressive Web App Download**: [Watch Video](https://drive.google.com/file/d/13CP-aRQmy_NG38Iqd0UuSMgQMQq07OXp/view?usp=drive_link)
