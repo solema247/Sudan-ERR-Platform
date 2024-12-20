@@ -1,6 +1,7 @@
 // Components/FileUploader.tsx
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { supabase } from "../lib/supabaseClient";
 
 interface FileUploaderProps {
   onUploadComplete: (urls: string[]) => void;
@@ -20,47 +21,34 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onUploadComplete }) => {
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
 
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        const base64String = (reader.result as string).split(",")[1];
-        resolve(base64String);
-      };
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
       setFiles(selectedFiles);
-
       setUploading(true);
       const urls: string[] = [];
 
       try {
         for (const file of selectedFiles) {
-          const base64Content = await convertToBase64(file);
+          // Create unique filename
+          const fileExt = file.name.split('.').pop();
+          const fileName = `scanned-reports/${Date.now()}-${self.crypto.randomUUID()}.${fileExt}`;
 
-          const response = await fetch("/api/upload", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              fileName: `${file.name}-${Date.now()}`,
-              fileContent: base64Content,
-            }),
-          });
+          // Upload directly to Supabase storage
+          const { data: uploadData, error: uploadError } = await supabase
+            .storage
+            .from('expense-reports')
+            .upload(fileName, file);
 
-          if (!response.ok) {
-            throw new Error(t("errors.upload_failed"));
-          }
+          if (uploadError) throw uploadError;
 
-          const result = await response.json();
-          urls.push(result.url);
+          // Get public URL
+          const { data } = supabase
+            .storage
+            .from('expense-reports')
+            .getPublicUrl(fileName);
+
+          urls.push(data.publicUrl);
         }
 
         // Notify parent component of completion
