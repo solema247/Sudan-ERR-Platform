@@ -48,7 +48,7 @@ const ScanCustomForm: React.FC<ScanCustomFormProps> = ({
 
     setIsLoading(true);
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("image", file);
     formData.append("language", i18n.language);
     formData.append("projectId", project.id);  
 

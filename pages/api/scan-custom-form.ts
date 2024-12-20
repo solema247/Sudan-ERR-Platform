@@ -9,6 +9,8 @@ import formidable from 'formidable';
 import { franc } from 'franc';
 import { createClient } from '@supabase/supabase-js';
 import { execSync } from 'child_process';
+import fetch from 'node-fetch';
+import FormData from 'form-data';
 
 
 // Disable body parsing for file uploads
@@ -53,7 +55,7 @@ async function parseForm(req: NextApiRequest): Promise<{ filePath: string; fileN
         return;
       }
 
-      const uploadedFiles = files['file'];
+      const uploadedFiles = files['image'];
       let file: formidable.File;
 
       if (Array.isArray(uploadedFiles)) {
@@ -106,22 +108,37 @@ async function fetchProjectMetadata(projectId: string) {
 
 // Preprocess the image for OCR
 async function preprocessImage(imagePath: string): Promise<Buffer> {
-  const outputPath = `${imagePath}_processed.png`; // Temporary processed file path
+  const PREPROCESS_FUNCTION_URL = process.env.PREPROCESS_FUNCTION_URL!;
+  const formData = new FormData();
+
+  // Create a read stream from the file
+  const fileStream = fs.createReadStream(imagePath);
+  
+  // Append the file with proper boundary and headers
+  formData.append('image', fileStream, {
+    filename: path.basename(imagePath),
+    contentType: 'image/jpeg',
+  });
 
   try {
-    // Call the enhanced Python preprocessing script
-    execSync(`python preprocess.py ${imagePath} ${outputPath}`, { stdio: 'inherit' });
+    const response = await fetch(PREPROCESS_FUNCTION_URL, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        ...formData.getHeaders(),
+      }
+    });
 
-    // Read and return the processed image as a Buffer
-    return fs.readFileSync(outputPath);
+    if (!response.ok) {
+      console.error(`Failed to preprocess image: ${response.statusText}`);
+      throw new Error(`Failed to preprocess image: ${response.statusText}`);
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    return Buffer.from(arrayBuffer);
   } catch (error) {
     console.error('Error during image preprocessing:', error);
     throw new Error('Image preprocessing failed.');
-  } finally {
-    // Clean up the temporary processed image
-    if (fs.existsSync(outputPath)) {
-      fs.unlinkSync(outputPath);
-    }
   }
 }
 
