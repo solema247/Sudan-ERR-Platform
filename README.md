@@ -6,9 +6,13 @@
 
 ## Overview
 
-A Next.js-based chatbot application designed to streamline financial reporting for humanitarian organizations in Sudan. The system combines intelligent form processing with an intuitive interface to simplify report management.
+A Next.js-based web app designed to streamline ERR reporting and intervention workflows. 
 
 ## Features
+
+### Project Applications
+- Apply for projects and grants for your community
+- Review project status 
 
 ### Reporting Methods
 - **Form Scanning**
@@ -27,6 +31,7 @@ A Next.js-based chatbot application designed to streamline financial reporting f
 - Form validation and structured data output
 
 ### Security & Authentication
+- Disguise App as Calculator 
 - ERR ID and PIN authentication
 - Secure session management
 - Role-based access control
