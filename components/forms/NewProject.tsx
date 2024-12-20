@@ -175,13 +175,8 @@ import ActivitiesFieldArray from './NewProjectActivities';
                handleSubmit(values, actions);
              }}
            >
-             {({ isSubmitting, values, setFieldValue, errors, touched }) => (
+             {({ isSubmitting, values, setFieldValue }) => (
                <Form className="space-y-3 bg-white p-3 rounded-lg">
-                 {Object.keys(errors).length > 0 && (
-                   <div className="text-red-500">
-                     <pre>{JSON.stringify(errors, null, 2)}</pre>
-                   </div>
-                 )}
                  <p className="text-3xl">{t('newProjectApplication')}</p>
 
                  {/* Date */}
