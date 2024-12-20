@@ -15,6 +15,15 @@ function generateErrReportId(err_id: string): string {
     return `${prefix}${randomDigits}`;
 }
 
+// Add this configuration object at the top of the file
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb' // Increase the size limit to 10MB
+    }
+  }
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'POST') {
         try {
@@ -30,7 +39,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 lessons = '',
                 expenses = [],
                 file,
-                language // Dynamically added language field
+                language, // Dynamically added language field
+                fileUrl // Added file URL field
             } = req.body;
 
             if (!language) {
@@ -113,6 +123,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 await supabase
                     .from('MAG F4 Summary')
                     .update({ files: publicUrl })
+                    .eq('err_report_id', err_report_id);
+            }
+
+            // Update files column in MAG F4 Summary table with the provided URL
+            if (fileUrl) {
+                await supabase
+                    .from('MAG F4 Summary')
+                    .update({ files: fileUrl })
                     .eq('err_report_id', err_report_id);
             }
 

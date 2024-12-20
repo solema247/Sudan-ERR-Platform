@@ -9,6 +9,8 @@ import { createClient } from '@supabase/supabase-js'; // Import Supabase client
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+
 const FillForm: React.FC<{ 
     project: any | null; 
     onReturnToMenu: () => void; 
@@ -72,7 +74,13 @@ const FillForm: React.FC<{
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
-            setFile(e.target.files[0]);
+            const selectedFile = e.target.files[0];
+            if (selectedFile.size > MAX_FILE_SIZE) {
+                alert(t('fileTooBig', { size: '10MB' }));
+                e.target.value = ''; // Reset the input
+                return;
+            }
+            setFile(selectedFile);
         }
     };
 
@@ -86,30 +94,55 @@ const FillForm: React.FC<{
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.err_id || !formData.date || !formData.total_grant || !formData.total_other_sources) {
-            alert(t('requiredFieldsAlert'));
-            return;
-        }
+        try {
+            if (!formData.err_id || !formData.date || !formData.total_grant || !formData.total_other_sources) {
+                alert(t('requiredFieldsAlert'));
+                return;
+            }
 
-        const completedExpenses = expenses.filter(isExpenseComplete);
+            const completedExpenses = expenses.filter(isExpenseComplete);
+            let fileUrl = null;
 
-        const fileContent = file ? await file.arrayBuffer() : null;
-        const submissionData = {
-            ...formData,
-            expenses: completedExpenses,
-            file: file ? { name: file.name, type: file.type, content: Buffer.from(fileContent!).toString('base64') } : null,
-            language: currentLanguage
-        };
+            // Handle file upload directly to Supabase storage if file exists
+            if (file) {
+                const uniqueFileName = `reports/${file.name}-${crypto.randomUUID()}`;
+                const { data: uploadData, error: uploadError } = await supabase
+                    .storage
+                    .from('expense-reports')
+                    .upload(uniqueFileName, file);
 
-        const response = await fetch('/api/fill-form', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(submissionData)
-        });
+                if (uploadError) {
+                    throw uploadError;
+                }
 
-        if (response.ok) {
-            setFormSubmitted(true);
-        } else {
+                const { data } = supabase.storage
+                    .from('expense-reports')
+                    .getPublicUrl(uniqueFileName);
+
+                fileUrl = data.publicUrl;
+            }
+
+            // Submit form data without file content
+            const submissionData = {
+                ...formData,
+                expenses: completedExpenses,
+                fileUrl, // Just send the URL instead of file content
+                language: currentLanguage
+            };
+
+            const response = await fetch('/api/fill-form', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(submissionData)
+            });
+
+            if (response.ok) {
+                setFormSubmitted(true);
+            } else {
+                throw new Error('Submission failed');
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
             alert(t('submissionFailed'));
         }
     };
