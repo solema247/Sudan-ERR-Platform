@@ -1,8 +1,8 @@
 // components/OfflineForm.tsx
 import React, { useState } from 'react';
-import { Buffer } from 'buffer';
 import { useTranslation } from 'react-i18next';
 import { addFormToSessionQueue } from '../lib/sessionUtils';
+import { supabase } from '../lib/supabaseClient';
 
 interface OfflineFormProps {
   onClose: () => void;
@@ -67,19 +67,16 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
   const handleSubmit = async () => {
     if (!validateFormData()) return;
 
-    const fileContent = file ? await file.arrayBuffer() : null;
-    const encodedFile = file
-      ? {
-          name: file.name,
-          type: file.type,
-          content: Buffer.from(fileContent!).toString('base64'),
-        }
-      : null;
-
     const offlineData = {
       formData: { ...formData, expenses: undefined },
       expenses: formData.expenses,
-      file: encodedFile,
+      file: file ? {
+        name: file.name,
+        type: file.type,
+        lastModified: file.lastModified,
+        // Store file as object URL for offline storage
+        objectUrl: URL.createObjectURL(file)
+      } : null
     };
 
     if (navigator.onLine) {

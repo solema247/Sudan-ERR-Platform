@@ -114,41 +114,11 @@ export default async function handler(
     }
 
     // Handle file upload if present
-    if (file && file.content && file.name && file.type) {
-      // Decode base64 content
-      const buffer = Buffer.from(file.content, 'base64');
-
-      // Generate unique filename
-      const uniqueFileName = `reports/${crypto.randomUUID()}-${file.name}`;
-
-      // Upload to Supabase storage bucket 'expense-reports'
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('expense-reports')
-        .upload(uniqueFileName, buffer, {
-          contentType: file.type,
-        });
-
-      if (uploadError) {
-        console.error('Error uploading file:', uploadError.message);
-        throw new Error('Failed to upload file');
-      }
-
-      // Get public URL of the uploaded file
-      const { data } = supabase.storage
-          .from('expense-reports')
-          .getPublicUrl(uniqueFileName);
-
-      if (!data || !data.publicUrl) {
-          console.error('Error: Public URL is missing or invalid.');
-          throw new Error('Failed to get public URL of the uploaded file');
-      }
-
-      const publicUrl = data.publicUrl;
-
+    if (req.body.fileUrl) {
       // Update the summary record with the file URL
       const { error: updateError } = await supabase
         .from('MAG F4 Summary')
-        .update({ files: publicUrl })
+        .update({ files: req.body.fileUrl })
         .eq('err_report_id', err_report_id);
 
       if (updateError) {
