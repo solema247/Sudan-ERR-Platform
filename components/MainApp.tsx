@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
 import Button from '../components/Button';
@@ -7,6 +7,7 @@ import Image from 'next/image';
 const MainApp = () => {
   const router = useRouter();
   const { t, i18n } = useTranslation('home');
+  const [showBackButton, setShowBackButton] = useState(false);
 
   const handleLogin = () => {
     router.push('/login');
@@ -19,11 +20,17 @@ const MainApp = () => {
   const handleDownload = () => {
     const link = document.createElement('a');
     link.href = '/guides/user-guide.pdf';
-    link.download = 'user-guide.pdf'; // Suggested filename
-    link.setAttribute('download', ''); // Force download rather than open
+    link.download = 'user-guide.pdf';
+    link.setAttribute('download', '');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setShowBackButton(true);
+  };
+
+  const handleBack = () => {
+    router.push('/');
+    setShowBackButton(false);
   };
 
   const changeLanguage = (lng: string) => {
@@ -54,6 +61,30 @@ const MainApp = () => {
           </button>
         </div>
       </div>
+
+      {/* Floating Back Button */}
+      {showBackButton && (
+        <button
+          onClick={handleBack}
+          className="fixed bottom-4 left-4 bg-white shadow-lg rounded-full p-3 z-50"
+          aria-label="Back"
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            className="h-6 w-6" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M15 19l-7-7 7-7" 
+            />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };
