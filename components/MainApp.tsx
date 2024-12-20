@@ -31,6 +31,10 @@ const MainApp = () => {
       <div className="flex flex-col space-y-4 w-full max-w-sm">
         <Button text={t('login')} onClick={handleLogin} />
         <Button text={t('offlineMode')} onClick={handleOfflineMode} />
+        <Button 
+          text={t('downloadGuide')}
+          onClick={() => window.open('/guides/user-guide.pdf', '_blank')}
+        />
         <div className="flex justify-center space-x-4 mt-4">
           <button onClick={() => changeLanguage('en')} className="mx-2 text-blue-500 underline">
             English

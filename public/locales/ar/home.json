@@ -3,5 +3,6 @@
   "languageSelect": "اختر اللغة",
   "appLocked": "التطبيق مقفل. يرجى الاتصال بالدعم.",
   "login": "تسجيل الدخول",
-  "offlineMode": "الوضع غير المتصل"
+  "offlineMode": "الوضع غير المتصل",
+  "downloadGuide": "تحميل دليل المستخدم"
 }

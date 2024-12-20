@@ -1,5 +1,6 @@
 {
   "welcome": "Bienvenido al Bot de Sudan Emergency Response Rooms",
   "login": "Iniciar sesión",
-  "offlineMode": "Modo sin conexión"
+  "offlineMode": "Modo sin conexión",
+  "downloadGuide": "Descargar Guía de Usuario"
 }
