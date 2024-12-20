@@ -134,7 +134,7 @@ npm run start
 
 ## License
 
-This project is currently licensed under a private license for use by the Sudan Localization Coordination Council, Gisa and Local Humanitarian organizations. Unauthorized distribution or modification is prohibited. Developing plan to make it open source in 2025.
+This project is currently licensed under a private license for use by the Sudan Localization Coordination Council, Gisa and Local Humanitarian organizations. Unauthorized distribution or modification is prohibited. Developing plan to make project open source in Q1 2025.
 
 ## Contact
 
