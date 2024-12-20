@@ -27,7 +27,6 @@ export const config = {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'POST') {
         try {
-            // Destructure the incoming request body
             const {
                 err_id,
                 date,
@@ -38,9 +37,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 additional_training_needs = '',
                 lessons = '',
                 expenses = [],
-                file,
-                language, // Dynamically added language field
-                fileUrl // Added file URL field
+                fileUrl,
+                language
             } = req.body;
 
             if (!language) {
@@ -50,10 +48,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             // Generate a unique report ID
             const err_report_id = generateErrReportId(err_id || '');
 
-            // Calculate the total expenses from completed cards
+            // Calculate the total expenses
             const total_expenses = expenses.reduce((acc: number, exp: any) => acc + (parseFloat(exp.amount) || 0), 0);
 
-            // Insert data into MAG F4 Summary table
+            // Insert data into MAG F4 Summary table with the file URL
             const { error: summaryError } = await supabase
                 .from('MAG F4 Summary')
                 .insert([{
@@ -68,7 +66,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     training: additional_training_needs,
                     lessons,
                     total_expenses,
-                    language // Add language field
+                    language,
+                    files: fileUrl
                 }]);
 
             if (summaryError) throw new Error('Failed to insert data into MAG F4 Summary');
@@ -95,46 +94,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         payment_method,
                         receipt_no,
                         expense_amount: parseFloat(amount) || 0,
-                        language // Add language field for each expense
+                        language
                     }]);
 
                 if (expenseError) throw new Error('Failed to insert expense data');
             }
 
-            // Handle file upload if file exists
-            if (file) {
-                const uniqueFileName = `reports/${file.name}-${crypto.randomUUID()}`;
-                const { error: uploadError } = await supabase
-                    .storage
-                    .from('expense-reports')
-                    .upload(uniqueFileName, Buffer.from(file.content, 'base64'), { contentType: file.type });
-
-                if (uploadError) throw uploadError;
-
-                // Retrieve the public URL of the uploaded file
-                const { data } = supabase
-                    .storage
-                    .from('expense-reports')
-                    .getPublicUrl(uniqueFileName);
-
-                const publicUrl = data.publicUrl; 
-
-                // Update files column in MAG F4 Summary table
-                await supabase
-                    .from('MAG F4 Summary')
-                    .update({ files: publicUrl })
-                    .eq('err_report_id', err_report_id);
-            }
-
-            // Update files column in MAG F4 Summary table with the provided URL
-            if (fileUrl) {
-                await supabase
-                    .from('MAG F4 Summary')
-                    .update({ files: fileUrl })
-                    .eq('err_report_id', err_report_id);
-            }
-
-            // Respond with success message
             res.status(200).json({ message: 'Form submitted successfully!' });
         } catch (error) {
             console.error('Error submitting form:', error);

@@ -105,28 +105,38 @@ const FillForm: React.FC<{
 
             // Handle file upload directly to Supabase storage if file exists
             if (file) {
-                const uniqueFileName = `reports/${file.name}-${crypto.randomUUID()}`;
-                const { data: uploadData, error: uploadError } = await supabase
-                    .storage
-                    .from('expense-reports')
-                    .upload(uniqueFileName, file);
+                try {
+                    // Create a unique file name to prevent collisions
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${crypto.randomUUID()}.${fileExt}`;
+                    const filePath = `expense-reports/${fileName}`;
 
-                if (uploadError) {
-                    throw uploadError;
+                    // Upload file directly to Supabase storage
+                    const { data: uploadData, error: uploadError } = await supabase
+                        .storage
+                        .from('expense-reports')
+                        .upload(filePath, file);
+
+                    if (uploadError) throw uploadError;
+
+                    // Get the public URL of the uploaded file
+                    const { data } = supabase.storage
+                        .from('expense-reports')
+                        .getPublicUrl(filePath);
+
+                    fileUrl = data.publicUrl;
+                } catch (uploadError) {
+                    console.error('Error uploading file:', uploadError);
+                    alert(t('fileUploadError'));
+                    return;
                 }
-
-                const { data } = supabase.storage
-                    .from('expense-reports')
-                    .getPublicUrl(uniqueFileName);
-
-                fileUrl = data.publicUrl;
             }
 
-            // Submit form data without file content
+            // Submit form data with file URL
             const submissionData = {
                 ...formData,
                 expenses: completedExpenses,
-                fileUrl, // Just send the URL instead of file content
+                fileUrl,
                 language: currentLanguage
             };
 
@@ -136,11 +146,11 @@ const FillForm: React.FC<{
                 body: JSON.stringify(submissionData)
             });
 
-            if (response.ok) {
-                setFormSubmitted(true);
-            } else {
+            if (!response.ok) {
                 throw new Error('Submission failed');
             }
+
+            setFormSubmitted(true);
         } catch (error) {
             console.error('Error submitting form:', error);
             alert(t('submissionFailed'));
