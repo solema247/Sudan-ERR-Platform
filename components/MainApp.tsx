@@ -7,7 +7,7 @@ import Image from 'next/image';
 const MainApp = () => {
   const router = useRouter();
   const { t, i18n } = useTranslation('home');
-  const [showBackButton, setShowBackButton] = useState(false);
+  const [showPDFModal, setShowPDFModal] = useState(false);
 
   const handleLogin = () => {
     router.push('/login');
@@ -18,19 +18,7 @@ const MainApp = () => {
   };
 
   const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = '/guides/user-guide.pdf';
-    link.download = 'user-guide.pdf';
-    link.setAttribute('download', '');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setShowBackButton(true);
-  };
-
-  const handleBack = () => {
-    router.push('/');
-    setShowBackButton(false);
+    setShowPDFModal(true);
   };
 
   const changeLanguage = (lng: string) => {
@@ -62,28 +50,33 @@ const MainApp = () => {
         </div>
       </div>
 
-      {/* Floating Back Button */}
-      {showBackButton && (
-        <button
-          onClick={handleBack}
-          className="fixed bottom-4 left-4 bg-white shadow-lg rounded-full p-3 z-50"
-          aria-label="Back"
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-6 w-6" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M15 19l-7-7 7-7" 
-            />
-          </svg>
-        </button>
+      {/* PDF Modal */}
+      {showPDFModal && (
+        <div className="fixed inset-0 z-50 bg-white flex flex-col">
+          <div className="bg-white p-4 shadow-md flex justify-between items-center">
+            <button 
+              onClick={() => setShowPDFModal(false)}
+              className="flex items-center text-gray-700"
+            >
+              <svg className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              {t('backToApp')}
+            </button>
+            <a 
+              href="/guides/user-guide.pdf"
+              download="user-guide.pdf"
+              className="text-blue-500"
+            >
+              {t('download')}
+            </a>
+          </div>
+          <iframe 
+            src="/guides/user-guide.pdf"
+            className="flex-1 w-full"
+            title="User Guide"
+          />
+        </div>
       )}
     </div>
   );
