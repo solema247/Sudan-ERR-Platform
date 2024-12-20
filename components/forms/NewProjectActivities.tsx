@@ -79,7 +79,7 @@ import React from "react";
                      <button
                        type="button"
                        className="text-primaryGreen mt-2"
-                       onClick={() => push({ description: '', amount: '' })}
+                       onClick={() => push({ expense: '', description: '', amount: '' })}
                      >
                        + Add Expense
                      </button>

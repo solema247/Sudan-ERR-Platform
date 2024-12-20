@@ -68,15 +68,16 @@ import ActivitiesFieldArray from './NewProjectActivities';
      err: Yup.string().required(t('validation.required')),
      state: Yup.string().required(t('validation.required')),
      locality: Yup.string().required(t('validation.required')),
+     project_objectives: Yup.string().required(t('validation.required')),
+     intended_beneficiaries: Yup.string().required(t('validation.required')),
+     estimated_beneficiaries: Yup.number().required(t('validation.required')),
      planned_activities: Yup.array().of(
        Yup.object({
          selectedActivity: Yup.string().required(t('validation.required')),
          quantity: Yup.number().required(t('validation.required')),
-         duration: Yup.string().required(t('validation.required')),
-         placeOfOperation: Yup.string().required(t('validation.required')),
          expenses: Yup.array().of(
            Yup.object({
-             selectedExpense: Yup.string().required(t('validation.required')),
+             expense: Yup.string().required(t('validation.required')),
              description: Yup.string().required(t('validation.required')),
              amount: Yup.number().required(t('validation.required')),
            })
@@ -112,18 +113,26 @@ import ActivitiesFieldArray from './NewProjectActivities';
    }
 
    const handleSubmit = async (values, { setSubmitting }) => {
-     console.log("Handle submit here.");
+     console.log("Starting form submission...");
+     console.log("Form values:", values);
      setLoading(true);
+     
      try {
+       console.log("Making POST request to /api/project-application");
        const res = await fetch('/api/project-application', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify(values),
        });
+       
+       console.log("Response received:", res);
+       
        if (res.ok) {
+         console.log("Submission successful");
          setIsFormSubmitted(true);
        } else {
-         console.error('Submission failed:', await res.json());
+         const errorData = await res.json();
+         console.error('Submission failed:', errorData);
          alert(t('submissionFailed'));
        }
      } catch (error) {
@@ -152,16 +161,27 @@ import ActivitiesFieldArray from './NewProjectActivities';
                err: '',
                state: '',
                locality: '',
+               project_objectives: '',
+               intended_beneficiaries: '',
+               estimated_beneficiaries: '',
                planned_activities: [],
                estimated_timeframe: '',
                additional_support: '',
                officer_name: '',
              }}
              validationSchema={validationSchema}
-             onSubmit={handleSubmit}
+             onSubmit={(values, actions) => {
+               console.log("Formik onSubmit triggered");
+               handleSubmit(values, actions);
+             }}
            >
-             {({ isSubmitting, values, setFieldValue }) => (
+             {({ isSubmitting, values, setFieldValue, errors, touched }) => (
                <Form className="space-y-3 bg-white p-3 rounded-lg">
+                 {Object.keys(errors).length > 0 && (
+                   <div className="text-red-500">
+                     <pre>{JSON.stringify(errors, null, 2)}</pre>
+                   </div>
+                 )}
                  <p className="text-3xl">{t('newProjectApplication')}</p>
 
                  {/* Date */}
@@ -179,19 +199,34 @@ import ActivitiesFieldArray from './NewProjectActivities';
                   {/* Objectives */}
                   <div className="mb-3">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('projectObjectives')}</label>
-                   <Field name="objectives" type="text" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
+                   <Field 
+                     name="project_objectives"
+                     type="text" 
+                     className="text-sm w-full p-2 border rounded-lg" 
+                     disabled={isLoading} 
+                   />
                  </div>
 
                  {/* Intended beneficiaries */}
                   <div className="mb-3">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('intendedBeneficiaries')}</label>
-                   <Field name="intended-beneficiaries" type="text" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
+                   <Field 
+                     name="intended_beneficiaries"
+                     type="text" 
+                     className="text-sm w-full p-2 border rounded-lg" 
+                     disabled={isLoading} 
+                   />
                  </div>
 
                  {/* Estimated beneficiaries*/}
                   <div className="mb-3">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('estimatedBeneficiaries')}</label>
-                   <Field name="estimated-beneficiaries" type="number" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
+                   <Field 
+                     name="estimated_beneficiaries"
+                     type="number" 
+                     className="text-sm w-full p-2 border rounded-lg" 
+                     disabled={isLoading} 
+                   />
                  </div>
 
                  {/* State or region */}
@@ -291,6 +326,7 @@ import ActivitiesFieldArray from './NewProjectActivities';
                      type="submit"
                      text={isLoading ? t('button.processing') : t('button.submit')}
                      disabled={isSubmitting || isLoading}
+                     onClick={() => console.log("Submit button clicked")}
                    />
                  </div>
                </Form>
