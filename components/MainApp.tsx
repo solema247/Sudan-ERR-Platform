@@ -50,7 +50,7 @@ const MainApp = () => {
         </div>
       </div>
 
-      {/* PDF Modal */}
+      {/* PDF Modal with improved mobile viewing */}
       {showPDFModal && (
         <div className="fixed inset-0 z-50 bg-white flex flex-col">
           <div className="bg-white p-4 shadow-md flex justify-between items-center">
@@ -71,11 +71,20 @@ const MainApp = () => {
               {t('download')}
             </a>
           </div>
-          <iframe 
-            src="/guides/user-guide.pdf"
-            className="flex-1 w-full"
-            title="User Guide"
-          />
+          <div className="flex-1 w-full overflow-hidden">
+            <iframe 
+              src="/guides/user-guide.pdf#view=FitH"
+              className="w-full h-full"
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                transform: 'scale(1)',
+                transformOrigin: 'top left'
+              }}
+              title="User Guide"
+            />
+          </div>
         </div>
       )}
     </div>
