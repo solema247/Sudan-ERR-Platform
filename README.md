@@ -63,6 +63,14 @@ Our comprehensive user guide is available:
 - **Database**: Supabase
 - **Authentication**: Custom session-based
 
+## Roadmap and Challenges for developers
+
+- Enhanced OCR model specifically trained for Arabic handwritten forms
+- Improved accuracy for local dialects and writing styles
+- Integration with existing OCR datasets
+- F6 Workflow Implementation Community feedback collection
+- Integration with wider Humanitarian and Fintech
+
 ## Quick Start
 
 1. Clone the repository:
@@ -97,14 +105,6 @@ npm run dev
 - `/api/project-application` - Manages project application submissions.
 - `/api/project-status` - Retrieves the status of submitted project applications.
 - `/api/fill-form` - Handles the submission of filled forms with structured data.
-
-## Roadmap and Projects
-
-- Enhanced OCR model specifically trained for Arabic handwritten forms
-- Improved accuracy for local dialects and writing styles
-- Integration with existing OCR datasets
-- F6 Workflow Implementation Community feedback collection
-- Integration with wider Humanitarian and Fintech
  
 
 ## Development
