@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/icons/icon-512x512.png" alt="Sudan ERR Chatbot Logo" width="200"/>
+  <img src="public/icons/icon-512x512.png" alt="Sudan ERR Bot Logo" width="200"/>
   <h1>Sudan ERR Chatbot</h1>
   <p><strong>Sudan Emergency Response Rooms open-source platform for managing humanitarian funds and local interventions</strong></p>
 </div>
