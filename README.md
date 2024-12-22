@@ -6,18 +6,18 @@
 
 ## Overview
 
-A Next.js-based web app designed to streamline ERR reporting and intervention workflows. 
+Emergency Response Rooms (ERR) are a community-led initiative that has played a crucial role in supplying people in Sudan with water, medical supplies and other essential resources during the conflict in that country, which began in 2023. This is a Next.js-based Web app that streamlines the reporting and interention workflows of ERRs, giving control to activists on the ground while tracking the use of donor funds.
 
 ## Features
 
 ### Project Applications
 - Apply for projects and grants for your community
-- Review project status 
+- Review project status
 
 ### Reporting Methods
 - **Form Scanning**
   - Upload and process physical forms
-  - Support for both Arabic and English documents
+  - Support for documents in both Arabic and English
   - Handwritten text recognition
 - **Digital Form Entry**
   - Interactive form filling interface
@@ -27,15 +27,15 @@ A Next.js-based web app designed to streamline ERR reporting and intervention wo
 ### AI-Powered Processing
 - Image preprocessing 
 - OCR Model
-- Integration with OpenAI
+- Integration with ChatGPT
 - Form validation and structured data output
 
 ### Security & Authentication
-- Disguise App as Calculator 
+- App can be disgused as calculator to avoid unwanted attention
 - ERR ID and PIN authentication
 - Secure session management
 - Role-based access control
-- Supabase backend integration
+- Supabase (SQL) backend integration
 
 ## User Guide
 
