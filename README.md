@@ -10,11 +10,11 @@ Emergency Response Rooms (ERR) are a community-led initiative that has played a 
 
 ## F-System
 A structured process used by ERRs to ensure effective planning, approval, and documentation for all the emergency response rooms partners and 
-Purpose:
+### Purpose
 - Helping the ERR’s to prioritise, learn and improve the response.
 - Document streamlined workflows of transparent financial management.
 - Community engagement and accountability.
-Components:
+### Components
 - F-1: Work Plan and Budget
 - F-2: Project Approval
 - F-3: Contract of Agreement
