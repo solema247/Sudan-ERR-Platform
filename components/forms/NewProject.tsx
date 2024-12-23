@@ -113,8 +113,6 @@ import ActivitiesFieldArray from './NewProjectActivities';
    }
 
    const handleSubmit = async (values, { setSubmitting }) => {
-     console.log("Starting form submission...");
-     console.log("Form values:", values);
      setLoading(true);
      
      try {

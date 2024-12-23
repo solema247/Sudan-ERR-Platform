@@ -2,14 +2,22 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import FormBubble from '../components/FormBubble';
-import MessageBubble from '../components/MessageBubble';
 import Button from '../components/Button';
 import i18n from '../lib/i18n';
 import { createClient } from '@supabase/supabase-js'; // Import Supabase client
 
+// TODO: Sturdier bucket paths, using presets and enums to ease future development
+// TODO: Move more API stuff into backend
+
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+
+/**
+ *  Fill form
+ * 
+ * 
+ */
 
 const FillForm: React.FC<{ 
     project: any | null; 
@@ -91,6 +99,11 @@ const FillForm: React.FC<{
         );
     };
 
+    const getNewFilename= (file: File) => {
+        const fileExt = file.name.split('.').pop();
+        return`${crypto.randomUUID()}.${fileExt}`;
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -101,42 +114,56 @@ const FillForm: React.FC<{
             }
 
             const completedExpenses = expenses.filter(isExpenseComplete);
-            let fileUrl = null;
+            let projectId = project.id;
+            if (!projectId) {
+                alert(t('missingProjectId'));
+                return;
+            }
 
+            let fileName = getNewFilename(file)
+            
             // Handle file upload directly to Supabase storage if file exists
             if (file) {
                 try {
                     // Create a unique file name to prevent collisions
-                    const fileExt = file.name.split('.').pop();
-                    const fileName = `${crypto.randomUUID()}.${fileExt}`;
-                    const filePath = `expense-reports/${fileName}`;
+                    const filePath = `reports/expenses/${fileName}`;
 
-                    // Upload file directly to Supabase storage
+                    // 1. Upload file directly to private Supabase storage bucket
                     const { data: uploadData, error: uploadError } = await supabase
                         .storage
-                        .from('expense-reports')
+                        .from("images")
                         .upload(filePath, file);
 
                     if (uploadError) throw uploadError;
 
-                    // Get the public URL of the uploaded file
-                    const { data } = supabase.storage
-                        .from('expense-reports')
-                        .getPublicUrl(filePath);
+                    // 2. Store a record of the file in Supabase's image table
+                    const { error: insertError } = await supabase
+                    .from('images')
+                    .insert([
+                        {
+                        created_at: new Date().toISOString(),
+                        project_id: projectId,
+                        filename: fileName,
+                        path: filePath,
+                        },  
+                    ]);
 
-                    fileUrl = data.publicUrl;
-                } catch (uploadError) {
-                    console.error('Error uploading file:', uploadError);
+                    if (insertError) {
+                    throw insertError;
+
+                    }
+
+                } catch (error) {
+                    console.error('Error uploading file:', error);
                     alert(t('fileUploadError'));
                     return;
-                }
+                } 
             }
 
-            // Submit form data with file URL
+            // Submit form data with filename
             const submissionData = {
                 ...formData,
                 expenses: completedExpenses,
-                fileUrl,
                 language: currentLanguage
             };
 
