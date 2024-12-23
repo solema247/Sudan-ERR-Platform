@@ -7,6 +7,7 @@ import i18n from '../lib/i18n';
 import { createClient } from '@supabase/supabase-js'; // Import Supabase client
 
 // TODO: Sturdier bucket paths, using presets and enums to ease future development
+// TODO: Move more API stuff into backend
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
@@ -113,7 +114,12 @@ const FillForm: React.FC<{
             }
 
             const completedExpenses = expenses.filter(isExpenseComplete);
-            let projectId = project
+            let projectId = project.id;
+            if (!projectId) {
+                alert(t('missingProjectId'));
+                return;
+            }
+
             let fileName = getNewFilename(file)
             
             // Handle file upload directly to Supabase storage if file exists
