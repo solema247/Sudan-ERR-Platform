@@ -1,12 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../../lib/supabaseClient';
 import crypto from 'crypto';
 
 // Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Function to generate unique ERR report ID
 function generateErrReportId(err_id: string): string {
@@ -26,6 +22,7 @@ export const config = {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'POST') {
+        debugger;
         try {
             const {
                 err_id,
@@ -37,7 +34,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 additional_training_needs = '',
                 lessons = '',
                 expenses = [],
-                fileUrl,
                 language
             } = req.body;
 
@@ -66,8 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     training: additional_training_needs,
                     lessons,
                     total_expenses,
-                    language,
-                    files: fileUrl
+                    language
                 }]);
 
             if (summaryError) throw new Error('Failed to insert data into MAG F4 Summary');

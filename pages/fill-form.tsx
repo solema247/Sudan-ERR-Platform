@@ -164,7 +164,6 @@ const FillForm: React.FC<{
             const submissionData = {
                 ...formData,
                 expenses: completedExpenses,
-                fileName: fileName,
                 language: currentLanguage
             };
 
