@@ -133,13 +133,13 @@ const FillForm: React.FC<{
 
                     // 2. Store a record of the file in Supabase's image table
                     const { error: insertError } = await supabase
-                    .from('Images')
+                    .from('images')
                     .insert([
                         {
+                        created_at: new Date().toISOString(),
+                        project_id: projectID, 
                         filename: fileName,
                         path: filePath,
-                        projectID: projectID, 
-                        createdAt: new Date().toISOString(),
                         },
                     ]);
 
@@ -148,11 +148,11 @@ const FillForm: React.FC<{
 
                     }
 
-                } catch (uploadError) {
-                    console.error('Error uploading file:', uploadError);
+                } catch (error) {
+                    console.error('Error uploading file:', error);
                     alert(t('fileUploadError'));
                     return;
-                }
+                } 
             }
 
             // Submit form data with filename

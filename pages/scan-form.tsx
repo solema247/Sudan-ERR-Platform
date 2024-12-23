@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"; // i18n hook
 import ScanBubble from "../components/ScanBubble";
 import MessageBubble from "../components/MessageBubble";
 import PrefilledForm from "../components/PrefilledForm";
-import ImageUploader from "../components/FileUploader";
+import FileUploader from "../components/FileUploader";
 import Button from "../components/Button";
 
 interface ScanFormProps {
@@ -73,7 +73,7 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     setChatSteps((prevSteps) => [
       ...prevSteps,
       <ScanBubble key="fileUploader">
-        <ImageUploader onUploadComplete={handleUploadComplete} />
+        <FileUploader onUploadComplete={handleUploadComplete} />
       </ScanBubble>
     ]);
   };

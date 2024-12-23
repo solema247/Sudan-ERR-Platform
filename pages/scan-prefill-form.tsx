@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next"; // i18n hook
 import PrefilledForm from "../components/PrefilledForm";
-import ImageUploader from "../components/FileUploader";
+import FileUploader from "../components/FileUploader";
 import MessageBubble from "../components/MessageBubble";
 import Button from "../components/Button";
 
@@ -80,7 +80,7 @@ const ScanPrefillForm: React.FC = () => {
       ) : showFileUploader ? (
         <>
           <h2 className="text-lg font-semibold mb-4">{t("upload_photos_title")}</h2>
-          <ImageUploader onUploadComplete={handleUploadComplete} />
+          <FileUploader onUploadComplete={handleUploadComplete} />
         </>
       ) : (
         <>
