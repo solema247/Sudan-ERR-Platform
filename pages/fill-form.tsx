@@ -116,17 +116,17 @@ const FillForm: React.FC<{
             const completedExpenses = expenses.filter(isExpenseComplete);
             let projectID = formData.err_id;
             let fileName = getNewFilename(file)
-
+            
             // Handle file upload directly to Supabase storage if file exists
             if (file) {
                 try {
                     // Create a unique file name to prevent collisions
-                    const filePath = `images/reports/expenses/${fileName}`;
+                    const filePath = `reports/expenses/${fileName}`;
 
                     // 1. Upload file directly to private Supabase storage bucket
                     const { data: uploadData, error: uploadError } = await supabase
                         .storage
-                        .from('expense-reports')
+                        .from("images")
                         .upload(filePath, file);
 
                     if (uploadError) throw uploadError;
@@ -137,6 +137,7 @@ const FillForm: React.FC<{
                     .insert([
                         {
                         filename: fileName,
+                        path: filePath,
                         projectID: projectID, 
                         createdAt: new Date().toISOString(),
                         },
