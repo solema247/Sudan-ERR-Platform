@@ -1,5 +1,7 @@
 import { supabase } from "../lib/supabaseClient";
 
+// TODO: Do we need a File tho?
+
 interface UploadResult {
   success: boolean;
   fileName?: string;       
@@ -14,8 +16,6 @@ export async function uploadToPrivateBucket(
   filePath: string
 ): Promise<UploadResult> {
   try {
-    // For example, if using a File object, we can try to parse out the original extension:
-    // (If you're uploading a Blob without a `name`, you can decide how to generate a file name.)
     let fileName = filePath;
     if ((file as File).name) {
       const originalName = (file as File).name;
