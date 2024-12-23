@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import FormBubble from '../components/FormBubble';
-import MessageBubble from '../components/MessageBubble';
 import Button from '../components/Button';
 import i18n from '../lib/i18n';
 import { createClient } from '@supabase/supabase-js'; // Import Supabase client
@@ -114,7 +113,7 @@ const FillForm: React.FC<{
             }
 
             const completedExpenses = expenses.filter(isExpenseComplete);
-            let projectID = formData.err_id;
+            let projectId = project
             let fileName = getNewFilename(file)
             
             // Handle file upload directly to Supabase storage if file exists
@@ -137,10 +136,10 @@ const FillForm: React.FC<{
                     .insert([
                         {
                         created_at: new Date().toISOString(),
-                        project_id: projectID, 
+                        project_id: projectId,
                         filename: fileName,
                         path: filePath,
-                        },
+                        },  
                     ]);
 
                     if (insertError) {
