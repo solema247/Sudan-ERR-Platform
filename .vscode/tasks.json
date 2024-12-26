@@ -1,0 +1,11 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "clear-cache",
+            "type": "shell",
+            "command": "rm -rf .next/cache",
+            "problemMatcher": []
+        }
+    ]
+}
