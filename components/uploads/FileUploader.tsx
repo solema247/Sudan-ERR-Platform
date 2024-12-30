@@ -1,17 +1,17 @@
 // Components/FileUploader.tsx
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { supabase } from "../../lib/supabaseClient";
+import { uploadImageAndInsertRecord, ImageCategory } from "../../lib/uploadImageAndInsertRecord";
 
 interface FileUploaderProps {
   onUploadComplete: (urls: string[]) => void;
 }
 
 /**
-  * UI for choosing files to upload.
+  * UI for choosing files to upload for expense reports.
   * 
   * TODO: Move non-UI controller stuff into api or elsewhere
-  * TODO: Consolidate all similar code where we upload an image and its record
+  * TODO: See if we need the URL anywhere else besides what we are doing here.
   * 
   * @param param0 
   * @returns 
@@ -33,23 +33,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onUploadComplete }) => {
         for (const file of selectedFiles) {
           // Create unique filename
           const fileExt = file.name.split('.').pop();
-          const fileName = `scanned-reports/${Date.now()}-${self.crypto.randomUUID()}.${fileExt}`;
-
-          // Upload directly to Supabase storage
-          const { data: uploadData, error: uploadError } = await supabase
-            .storage
-            .from('expense-reports')
-            .upload(fileName, file);
-
-          if (uploadError) throw uploadError;
-
-          // Get public URL
-          const { data } = supabase
-            .storage
-            .from('expense-reports')
-            .getPublicUrl(fileName);
-
-          urls.push(data.publicUrl);
+          let category = ImageCategory.FORM_SCANNED;
+          let result = await uploadImageAndInsertRecord(file, category, null, "Scanned report");
+          if (result.errorMessage) { throw new Error("Image upload error") }
         }
 
         // Notify parent component of completion
