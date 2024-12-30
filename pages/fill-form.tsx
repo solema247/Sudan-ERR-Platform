@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import FormBubble from '../components/ui/FormBubble';
 import Button from '../components/ui/Button';
-import i18n from '../lib/i18n';
-import { uploadImageAndInsertRecord, ImageCategory } from '../lib/uploadImageAndInsertRecord';
+import i18n from '../services/i18n';
+import { uploadImageAndInsertRecord, ImageCategory } from '../services/uploadImageAndInsertRecord';
 import { createClient } from '@supabase/supabase-js'; // Import Supabase client
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);

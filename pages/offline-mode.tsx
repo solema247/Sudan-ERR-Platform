@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import OfflineForm from '../components/forms/OfflineForm';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
-import { getSessionQueue, clearSessionQueue, getSubmittedQueue } from '../lib/sessionUtils';
+import { getSessionQueue, clearSessionQueue, getSubmittedQueue } from '../services/sessionUtils';
 import dynamic from 'next/dynamic';
 
 const OfflineMode: React.FC = () => {

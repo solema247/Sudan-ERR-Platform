@@ -8,7 +8,7 @@ import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import OfflineForm from '../components/forms/OfflineForm';
 const LogoImage = '/icons/icon-512x512.png';
-import i18n from '../lib/i18n'; 
+import i18n from '../services/i18n'; 
 
 const Login = () => {
     // State management

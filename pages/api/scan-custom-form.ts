@@ -10,7 +10,7 @@ import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
 import os from 'os';
-import { uploadImageAndInsertRecord, ImageCategory } from '../../lib/uploadImageAndInsertRecord';
+import { uploadImageAndInsertRecord, ImageCategory } from '../../services/uploadImageAndInsertRecord';
 
 
 // Disable body parsing for file uploads

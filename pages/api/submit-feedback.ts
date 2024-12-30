@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '../../lib/supabaseClient';
-import { validateJWT } from '../../lib/auth';
+import { supabase } from '../../services/supabaseClient';
+import { validateJWT } from '../../services/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'POST') {

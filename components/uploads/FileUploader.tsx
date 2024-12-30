@@ -1,7 +1,7 @@
 // Components/FileUploader.tsx
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { uploadImageAndInsertRecord, ImageCategory } from "../../lib/uploadImageAndInsertRecord";
+import { uploadImageAndInsertRecord, ImageCategory } from "../../services/uploadImageAndInsertRecord";
 
 interface FileUploaderProps {
   projectId: string;

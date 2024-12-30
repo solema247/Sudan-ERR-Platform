@@ -1,7 +1,7 @@
 // pages/api/scan-prefill-form.ts
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import i18n from '../../lib/i18n'; // Import i18n for translations
+import i18n from '../../services/i18n'; // Import i18n for translations
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Ensure the request method is POST

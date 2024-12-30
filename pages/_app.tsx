@@ -1,11 +1,11 @@
 //pages/_app.tsx
 import { useEffect } from 'react';
 import '../styles/globals.css';
-import { registerServiceWorker } from '../lib/serviceWorkerRegistration';
-import { handleOnline } from '../lib/handleOnline';
+import { registerServiceWorker } from '../services/serviceWorkerRegistration';
+import { handleOnline } from '../services/handleOnline';
 import { appWithTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
-import i18n from '../lib/i18n'; // Import i18n initialization
+import i18n from '../services/i18n'; // Import i18n initialization
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
