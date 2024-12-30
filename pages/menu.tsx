@@ -3,15 +3,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
-import ChatContainer from '../components/ChatContainer';
-import MessageBubble from '../components/MessageBubble';
-import Button from '../components/Button';
+import ChatContainer from '../components/ui/ChatContainer';
+import MessageBubble from '../components/ui/MessageBubble';
+import Button from '../components/ui/Button';
 import FillForm from '../pages/fill-form';
 import ScanForm from '../pages/scan-form';
 import ScanCustomForm from '../pages/scan-custom-form'; // Import the new component
 import ProjectApplication from '../components/forms/NewProject';
 import ProjectStatus from '../pages/project-status';
-import FeedbackForm from '../components/FeedbackForm'; // Correct import path
+import FeedbackForm from '../components/forms/FeedbackForm'; // Correct import path
 const LogoImage = '/icons/icon-512x512.png'; 
 
 

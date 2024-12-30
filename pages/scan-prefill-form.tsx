@@ -1,10 +1,10 @@
 // pages/scan-prefill-form.tsx
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next"; // i18n hook
-import PrefilledForm from "../components/PrefilledForm";
-import FileUploader from "../components/FileUploader";
-import MessageBubble from "../components/MessageBubble";
-import Button from "../components/Button";
+import PrefilledForm from "../components/forms/PrefilledForm";
+import FileUploader from "../components/uploads/FileUploader";
+import MessageBubble from "../components/ui/MessageBubble";
+import Button from "../components/ui/Button";
 
 const ScanPrefillForm: React.FC = () => {
   const { t } = useTranslation("scan-form"); // Load translations from scan-form.json

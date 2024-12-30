@@ -1,8 +1,8 @@
 //pages/index.tsx
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Calculator from '../components/Calculator';
-import MainApp from '../components/MainApp';
+import Calculator from '../components/calculator/Calculator';
+import MainApp from '../components/main/MainApp';
 
 const Home = () => {
   const { t } = useTranslation('home');

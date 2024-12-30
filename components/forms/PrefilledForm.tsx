@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next"; // Import i18n
-import Button from "../components/Button";
+import Button from "../ui/Button";
 
 interface ExpenseEntry {
   activity: string;

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Formik, Form, Field, FieldArray } from 'formik';
 import * as Yup from 'yup';
-import Button from '../Button';
-import FormBubble from '../FormBubble';
+import Button from '../ui/Button';
+import FormBubble from '../ui/FormBubble';
 import ActivitiesFieldArray from './NewProjectActivities';
 
  const NewProjectApplication = ({ onReturnToMenu }) => {

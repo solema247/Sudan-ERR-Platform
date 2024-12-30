@@ -1,11 +1,11 @@
 // pages/scan-form.tsx
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next"; // i18n hook
-import ScanBubble from "../components/ScanBubble";
-import MessageBubble from "../components/MessageBubble";
-import PrefilledForm from "../components/PrefilledForm";
-import FileUploader from "../components/FileUploader";
-import Button from "../components/Button";
+import ScanBubble from "../components/ui/ScanBubble";
+import MessageBubble from "../components/ui/MessageBubble";
+import PrefilledForm from "../components/forms/PrefilledForm";
+import FileUploader from "../components/uploads/FileUploader";
+import Button from "../components/ui/Button";
 
 interface ScanFormProps {
   onReturnToMenu: () => void;

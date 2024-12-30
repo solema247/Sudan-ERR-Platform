@@ -1,8 +1,8 @@
 // components/OfflineForm.tsx
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { addFormToSessionQueue } from '../lib/sessionUtils';
-import { supabase } from '../lib/supabaseClient';
+import { addFormToSessionQueue } from '../../lib/sessionUtils';
+import { supabase } from '../../lib/supabaseClient';
 
 interface OfflineFormProps {
   onClose: () => void;

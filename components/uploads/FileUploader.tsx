@@ -1,7 +1,7 @@
 // Components/FileUploader.tsx
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 
 interface FileUploaderProps {
   onUploadComplete: (urls: string[]) => void;

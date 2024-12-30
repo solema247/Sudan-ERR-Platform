@@ -1,8 +1,8 @@
 // pages/fill-form.tsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import FormBubble from '../components/FormBubble';
-import Button from '../components/Button';
+import FormBubble from '../components/ui/FormBubble';
+import Button from '../components/ui/Button';
 import i18n from '../lib/i18n';
 import { createClient } from '@supabase/supabase-js'; // Import Supabase client
 

@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next'; // Import translation hook
 import Image from 'next/image';
-import Input from '../components/Input';
-import Button from '../components/Button';
-import OfflineForm from '../components/OfflineForm';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
+import OfflineForm from '../components/forms/OfflineForm';
 const LogoImage = '/icons/icon-512x512.png';
 import i18n from '../lib/i18n'; 
 
