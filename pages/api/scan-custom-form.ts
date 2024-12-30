@@ -2,16 +2,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import vision from '@google-cloud/vision';
 import OpenAI from 'openai';
-import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 import formidable from 'formidable';
 import { franc } from 'franc';
 import { createClient } from '@supabase/supabase-js';
-import { execSync } from 'child_process';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
 import os from 'os';
+import { uploadImageAndInsertRecord, ImageCategory } from '../../lib/uploadImageAndInsertRecord';
 
 
 // Disable body parsing for file uploads
@@ -312,46 +311,24 @@ async function classifyWithChatGPT(language: string, ocrText: string, projectMet
   }
 
   return parsedOutput;
+}
 
+function bufferToFile(buffer: Buffer, fileName: string): File {
+  const blob = new Blob([buffer]); // Create a Blob from the Buffer
+  return new File([blob], fileName); // Create a File from the Blob
 }
 
 // Upload file to Supabase Storage
-async function uploadToSupabase(filePath: string, fileName: string): Promise<string> {
-  const fileBuffer = fs.readFileSync(filePath); // Read the file from the path
-  const uploadPath = `custom-reports/${Date.now()}-${fileName}`; // Generate a unique file path
-
+async function uploadToSupabase(filePath: string, projectId: string): Promise<void> {
+  const buffer = await fs.promises.readFile(filePath); // Read the (TODO: OCR-generated, right?) file from the path
+  const file = bufferToFile(buffer, "scan_custom_form");
+  
   // Upload the file to Supabase Storage
-  const { data, error } = await supabase.storage
-    .from('expense-reports')
-    .upload(uploadPath, fileBuffer, {
-      cacheControl: '3600', // Set cache control
-      upsert: false, // Avoid overwriting existing files
-      contentType: 'image/jpeg', // Set appropriate content type
-    });
-
-  if (error) {
-    console.error('Error uploading to Supabase:', error.message);
+  const uploadResult = await uploadImageAndInsertRecord(file, ImageCategory.REPORT_EXPENSES, projectId, "Scanned form");
+  if (uploadResult.errorMessage) {
+    console.error('Error uploading to Supabase:', uploadResult.errorMessage);
     throw new Error('File upload to Supabase failed');
   }
-
-  // Check if the data object has a valid path
-  if (!data || !data.path) {
-    console.error('Error: Upload succeeded but file path is missing in response');
-    throw new Error('Failed to retrieve the uploaded file path from Supabase');
-  }
-
-  // Generate the public URL for the uploaded file
-  const { data: publicUrlData } = supabase.storage
-      .from('expense-reports')
-      .getPublicUrl(uploadPath);
-
-  if (!publicUrlData || !publicUrlData.publicUrl) {
-      console.error('Error: Public URL generation failed.');
-      throw new Error('Failed to generate public URL for uploaded file');
-  }
-
-  console.log('File uploaded to Supabase with URL:', publicUrlData.publicUrl);
-  return publicUrlData.publicUrl;
 }
 
 // API Route Handler
@@ -435,7 +412,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Upload to Supabase and get URL
-    const publicFileUrl = await uploadToSupabase(filePath, fileName);
+    const publicFileUrl = await uploadToSupabase(filePath, projectId);
 
     const enrichedData = {
       ...structuredData,
