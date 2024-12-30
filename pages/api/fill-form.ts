@@ -2,6 +2,12 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '../../lib/supabaseClient';
 import crypto from 'crypto';
 
+/**
+ * Fill Form
+ * 
+ * When the user fills out form for M4 report
+ */
+
 // Initialize Supabase client
 
 // Function to generate unique ERR report ID

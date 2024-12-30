@@ -1,5 +1,11 @@
 import { supabase } from "../lib/supabaseClient";
 
+/**
+ * Upload to private bucket
+ * 
+ * TODO: One-stop DRY function for all uploads to private bucket
+ */
+
 // TODO: Do we need a File tho?
 
 interface UploadResult {

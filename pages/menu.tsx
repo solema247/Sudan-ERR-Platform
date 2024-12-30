@@ -139,7 +139,7 @@ const Menu = () => {
                         timestamp={getCurrentTimestamp()}
                         fullWidth
                     />
-                    <div className="grid grid-cols-1 space-y-2">
+                    <div className="grid grid-cols-1 space-y-3">
                         <Button text={t('projects')} onClick={() => handleMenuSelection('projects')} className="w-full" />
                         <Button text={t('reporting')} onClick={() => handleMenuSelection('reporting')} className="w-full" />
                         <Button text={t('feedback')} onClick={() => setCurrentMenu('feedback')} className="w-full" />

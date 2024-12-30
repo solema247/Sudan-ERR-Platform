@@ -6,7 +6,18 @@ import Button from '../ui/Button';
 import FormBubble from '../ui/FormBubble';
 import ActivitiesFieldArray from './NewProjectActivities';
 
- const NewProjectApplication = ({ onReturnToMenu }) => {
+/**
+ * Application for a new project.
+ * 
+ * TODO: Make this whole thing typesafe
+ */
+
+interface NewProjectApplicationProps {
+  onReturnToMenu: () => void;
+}
+
+
+const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu }) => {
    const { t, i18n } = useTranslation('projectApplication');
    const [availableRegions, setAvailableRegions] = useState([]);
    const [localitiesDict, setLocalitiesDict] = useState({});
@@ -22,7 +33,7 @@ import ActivitiesFieldArray from './NewProjectActivities';
       * Fetches Select options for activities, expenses and localities (which are based on what state you have selected.)
       * 
       * "intendedBeneficiaries": "Intended Beneficiaries",
-   "estimatedBeneficiaries": "Estimated Beneficiaries",
+    "estimatedBeneficiaries": "Estimated Beneficiaries",
       */
 
      const fetchOptions = async () => {
