@@ -22,28 +22,22 @@ export const config = {
 
 // Initialize Google Vision client
 const googleVisionCredentials = JSON.parse(process.env.GOOGLE_VISION!);
-// Replace literal "\n" with actual newlines
 googleVisionCredentials.private_key = googleVisionCredentials.private_key.replace(/\\n/g, '\n');
 
 const visionClient = new vision.ImageAnnotatorClient({
   credentials: googleVisionCredentials,
 });
 
-
-// Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-// Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Parse multipart form-data
 async function parseForm(req: NextApiRequest): Promise<{ filePath: string; fileName: string; projectId: string }> {
-  // Use os.tmpdir() instead of hardcoded /tmp
   const uploadDir = os.tmpdir();
 
   const form = formidable({ 
@@ -185,10 +179,10 @@ function reconstructTextWithLayout(fullTextAnnotation: any): string {
     .join('\n');
 }
 
-// Updated OCR Function
 async function googleVisionOCR(imageBuffer: Buffer): Promise<string> {
+  const arr = new Uint8Array(imageBuffer);
   const [result] = await visionClient.documentTextDetection({
-    image: { content: imageBuffer },
+    image: { content: arr },
     imageContext: { languageHints: ['ar', 'en'] }, // Arabic prioritized
   });
 
@@ -351,7 +345,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const projectMetadata = await fetchProjectMetadata(projectId);
 
     // Read the file into a buffer before preprocessing
-    const fileBuffer = fs.readFileSync(filePath);
+    // const fileBuffer = fs.readFileSync(filePath);
     const processedImage = await preprocessImage(filePath);
     const ocrText = await googleVisionOCR(processedImage);
 
