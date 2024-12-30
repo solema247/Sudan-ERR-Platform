@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next"; // i18n hook
 import ScanBubble from "../components/ui/ScanBubble";
-import MessageBubble from "../components/ui/MessageBubble";
 import PrefilledForm from "../components/forms/PrefilledForm";
 import FileUploader from "../components/uploads/FileUploader";
 import Button from "../components/ui/Button";
@@ -13,7 +12,7 @@ interface ScanFormProps {
   project?: any; // Add project as an optional prop
 }
 
-const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm }) => {
+const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm, project }) => {
   const { t, i18n } = useTranslation("scanForm"); // Load translations from scan-form.json
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,7 +72,7 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     setChatSteps((prevSteps) => [
       ...prevSteps,
       <ScanBubble key="fileUploader">
-        <FileUploader onUploadComplete={handleUploadComplete} />
+        <FileUploader projectId={project.id} onUploadComplete={handleUploadComplete} />
       </ScanBubble>
     ]);
   };

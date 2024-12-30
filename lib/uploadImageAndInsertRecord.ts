@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 /**
  * Upload to private bucket
  * 
- * TODO: One-stop DRY function for all uploads to private bucket
- */
+ * TODO See if we can get project ID for everything
+*/
 
 export enum ImageCategory {
   FORM_CUSTOM,
@@ -43,7 +43,7 @@ export async function uploadImageAndInsertRecord(file: File, category: ImageCate
       .insert([
           {
           created_at: new Date().toISOString(),
-          project_id: projectId,
+          project_id: projectId ?? "none",
           filename: filename,
           path: newPath,
           category: ImageCategory[category],

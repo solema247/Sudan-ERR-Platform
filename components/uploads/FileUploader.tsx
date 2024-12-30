@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { uploadImageAndInsertRecord, ImageCategory } from "../../lib/uploadImageAndInsertRecord";
 
 interface FileUploaderProps {
+  projectId: string;
   onUploadComplete: (urls: string[]) => void;
 }
 
@@ -31,10 +32,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onUploadComplete }) => {
 
       try {
         for (const file of selectedFiles) {
-          // Create unique filename
-          const fileExt = file.name.split('.').pop();
-          let category = ImageCategory.FORM_SCANNED;
-          let result = await uploadImageAndInsertRecord(file, category, null, "Scanned report");
+          let result = await uploadImageAndInsertRecord(file, ImageCategory.FORM_SCANNED, null, "Scanned report");
           if (result.errorMessage) { throw new Error("Image upload error") }
         }
 
