@@ -7,7 +7,7 @@ import FormBubble from '../ui/FormBubble';
 import ActivitiesFieldArray from './NewProjectActivities';
 
 /**
- * Application for a new project.
+ * Application for a new project. Submits just a form. No files or images.
  * 
  * TODO: Make this whole thing typesafe
  */

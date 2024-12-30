@@ -1,29 +1,30 @@
-// pages/fill-form.tsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import FormBubble from '../components/ui/FormBubble';
 import Button from '../components/ui/Button';
 import i18n from '../lib/i18n';
+import { uploadImageAndInsertRecord, ImageCategory } from '../lib/uploadImageAndInsertRecord';
 import { createClient } from '@supabase/supabase-js'; // Import Supabase client
 
-// TODO: Sturdier bucket paths, using presets and enums to ease future development
-// TODO: Move more API stuff into backend
-
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
-
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
 
 /**
  *  Fill form
  * 
+ * Submits an F4 form, uploads accompanying images with image records
  * 
+ * TODO: Sturdier bucket paths, using presets and enums to ease future development
+ * TODO: Better dynamic activity form
  */
 
-const FillForm: React.FC<{ 
+interface FillFormProps {
     project: any | null; 
     onReturnToMenu: () => void; 
     onSubmitAnotherForm: () => void; 
-}> = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
+}
+
+const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
     const { t } = useTranslation('fillForm');
     const [expenses, setExpenses] = useState([
         { activity: '', description: '', payment_date: '', seller: '', payment_method: 'cash', receipt_no: '', amount: '' },
@@ -43,7 +44,6 @@ const FillForm: React.FC<{
     });
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [categories, setCategories] = useState<{ id: string, name: string, language: string }[]>([]);
-
     const currentLanguage = i18n.language;
 
     useEffect(() => {
@@ -99,11 +99,6 @@ const FillForm: React.FC<{
         );
     };
 
-    const getNewFilename= (file: File) => {
-        const fileExt = file.name.split('.').pop();
-        return`${crypto.randomUUID()}.${fileExt}`;
-    }
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -116,51 +111,12 @@ const FillForm: React.FC<{
             const completedExpenses = expenses.filter(isExpenseComplete);
             let projectId = project.id;
             if (!projectId) {
-                alert(t('missingProjectId'));
-                return;
+                throw new Error('Trouble finding a projectId to file the image under');
             }
 
-            let fileName = getNewFilename(file)
-            
-            // Handle file upload directly to Supabase storage if file exists
-            if (file) {
-                try {
-                    // Create a unique file name to prevent collisions
-                    const filePath = `reports/expenses/${fileName}`;
+            let uploadImageResult = await uploadImageAndInsertRecord(file, ImageCategory.FORM_FILLED, projectId, "Filled expense form.")
 
-                    // 1. Upload file directly to private Supabase storage bucket
-                    const { data: uploadData, error: uploadError } = await supabase
-                        .storage
-                        .from("images")
-                        .upload(filePath, file);
-
-                    if (uploadError) throw uploadError;
-
-                    // 2. Store a record of the file in Supabase's image table
-                    const { error: insertError } = await supabase
-                    .from('images')
-                    .insert([
-                        {
-                        created_at: new Date().toISOString(),
-                        project_id: projectId,
-                        filename: fileName,
-                        path: filePath,
-                        },  
-                    ]);
-
-                    if (insertError) {
-                    throw insertError;
-
-                    }
-
-                } catch (error) {
-                    console.error('Error uploading file:', error);
-                    alert(t('fileUploadError'));
-                    return;
-                } 
-            }
-
-            // Submit form data with filename
+            // Submit form data 
             const submissionData = {
                 ...formData,
                 expenses: completedExpenses,

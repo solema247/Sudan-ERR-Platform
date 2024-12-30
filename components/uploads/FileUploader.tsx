@@ -11,6 +11,7 @@ interface FileUploaderProps {
   * UI for choosing files to upload.
   * 
   * TODO: Move non-UI controller stuff into api or elsewhere
+  * TODO: Consolidate all similar code where we upload an image and its record
   * 
   * @param param0 
   * @returns 
