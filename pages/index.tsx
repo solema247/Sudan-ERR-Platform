@@ -1,4 +1,3 @@
-//pages/index.tsx
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Calculator from '../components/calculator/Calculator';
