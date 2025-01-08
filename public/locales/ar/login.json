@@ -1,11 +1,11 @@
 {
-  "welcomeMessage": "مرحبًا بكم في شات بوت ERR",
-  "errIdPlaceholder": "أدخل معرف ERR الخاص بك",
-  "pinPlaceholder": "أدخل رمز PIN الخاص بك",
+  "welcomeMessage": "مرحبًا بك في مساعدك الآلي لغرف الطوارئ  ",
+  "errIdPlaceholder": "أدخل رقم الغرفة",
+  "pinPlaceholder": "أدخل كلم السر",
   "loginButton": "تسجيل الدخول",
-  "offlineModeButton": "الوضع غير المتصل",
+  "offlineModeButton": "الوضع الغير متصل بالإنترنت",
   "backToHome": "العودة إلى الصفحة الرئيسية",
-  "loginError": "بيانات الاعتماد غير صحيحة. حاول مرة أخرى.",
+  "loginError": "هناك خطأ في البيانات الرجاء المحاولة مرة أخرى",
   "unexpectedError": "حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى لاحقًا.",
   "closeButton": "إغلاق"
 }
