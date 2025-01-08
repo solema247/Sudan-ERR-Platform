@@ -14,8 +14,8 @@
   "amount": "المبلغ",
   "totalGrant": "إجمالي المنحة (إجباري)",
   "totalOtherSources": "إجمالي المصادر الأخرى (إجباري)",
-  "excessExpenses": "كيف غطيت المصاريف الزائدة؟",
-  "surplusUse": "كيف ستنفق الفائض؟",
+  "excessExpenses": "كيف قمت بتغطية المصاريف الزائدة؟",
+  "surplusUse": "كيف ستنفق المبابغ المتبقية؟",
   "trainingNeeds": "الاحتياجات التدريبية الإضافية",
   "lessonsLearned": "الدروس المستفادة في تخطيط الميزانية",
   "chooseFile": "اختر ملفًا",
@@ -26,13 +26,13 @@
   "categories": {
     "Medical Procurements": "المشتريات الطبية",
     "Generator Fuel": "وقود المولد",
-    "Community Kitchen/Food Supply": "مطبخ المجتمع/إمدادات الطعام",
+    "Community Kitchen/Food Supply": "مطبخ المجتمع/توفير الطعام",
     "Communication & Internet": "الاتصالات والإنترنت",
     "Volunteers": "المتطوعون",
     "Women's Activities": "أنشطة النساء",
     "Children's Activities": "أنشطة الأطفال",
     "Productive Activities": "أنشطة إنتاجية",
-    "Protection & Evacuation": "الحماية والإخلاء",
+    "Protection & Evacuation": "الحماية والإجلاء",
     "Others (please specify)": "أخرى (يرجى التحديد)"
   },
   "pleaseSelect": "يرجى الاختيار"
