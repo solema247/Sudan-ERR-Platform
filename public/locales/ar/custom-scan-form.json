@@ -1,27 +1,27 @@
 {
-  "title": "نموذج المسح المخصص",
-  "instruction": "يرجى تحميل صورة للنموذج الممسوح ضوئيًا. تأكد من أنها واضحة ومقروءة.",
+  "title": "نموذج قراءة الفواتير",
+  "instruction": "يرجى تحميل صورة للنموذج لإستخراج النص. تأكد من أنها واضحة ومقروءة.",
   "choose_file": "اختر ملف",
-  "upload_and_scan": "تحميل ومسح",
+  "upload_and_scan": "تحميل وإستخراج النص",
   "processing": "جاري المعالجة...",
-  "ocr_results": "نتائج التعرف الضوئي",
-  "ocr_output_title": "النص المستخرج من التعرف الضوئي",
+  "ocr_results": "النتائج المستخرجة من الملف المرفوع",
+  "ocr_output_title": "النص المستخرج من الملف المرفوع ",
   "uploaded_image_alt": "معاينة للصورة المحملة",
   "unused_text_title": "النص غير المستخدم",
-  "likely_ocr_errors": "الأخطاء المحتملة للتعرف الضوئي",
+  "likely_ocr_errors": "الأخطاء المحتملة في النص المستخرج من الملف ",
   "potentially_useful_information": "معلومات محتملة الاستخدام",
   "no_data_available": "لا توجد بيانات",
   "errors": {
     "no_file_selected": "يرجى اختيار ملف قبل المتابعة.",
-    "scan_failed": "فشل المسح. يرجى المحاولة مرة أخرى.",
+    "scan_failed": "فشل قراءة الملف. يرجى المحاولة مرة أخرى.",
     "server_error": "خطأ في الخادم. رمز الحالة: {{status}}"
   },
-  "scan_success": "تمت معالجة المسح بنجاح.",
+  "scan_success": "تمت معالجة الملف بنجاح.",
   "review_and_edit": "مراجعة وتحرير النموذج",
   "completion": "الإكمال: {{completion}}%",
   "general": {
     "date": "التاريخ",
-    "err_id": "معرّف غرفة الطوارئ"
+    "err_id": "رقم غرفة الطوارئ"
   },
   "financial_summary": {
     "title": "الملخص المالي",
@@ -33,9 +33,9 @@
   "additional_questions": {
     "title": "أسئلة إضافية",
     "excess_expenses": "النفقات الزائدة",
-    "surplus_use": "استخدام الفائض",
+    "surplus_use": "استخدام الميزانية المتبقية",
     "lessons_learned": "الدروس المستفادة",
-    "training_needs": "احتياجات التدريب"
+    "training_needs": "إحتياجات التدريب"
   },
   "expenses": {
     "title": "النفقات",
