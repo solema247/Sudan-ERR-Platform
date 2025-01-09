@@ -28,12 +28,12 @@
   "unknown": "غير معروف",
   "expense_entry": "إدخال المصاريف {{index}}",
   "fields": {
-    "err_id": "رقم ERR",
+    "err_id": "رقم الغرفة",
     "date": "التاريخ",
     "total_grant": "إجمالي المنحة",
     "total_other_sources": "إجمالي المصادر الأخرى",
-    "additional_excess_expenses": "كيف غطيت المصاريف الزائدة؟",
-    "additional_surplus_use": "كيف ستستخدم الفائض؟",
+    "additional_excess_expenses": "كيف قمت بتغطية المصاريف الزائدة؟",
+    "additional_surplus_use": "كيف ستستخدم المبابغ المتبقية؟",
     "additional_training_needs": "احتياجات التدريب الإضافية",
     "lessons": "الدروس المستفادة من تخطيط الميزانية",
     "activity": "النشاط",
@@ -56,7 +56,7 @@
     "add_expense": "إضافة مصاريف"
   },
   "placeholders": {
-    "err_id": "رقم ERR (مطلوب)",
+    "err_id": "رقم الغرفة (مطلوب)",
     "activity": "النشاط",
     "description": "الوصف",
     "payment_date": "تاريخ الدفع",
@@ -65,8 +65,8 @@
     "amount": "المبلغ",
     "total_grant": "إجمالي المنحة",
     "total_other_sources": "إجمالي المصادر الأخرى",
-    "additional_excess_expenses": "كيف غطيت المصاريف الزائدة؟",
-    "additional_surplus_use": "كيف ستستخدم الفائض؟",
+    "additional_excess_expenses": "كيف قمت بتغطية المصاريف الزائدة؟",
+    "additional_surplus_use": "كيف ستستخدم المبالغ المتبقية؟",
     "additional_training_needs": "احتياجات التدريب الإضافية",
     "lessons": "الدروس المستفادة من تخطيط الميزانية"
   },
