@@ -32,8 +32,8 @@
   },
   "additional_questions": {
     "title": "أسئلة إضافية",
-    "excess_expenses": "النفقات الزائدة",
-    "surplus_use": "استخدام الميزانية المتبقية",
+    "excess_expenses": "كيف قمت بتغطية المصاريف الزائدة",
+    "surplus_use": "كيف ستنفق الميزانية المتبقية",
     "lessons_learned": "الدروس المستفادة",
     "training_needs": "إحتياجات التدريب"
   },
