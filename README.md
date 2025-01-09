@@ -6,10 +6,13 @@
 
 ## Overview
 
-Emergency Response Rooms (ERR) are a community-led initiative that has played a crucial role in supplying people in Sudan with water, medical supplies and other essential resources during the conflict in that country, which began in 2023. This is a Next.js-based Web app that streamlines the reporting and interention workflows of ERRs, giving control to activists on the ground while tracking the use of donor funds. The solution is built around the F-System framework developed by ERRs to manage Group Cash Transfers to communities on ground to carry out critical humanitarian work. 
+In war-torn Sudan, during what the U.N. calls the "world's worst hunger crisis," there is a struggle to deliver water, food and medical supplies. Security threats and checkpoints set up by both sides have interfered with work by aid agencies.
+
+Emergency Response Rooms (ERR) are a community-led initiative that has played a crucial role in breaking through these obstacles. This is a Next.js Web app that streamlines the reporting and interention workflows of ERRs. It gives control to activists on the ground while tracking the use of donor funds from outside. The solution is built around the F-System framework developed by ERRs to manage Group Cash Transfers to communities on ground to carry out critical humanitarian work. 
 
 ## F-System
-A structured process used by ERRs to ensure effective planning, approval, and documentation for all the emergency response rooms partners and 
+A structured process used by ERRs to ensure effective planning, approval, and documentation for ERR partners.
+
 ### Purpose
 - Helping the ERR’s to prioritise, learn and improve the response.
 - Document streamlined workflows of transparent financial management.
