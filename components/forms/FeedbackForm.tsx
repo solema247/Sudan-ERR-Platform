@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import Button from '../ui/Button';
+import { useTranslation } from 'react-i18next';
 
 interface FeedbackFormProps {
     onReturnToMenu: () => void;
 }
 
 const FeedbackForm = ({ onReturnToMenu }: FeedbackFormProps) => {
+    const { t } = useTranslation('feedback');
     const [taskUsabilityRating, setTaskUsabilityRating] = useState(3);
     const [mainChallenges, setMainChallenges] = useState('');
     const [recommendation, setRecommendation] = useState('Maybe');
@@ -41,7 +43,7 @@ const FeedbackForm = ({ onReturnToMenu }: FeedbackFormProps) => {
     return (
         <div className="space-y-4 p-4 bg-white rounded">
             <div className="flex flex-col">
-                <label className="mb-2 font-semibold">How easy was it to complete your task in the app? (1-5)</label>
+                <label className="mb-2 font-semibold">{t('usabilityRating.label')}</label>
                 <input
                     type="range"
                     min="1"
@@ -53,7 +55,7 @@ const FeedbackForm = ({ onReturnToMenu }: FeedbackFormProps) => {
                 <div className="text-center">{taskUsabilityRating}</div>
             </div>
             <div className="flex flex-col">
-                <label className="mb-2 font-semibold">What was the biggest challenge you faced while using the app?</label>
+                <label className="mb-2 font-semibold">{t('mainChallenges.label')}</label>
                 <textarea
                     value={mainChallenges}
                     onChange={(e) => setMainChallenges(e.target.value)}
@@ -61,20 +63,20 @@ const FeedbackForm = ({ onReturnToMenu }: FeedbackFormProps) => {
                 />
             </div>
             <div className="flex flex-col">
-                <label className="mb-2 font-semibold">Would you recommend this app to other volunteers?</label>
+                <label className="mb-2 font-semibold">{t('recommendation.label')}</label>
                 <select
                     value={recommendation}
                     onChange={(e) => setRecommendation(e.target.value)}
                     className="p-2 border rounded"
                 >
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                    <option value="Maybe">Maybe</option>
+                    <option value="Yes">{t('recommendation.options.yes')}</option>
+                    <option value="No">{t('recommendation.options.no')}</option>
+                    <option value="Maybe">{t('recommendation.options.maybe')}</option>
                 </select>
             </div>
             <div className="flex space-x-2">
-                <Button text="Submit Feedback" onClick={handleSubmit} />
-                <Button text="Return to Menu" onClick={onReturnToMenu} />
+                <Button text={t('buttons.submit')} onClick={handleSubmit} />
+                <Button text={t('buttons.returnToMenu')} onClick={onReturnToMenu} />
             </div>
         </div>
     );

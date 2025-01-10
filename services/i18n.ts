@@ -16,6 +16,7 @@ i18n.use(initReactI18next).init({
       projectApplication: require("../public/locales/en/project-application.json"),
       projectStatus: require("../public/locales/en/project-status.json"),
       home: require("../public/locales/en/home.json"),
+      feedback: require("../public/locales/en/feedback.json"),
     },
     ar: {
       login: require("../public/locales/ar/login.json"),
@@ -29,6 +30,7 @@ i18n.use(initReactI18next).init({
       projectApplication: require("../public/locales/ar/project-application.json"),
       projectStatus: require("../public/locales/ar/project-status.json"),
       home: require("../public/locales/ar/home.json"),
+      feedback: require("../public/locales/ar/feedback.json"),
     },
     es: {
       login: require("../public/locales/es/login.json"),
@@ -42,6 +44,7 @@ i18n.use(initReactI18next).init({
       projectApplication: require("../public/locales/es/project-application.json"),
       projectStatus: require("../public/locales/es/project-status.json"),
       home: require("../public/locales/es/home.json"),
+      feedback: require("../public/locales/es/feedback.json"),
     },
   },
   lng: "en", // Default language

@@ -1,0 +1,28 @@
+{
+  "title": "Feedback Form",
+  "usabilityRating": {
+    "label": "How easy was it to complete your task in the app? (1-5)",
+    "min": "Very Difficult",
+    "max": "Very Easy"
+  },
+  "mainChallenges": {
+    "label": "What was the biggest challenge you faced while using the app?"
+  },
+  "recommendation": {
+    "label": "Would you recommend this app to other volunteers?",
+    "options": {
+      "yes": "Yes",
+      "no": "No",
+      "maybe": "Maybe"
+    }
+  },
+  "buttons": {
+    "submit": "Submit Feedback",
+    "returnToMenu": "Return to Menu"
+  },
+  "messages": {
+    "success": "Feedback submitted successfully!",
+    "error": "Failed to submit feedback.",
+    "generalError": "An error occurred while submitting feedback."
+  }
+} 
