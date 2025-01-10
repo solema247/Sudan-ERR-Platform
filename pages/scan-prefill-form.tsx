@@ -56,7 +56,7 @@ const ScanPrefillForm: React.FC = () => {
     }
   };
 
-  const handleUploadComplete = () => {
+  const handleUploadComplete = (urls: string[]) => {
     alert(t("upload_success"));
     setShowFileUploader(false);
     setShowCompletionOptions(true);

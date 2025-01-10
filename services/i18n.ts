@@ -44,7 +44,6 @@ i18n.use(initReactI18next).init({
       projectApplication: require("../public/locales/es/project-application.json"),
       projectStatus: require("../public/locales/es/project-status.json"),
       home: require("../public/locales/es/home.json"),
-      feedback: require("../public/locales/es/feedback.json"),
     },
   },
   lng: "en", // Default language

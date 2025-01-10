@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { uploadImageAndInsertRecord, ImageCategory } from "../../services/uploadImageAndInsertRecord";
 
 interface FileUploaderProps {
-  projectId: string;
+  projectId?: string;
   onUploadComplete: (urls: string[]) => void;
 }
 
@@ -18,7 +18,7 @@ interface FileUploaderProps {
   * @returns 
 */
 
-const FileUploader: React.FC<FileUploaderProps> = ({ onUploadComplete }) => {
+const FileUploader: React.FC<FileUploaderProps> = ({ projectId, onUploadComplete }) => {
   const { t } = useTranslation("scanForm"); // Use scanForm namespace for translations
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
