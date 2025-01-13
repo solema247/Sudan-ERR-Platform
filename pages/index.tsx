@@ -13,7 +13,7 @@ const Home = () => {
     doesEntryMatchHash(pin) ? setIsUnlocked(true) : setIsLocked(true);
   };
 
-  const doesEntryMatchHash(pin: string) => {
+  const doesEntryMatchHash = (pin: string) => {
     const hash = crypto.createHash('sha256').update(pin, 'utf8').digest('hex');
     return hash === process.env.NEXT_PUBLIC_CALCULATOR_PIN;
   }
