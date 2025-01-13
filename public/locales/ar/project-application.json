@@ -56,5 +56,24 @@
   "remove": "إزالة",
   "returnToMenu": "العودة إلى القائمة",
   "button.submit": "أرسل هذا المشروع",
-  "button.processing": "جاري المعالجة..."
+  "button.processing": "جاري المعالجة...",
+  "activities": {
+    "header": "الأنشطة والنفقات",
+    "add": "إضافة نشاط",
+    "remove": "إزالة النشاط",
+    "expenses": {
+      "add": "إضافة نفقات",
+      "remove": "إزالة النفقات",
+      "label": "اختر نشاطاً",
+      "placeholder": "اختر نشاطاً",
+      "quantity": {
+        "label": "الكمية",
+        "placeholder": "أدخل الكمية"
+      },
+      "expenseLabel": "المصروفات",
+      "selectExpense": "اختر المصروفات",
+      "description": "وصف المصروفات",
+      "amount": "المبلغ"
+    }
+  }
 }

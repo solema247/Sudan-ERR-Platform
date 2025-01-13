@@ -56,5 +56,24 @@
   "remove": "Remove",
   "returnToMenu": "Return to Menu",
   "button.submit": "Submit",
-  "button.processing": "Processing..."
+  "button.processing": "Processing...",
+  "activities": {
+    "header": "Activities and Expenses",
+    "add": "Add Activity",
+    "remove": "Remove Activity",
+    "expenses": {
+      "add": "Add Expense",
+      "remove": "Remove Expense",
+      "label": "Select Activity",
+      "placeholder": "Select Activity",
+      "quantity": {
+        "label": "Quantity",
+        "placeholder": "Enter quantity"
+      },
+      "expenseLabel": "Expenses",
+      "selectExpense": "Select Expense",
+      "description": "Expense Description",
+      "amount": "Amount"
+    }
+  }
 }
