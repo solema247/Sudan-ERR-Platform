@@ -10,12 +10,12 @@ const Home = () => {
   const [isLocked, setIsLocked] = useState(false);
 
   const handlePinEntry = (pin: string) => {
-    console.log("Entered PIN:", pin);
     doesEntryMatchHash(pin) ? setIsUnlocked(true) : setIsLocked(true);
   };
 
   const doesEntryMatchHash(pin: string) => {
-    return pin === process.env.NEXT_PUBLIC_CALCULATOR_PIN;
+    const hash = crypto.createHash('sha256').update(pin, 'utf8').digest('hex');
+    return hash === process.env.NEXT_PUBLIC_CALCULATOR_PIN;
   }
 
   if (isLocked) {
