@@ -13,6 +13,11 @@ import os from 'os';
 import { uploadImageAndInsertRecord, ImageCategory } from '../../services/uploadImageAndInsertRecord';
 
 
+/**
+ * Scan custom form
+ */
+
+
 // Disable body parsing for file uploads
 export const config = {
   api: {
@@ -112,10 +117,8 @@ async function preprocessImage(imagePath: string): Promise<Buffer> {
   const formData = new FormData();
 
   try {
-    // Read the file into a buffer first
     const fileBuffer = fs.readFileSync(imagePath);
     
-    // Append the buffer with proper boundary and headers
     formData.append('image', fileBuffer, {
       filename: path.basename(imagePath),
       contentType: 'image/jpeg',

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import crypto from 'crypto';
 import { useTranslation } from 'react-i18next';
 import Calculator from '../components/calculator/Calculator';
 import MainApp from '../components/main/MainApp';
@@ -10,12 +11,12 @@ const Home = () => {
 
   const handlePinEntry = (pin: string) => {
     console.log("Entered PIN:", pin);
-    if (pin === '1234=') {
-      setIsUnlocked(true);
-    } else if (pin === '0000=') {
-      setIsLocked(true);
-    }
+    doesEntryMatchHash(pin) ? setIsUnlocked(true) : setIsLocked(true);
   };
+
+  const doesEntryMatchHash(pin: string) => {
+    return pin === process.env.NEXT_PUBLIC_CALCULATOR_PIN;
+  }
 
   if (isLocked) {
     return <div>{t('appLocked')}</div>;

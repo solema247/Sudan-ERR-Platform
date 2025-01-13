@@ -2,6 +2,11 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '../../services/supabaseClient';
 import { validateJWT } from '../../services/auth'; // Import JWT validation helper
 
+/**
+ * Project status
+ * 
+ */
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // Validate the user's session
     const token = req.cookies.token;

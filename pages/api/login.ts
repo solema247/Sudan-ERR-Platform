@@ -3,6 +3,15 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '../../services/supabaseClient';
 import { generateToken } from '../../services/auth'; // Import token generation function
 
+/**
+ * Login
+ * 
+ * User logs on using an Err_Id.
+ * 
+ * TODO: Secure password storage
+ * TODO: Other forms of login
+*/
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'POST') {
         const { err_id, pin } = req.body;
