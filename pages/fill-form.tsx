@@ -114,7 +114,16 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                 throw new Error('Trouble finding a projectId to file the image under');
             }
 
-            let uploadImageResult = await uploadImageAndInsertRecord(file, ImageCategory.FORM_FILLED, projectId, "Filled expense form.")
+            let uploadImageResult = await uploadImageAndInsertRecord(
+                file, 
+                ImageCategory.FORM_FILLED, 
+                projectId, 
+                "Filled expense form.",
+                {
+                    noFile: t('noFileSelected'),
+                    uploadFailed: t('uploadFailed')
+                }
+            );
 
             // Submit form data 
             const submissionData = {

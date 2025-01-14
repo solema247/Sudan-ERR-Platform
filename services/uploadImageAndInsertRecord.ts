@@ -1,5 +1,4 @@
 import { supabase } from "./supabaseClient";
-import { useTranslation } from 'react-i18next';
 
 /**
  * Upload to private bucket
@@ -20,77 +19,96 @@ export interface UploadResult {
   errorMessage?: string;
 }
 
+interface ErrorMessages {
+  noFile?: string;
+  uploadFailed?: string;
+}
+
 const BUCKET_NAME = "images";
 
-export async function uploadImageAndInsertRecord(file: File, category: ImageCategory, projectId: string, notes?: string): Promise<UploadResult> {
-   const { t } = useTranslation('uploadImage');
+export const uploadImageAndInsertRecord = async (
+    file: File | null,
+    category: ImageCategory,
+    projectId: string,
+    description: string,
+    errorMessages?: ErrorMessages
+): Promise<UploadResult> => {
+    // Validate required projectId
+    if (!projectId) {
+        return {
+            success: false,
+            errorMessage: 'Project ID is required for uploading images'
+        };
+    }
 
-  try {
-    const filename = getNewFilename(file);
-    const newPath = getPath(filename, category);
+    if (!file) {
+        return {
+            success: false,
+            errorMessage: errorMessages?.noFile || 'No file selected'
+        };
+    }
 
-    // 1. Upload file directly to private Supabase storage bucket
-    const { data: _, error: uploadError } = await supabase
-        .storage
-        .from(BUCKET_NAME)
-        .upload(newPath, file);
+    try {
+        const filename = getNewFilename(file);
+        const newPath = getPath(filename, category);
 
-    if (uploadError) throw uploadError;
+        // Upload file to Supabase storage
+        const { error: uploadError } = await supabase
+            .storage
+            .from(BUCKET_NAME)
+            .upload(newPath, file);
 
-    // 2. Store a record of the file in Supabase's image table
-      const { error: insertError } = await supabase
-      .from('images')
-      .insert([
-          {
-          created_at: new Date().toISOString(),
-          project_id: projectId ?? "none",
-          filename: filename,
-          path: newPath,
-          category: ImageCategory[category],
-          notes: notes
-          },  
-      ]);
+        if (uploadError) throw uploadError;
 
-      if (insertError) {
-        throw insertError;
-      }
+        // Insert record into images table
+        const { error: insertError } = await supabase
+            .from('images')
+            .insert([{
+                created_at: new Date().toISOString(),
+                project_id: projectId,  // Now required and validated
+                filename: filename,
+                path: newPath,
+                category: ImageCategory[category],
+                notes: description
+            }]);
 
-       // If no error, return success and the file name
-      return {
-        success: true,
-        filename: filename
-      }
+        if (insertError) throw insertError;
 
+        return {
+            success: true,
+            filename: filename
+        };
     } catch (error) {
-      console.error('Error uploading file:', error);
-      alert(t('fileUploadError'));
-      return;
-      } 
-}
+        console.error('Error uploading image:', error);
+        return {
+            success: false,
+            errorMessage: errorMessages?.uploadFailed || 'Failed to upload image'
+        };
+    }
+};
 
 const getNewFilename = (file: File) => {
     const fileExt = file.name.split('.').pop();
-    return`${crypto.randomUUID()}.${fileExt}`;
+    return `${crypto.randomUUID()}.${fileExt}`;
 }
 
-const getPath = (filename: String, category: ImageCategory) => {
-  let base:string;
-  switch(category) {
-    case ImageCategory.FORM_CUSTOM:
-      base = "forms/custom";
-      break;
-    case ImageCategory.FORM_FILLED:
-      base = "forms/filled";
-      break;
-    case ImageCategory.FORM_SCANNED:
-      base = "forms/scanned";
-      break;
-    case ImageCategory.REPORT_EXPENSES:
-      base = "reports/expenses";
-      break;
-    default: 
-      throw new Error("To upload, we needed a valid image category.");
-   }
-  const path = `${base}/${filename}`;
-  return path;
+const getPath = (filename: string, category: ImageCategory) => {
+    let base: string;
+    switch(category) {
+        case ImageCategory.FORM_CUSTOM:
+            base = "forms/custom";
+            break;
+        case ImageCategory.FORM_FILLED:
+            base = "forms/filled";
+            break;
+        case ImageCategory.FORM_SCANNED:
+            base = "forms/scanned";
+            break;
+        case ImageCategory.REPORT_EXPENSES:
+            base = "reports/expenses";
+            break;
+        default: 
+            throw new Error("To upload, we needed a valid image category.");
+    }
+    return `${base}/${filename}`;
 }
