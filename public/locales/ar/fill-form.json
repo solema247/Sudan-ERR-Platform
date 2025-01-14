@@ -1,6 +1,14 @@
 {
-  "errId": "رقم الغرفة (إجباري)",
-  "date": "التاريخ (إجباري)",
+  "formTitle": "تقرير F4 المالي",
+  "requiredFields": "الحقول المطلوبة",
+  "expenseCardNote": "يجب ملء بطاقات المصروفات بالكامل عند البدء",
+  "errorMessages": {
+    "required": "هذا الحقل مطلوب",
+    "invalidNumber": "الرجاء إدخال رقم صحيح",
+    "invalidDate": "الرجاء إدخال تاريخ صحيح"
+  },
+  "errId": "رقم الغرفة",
+  "date": "التاريخ",
   "expenseEntry": "إدخال المصاريف {{index}}",
   "addExpense": "إضافة مصروف",
   "activity": "النشاط",
@@ -12,8 +20,8 @@
   "bankApp": "تطبيق بنكي",
   "receiptNo": "رقم الإيصال",
   "amount": "المبلغ",
-  "totalGrant": "إجمالي المنحة (إجباري)",
-  "totalOtherSources": "إجمالي المصادر الأخرى (إجباري)",
+  "totalGrant": "إجمالي المنحة",
+  "totalOtherSources": "إجمالي المصادر الأخرى",
   "excessExpenses": "كيف قمت بتغطية المصاريف الزائدة؟",
   "surplusUse": "كيف ستنفق المبالغ المتبقية؟",
   "trainingNeeds": "الاحتياجات التدريبية الإضافية",

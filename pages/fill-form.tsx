@@ -5,6 +5,7 @@ import Button from '../components/ui/Button';
 import i18n from '../services/i18n';
 import { uploadImageAndInsertRecord, ImageCategory } from '../services/uploadImageAndInsertRecord';
 import { createClient } from '@supabase/supabase-js'; // Import Supabase client
+import { FormLabel } from '../components/ui/FormBubble';
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
@@ -22,6 +23,25 @@ interface FillFormProps {
     project: any | null; 
     onReturnToMenu: () => void; 
     onSubmitAnotherForm: () => void; 
+}
+
+// Add this interface for form errors
+interface FormErrors {
+    err_id?: string;
+    date?: string;
+    total_grant?: string;
+    total_other_sources?: string;
+    expenses: {
+        [key: number]: {
+            activity?: string;
+            description?: string;
+            payment_date?: string;
+            seller?: string;
+            payment_method?: string;
+            receipt_no?: string;
+            amount?: string;
+        };
+    };
 }
 
 const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
@@ -45,6 +65,9 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [categories, setCategories] = useState<{ id: string, name: string, language: string }[]>([]);
     const currentLanguage = i18n.language;
+    const [errors, setErrors] = useState<FormErrors>({
+        expenses: {}
+    });
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -64,16 +87,86 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
         fetchCategories();
     }, []);
 
+    // Add validation function
+    const validateField = (name: string, value: string) => {
+        let fieldError = '';
+        
+        switch (name) {
+            case 'err_id':
+                if (!value) fieldError = t('errorMessages.required');
+                break;
+            case 'date':
+                if (!value) fieldError = t('errorMessages.required');
+                break;
+            case 'total_grant':
+                if (!value) fieldError = t('errorMessages.required');
+                else if (isNaN(Number(value)) || Number(value) < 0) 
+                    fieldError = t('errorMessages.invalidNumber');
+                break;
+            case 'total_other_sources':
+                if (!value) fieldError = t('errorMessages.required');
+                else if (isNaN(Number(value)) || Number(value) < 0) 
+                    fieldError = t('errorMessages.invalidNumber');
+                break;
+        }
+        
+        return fieldError;
+    };
+
+    // Update handleInputChange to include validation
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+        
+        const fieldError = validateField(name, value);
+        setErrors(prev => ({
+            ...prev,
+            [name]: fieldError
+        }));
     };
 
+    // Add validation for expense fields
+    const validateExpenseField = (name: string, value: string) => {
+        let fieldError = '';
+        
+        switch (name) {
+            case 'activity':
+            case 'description':
+            case 'payment_date':
+            case 'seller':
+            case 'payment_method':
+            case 'receipt_no':
+                if (!value) fieldError = t('errorMessages.required');
+                break;
+            case 'amount':
+                if (!value) fieldError = t('errorMessages.required');
+                else if (isNaN(Number(value)) || Number(value) < 0) 
+                    fieldError = t('errorMessages.invalidNumber');
+                break;
+        }
+        
+        return fieldError;
+    };
+
+    // Update handleExpenseChange to include validation
     const handleExpenseChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         const newExpenses = [...expenses];
         newExpenses[index] = { ...newExpenses[index], [name]: value };
         setExpenses(newExpenses);
+
+        // Add validation
+        const fieldError = validateExpenseField(name, value);
+        setErrors(prev => ({
+            ...prev,
+            expenses: {
+                ...prev.expenses,
+                [index]: {
+                    ...prev.expenses[index],
+                    [name]: fieldError
+                }
+            }
+        }));
     };
 
     const addExpenseCard = () => {
@@ -152,42 +245,61 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
     return (
         <>
             {!formSubmitted ? (
-                <FormBubble>
+                <FormBubble 
+                    title={t('formTitle')} 
+                    showRequiredLegend={true}
+                >
                     <form onSubmit={handleSubmit} className="space-y-3 bg-white p-2 rounded-lg">
-                        <label>
-                            {t('errId')}
+                        <div>
+                            <FormLabel htmlFor="err_id" required error={errors.err_id}>
+                                {t('errId')}
+                            </FormLabel>
                             <input
+                                id="err_id"
                                 type="text"
                                 name="err_id"
                                 onChange={handleInputChange}
                                 value={formData.err_id}
-                                required
-                                className="w-full p-2 border rounded"
+                                className={`w-full p-2 border rounded ${
+                                    errors.err_id ? 'border-red-500' : 'border-gray-300'
+                                } focus:outline-none focus:ring-2 focus:ring-primaryGreen`}
                                 placeholder={t('errId')}
                             />
-                        </label>
-                        <label>
-                            {t('date')}
+                        </div>
+
+                        <div>
+                            <FormLabel htmlFor="date" required error={errors.date}>
+                                {t('date')}
+                            </FormLabel>
                             <input
+                                id="date"
                                 type="date"
                                 name="date"
                                 onChange={handleInputChange}
                                 value={formData.date}
-                                required
-                                className="w-full p-2 border rounded"
+                                className={`w-full p-2 border rounded ${
+                                    errors.date ? 'border-red-500' : 'border-gray-300'
+                                } focus:outline-none focus:ring-2 focus:ring-primaryGreen`}
                             />
-                        </label>
+                        </div>
 
                         <div className="swipeable-cards flex overflow-x-auto space-x-2 max-w-full">
                             {expenses.map((expense, index) => (
                                 <div key={index} className="min-w-[200px] p-4 rounded bg-gray-50">
                                     <h4>{t('expenseEntry', { index: index + 1 })}</h4>
-                                    <label>{t('activity')}
+                                    
+                                    <div>
+                                        <FormLabel htmlFor={`activity-${index}`} required>
+                                            {t('activity')}
+                                        </FormLabel>
                                         <select
+                                            id={`activity-${index}`}
                                             name="activity"
                                             value={expense.activity}
                                             onChange={(e) => handleExpenseChange(index, e)}
-                                            className="w-full p-2 border rounded"
+                                            className={`w-full p-2 border rounded ${
+                                                errors.expenses[index]?.activity ? 'border-red-500' : 'border-gray-300'
+                                            } focus:outline-none focus:ring-2 focus:ring-primaryGreen`}
                                         >
                                             <option value="">{t('pleaseSelect')}</option>
                                             {categories.map(category => (
@@ -196,9 +308,14 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                                                 </option>
                                             ))}
                                         </select>
-                                    </label>
-                                    <label>{t('description')}
+                                    </div>
+
+                                    <div>
+                                        <FormLabel htmlFor={`description-${index}`} required>
+                                            {t('description')}
+                                        </FormLabel>
                                         <input
+                                            id={`description-${index}`}
                                             type="text"
                                             name="description"
                                             value={expense.description}
@@ -206,19 +323,28 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                                             className="w-full p-2 border rounded"
                                             placeholder={t('description')}
                                         />
-                                    </label>
-                                    <label>{t('paymentDate')}
+                                    </div>
+
+                                    <div>
+                                        <FormLabel htmlFor={`payment_date-${index}`} required>
+                                            {t('paymentDate')}
+                                        </FormLabel>
                                         <input
+                                            id={`payment_date-${index}`}
                                             type="date"
                                             name="payment_date"
                                             value={expense.payment_date}
                                             onChange={(e) => handleExpenseChange(index, e)}
                                             className="w-full p-2 border rounded"
                                         />
-                                    </label>
-                                    <div className="mb-2">
-                                        <label>{t('seller')}</label>
+                                    </div>
+
+                                    <div>
+                                        <FormLabel htmlFor={`seller-${index}`} required>
+                                            {t('seller')}
+                                        </FormLabel>
                                         <input
+                                            id={`seller-${index}`}
                                             type="text"
                                             name="seller"
                                             value={expense.seller}
@@ -227,8 +353,13 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                                             placeholder={t('seller')}
                                         />
                                     </div>
-                                    <label>{t('paymentMethod')}
+
+                                    <div>
+                                        <FormLabel htmlFor={`payment_method-${index}`} required>
+                                            {t('paymentMethod')}
+                                        </FormLabel>
                                         <select
+                                            id={`payment_method-${index}`}
                                             name="payment_method"
                                             value={expense.payment_method}
                                             onChange={(e) => handleExpenseChange(index, e)}
@@ -237,9 +368,14 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                                             <option value="cash">{t('cash')}</option>
                                             <option value="bank app">{t('bankApp')}</option>
                                         </select>
-                                    </label>
-                                    <label>{t('receiptNo')}
+                                    </div>
+
+                                    <div>
+                                        <FormLabel htmlFor={`receipt_no-${index}`} required>
+                                            {t('receiptNo')}
+                                        </FormLabel>
                                         <input
+                                            id={`receipt_no-${index}`}
                                             type="text"
                                             name="receipt_no"
                                             value={expense.receipt_no}
@@ -247,41 +383,60 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                                             className="w-full p-2 border rounded"
                                             placeholder={t('receiptNo')}
                                         />
-                                    </label>
-                                    <label>{t('amount')}
+                                    </div>
+
+                                    <div>
+                                        <FormLabel htmlFor={`amount-${index}`} required>
+                                            {t('amount')}
+                                        </FormLabel>
                                         <input
+                                            id={`amount-${index}`}
                                             type="number"
                                             name="amount"
                                             value={expense.amount}
                                             onChange={(e) => handleExpenseChange(index, e)}
-                                            className="w-full p-2 border rounded"
+                                            className={`w-full p-2 border rounded ${
+                                                errors.expenses[index]?.amount ? 'border-red-500' : 'border-gray-300'
+                                            } focus:outline-none focus:ring-2 focus:ring-primaryGreen`}
                                             placeholder={t('amount')}
                                         />
-                                    </label>
+                                    </div>
                                 </div>
                             ))}
                         </div>
                         <Button text={t('addExpense')} onClick={addExpenseCard} />
                         <div className="w-full mt-4">
+                            <FormLabel htmlFor="total_grant" required error={errors.total_grant}>
+                                {t('totalGrant')}
+                            </FormLabel>
                             <input
+                                id="total_grant"
                                 type="number"
                                 name="total_grant"
                                 onChange={handleInputChange}
                                 value={formData.total_grant}
-                                required
-                                className="w-full p-2 border rounded"
+                                className={`w-full p-2 border rounded ${
+                                    errors.total_grant ? 'border-red-500' : 'border-gray-300'
+                                } focus:outline-none focus:ring-2 focus:ring-primaryGreen`}
                                 placeholder={t('totalGrant')}
                             />
                         </div>
-                        <input
-                            type="number"
-                            name="total_other_sources"
-                            onChange={handleInputChange}
-                            value={formData.total_other_sources}
-                            required
-                            className="w-full p-2 border rounded"
-                            placeholder={t('totalOtherSources')}
-                        />
+                        <div>
+                            <FormLabel htmlFor="total_other_sources" required error={errors.total_other_sources}>
+                                {t('totalOtherSources')}
+                            </FormLabel>
+                            <input
+                                id="total_other_sources"
+                                type="number"
+                                name="total_other_sources"
+                                onChange={handleInputChange}
+                                value={formData.total_other_sources}
+                                className={`w-full p-2 border rounded ${
+                                    errors.total_other_sources ? 'border-red-500' : 'border-gray-300'
+                                } focus:outline-none focus:ring-2 focus:ring-primaryGreen`}
+                                placeholder={t('totalOtherSources')}
+                            />
+                        </div>
                         <textarea
                             name="additional_excess_expenses"
                             onChange={handleInputChange}
