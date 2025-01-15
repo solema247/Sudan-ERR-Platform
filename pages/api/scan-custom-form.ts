@@ -12,6 +12,8 @@ import FormData from 'form-data';
 import os from 'os';
 import { uploadImageAndInsertRecord, ImageCategory } from '../../services/uploadImageAndInsertRecord';
 
+// At the top of the file with other constants
+const BUCKET_NAME = "images";  // This should already exist
 
 /**
  * Scan custom form
@@ -75,7 +77,8 @@ async function parseForm(req: NextApiRequest): Promise<{ filePath: string; fileN
         return;
       }
 
-      const projectId = fields['projectId'] as unknown as string;
+      const rawProjectId = fields['projectId'];
+      const projectId = Array.isArray(rawProjectId) ? rawProjectId[0] : rawProjectId;
 
       if (!projectId) {
         console.error("Project ID is missing from the form submission");
@@ -87,7 +90,7 @@ async function parseForm(req: NextApiRequest): Promise<{ filePath: string; fileN
       resolve({
         filePath: file.filepath,
         fileName: file.originalFilename || "uploaded_image",
-        projectId,
+        projectId: projectId
       });
     });
   });
@@ -310,22 +313,45 @@ async function classifyWithChatGPT(language: string, ocrText: string, projectMet
   return parsedOutput;
 }
 
-function bufferToFile(buffer: Buffer, fileName: string): File {
-  const blob = new Blob([buffer]); // Create a Blob from the Buffer
-  return new File([blob], fileName); // Create a File from the Blob
-}
-
 // Upload file to Supabase Storage
-async function uploadToSupabase(filePath: string, projectId: string): Promise<void> {
-  const buffer = await fs.promises.readFile(filePath); // Read the (TODO: OCR-generated, right?) file from the path
-  const file = bufferToFile(buffer, "scan_custom_form");
-  
-  // Upload the file to Supabase Storage
-  const uploadResult = await uploadImageAndInsertRecord(file, ImageCategory.REPORT_EXPENSES, projectId, "Scanned form");
-  if (uploadResult.errorMessage) {
-    console.error('Error uploading to Supabase:', uploadResult.errorMessage);
-    throw new Error('File upload to Supabase failed');
-  }
+async function uploadToSupabase(filePath: string, projectId: string): Promise<string> {
+    try {
+        // Read file as buffer instead of stream
+        const fileBuffer = await fs.promises.readFile(filePath);
+        const fileName = path.basename(filePath);
+
+        // Upload using buffer instead of stream
+        const uploadResult = await supabase.storage
+            .from(BUCKET_NAME)
+            .upload(`forms/scanned/${fileName}`, fileBuffer, {
+                contentType: 'image/jpeg' // Set appropriate content type
+            });
+
+        if (uploadResult.error) {
+            throw uploadResult.error;
+        }
+
+        // Insert record into images table
+        const { error: insertError } = await supabase
+            .from('images')
+            .insert([{
+                created_at: new Date().toISOString(),
+                project_id: projectId,
+                filename: fileName,
+                path: uploadResult.data.path,
+                category: ImageCategory[ImageCategory.FORM_SCANNED],
+                notes: "Custom scanned form"
+            }]);
+
+        if (insertError) {
+            throw insertError;
+        }
+
+        return uploadResult.data.path;
+    } catch (error) {
+        console.error('Error in uploadToSupabase:', error);
+        throw new Error(`File upload to Supabase failed: ${error.message}`);
+    }
 }
 
 // API Route Handler

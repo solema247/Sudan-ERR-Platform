@@ -1,6 +1,14 @@
 {
-  "errId": "ID ERR (requerido)",
-  "date": "Fecha (requerido)",
+  "formTitle": "Informe Financiero F4",
+  "requiredFields": "Campos requeridos",
+  "expenseCardNote": "Las tarjetas de gastos deben completarse totalmente si se inician",
+  "errorMessages": {
+    "required": "Este campo es requerido",
+    "invalidNumber": "Por favor ingrese un número válido",
+    "invalidDate": "Por favor ingrese una fecha válida"
+  },
+  "errId": "ID ERR",
+  "date": "Fecha",
   "expenseEntry": "Entrada de Gasto {{index}}",
   "addExpense": "Agregar Gasto",
   "activity": "Actividad",
@@ -12,8 +20,8 @@
   "bankApp": "Aplicación Bancaria",
   "receiptNo": "Número de Recibo",
   "amount": "Monto",
-  "totalGrant": "Subvención Total (requerido)",
-  "totalOtherSources": "Total de Otras Fuentes (requerido)",
+  "totalGrant": "Subvención Total",
+  "totalOtherSources": "Total de Otras Fuentes",
   "excessExpenses": "¿Cómo cubrió los gastos adicionales?",
   "surplusUse": "¿Cómo gastaría el excedente?",
   "trainingNeeds": "Necesidades de formación adicionales",
@@ -34,5 +42,12 @@
     "Productive Activities": "Actividades Productivas",
     "Protection & Evacuation": "Protección y Evacuación",
     "Others (please specify)": "Otros (por favor especifique)"
-  }
+  },
+  "pleaseSelect": "Por favor seleccione",
+  "uploadReceipt": "Subir Recibo",
+  "uploading": "Subiendo...",
+  "uploadSuccess": "Recibo subido exitosamente",
+  "uploadError": "Error al subir el recibo",
+  "addAnotherExpense": "Agregar Otro Gasto",
+  "receiptRequired": "Se requiere recibo"
 }

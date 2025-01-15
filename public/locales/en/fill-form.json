@@ -1,7 +1,13 @@
 {
-  "errId": "ERR ID (required)",
-  "date": "Date (required)",
-  "expenseEntry": "Expense Entry",
+  "formTitle": "F4 Financial Report",
+  "requiredFields": "Required fields",
+  "errorMessages": {
+    "required": "This field is required",
+    "invalidNumber": "Please enter a valid number",
+    "invalidDate": "Please enter a valid date"
+  },
+  "errId": "ERR ID",
+  "date": "Date",
   "expenseEntry": "Expense Entry {{index}}",
   "addExpense": "Add Expense",
   "activity": "Activity",
@@ -13,13 +19,15 @@
   "bankApp": "Bank App",
   "receiptNo": "Receipt No.",
   "amount": "Amount",
-  "totalGrant": "Total Grant (required)",
-  "totalOtherSources": "Total Other Sources (required)",
+  "totalGrant": "Total Grant",
+  "totalOtherSources": "Total Other Sources",
   "excessExpenses": "How did you cover excess expenses?",
   "surplusUse": "How would you spend the surplus?",
   "trainingNeeds": "Additional training needs",
   "lessonsLearned": "Lessons learned in budget planning",
   "chooseFile": "Choose File",
+  "chooseReceiptFile": "Choose Receipt File",
+  "noFileChosen": "No file chosen",
   "submit": "Submit",
   "formSuccess": "Form submitted successfully!",
   "submitAnother": "Submit Another Form",
@@ -36,5 +44,14 @@
     "Protection & Evacuation": "Protection & Evacuation",
     "Others (please specify)": "Others (please specify)"
   },
-  "pleaseSelect": "Please Select"
+  "pleaseSelect": "Please Select",
+  "uploadReceipt": "Upload Receipt Image",
+  "fileTooBig": "File is too big. Maximum size is {{size}}",
+  "uploadError": "Failed to upload receipt",
+  "receiptRequired": "Receipt is required",
+  "uploadingReceipts": "Uploading receipts...",
+  "receiptUploadFailed": "Failed to upload one or more receipts",
+  "formSubmitting": "Submitting form...",
+  "formSubmitFailed": "Failed to submit form",
+  "addAnotherExpense": "Add Another Expense"
 }

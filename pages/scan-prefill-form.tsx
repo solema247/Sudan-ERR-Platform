@@ -12,6 +12,7 @@ const ScanPrefillForm: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showFileUploader, setShowFileUploader] = useState(false);
   const [showCompletionOptions, setShowCompletionOptions] = useState(false);
+  const [formData, setFormData] = useState<any>(null);  // Store submitted form data
 
   useEffect(() => {
     const data = localStorage.getItem("prefillData");
@@ -49,6 +50,7 @@ const ScanPrefillForm: React.FC = () => {
       const result = await response.json();
       console.log(t("form_submit_success"), result);
 
+      setFormData(formData);  // Store the submitted form data
       setShowFileUploader(true);
     } catch (error) {
       console.error(t("errors.submit_failed"), error);
@@ -80,7 +82,16 @@ const ScanPrefillForm: React.FC = () => {
       ) : showFileUploader ? (
         <>
           <h2 className="text-lg font-semibold mb-4">{t("upload_photos_title")}</h2>
-          <FileUploader onUploadComplete={handleUploadComplete} />
+          {formData?.project_id ? (
+            <FileUploader 
+              projectId={formData.project_id} 
+              onUploadComplete={handleUploadComplete} 
+            />
+          ) : (
+            <div className="text-red-500">
+              {t("errors.missing_project_id")}
+            </div>
+          )}
         </>
       ) : (
         <>
