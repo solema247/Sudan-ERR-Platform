@@ -6,6 +6,7 @@ import i18n from '../services/i18n';
 import { uploadImageAndInsertRecord, ImageCategory } from '../services/uploadImageAndInsertRecord';
 import { createClient } from '@supabase/supabase-js'; // Import Supabase client
 import { FormLabel } from '../components/ui/FormBubble';
+import ReceiptUploader from '../components/uploads/ReceiptUploader';
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
@@ -47,8 +48,6 @@ interface FormErrors {
 const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
     const { t } = useTranslation('fillForm');
     const [expenses, setExpenses] = useState([
-        { activity: '', description: '', payment_date: '', seller: '', payment_method: 'cash', receipt_no: '', amount: '' },
-        { activity: '', description: '', payment_date: '', seller: '', payment_method: 'cash', receipt_no: '', amount: '' },
         { activity: '', description: '', payment_date: '', seller: '', payment_method: 'cash', receipt_no: '', amount: '' }
     ]);
     const [file, setFile] = useState<File | null>(null);
@@ -68,6 +67,9 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
     const [errors, setErrors] = useState<FormErrors>({
         expenses: {}
     });
+    const [receiptUploads, setReceiptUploads] = useState<{ [key: number]: string }>({});
+    const [receiptFiles, setReceiptFiles] = useState<{ [key: number]: File }>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -185,15 +187,38 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
         }
     };
 
-    const isExpenseComplete = (expense: any) => {
+    const isExpenseComplete = (expense: any, index: number) => {
         return (
-            expense.activity && expense.description && expense.payment_date && expense.seller &&
-            expense.receipt_no && expense.amount && expense.payment_method
+            expense.activity && 
+            expense.description && 
+            expense.payment_date && 
+            expense.seller &&
+            expense.receipt_no && 
+            expense.amount && 
+            expense.payment_method &&
+            receiptFiles[index] // Check if file exists for this expense
         );
+    };
+
+    const handleFileSelect = (index: number, file: File) => {
+        setReceiptFiles(prev => ({
+            ...prev,
+            [index]: file
+        }));
+        // Still update receiptUploads for UI feedback
+        setReceiptUploads(prev => ({
+            ...prev,
+            [index]: file.name
+        }));
+    };
+
+    const handleReceiptError = (error: string) => {
+        alert(error);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsSubmitting(true);
 
         try {
             if (!formData.err_id || !formData.date || !formData.total_grant || !formData.total_other_sources) {
@@ -201,27 +226,53 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                 return;
             }
 
-            const completedExpenses = expenses.filter(isExpenseComplete);
-            let projectId = project.id;
-            if (!projectId) {
-                throw new Error('Trouble finding a projectId to file the image under');
-            }
+            const completedExpenses = expenses.filter((expense, index) => isExpenseComplete(expense, index));
 
-            let uploadImageResult = await uploadImageAndInsertRecord(
-                file, 
-                ImageCategory.FORM_FILLED, 
-                projectId, 
-                "Filled expense form.",
-                {
-                    noFile: t('noFileSelected'),
-                    uploadFailed: t('uploadFailed')
+            // Show uploading message
+            alert(t('uploadingReceipts'));
+
+            // Upload all receipt files first
+            const receiptUploadsPromises = completedExpenses.map(async (expense, index) => {
+                const file = receiptFiles[index];
+                if (!file) return null;
+
+                const uploadFormData = new FormData();
+                uploadFormData.append('file', file);
+                uploadFormData.append('expenseId', `${project.id}-${index}`);
+                uploadFormData.append('projectId', project.id);
+                uploadFormData.append('reportId', formData.err_id);
+
+                const response = await fetch('/api/upload-receipt', {
+                    method: 'POST',
+                    body: uploadFormData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Receipt upload failed');
                 }
-            );
 
-            // Submit form data 
+                const data = await response.json();
+                return { index, filename: data.filename };
+            });
+
+            const receiptResults = await Promise.all(receiptUploadsPromises);
+            const receiptMap = receiptResults.reduce((acc, result) => {
+                if (result) {
+                    acc[result.index] = result.filename;
+                }
+                return acc;
+            }, {});
+
+            // Show submitting message
+            alert(t('formSubmitting'));
+
+            // Submit form data with receipt information
             const submissionData = {
                 ...formData,
-                expenses: completedExpenses,
+                expenses: completedExpenses.map((expense, index) => ({
+                    ...expense,
+                    receipt_upload: receiptMap[index]
+                })),
                 language: currentLanguage
             };
 
@@ -238,7 +289,12 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
             setFormSubmitted(true);
         } catch (error) {
             console.error('Error submitting form:', error);
-            alert(t('submissionFailed'));
+            alert(error.message === 'Receipt upload failed' 
+                ? t('receiptUploadFailed') 
+                : t('formSubmitFailed')
+            );
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -285,7 +341,7 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
 
                         <div className="swipeable-cards flex overflow-x-auto space-x-2 max-w-full">
                             {expenses.map((expense, index) => (
-                                <div key={index} className="min-w-[200px] p-4 rounded bg-gray-50">
+                                <div key={index} className="min-w-[300px] p-4 rounded bg-gray-50">
                                     <h4>{t('expenseEntry', { index: index + 1 })}</h4>
                                     
                                     <div>
@@ -401,10 +457,27 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                                             placeholder={t('amount')}
                                         />
                                     </div>
+
+                                    <ReceiptUploader
+                                        expenseId={`${project.id}-${index}`}
+                                        projectId={project.id}
+                                        reportId={formData.err_id}
+                                        onFileSelect={(file) => handleFileSelect(index, file)}
+                                        onError={handleReceiptError}
+                                    />
+
+                                    {receiptUploads[index] && (
+                                        <p className="text-sm text-green-600 mt-2">
+                                            ✓ {receiptUploads[index]}
+                                        </p>
+                                    )}
                                 </div>
                             ))}
                         </div>
-                        <Button text={t('addExpense')} onClick={addExpenseCard} />
+                        <Button 
+                            text={expenses.length === 1 ? t('addExpense') : t('addAnotherExpense')} 
+                            onClick={addExpenseCard} 
+                        />
                         <div className="w-full mt-4">
                             <FormLabel htmlFor="total_grant" required error={errors.total_grant}>
                                 {t('totalGrant')}
@@ -478,7 +551,12 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                             {file && <span className="text-gray-600">{file.name}</span>}
                         </div>
 
-                        <Button text={t('submit')} type="submit" />
+                        <Button 
+                            text={t('submit')}
+                            type="submit"
+                            disabled={isSubmitting}
+                            className={isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}
+                        />
                     </form>
                 </FormBubble>
             ) : (

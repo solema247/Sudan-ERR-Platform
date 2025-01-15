@@ -29,17 +29,19 @@ export const FormLabel: React.FC<FormLabelProps> = ({ htmlFor, required, childre
     );
 };
 
-const FormBubble: React.FC<FormBubbleProps> = ({ children, title, showRequiredLegend }) => {
+const FormBubble: React.FC<FormBubbleProps> = ({ 
+    children, 
+    title, 
+    showRequiredLegend = false 
+}) => {
     const { t } = useTranslation('fillForm');
-
+    
     return (
-        <div className="w-full px-2 bg-white rounded-lg max-w-full overflow-hidden">
-            {title && <h1 className="text-2xl font-bold text-center my-4">{title}</h1>}
+        <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold mb-4">{title}</h2>
             {showRequiredLegend && (
-                <div className="text-sm text-gray-500 mb-4">
-                    <span className="text-red-500">*</span> {t('requiredFields')}
-                    <br />
-                    <span className="text-xs italic">{t('expenseCardNote')}</span>
+                <div className="text-sm text-gray-600 mb-4">
+                    * {t('requiredFields')}
                 </div>
             )}
             {children}

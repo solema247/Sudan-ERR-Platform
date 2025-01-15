@@ -1,7 +1,6 @@
 {
   "formTitle": "F4 Financial Report",
   "requiredFields": "Required fields",
-  "expenseCardNote": "Expense cards need to be filled completely if started",
   "errorMessages": {
     "required": "This field is required",
     "invalidNumber": "Please enter a valid number",
@@ -27,6 +26,8 @@
   "trainingNeeds": "Additional training needs",
   "lessonsLearned": "Lessons learned in budget planning",
   "chooseFile": "Choose File",
+  "chooseReceiptFile": "Choose Receipt File",
+  "noFileChosen": "No file chosen",
   "submit": "Submit",
   "formSuccess": "Form submitted successfully!",
   "submitAnother": "Submit Another Form",
@@ -43,5 +44,14 @@
     "Protection & Evacuation": "Protection & Evacuation",
     "Others (please specify)": "Others (please specify)"
   },
-  "pleaseSelect": "Please Select"
+  "pleaseSelect": "Please Select",
+  "uploadReceipt": "Upload Receipt Image",
+  "fileTooBig": "File is too big. Maximum size is {{size}}",
+  "uploadError": "Failed to upload receipt",
+  "receiptRequired": "Receipt is required",
+  "uploadingReceipts": "Uploading receipts...",
+  "receiptUploadFailed": "Failed to upload one or more receipts",
+  "formSubmitting": "Submitting form...",
+  "formSubmitFailed": "Failed to submit form",
+  "addAnotherExpense": "Add Another Expense"
 }

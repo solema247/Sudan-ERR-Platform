@@ -1,7 +1,6 @@
 {
   "formTitle": "تقرير F4 المالي",
   "requiredFields": "الحقول المطلوبة",
-  "expenseCardNote": "يجب ملء بطاقات المصروفات بالكامل عند البدء",
   "errorMessages": {
     "required": "هذا الحقل مطلوب",
     "invalidNumber": "الرجاء إدخال رقم صحيح",
@@ -27,6 +26,8 @@
   "trainingNeeds": "الاحتياجات التدريبية الإضافية",
   "lessonsLearned": "الدروس المستفادة في تخطيط الميزانية",
   "chooseFile": "اختر ملفًا",
+  "chooseReceiptFile": "اختر ملف الإيصال",
+  "noFileChosen": "لم يتم اختيار ملف",
   "submit": "إرسال",
   "formSuccess": "تم إرسال النموذج بنجاح!",
   "submitAnother": "إرسال نموذج آخر",
@@ -43,5 +44,14 @@
     "Protection & Evacuation": "الحماية والإجلاء",
     "Others (please specify)": "أخرى (يرجى التحديد)"
   },
-  "pleaseSelect": "يرجى الاختيار"
+  "pleaseSelect": "يرجى الاختيار",
+  "uploadReceipt": "تحميل صورة الإيصال",
+  "fileTooBig": "الملف كبير جداً. الحد الأقصى للحجم هو {{size}}",
+  "uploadError": "فشل في تحميل الإيصال",
+  "receiptRequired": "الإيصال مطلوب",
+  "uploadingReceipts": "جاري تحميل الإيصالات...",
+  "receiptUploadFailed": "فشل في تحميل واحد أو أكثر من الإيصالات",
+  "formSubmitting": "جاري إرسال النموذج...",
+  "formSubmitFailed": "فشل في إرسال النموذج",
+  "addAnotherExpense": "إضافة مصروف آخر"
 }
