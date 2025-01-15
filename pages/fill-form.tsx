@@ -14,7 +14,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
 /**
  *  Fill form
  * 
- * Submits an F4 form, uploads accompanying images with image records
+ * Submits an F4 (reporting) form, uploads accompanying images with image records
  * 
  * TODO: Sturdier bucket paths, using presets and enums to ease future development
  * TODO: Better dynamic activity form

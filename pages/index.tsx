@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import crypto from 'crypto';
 import { useTranslation } from 'react-i18next';
 import Calculator from '../components/calculator/Calculator';
 import MainApp from '../components/main/MainApp';
@@ -15,14 +16,23 @@ const Home = () => {
   }, []);
 
   const handlePinEntry = (pin: string) => {
-    console.log("Entered PIN:", pin);
-    if (pin === '1234=') {
-      setIsUnlocked(true);
-      localStorage.setItem('isUnlocked', 'true');
-    } else if (pin === '0000=') {
-      setIsLocked(true);
-    }
+    doesEntryMatchHash(pin) ? setIsUnlocked(true) : setIsLocked(true);
   };
+
+  const doesEntryMatchHash = (pin: string) => {
+    try {
+      const hash = crypto.createHash('sha256').update(pin, 'utf8').digest('hex');
+      const calculatorPinHash = process.env.NEXT_PUBLIC_CALCULATOR_PIN;
+
+      if (!calculatorPinHash) {
+        throw new Error('Missing system hash needed for PIN')
+      }
+      return hash === calculatorPinHash;
+    }
+    catch(e) {
+      console.log(e)
+    }
+  }
 
   if (isLocked) {
     return <div>{t('appLocked')}</div>;
