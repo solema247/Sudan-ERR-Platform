@@ -221,6 +221,10 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
         setIsSubmitting(true);
 
         try {
+            if (!project?.id) {
+                throw new Error('No project ID available');
+            }
+
             if (!formData.err_id || !formData.date || !formData.total_grant || !formData.total_other_sources) {
                 alert(t('requiredFieldsAlert'));
                 return;
@@ -459,8 +463,8 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                                     </div>
 
                                     <ReceiptUploader
-                                        expenseId={`${project.id}-${index}`}
-                                        projectId={project.id}
+                                        expenseId={project?.id ? `${project.id}-${index}` : ''}
+                                        projectId={project?.id || ''}
                                         reportId={formData.err_id}
                                         onFileSelect={(file) => handleFileSelect(index, file)}
                                         onError={handleReceiptError}
@@ -573,6 +577,12 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
             )}
         </>
     );
+};
+
+export const getServerSideProps = async () => {
+    return {
+        props: {}
+    };
 };
 
 export default FillForm;
