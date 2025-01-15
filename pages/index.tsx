@@ -14,8 +14,18 @@ const Home = () => {
   };
 
   const doesEntryMatchHash = (pin: string) => {
-    const hash = crypto.createHash('sha256').update(pin, 'utf8').digest('hex');
-    return hash === process.env.NEXT_PUBLIC_CALCULATOR_PIN;
+    try {
+      const hash = crypto.createHash('sha256').update(pin, 'utf8').digest('hex');
+      const calculatorPinHash = process.env.NEXT_PUBLIC_CALCULATOR_PIN;
+
+      if (!calculatorPinHash) {
+        throw new Error('Missing system hash needed for PIN')
+      }
+      return hash === calculatorPinHash;
+    }
+    catch(e) {
+      console.log(e)
+    }
   }
 
   if (isLocked) {
