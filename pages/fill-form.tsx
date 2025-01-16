@@ -243,13 +243,11 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
             }
 
             // Submit form data 
-            const submissionData = {
-                ...formData,
-                expenses: completedExpenses.map((expense, index) => ({
-                    ...expense,
-                    receipt_upload: receiptMap[index]
-                })),
-                language: currentLanguage
+                  // Submit form data 
+                  const submissionData = {
+                    ...formData,
+                    expenses: completedExpenses,
+                    language: currentLanguage
             };
 
             const response = await fetch('/api/fill-form', {
