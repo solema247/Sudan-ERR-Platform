@@ -53,5 +53,9 @@
   "receiptUploadFailed": "فشل في تحميل واحد أو أكثر من الإيصالات",
   "formSubmitting": "جاري إرسال النموذج...",
   "formSubmitFailed": "فشل في إرسال النموذج",
-  "addAnotherExpense": "إضافة مصروف آخر"
+  "addAnotherExpense": "إضافة مصروف آخر",
+  "enterPhoneNumber": "أدخل رقم هاتفك",
+  "phoneNumber": "رقم التليفون",
+  "enterBankDetails": "أدخل تفاصيل البنك الخاص بك",
+  "bankDetails": "تفاصيل البنك"
 }

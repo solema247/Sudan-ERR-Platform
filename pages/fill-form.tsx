@@ -47,6 +47,7 @@ interface FormErrors {
 
 const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
     const { t } = useTranslation('fillForm');
+    
     const [expenses, setExpenses] = useState([
         { activity: '', description: '', payment_date: '', seller: '', payment_method: 'cash', receipt_no: '', amount: '' }
     ]);

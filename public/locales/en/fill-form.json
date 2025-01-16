@@ -43,10 +43,6 @@
     "Productive Activities": "Productive Activities",
     "Protection & Evacuation": "Protection & Evacuation",
     "Others (please specify)": "Others (please specify)",
-    "enterPhoneNumber": "Enter your phone number",
-    "phoneNumber": "Phone Number",
-    "enterBankDetails": "Enter your banking details",
-    "bankDetails": "Bank Details"
   },
   "pleaseSelect": "Please Select",
   "uploadReceipt": "Upload Receipt Image",
@@ -57,5 +53,9 @@
   "receiptUploadFailed": "Failed to upload one or more receipts",
   "formSubmitting": "Submitting form...",
   "formSubmitFailed": "Failed to submit form",
-  "addAnotherExpense": "Add Another Expense"
+  "addAnotherExpense": "Add Another Expense",
+  "enterPhoneNumber": "Enter your phone number",
+  "phoneNumber": "Phone Number",
+  "enterBankingDetails": "Enter your banking details",
+  "bankingDetails": "Bank Details"
 }
