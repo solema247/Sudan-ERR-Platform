@@ -27,5 +27,9 @@
     "requiredFieldsAlert": "Please fill in all required fields",
     "submissionFailed": "Form submission failed. Please try again.",
     "fileUploadError": "Error uploading file. Please try again.",
-    "fileTooBig": "File size must be less than {{size}}"
+    "fileTooBig": "File size must be less than {{size}}",
+    "enterPhoneNumber": "Enter your phone number",
+    "phoneNumber": "Phone Number",
+    "enterBankDetails": "Enter your banking details",
+    "bankDetails": "Bank Details"
 } 

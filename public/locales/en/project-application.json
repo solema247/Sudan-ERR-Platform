@@ -75,5 +75,9 @@
       "description": "Expense Description",
       "amount": "Amount"
     }
-  }
+  },
+  "enterPhoneNumber": "Enter your phone number",
+  "phoneNumber": "Phone Number",
+  "enterBankDetails": "Enter your banking details",
+  "bankDetails": "Bank Details"
 }

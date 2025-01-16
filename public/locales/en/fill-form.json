@@ -1,7 +1,6 @@
 {
   "errId": "ERR ID (required)",
   "date": "Date (required)",
-  "expenseEntry": "Expense Entry",
   "expenseEntry": "Expense Entry {{index}}",
   "addExpense": "Add Expense",
   "activity": "Activity",
@@ -34,7 +33,11 @@
     "Children's Activities": "Children's Activities",
     "Productive Activities": "Productive Activities",
     "Protection & Evacuation": "Protection & Evacuation",
-    "Others (please specify)": "Others (please specify)"
+    "Others (please specify)": "Others (please specify)",
+    "enterPhoneNumber": "Enter your phone number",
+    "phoneNumber": "Phone Number",
+    "enterBankDetails": "Enter your banking details",
+    "bankDetails": "Bank Details"
   },
   "pleaseSelect": "Please Select"
 }

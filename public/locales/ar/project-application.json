@@ -75,5 +75,9 @@
       "description": "وصف المصروفات",
       "amount": "المبلغ"
     }
-  }
+  },
+  "enterPhoneNumber": "أدخل رقم هاتفك",
+  "phoneNumber": "رقم التليفون",
+  "enterBankDetails": "أدخل تفاصيل البنك الخاص بك",
+  "bankDetails": "تفاصيل البنك"
 }

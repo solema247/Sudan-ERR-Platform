@@ -230,6 +230,7 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
                    <Field 
                      name="estimated_beneficiaries"
                      type="number" 
+                     min="0"
                      className="text-sm w-full p-2 border rounded-lg" 
                      disabled={isLoading} 
                    />
@@ -332,7 +333,7 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
                    <label className="font-bold block text-base text-black-bold mb-1">{t('phoneNumber')}</label>
                    <Field
                      name="phone_number"
-                     type="number"
+                     type="text"
                      className="text-sm w-full p-2 border rounded-lg"
                      placeholder={t('enterPhoneNumber')}
                      disabled={isLoading}
