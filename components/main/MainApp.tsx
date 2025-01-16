@@ -18,9 +18,9 @@ const MainApp = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(() => {
     if (typeof window !== 'undefined') {
-      return window.innerWidth < 768 ? 0.5 : 0.8;  // Mobile gets 0.5, desktop gets 0.8
+      return window.innerWidth < 768 ? 0.5 : 0.8;  // Mobile gets 0.50, desktop gets 0.8
     }
-    return 0.6; // Default fallback
+    return 0.6; // Default fall back
   });
 
   const handleLogin = () => {
@@ -43,6 +43,11 @@ const MainApp = () => {
     setNumPages(numPages);
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('isUnlocked');
+    router.reload(); // This will reload the page and show the calculator
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
       <div className="text-center mb-8">
@@ -64,6 +69,11 @@ const MainApp = () => {
           </button>
           <button onClick={() => changeLanguage('ar')} className="mx-2 text-blue-500 underline">
             العربية
+          </button>
+        </div>
+        <div className="mt-4">
+          <button onClick={handleLogout} className="text-red-500 underline">
+            {t('logout')}
           </button>
         </div>
       </div>

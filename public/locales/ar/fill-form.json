@@ -1,6 +1,13 @@
 {
-  "errId": "رقم الغرفة (إجباري)",
-  "date": "التاريخ (إجباري)",
+  "formTitle": "تقرير F4 المالي",
+  "requiredFields": "الحقول المطلوبة",
+  "errorMessages": {
+    "required": "هذا الحقل مطلوب",
+    "invalidNumber": "الرجاء إدخال رقم صحيح",
+    "invalidDate": "الرجاء إدخال تاريخ صحيح"
+  },
+  "errId": "رقم الغرفة",
+  "date": "التاريخ",
   "expenseEntry": "إدخال المصاريف {{index}}",
   "addExpense": "إضافة مصروف",
   "activity": "النشاط",
@@ -12,13 +19,15 @@
   "bankApp": "تطبيق بنكي",
   "receiptNo": "رقم الإيصال",
   "amount": "المبلغ",
-  "totalGrant": "إجمالي المنحة (إجباري)",
-  "totalOtherSources": "إجمالي المصادر الأخرى (إجباري)",
+  "totalGrant": "إجمالي المنحة",
+  "totalOtherSources": "إجمالي المصادر الأخرى",
   "excessExpenses": "كيف قمت بتغطية المصاريف الزائدة؟",
   "surplusUse": "كيف ستنفق المبالغ المتبقية؟",
   "trainingNeeds": "الاحتياجات التدريبية الإضافية",
   "lessonsLearned": "الدروس المستفادة في تخطيط الميزانية",
   "chooseFile": "اختر ملفًا",
+  "chooseReceiptFile": "اختر ملف الإيصال",
+  "noFileChosen": "لم يتم اختيار ملف",
   "submit": "إرسال",
   "formSuccess": "تم إرسال النموذج بنجاح!",
   "submitAnother": "إرسال نموذج آخر",
@@ -35,5 +44,14 @@
     "Protection & Evacuation": "الحماية والإجلاء",
     "Others (please specify)": "أخرى (يرجى التحديد)"
   },
-  "pleaseSelect": "يرجى الاختيار"
+  "pleaseSelect": "يرجى الاختيار",
+  "uploadReceipt": "تحميل صورة الإيصال",
+  "fileTooBig": "الملف كبير جداً. الحد الأقصى للحجم هو {{size}}",
+  "uploadError": "فشل في تحميل الإيصال",
+  "receiptRequired": "الإيصال مطلوب",
+  "uploadingReceipts": "جاري تحميل الإيصالات...",
+  "receiptUploadFailed": "فشل في تحميل واحد أو أكثر من الإيصالات",
+  "formSubmitting": "جاري إرسال النموذج...",
+  "formSubmitFailed": "فشل في إرسال النموذج",
+  "addAnotherExpense": "إضافة مصروف آخر"
 }

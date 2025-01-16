@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { uploadImageAndInsertRecord, ImageCategory } from "../../services/uploadImageAndInsertRecord";
 
 interface FileUploaderProps {
-  projectId?: string;
+  projectId: string;
   onUploadComplete: (urls: string[]) => void;
 }
 
@@ -24,6 +24,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({ projectId, onUploadComplete
   const [uploading, setUploading] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!projectId) {
+      console.error('Project ID is required for uploading files');
+      alert(t("errors.missing_project_id"));
+      return;
+    }
+
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
       setFiles(selectedFiles);
@@ -32,15 +38,25 @@ const FileUploader: React.FC<FileUploaderProps> = ({ projectId, onUploadComplete
 
       try {
         for (const file of selectedFiles) {
-          let result = await uploadImageAndInsertRecord(file, ImageCategory.FORM_SCANNED, null, "Scanned report");
-          if (result.errorMessage) { throw new Error("Image upload error") }
+          let result = await uploadImageAndInsertRecord(
+            file, 
+            ImageCategory.FORM_SCANNED, 
+            projectId,
+            "Scanned report",
+            {
+              noFile: t("errors.no_file"),
+              uploadFailed: t("errors.upload_failed")
+            }
+          );
+          if (result.errorMessage) { 
+            throw new Error(result.errorMessage);
+          }
         }
 
-        // Notify parent component of completion
         onUploadComplete(urls);
         setFiles([]);
       } catch (error) {
-        console.error(t("errors.upload_failed"), error);
+        console.error('Failed to upload files.', error);
         alert(t("errors.upload_failed"));
       } finally {
         setUploading(false);

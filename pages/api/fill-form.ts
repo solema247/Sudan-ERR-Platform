@@ -44,18 +44,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 language
             } = req.body;
 
-            if (!language) {
-                throw new Error('Language field is missing in the request payload.');
-            }
-
             // Generate a unique report ID
             const err_report_id = generateErrReportId(err_id || '');
 
             // Calculate the total expenses
             const total_expenses = expenses.reduce((acc: number, exp: any) => acc + (parseFloat(exp.amount) || 0), 0);
 
-            // Insert data into MAG F4 Summary table with the file URL
-            const { error: summaryError } = await supabase
+            // Insert data into MAG F4 Summary table
+            const { data: formRecord, error: summaryError } = await supabase
                 .from('MAG F4 Summary')
                 .insert([{
                     err_id,
@@ -72,14 +68,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     phone_number,
                     banking_details,
                     language
-                }]);
+                }])
+                .select()
+                .single();
 
             if (summaryError) throw new Error('Failed to insert data into MAG F4 Summary');
 
-            // Insert completed expense entries into MAG F4 Expenses table
+            // Insert completed expense entries
             for (const expense of expenses) {
                 const {
-                    activity, description, payment_date, seller, payment_method, receipt_no, amount
+                    activity, description, payment_date, seller, 
+                    payment_method, receipt_no, amount, receipt_upload
                 } = expense;
 
                 // Skip incomplete cards
@@ -87,27 +86,52 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     continue;
                 }
 
-                const { error: expenseError } = await supabase
-                    .from('MAG F4 Expenses')
-                    .insert([{
-                        err_report_id,
-                        expense_activity: activity,
-                        expense_description: description,
-                        payment_date,
-                        seller,
-                        payment_method,
-                        receipt_no,
-                        expense_amount: parseFloat(amount) || 0,
-                        language
-                    }]);
+                // Validate receipt upload
+                if (!receipt_upload) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Receipt upload is required for each expense'
+                    });
+                }
 
-                if (expenseError) throw new Error('Failed to insert expense data');
+                // Insert expense record with receipt reference
+                try {
+                    const { error: expenseError } = await supabase
+                        .from('MAG F4 Expenses')
+                        .insert([{
+                            err_report_id,
+                            expense_activity: activity,
+                            expense_description: description,
+                            payment_date,
+                            seller,
+                            payment_method,
+                            receipt_no,
+                            expense_amount: parseFloat(amount) || 0,
+                            receipt_id: receipt_upload,
+                            language
+                        }]);
+
+                    if (expenseError) {
+                        console.error('Detailed expense error:', expenseError);
+                        throw new Error(`Failed to insert expense data: ${expenseError.message}`);
+                    }
+                } catch (error) {
+                    console.error('Full error object:', error);
+                    throw error;
+                }
             }
 
-            res.status(200).json({ message: 'Form submitted successfully!' });
+            res.status(200).json({ 
+                success: true,
+                message: 'Form submitted successfully!',
+                report_id: err_report_id
+            });
         } catch (error) {
             console.error('Error submitting form:', error);
-            res.status(500).json({ message: error.message || 'Error submitting form' });
+            res.status(500).json({ 
+                success: false,
+                message: error.message || 'Error submitting form' 
+            });
         }
     } else {
         res.status(405).json({ message: 'Method not allowed' });

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import crypto from 'crypto';
 import { useTranslation } from 'react-i18next';
 import Calculator from '../components/calculator/Calculator';
@@ -8,6 +8,12 @@ const Home = () => {
   const { t } = useTranslation('home');
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+
+  // Load unlock state on mount
+  useEffect(() => {
+    const unlocked = localStorage.getItem('isUnlocked') === 'true';
+    setIsUnlocked(unlocked);
+  }, []);
 
   const handlePinEntry = (pin: string) => {
     doesEntryMatchHash(pin) ? setIsUnlocked(true) : setIsLocked(true);
