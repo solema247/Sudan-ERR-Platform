@@ -14,8 +14,8 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
  * 
  * Submits an F4 (reporting) form, uploads accompanying images with image records
  * 
- * TODO: Sturdier bucket paths, using presets and enums to ease future development
  * TODO: Better dynamic activity form
+ * TODO: Convert to Formik for easier management and for consistency with the F1 form. https://formik.org
  */
 
 interface FillFormProps {
@@ -40,7 +40,9 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
         additional_excess_expenses: '',
         additional_surplus_use: '',
         additional_training_needs: '',
-        lessons: ''
+        lessons: '',
+        phone_number: '',
+        banking_details: ''
     });
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [categories, setCategories] = useState<{ id: string, name: string, language: string }[]>([]);
@@ -301,7 +303,20 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                             className="w-full p-2 border rounded"
                             placeholder={t('lessonsLearned')}
                         />
-
+                        <textarea
+                            name="phone_number"
+                            onChange={handleInputChange}
+                            value={formData.phone_number}
+                            className="w-full p-2 border rounded"
+                            placeholder={t('phoneNumber')}
+                        />
+                        <textarea
+                            name="banking_details"
+                            onChange={handleInputChange}
+                            value={formData.banking_details}
+                            className="w-full p-2 border rounded"
+                            placeholder={t('bankingDetails')}
+                        />
                         <div className="flex flex-col space-y-2">
                             <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all cursor-pointer inline-flex items-center justify-center">
                                 {t('chooseFile')}

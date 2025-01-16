@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Formik, Form, Field, FieldArray } from 'formik';
 import * as Yup from 'yup';
-import Button from '../ui/Button';
-import FormBubble from '../ui/FormBubble';
+import Button from '../../ui/Button';
+import FormBubble from '../../ui/FormBubble';
 import ActivitiesFieldArray from './NewProjectActivities';
 
 /**
+ * F1 Form
  * Application for a new project. Submits just a form. No files or images.
+ * 
  * 
  * TODO: Make this whole thing typesafe
  */
@@ -321,6 +323,30 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
                      type="text"
                      className="text-sm w-full p-2 border rounded-lg"
                      placeholder={t('enterOfficerName')}
+                     disabled={isLoading}
+                   />
+                 </div>
+
+                 {/* Phone number */}
+                 <div className="mb-3">
+                   <label className="font-bold block text-base text-black-bold mb-1">{t('phoneNumber')}</label>
+                   <Field
+                     name="phone_number"
+                     type="number"
+                     className="text-sm w-full p-2 border rounded-lg"
+                     placeholder={t('enterPhoneNumber')}
+                     disabled={isLoading}
+                   />
+                 </div>
+
+                 {/* Banking details */}
+                 <div className="mb-3">
+                   <label className="font-bold block text-base text-black-bold mb-1">{t('bankingDetails')}</label>
+                   <Field
+                     name="banking_details"
+                     type="text"
+                     className="text-sm w-full p-2 border rounded-lg"
+                     placeholder={t('enterBankingDetails')}
                      disabled={isLoading}
                    />
                  </div>

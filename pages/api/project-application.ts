@@ -3,9 +3,16 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '../../services/supabaseClient';
 import { validateJWT } from '../../services/auth';
 
+/**
+ * F1 Project Application
+ * 
+ * Handles 
+ * - Drop-down options for state and locality, provided via a GET request
+ * - A POST of the F1 project application from front-end
+ */
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        // Step 1: Validate the user's session using the JWT token
         const token = req.cookies.token;
         const user = validateJWT(token);
 
@@ -14,24 +21,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
 
-        // Step 2: Handle GET request for fetching dropdown options
         if (req.method === 'GET') {
             try {
                 // Force language to 'en' as Supabase tables contain only English values
                 const language = 'en';
 
-                // Fetch planned activities, expense categories, and states
                 const [plannedActivitiesResult, expenseCategoriesResult, statesResultRaw] = await Promise.all([
                     supabase.from('planned_activities').select('id, name').eq('language', language),
                     supabase.from('expense_categories').select('id, name').eq('language', language),
                     supabase.from('states').select('state_name, locality').neq('state_name', null).order('state_name', { ascending: true }),
                 ]);
-
-                console.log('Fetched dropdown options:', {
-                    plannedActivities: plannedActivitiesResult.data,
-                    expenseCategories: expenseCategoriesResult.data,
-                    states: statesResultRaw.data,
-                });
 
                 // Group localities by state_name
                 const groupedStates = statesResultRaw.data.reduce((acc: any[], item: any) => {
@@ -61,7 +60,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         }
 
-        // Step 3: Handle POST request for submitting project applications
         if (req.method === 'POST') {
             const {
                 date,
@@ -76,6 +74,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 estimated_timeframe,
                 additional_support,
                 officer_name,
+                phone_number,
+                banking_details
             } = req.body;
 
             console.log('Received POST data:', {
@@ -91,6 +91,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 estimated_timeframe,
                 additional_support,
                 officer_name,
+                phone_number,
+                banking_details
             });
 
             // Validate planned_activities and expenses fields
@@ -113,6 +115,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         estimated_timeframe,
                         additional_support,
                         officer_name,
+                        phone_number,
+                        banking_details,        
                         language: 'en', // Default language is English
                     },
                 ]);

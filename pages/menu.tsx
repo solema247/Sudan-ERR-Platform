@@ -6,10 +6,10 @@ import { useTranslation } from 'react-i18next';
 import ChatContainer from '../components/ui/ChatContainer';
 import MessageBubble from '../components/ui/MessageBubble';
 import Button from '../components/ui/Button';
-import FillForm from '../pages/fill-form';
+import FillForm from './fill-form';
 import ScanForm from '../pages/scan-form';
 import ScanCustomForm from '../pages/scan-custom-form'; // Import the new component
-import ProjectApplication from '../components/forms/NewProject';
+import ProjectApplication from '../components/forms/NewProject/NewProject';
 import ProjectStatus from '../pages/project-status';
 import FeedbackForm from '../components/forms/FeedbackForm'; // Correct import path
 const LogoImage = '/icons/icon-512x512.png'; 
