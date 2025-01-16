@@ -116,7 +116,9 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                 throw new Error('Trouble finding a projectId to file the image under');
             }
 
-            let uploadImageResult = await uploadImageAndInsertRecord(file, ImageCategory.FORM_FILLED, projectId, "Filled expense form.")
+            if (file != null) {
+                let uploadImageResult = await uploadImageAndInsertRecord(file, ImageCategory.FORM_FILLED, projectId, t)
+            }
 
             // Submit form data 
             const submissionData = {
@@ -244,6 +246,7 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                                     <label>{t('amount')}
                                         <input
                                             type="number"
+                                            min="0"
                                             name="amount"
                                             value={expense.amount}
                                             onChange={(e) => handleExpenseChange(index, e)}
@@ -258,6 +261,7 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                         <div className="w-full mt-4">
                             <input
                                 type="number"
+                                min="0"
                                 name="total_grant"
                                 onChange={handleInputChange}
                                 value={formData.total_grant}
@@ -268,6 +272,7 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                         </div>
                         <input
                             type="number"
+                            min="0"
                             name="total_other_sources"
                             onChange={handleInputChange}
                             value={formData.total_other_sources}

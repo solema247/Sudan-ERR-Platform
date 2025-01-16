@@ -1,5 +1,4 @@
 import { supabase } from "./supabaseClient";
-import { useTranslation } from 'react-i18next';
 
 /**
  * Upload to private bucket
@@ -22,8 +21,7 @@ export interface UploadResult {
 
 const BUCKET_NAME = "images";
 
-export async function uploadImageAndInsertRecord(file: File, category: ImageCategory, projectId: string, notes?: string): Promise<UploadResult> {
-   const { t } = useTranslation('uploadImage');
+export async function uploadImageAndInsertRecord(file: File, category: ImageCategory, projectId: string, t: (key: string, options?: any) => string, notes?: string): Promise<UploadResult> {
 
   try {
     const filename = getNewFilename(file);
