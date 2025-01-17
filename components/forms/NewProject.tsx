@@ -16,6 +16,39 @@ interface NewProjectApplicationProps {
   onReturnToMenu: () => void;
 }
 
+interface ConfirmDialogProps {
+  isOpen: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ isOpen, onConfirm, onCancel }) => {
+  const { t } = useTranslation('projectApplication');
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg max-w-md">
+        <h3 className="text-xl font-bold mb-4">{t('confirmDialog.title')}</h3>
+        <p className="mb-6">{t('confirmDialog.message')}</p>
+        <div className="flex justify-end space-x-4">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+          >
+            {t('confirmDialog.review')}
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-primaryGreen text-white rounded hover:bg-primaryGreen-dark"
+          >
+            {t('confirmDialog.confirm')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu }) => {
    const { t, i18n } = useTranslation('projectApplication');
@@ -26,6 +59,8 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
    const [optionsExpenses, setOptionsExpenses] = useState([]);
    const [isFormSubmitted, setIsFormSubmitted] = useState(false);
    const [isLoading, setLoading] = useState(false);
+   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+   const [pendingSubmission, setPendingSubmission] = useState(null);
 
 
    useEffect(() => {
@@ -124,6 +159,15 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
    }
 
    const handleSubmit = async (values, { setSubmitting }) => {
+     setPendingSubmission({ values, setSubmitting });
+     setShowConfirmDialog(true);
+   };
+
+   const handleConfirmedSubmit = async () => {
+     if (!pendingSubmission) return;
+     
+     const { values, setSubmitting } = pendingSubmission;
+     setShowConfirmDialog(false);
      setLoading(true);
      
      try {
@@ -150,7 +194,17 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
      } finally {
        setLoading(false);
        setSubmitting(false);
+       setPendingSubmission(null);
      }
+   };
+
+   const handleCancelSubmit = () => {
+     if (pendingSubmission) {
+       const { setSubmitting } = pendingSubmission;
+       setSubmitting(false); // Reset the form's submitting state
+     }
+     setShowConfirmDialog(false);
+     setPendingSubmission(null);
    };
 
    return (
@@ -338,6 +392,12 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
            </Formik>
          </FormBubble>
        )}
+       
+       <ConfirmDialog
+         isOpen={showConfirmDialog}
+         onConfirm={handleConfirmedSubmit}
+         onCancel={handleCancelSubmit}
+       />
      </>
    );
  };
