@@ -10,7 +10,8 @@ export enum ImageCategory {
   FORM_CUSTOM,
   FORM_FILLED,
   FORM_SCANNED,
-  REPORT_EXPENSES
+  REPORT_EXPENSES,
+  EXPENSE_RECEIPT
 }
 
 export interface UploadResult {
@@ -101,6 +102,9 @@ const getPath = (filename: String, category: ImageCategory) => {
       break;
     case ImageCategory.REPORT_EXPENSES:
       base = "reports/expenses";
+      break;
+    case ImageCategory.EXPENSE_RECEIPT:
+      base = "receipts";
       break;
     default: 
       throw new Error("To upload, we needed a valid image category.");
