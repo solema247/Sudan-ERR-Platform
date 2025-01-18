@@ -79,5 +79,11 @@
   "enterPhoneNumber": "Enter your phone number",
   "phoneNumber": "Phone Number",
   "enterBankDetails": "Enter your banking details",
-  "bankDetails": "Bank Details"
+  "bankDetails": "Bank Details",
+  "confirmDialog": {
+    "title": "Stakeholder Alignment",
+    "message": "Have you discussed this project with all relevant ERR stakeholders in your area? This is important to ensure community support and project success.",
+    "confirm": "Yes, I have aligned with stakeholders",
+    "review": "No, I need to review first"
+  }
 }
