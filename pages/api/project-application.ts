@@ -23,22 +23,49 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (req.method === 'GET') {
             try {
-                // Force language to 'en' as Supabase tables contain only English values
-                const language = 'en';
+                // Get language from query params
+                const language = req.query.language as string;
+                const isArabic = language === 'ar';
+
+                console.log('Fetching data with language:', language, 'isArabic:', isArabic);
 
                 const [plannedActivitiesResult, expenseCategoriesResult, statesResultRaw] = await Promise.all([
                     supabase.from('planned_activities').select('id, name').eq('language', language),
                     supabase.from('expense_categories').select('id, name').eq('language', language),
-                    supabase.from('states').select('state_name, locality').neq('state_name', null).order('state_name', { ascending: true }),
+                    supabase
+                        .from('states')
+                        .select('state_name, state_name_ar, locality, locality_ar')
+                        .neq('state_name', null)
+                        .order('state_name', { ascending: true }),
                 ]);
 
-                // Group localities by state_name
+                // Log the results to check for errors
+                console.log('Supabase Results:', {
+                    plannedActivities: plannedActivitiesResult,
+                    expenseCategories: expenseCategoriesResult,
+                    states: statesResultRaw
+                });
+
+                if (plannedActivitiesResult.error) {
+                    throw new Error(`Planned Activities Error: ${plannedActivitiesResult.error.message}`);
+                }
+                if (expenseCategoriesResult.error) {
+                    throw new Error(`Expense Categories Error: ${expenseCategoriesResult.error.message}`);
+                }
+                if (statesResultRaw.error) {
+                    throw new Error(`States Error: ${statesResultRaw.error.message}`);
+                }
+
+                // Group localities by state_name, using Arabic names if language is Arabic
                 const groupedStates = statesResultRaw.data.reduce((acc: any[], item: any) => {
-                    const state = acc.find((s: any) => s.state_name === item.state_name);
+                    const stateName = isArabic ? item.state_name_ar : item.state_name;
+                    const localityName = isArabic ? item.locality_ar : item.locality;
+                    
+                    const state = acc.find((s: any) => s.state_name === stateName);
                     if (state) {
-                        state.localities.push(item.locality);
+                        state.localities.push(localityName);
                     } else {
-                        acc.push({ state_name: item.state_name, localities: [item.locality] });
+                        acc.push({ state_name: stateName, localities: [localityName] });
                     }
                     return acc;
                 }, []);
@@ -51,11 +78,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     states: groupedStates,
                 });
             } catch (error) {
-                console.error('Error fetching dropdown options:', error);
+                console.error('Detailed error in GET request:', error);
                 return res.status(500).json({
                     success: false,
                     message: 'Error fetching dropdown options',
                     error: error.message,
+                    stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
                 });
             }
         }

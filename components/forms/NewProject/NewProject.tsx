@@ -400,12 +400,12 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
 
                  {/* Banking details */}
                  <div className="mb-3">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('bankingDetails')}</label>
+                   <label className="font-bold block text-base text-black-bold mb-1">{t('bankDetails')}</label>
                    <Field
                      name="banking_details"
                      type="text"
                      className="text-sm w-full p-2 border rounded-lg"
-                     placeholder={t('enterBankingDetails')}
+                     placeholder={t('enterBankDetails')}
                      disabled={isLoading}
                    />
                  </div>
