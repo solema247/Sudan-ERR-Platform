@@ -21,55 +21,71 @@ export interface UploadResult {
 
 const BUCKET_NAME = "images";
 
-export async function uploadImageAndInsertRecord(file: File, category: ImageCategory, projectId: string, t: (key: string, options?: any) => string, notes?: string): Promise<UploadResult> {
-
+export async function uploadImageAndInsertRecord(
+  file: File, 
+  category: ImageCategory, 
+  projectId: string, 
+  t: (key: string) => string = (key) => key,
+  notes?: string
+): Promise<UploadResult> {
   try {
+    // Validate file exists before trying to use it
+    if (!file) {
+      return {
+        success: false,
+        errorMessage: 'No file provided'
+      };
+    }
+
     const filename = getNewFilename(file);
     const newPath = getPath(filename, category);
 
     // 1. Upload file directly to private Supabase storage bucket
     const { data: _, error: uploadError } = await supabase
-        .storage
-        .from(BUCKET_NAME)
-        .upload(newPath, file);
+      .storage
+      .from(BUCKET_NAME)
+      .upload(newPath, file);
 
     if (uploadError) throw uploadError;
 
     // 2. Store a record of the file in Supabase's image table
-      const { error: insertError } = await supabase
+    const { error: insertError } = await supabase
       .from('images')
       .insert([
-          {
+        {
           created_at: new Date().toISOString(),
           project_id: projectId ?? "none",
           filename: filename,
           path: newPath,
           category: ImageCategory[category],
           notes: notes
-          },  
+        },
       ]);
 
-      if (insertError) {
-        throw insertError;
-      }
+    if (insertError) {
+      throw insertError;
+    }
 
-       // If no error, return success and the file name
-      return {
-        success: true,
-        filename: filename
-      }
+    // If no error, return success and the file name
+    return {
+      success: true,
+      filename: filename
+    };
 
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      alert(t('fileUploadError'));
-      return;
-      } 
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    return {
+      success: false,
+      errorMessage: t('fileUploadError')
+    };
+  }
 }
 
-const getNewFilename = (file: File) => {
-    const fileExt = file.name.split('.').pop();
-    return`${crypto.randomUUID()}.${fileExt}`;
-}
+const getNewFilename = (file: File): string => {
+  // Add null check and default extension
+  const fileExt = file.name ? file.name.split('.').pop() || 'bin' : 'bin';
+  return `${crypto.randomUUID()}.${fileExt}`;
+};
 
 const getPath = (filename: String, category: ImageCategory) => {
   let base:string;

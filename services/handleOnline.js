@@ -13,6 +13,48 @@ import {
 import { uploadImageAndInsertRecord, ImageCategory } from './uploadImageAndInsertRecord';
 import { supabase } from './supabaseClient';
 
+async function uploadOfflineFormFile(file, errId) {
+  try {
+    // Upload file to storage
+    const filename = `${crypto.randomUUID()}.${file.name.split('.').pop() || 'bin'}`;
+    const newPath = `reports/expenses/${filename}`;
+    
+    const { data: _, error: uploadError } = await supabase
+      .storage
+      .from('images')
+      .upload(newPath, file);
+
+    if (uploadError) throw uploadError;
+
+    // Create record with the offline project ID
+    const { error: insertError } = await supabase
+      .from('images')
+      .insert([
+        {
+          created_at: new Date().toISOString(),
+          filename: filename,
+          path: newPath,
+          category: ImageCategory[ImageCategory.REPORT_EXPENSES],
+          project_id: '514b2d2b-ee38-4f6f-ae35-22c6c982a256',  // Dedicated offline project ID
+          notes: `ERR ID: ${errId}`  // Still store ERR ID in notes for reference
+        },
+      ]);
+
+    if (insertError) throw insertError;
+
+    return {
+      success: true,
+      filename: filename
+    };
+  } catch (error) {
+    console.error('Error uploading offline form file:', error);
+    return {
+      success: false,
+      errorMessage: 'Failed to upload file'
+    };
+  }
+}
+
 export const handleOnline = async () => {
   console.log('Handling online event: Processing offline forms queue.');
 
@@ -32,12 +74,28 @@ export const handleOnline = async () => {
       // If there's a file, upload it first
       let fileUrl = null;
       if (queuedData.file) {
-        const file = await fetch(queuedData.file.objectUrl).then(r => r.blob());
-        const fileExt = queuedData.file.name.split('.').pop();
-        const fileName = `offline-reports/${Date.now()}-${crypto.randomUUID()}.${fileExt}`;
-        
-        const uploadResult = await uploadImageAndInsertRecord(file, ImageCategory.REPORT_EXPENSES);
-        if (uploadResult.errorMessage) throw uploadError;
+        try {
+          const response = await fetch(queuedData.file.objectUrl);
+          const blobData = await response.blob();
+          const file = new File([blobData], queuedData.file.name, {
+            type: queuedData.file.type,
+            lastModified: queuedData.file.lastModified
+          });
+          
+          const uploadResult = await uploadOfflineFormFile(
+            file,
+            queuedData.formData.err_id || 'unknown'
+          );
+          
+          if (uploadResult.success) {
+            fileUrl = uploadResult.filename;
+          } else {
+            throw new Error(uploadResult.errorMessage || 'File upload failed');
+          }
+        } catch (fileError) {
+          console.error('Error processing file:', fileError);
+          // Continue with form submission even if file upload fails
+        }
       }
 
       const response = await fetch('/api/offline-mode', {
@@ -45,7 +103,8 @@ export const handleOnline = async () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...queuedData,
-          fileUrl
+          fileUrl,
+          is_offline: true
         }),
       });
 
