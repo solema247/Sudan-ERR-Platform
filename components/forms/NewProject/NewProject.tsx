@@ -135,6 +135,8 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
      estimated_timeframe: Yup.string().required(t('validation.required')),
      additional_support: Yup.string(),
      officer_name: Yup.string().required(t('validation.required')),
+     phone_number: Yup.string().required(t('validation.required')),
+     banking_details: Yup.string(),
    });
 
  const getAvailableStates = (localitiesData) => {
@@ -233,6 +235,8 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
                estimated_timeframe: '',
                additional_support: '',
                officer_name: '',
+               phone_number: '',
+               banking_details: ''
              }}
              validationSchema={validationSchema}
              onSubmit={(values, actions) => {
