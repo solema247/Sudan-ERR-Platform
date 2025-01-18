@@ -43,6 +43,15 @@ const MainApp = () => {
     setNumPages(numPages);
   }
 
+  const handleLogout = () => {
+    // Clear the unlock state
+    localStorage.removeItem('isUnlocked');
+    // Remove internal page flag
+    sessionStorage.removeItem('fromInternalPage');
+    // Refresh the page to show calculator
+    router.reload();
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
       <div className="text-center mb-8">
@@ -57,6 +66,11 @@ const MainApp = () => {
         <Button 
           text={t('downloadGuide')}
           onClick={handleDownload}
+        />
+        <Button 
+          text="Logout" 
+          onClick={handleLogout}
+          className="bg-red-500 hover:bg-red-600"
         />
         <div className="flex justify-center space-x-4 mt-4">
           <button onClick={() => changeLanguage('en')} className="mx-2 text-blue-500 underline">
