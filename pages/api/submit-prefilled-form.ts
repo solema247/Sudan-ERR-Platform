@@ -72,6 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { error: expenseError } = await supabase.from('MAG F4 Expenses').insert([
         {
           err_report_id,
+          err_id,
           expense_activity: activity,
           expense_description: description,
           payment_date,

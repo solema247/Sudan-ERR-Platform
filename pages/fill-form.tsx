@@ -228,27 +228,60 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                 throw new Error('No project ID available');
             }
 
-            if (!formData.err_id || !formData.date || !formData.total_grant || !formData.total_other_sources) {
-                alert(t('requiredFieldsAlert'));
+            // Add validation for err_id
+            if (!formData.err_id?.trim()) {
+                alert(t('errIdRequired'));
+                setIsSubmitting(false);
                 return;
             }
 
-            const completedExpenses = expenses.filter(isExpenseComplete);
-            let projectId = project.id;
-            if (!projectId) {
-                throw new Error('Trouble finding a projectId to file the image under');
+            // Rest of your existing validation
+            if (!formData.date || !formData.total_grant || !formData.total_other_sources) {
+                alert(t('requiredFieldsAlert'));
+                setIsSubmitting(false);
+                return;
             }
 
-            if (file != null) {
-                let uploadImageResult = await uploadImageAndInsertRecord(file, ImageCategory.FORM_FILLED, projectId, t)
-            }
+            // Upload receipts first
+            const completedExpenses = await Promise.all(
+                expenses.filter((expense, index) => isExpenseComplete(expense, index))
+                    .map(async (expense, index) => {
+                        const receiptFile = receiptFiles[index];
+                        if (!receiptFile) {
+                            throw new Error('Missing receipt file');
+                        }
 
-            // Submit form data 
-                  // Submit form data 
-                  const submissionData = {
-                    ...formData,
-                    expenses: completedExpenses,
-                    language: currentLanguage
+                        // Upload receipt
+                        const uploadFormData = new FormData();
+                        uploadFormData.append('file', receiptFile);
+                        uploadFormData.append('expenseId', `${project.id}-${index}`);
+                        uploadFormData.append('projectId', project.id);
+                        uploadFormData.append('reportId', formData.err_id);
+
+                        const uploadResponse = await fetch('/api/upload-receipt', {
+                            method: 'POST',
+                            body: uploadFormData
+                        });
+
+                        if (!uploadResponse.ok) {
+                            const errorData = await uploadResponse.json();
+                            throw new Error(errorData.message || 'Receipt upload failed');
+                        }
+
+                        const uploadResult = await uploadResponse.json();
+
+                        return {
+                            ...expense,
+                            receipt_upload: uploadResult.filename
+                        };
+                    })
+            );
+
+            // Submit form data with receipt references
+            const submissionData = {
+                ...formData,
+                expenses: completedExpenses,
+                language: currentLanguage
             };
 
             const response = await fetch('/api/fill-form', {
@@ -258,16 +291,14 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
             });
 
             if (!response.ok) {
-                throw new Error('Submission failed');
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Submission failed');
             }
 
             setFormSubmitted(true);
         } catch (error) {
             console.error('Error submitting form:', error);
-            alert(error.message === 'Receipt upload failed' 
-                ? t('receiptUploadFailed') 
-                : t('formSubmitFailed')
-            );
+            alert(error.message);
         } finally {
             setIsSubmitting(false);
         }

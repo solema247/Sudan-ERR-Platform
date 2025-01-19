@@ -80,12 +80,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const expenseData = {
         err_report_id,
+        err_id,
         expense_activity: activity,
         expense_description: description,
-        payment_date: payment_date || null, // Allow null if not provided
+        payment_date: payment_date || null,
         seller,
-        payment_method: payment_method || 'Not Available', // Provide default if missing
-        receipt_no: receipt_no || 'Not Available', // Provide default if missing
+        payment_method: payment_method || 'Not Available',
+        receipt_no: receipt_no || 'Not Available',
         expense_amount: parseFloat(amount) || 0,
       };
 
