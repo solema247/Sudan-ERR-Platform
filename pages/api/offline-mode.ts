@@ -97,6 +97,7 @@ export default async function handler(
         .insert([
           {
             err_report_id,
+            err_id: formData.err_id,
             expense_activity: activity,
             expense_description: description,
             payment_date,
