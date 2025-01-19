@@ -8,7 +8,6 @@ const Home = () => {
   const { t } = useTranslation('home');
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
-  const [bypassCalculator, setBypassCalculator] = useState(false);
 
   // Check if we're coming from login/offline screens
   useEffect(() => {
@@ -17,11 +16,15 @@ const Home = () => {
       setIsUnlocked(true);
       sessionStorage.removeItem('fromInternalPage');
     } else {
-      // Load normal unlock state from sessionStorage instead
       const unlocked = sessionStorage.getItem('isUnlocked') === 'true';
       setIsUnlocked(unlocked);
     }
   }, []);
+
+  const handleLogout = () => {
+    setIsUnlocked(false);
+    sessionStorage.removeItem('isUnlocked');
+  };
 
   const handlePinEntry = (pin: string) => {
     if (doesEntryMatchHash(pin)) {
@@ -51,7 +54,7 @@ const Home = () => {
     return <div>{t('appLocked')}</div>;
   }
 
-  return isUnlocked ? <MainApp /> : <Calculator onPinEntry={handlePinEntry} />;
+  return isUnlocked ? <MainApp onLogout={handleLogout} /> : <Calculator onPinEntry={handlePinEntry} />;
 };
 
 export default Home;

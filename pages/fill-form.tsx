@@ -310,6 +310,7 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                 <FormBubble 
                     title={t('formTitle')} 
                     showRequiredLegend={true}
+                    removeBoxShadow
                 >
                     <form onSubmit={handleSubmit} className="space-y-3 bg-white p-2 rounded-lg">
                         <div>

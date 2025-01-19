@@ -6,6 +6,7 @@ interface FormBubbleProps {
     children: ReactNode;
     title?: string;
     showRequiredLegend?: boolean;
+    removeBoxShadow?: boolean;
 }
 
 interface FormLabelProps {
@@ -32,12 +33,13 @@ export const FormLabel: React.FC<FormLabelProps> = ({ htmlFor, required, childre
 const FormBubble: React.FC<FormBubbleProps> = ({ 
     children, 
     title, 
-    showRequiredLegend = false 
+    showRequiredLegend = false,
+    removeBoxShadow = false
 }) => {
     const { t } = useTranslation('fillForm');
     
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+        <div className={`max-w-4xl mx-auto p-6 bg-white rounded-lg ${!removeBoxShadow ? 'shadow-lg' : ''}`}>
             <h2 className="text-2xl font-bold mb-4">{title}</h2>
             {showRequiredLegend && (
                 <div className="text-sm text-gray-600 mb-4">

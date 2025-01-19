@@ -221,7 +221,7 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
            </div>
          </div>
        ) : (
-         <FormBubble>
+         <FormBubble removeBoxShadow>
            <Formik
              initialValues={{
                date: '',

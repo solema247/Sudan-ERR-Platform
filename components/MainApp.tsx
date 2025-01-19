@@ -10,7 +10,7 @@ import 'react-pdf/dist/esm/Page/TextLayer.css';
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
-const MainApp = () => {
+const MainApp = ({ onLogout }) => {
   const router = useRouter();
   const { t, i18n } = useTranslation('home');
   const [showPDFModal, setShowPDFModal] = useState(false);
@@ -44,12 +44,10 @@ const MainApp = () => {
   }
 
   const handleLogout = () => {
-    // Clear the unlock state
-    localStorage.removeItem('isUnlocked');
-    // Remove internal page flag
-    sessionStorage.removeItem('fromInternalPage');
-    // Refresh the page to show calculator
-    router.reload();
+    // Clear the JWT token cookie
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    // Call the onLogout prop to switch to Calculator
+    onLogout();
   };
 
   return (

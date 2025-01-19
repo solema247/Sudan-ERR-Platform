@@ -18,9 +18,14 @@ const Calculator: React.FC<CalculatorProps> = ({ onPinEntry }) => {
   };
 
   const handleCalculate = () => {
-    onPinEntry(input + '=');
     try {
-      // eslint-disable-next-line no-eval
+      // First check if this could be a PIN attempt
+      if (!input.includes('+') && !input.includes('-') && !input.includes('*') && !input.includes('/')) {
+        // If it's just numbers, treat as potential PIN and add the = sign
+        onPinEntry(input + '=');
+      }
+      
+      // Perform normal calculation regardless
       const evalResult = eval(input);
       setResult(evalResult.toString());
     } catch (error) {
