@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
-import Button from '../ui/Button';
+import Button from '../components/ui/Button';
 import Image from 'next/image';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
@@ -10,7 +10,7 @@ import 'react-pdf/dist/esm/Page/TextLayer.css';
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
-const MainApp = () => {
+const MainApp = ({ onLogout }) => {
   const router = useRouter();
   const { t, i18n } = useTranslation('home');
   const [showPDFModal, setShowPDFModal] = useState(false);
@@ -18,9 +18,9 @@ const MainApp = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(() => {
     if (typeof window !== 'undefined') {
-      return window.innerWidth < 768 ? 0.5 : 0.8;  // Mobile gets 0.50, desktop gets 0.8
+      return window.innerWidth < 768 ? 0.5 : 0.8;  // Mobile gets 0.5, desktop gets 0.8
     }
-    return 0.6; // Default fall back
+    return 0.6; // Default fallback
   });
 
   const handleLogin = () => {
@@ -46,8 +46,8 @@ const MainApp = () => {
   const handleLogout = () => {
     // Clear the JWT token cookie
     document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    // Go to root path which will show calculator when not authenticated
-    window.location.href = '/';
+    // Call the onLogout prop to switch to Calculator
+    onLogout();
   };
 
   return (
@@ -65,17 +65,17 @@ const MainApp = () => {
           text={t('downloadGuide')}
           onClick={handleDownload}
         />
+        <Button 
+          text="Logout" 
+          onClick={handleLogout}
+          className="bg-red-500 hover:bg-red-600"
+        />
         <div className="flex justify-center space-x-4 mt-4">
           <button onClick={() => changeLanguage('en')} className="mx-2 text-blue-500 underline">
             English
           </button>
           <button onClick={() => changeLanguage('ar')} className="mx-2 text-blue-500 underline">
             العربية
-          </button>
-        </div>
-        <div className="mt-4">
-          <button onClick={handleLogout} className="text-red-500 underline">
-            {t('logout')}
           </button>
         </div>
       </div>

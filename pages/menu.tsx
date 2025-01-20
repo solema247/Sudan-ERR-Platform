@@ -236,7 +236,7 @@ const Menu = () => {
                         onReturnToMenu={() => handleMenuSelection('reporting')} 
                         onSubmitAnotherForm={() => {
                             setShowFillForm(false);
-                            setTimeout(() => setShowFillForm(true), 0); // Reset workflow
+                            setTimeout(() => setShowFillForm(true), 0);
                         }}
                     />
                 </MessageBubble>

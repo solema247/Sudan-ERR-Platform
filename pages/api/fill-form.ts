@@ -44,8 +44,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 language
             } = req.body;
 
+            // Add validation for err_id
+            if (!err_id) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'ERR ID is required'
+                });
+            }
+
             // Generate a unique report ID
-            const err_report_id = generateErrReportId(err_id || '');
+            const err_report_id = generateErrReportId(err_id);
 
             // Calculate the total expenses
             const total_expenses = expenses.reduce((acc: number, exp: any) => acc + (parseFloat(exp.amount) || 0), 0);
@@ -72,7 +80,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 .select()
                 .single();
 
-            if (summaryError) throw new Error('Failed to insert data into MAG F4 Summary');
+            if (summaryError) {
+                console.error('Summary error:', summaryError);
+                throw new Error(`Failed to insert data into MAG F4 Summary: ${summaryError.message}`);
+            }
 
             // Insert completed expense entries
             for (const expense of expenses) {
@@ -94,12 +105,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     });
                 }
 
-                // Insert expense record with receipt reference
                 try {
                     const { error: expenseError } = await supabase
                         .from('MAG F4 Expenses')
                         .insert([{
                             err_report_id,
+                            err_id,
                             expense_activity: activity,
                             expense_description: description,
                             payment_date,

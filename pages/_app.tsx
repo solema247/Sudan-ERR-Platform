@@ -1,5 +1,6 @@
 //pages/_app.tsx
 import { useEffect } from 'react';
+import Head from 'next/head';
 import '../styles/globals.css';
 import { registerServiceWorker } from '../services/serviceWorkerRegistration';
 import { handleOnline } from '../services/handleOnline';
@@ -56,7 +57,14 @@ function MyApp({ Component, pageProps }) {
   }, [router.locale]);
 
   // Render the application
-  return <Component {...pageProps} />;
+  return (
+    <>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+      </Head>
+      <Component {...pageProps} />
+    </>
+  );
 }
 
 export default appWithTranslation(MyApp);
