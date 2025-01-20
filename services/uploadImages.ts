@@ -21,50 +21,64 @@ export interface UploadResult {
 
 const BUCKET_NAME = "images";
 
-export async function uploadImageAndInsertRecord(file: File, category: ImageCategory, projectId: string, t: (key: string, options?: any) => string, notes?: string): Promise<UploadResult> {
+export async function uploadImages(
+  files: File[], 
+  category: ImageCategory, 
+  projectId: string, 
+  t: (key: string, options?: any) => string, 
+  notes?: string
+): Promise<UploadResult[]> {
 
-  try {
-    const filename = getNewFilename(file);
-    const newPath = getPath(filename, category);
+  const results: UploadResult[] = [];
 
-    // 1. Upload file directly to private Supabase storage bucket
-    const { data: _, error: uploadError } = await supabase
+  for (const file of files) {
+    try {
+      const filename = getNewFilename(file);
+      const newPath = getPath(filename, category);
+
+      // 1. Upload file to the Supabase storage bucket
+      const { error: uploadError } = await supabase
         .storage
         .from(BUCKET_NAME)
         .upload(newPath, file);
 
-    if (uploadError) throw uploadError;
+      if (uploadError) throw uploadError;
 
-    // 2. Store a record of the file in Supabase's image table
+      // 2. Store a record of the file in Supabase's image table
       const { error: insertError } = await supabase
-      .from('images')
-      .insert([
+        .from('images')
+        .insert([
           {
-          created_at: new Date().toISOString(),
-          project_id: projectId ?? "none",
-          filename: filename,
-          path: newPath,
-          category: ImageCategory[category],
-          notes: notes
-          },  
-      ]);
+            created_at: new Date().toISOString(),
+            project_id: projectId ?? "none",
+            filename: filename,
+            path: newPath,
+            category: ImageCategory[category],
+            notes: notes,
+          },
+        ]);
 
-      if (insertError) {
-        throw insertError;
-      }
+      if (insertError) throw insertError;
 
-       // If no error, return success and the file name
-      return {
+      // If no error, add success result to the array
+      results.push({
         success: true,
-        filename: filename
-      }
-
+        filename: filename,
+      });
     } catch (error) {
       console.error('Error uploading file:', error);
-      alert(t('fileUploadError'));
-      return;
-      } 
+
+      // Add failure result to the array
+      results.push({
+        success: false,
+        errorMessage: t('fileUploadError'),
+      });
+    }
+  }
+
+  return results;
 }
+
 
 const getNewFilename = (file: File) => {
     const fileExt = file.name.split('.').pop();

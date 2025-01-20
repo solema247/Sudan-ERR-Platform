@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import FormBubble from '../components/ui/FormBubble';
 import Button from '../components/ui/Button';
 import i18n from '../services/i18n';
-import { uploadImageAndInsertRecord, ImageCategory } from '../services/uploadImageAndInsertRecord';
+import { uploadImages, ImageCategory } from '../services/uploadImages';
 import { FormLabel } from '../components/ui/FormBubble';
 import ReceiptUploader from '../components/uploads/ReceiptUploader';
 import { supabase } from '../services/supabaseClient';
@@ -17,6 +17,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
  * 
  * TODO: Better dynamic activity form
  * TODO: Convert to Formik for easier management and for consistency with the F1 form. https://formik.org
+ * TODO: Move this into its own Components/forms folder, but be sure we don't break offline mode, etc.
  */
 
 interface FillFormProps {
@@ -50,7 +51,7 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
     const [expenses, setExpenses] = useState([
         { activity: '', description: '', payment_date: '', seller: '', payment_method: 'cash', receipt_no: '', amount: '' }
     ]);
-    const [file, setFile] = useState<File | null>(null);
+    // const [file, setFile] = useState<File | null>(null);
     const [formData, setFormData] = useState({
         date: '',
         err_id: '',
@@ -185,7 +186,7 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                 e.target.value = ''; // Reset the input
                 return;
             }
-            setFile(selectedFile);
+            setReceiptFiles[index](selectedFile);
         }
     };
 
@@ -238,8 +239,10 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                 throw new Error('Trouble finding a projectId to file the image under');
             }
 
-            if (file != null) {
-                let uploadImageResult = await uploadImageAndInsertRecord(file, ImageCategory.FORM_FILLED, projectId, t)
+            if (receiptFiles) {
+                const keys = Object.keys(receiptFiles);
+                const uploadableFiles = keys.map((k) => receiptFiles[k])
+                let uploadImageResults = await uploadImages(uploadableFiles, ImageCategory.REPORT_EXPENSES, projectId, t)
             }
 
             // Submit form data 
@@ -531,7 +534,7 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
                                     className="hidden"
                                 />
                             </label>
-                            {file && <span className="text-gray-600">{file.name}</span>}
+                            {receiptFiles[index] && <span className="text-gray-600">{receiptFiles[index].name}</span>}
                         </div>
 
                         <Button 

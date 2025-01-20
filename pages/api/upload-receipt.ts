@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '../../services/supabaseClient';
-import { ImageCategory } from '../../services/uploadImageAndInsertRecord';
+import { ImageCategory } from '../../services/uploadImages';
 import formidable, { Fields, Files } from 'formidable';
 import fs from 'fs';
 import { promisify } from 'util';
@@ -80,7 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .insert([{
                 filename,
                 path: filePath,
-                category: ImageCategory.EXPENSE_RECEIPT,
+                category: ImageCategory.REPORT_EXPENSES,
                 project_id: projectId,
                 notes: `Receipt for expense ${expenseId}`,
                 created_at: new Date().toISOString(),

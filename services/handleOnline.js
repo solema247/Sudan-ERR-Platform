@@ -10,7 +10,7 @@ import {
   removeFormFromSessionQueue, 
   addFormToSubmittedQueue 
 } from './sessionUtils';
-import { uploadImageAndInsertRecord, ImageCategory } from './uploadImageAndInsertRecord';
+import { uploadImagesAndInsertRecord, ImageCategory } from './uploadImages';
 import { supabase } from './supabaseClient';
 
 export const handleOnline = async () => {
