@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import NewProject from '../components/forms/NewProject/NewProject';
-// import FillForm from '../pages/fill-form';
+import FillForm from '../pages/fill-form';
+
 
 describe('Index', () => {
     it('loads F1 Project Form', () => {
@@ -9,7 +10,7 @@ describe('Index', () => {
     })
 
     it('loads F4 Financial Reporting Form', () => {
-
+        render(<FillForm/>)
     })
 
     it('submits a valid request to the server', () => {

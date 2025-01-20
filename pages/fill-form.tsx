@@ -4,11 +4,10 @@ import FormBubble from '../components/ui/FormBubble';
 import Button from '../components/ui/Button';
 import i18n from '../services/i18n';
 import { uploadImageAndInsertRecord, ImageCategory } from '../services/uploadImageAndInsertRecord';
-import { createClient } from '@supabase/supabase-js'; // Import Supabase client
 import { FormLabel } from '../components/ui/FormBubble';
 import ReceiptUploader from '../components/uploads/ReceiptUploader';
+import { supabase } from '../services/supabaseClient';
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
 
 /**
