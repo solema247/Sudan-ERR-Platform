@@ -6,7 +6,7 @@
 
 ## Overview
 
-In war-torn Sudan, during what the U.N. calls the "world's worst hunger crisis," there is a struggle to deliver water, food and medical supplies. Security threats and checkpoints set up by both sides have interfered with work by aid agencies.
+In war-torn Sudan, during what the U.N. calls the world's worst hunger crisis, there is a struggle to deliver water, food and medical supplies. Security threats and checkpoints set up by both sides have interfered with work by aid agencies.
 
 Emergency Response Rooms (ERR) are a community-led initiative that has played a crucial role in breaking through these obstacles. This is a Next.js Web app that streamlines the reporting and interention workflows of ERRs. It gives control to activists on the ground while tracking the use of donor funds from outside. The solution is built around the F-System framework developed by ERRs to manage Group Cash Transfers to communities on ground to carry out critical humanitarian work. 
 
