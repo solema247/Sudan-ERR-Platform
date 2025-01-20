@@ -240,7 +240,7 @@ const FillForm: React.FC<FillFormProps> = ({ project, onReturnToMenu, onSubmitAn
             }
 
             if (file != null) {
-                let uploadImageResult = await uploadImageAndInsertRecord(file, ImageCategory.FORM_FILLED, projectId, t)
+                let uploadImageResult = await uploadImageAndInsertRecord(file, ImageCategory.REPORT_EXPENSES, projectId, t)
             }
 
             // Submit form data 
