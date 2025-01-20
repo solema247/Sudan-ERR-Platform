@@ -42,11 +42,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ projectId, onUploadComplete
             file, 
             ImageCategory.FORM_SCANNED, 
             projectId,
+            t,
             "Scanned report",
-            {
-              noFile: t("errors.no_file"),
-              uploadFailed: t("errors.upload_failed")
-            }
           );
           if (result.errorMessage) { 
             throw new Error(result.errorMessage);

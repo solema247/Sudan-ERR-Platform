@@ -80,7 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .insert([{
                 filename,
                 path: filePath,
-                category: ImageCategory.EXPENSE_RECEIPT,
+                category: ImageCategory.REPORT_EXPENSES,
                 project_id: projectId,
                 notes: `Receipt for expense ${expenseId}`,
                 created_at: new Date().toISOString(),
