@@ -135,9 +135,7 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify(values),
        });
-       
-       console.log("Response received:", res);
-       
+              
        if (res.ok) {
          console.log("Submission successful");
          setIsFormSubmitted(true);

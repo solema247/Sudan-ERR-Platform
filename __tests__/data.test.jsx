@@ -15,5 +15,5 @@ describe('JSON test', () => {
                 var json = JSON.parse(fs.readFileSync(filepath, 'utf8'));
             }    
         }
-    })
+    })  
 })
