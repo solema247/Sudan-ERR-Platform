@@ -11,6 +11,16 @@ import { v4 as uuidv4 } from 'uuid';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 
+
+// TODO: Ensure we are adding and removing cards
+// TODO: Ensure we are uploading receipts
+// TODO: Differentiate somehow between form and supporting files.
+// TODO: Prepopulate ERR ID, first expense.
+// TODO: Report ID should be assigned when upload begins, right? Or at creation?
+// TODO: Wire uploader back up.
+// TODO: Wire back up errors on individual array items. How does this
+// TODO: Wire back up the onBlur, etc. handlers if we need them.
+
 const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
     const { t } = useTranslation('fill-form');
     const [categories, setCategories] = useState([]);
@@ -183,7 +193,10 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
 
                                             <Button
                                                 text={t('removeExpense')}
-                                                onClick={() => arrayHelpers.remove(index)}
+                                                onClick={() => {
+                                                    arrayHelpers.remove(index)
+                                                    console.log(`Removing index ${index}`);
+                                                }}
                                                 className="mt-4 bg-red-500 text-white"
                                             />
                                         </div>
