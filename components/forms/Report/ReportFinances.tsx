@@ -8,14 +8,19 @@ import ReceiptUploader from './ReceiptUploader';
 import { supabase } from '../../../services/supabaseClient';
 import { uploadImages, ImageCategory } from '../../../services/uploadImages';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes. TODO: Compress files before they upload.
 
-const FillForm = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
+// TODO: Ensure we are adding and removing cards
+// TODO: Ensure we are uploading receipts
+// TODO: Differentiate somehow between form and supporting files.
+
+
+const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
     const { t } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
-        const fetchCategories = async () => {
+        const populateCategories = async () => {
             const { data, error } = await supabase
                 .from('expense_categories')
                 .select('id, name, language')
@@ -25,88 +30,37 @@ const FillForm = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                 setCategories(data);
             }
         };
-        fetchCategories();
+        populateCategories();
     }, []);
 
-    const validationSchema = Yup.object({
-        err_id: Yup.string().required(t('errorMessages.required')),
-        date: Yup.string().required(t('errorMessages.required')),
-        total_grant: Yup.number()
-            .required(t('errorMessages.required'))
-            .min(0, t('errorMessages.invalidNumber')),
-        total_other_sources: Yup.number()
-            .required(t('errorMessages.required'))
-            .min(0, t('errorMessages.invalidNumber')),
-        expenses: Yup.array()
-            .of(
-                Yup.object({
-                    activity: Yup.string().required(t('errorMessages.required')),
-                    description: Yup.string().required(t('errorMessages.required')),
-                    payment_date: Yup.string().required(t('errorMessages.required')),
-                    seller: Yup.string().required(t('errorMessages.required')),
-                    payment_method: Yup.string().required(t('errorMessages.required')),
-                    receipt_no: Yup.string().required(t('errorMessages.required')),
-                    amount: Yup.number()
-                        .required(t('errorMessages.required'))
-                        .min(0, t('errorMessages.invalidNumber')),
-                })
-            )
-            .min(1, t('errorMessages.minExpenses')),
-    });
-
     const formik = useFormik({
-        initialValues: {
-            err_id: '',
-            date: '',
-            total_grant: '',
-            total_other_sources: '',
-            expenses: [
-                {
-                    activity: '',
-                    description: '',
-                    payment_date: '',
-                    seller: '',
-                    payment_method: 'cash',
-                    receipt_no: '',
-                    amount: '',
-                    file: null,
-                },
-            ],
-        },
-        validationSchema,
-        onSubmit: async (values, { setSubmitting }) => {
-            try {
-                const completedExpenses = values.expenses.filter((expense) => expense.file);
-
-                const uploadedFiles = await Promise.all(
-                    completedExpenses.map((expense) =>
-                        uploadImages([expense.file], ImageCategory.REPORT_EXPENSES, project?.id || '', t)
-                    )
-                );
-
-                const submissionData = {
-                    ...values,
-                    expenses: completedExpenses.map((expense, index) => ({
-                        ...expense,
-                        receipt_url: uploadedFiles[index]?.[0]?.url || '',
-                    })),
-                };
-
-                const response = await fetch('/api/fill-form', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(submissionData),
-                });
-
-                if (!response.ok) throw new Error(t('formSubmitFailed'));
-                onSubmitAnotherForm();
-            } catch (error) {
-                console.error('Error submitting form:', error);
-                alert(error.message);
-            } finally {
-                setSubmitting(false);
-            }
-        },
+        initialValues: initialValues,
+        validationSchema: Yup.object({
+            err_id: Yup.string().required(t('errorMessages.required')),
+            date: Yup.string().required(t('errorMessages.required')),
+            total_grant: Yup.number()
+                .required(t('errorMessages.required'))
+                .min(0, t('errorMessages.invalidNumber')),
+            total_other_sources: Yup.number()
+                .required(t('errorMessages.required'))
+                .min(0, t('errorMessages.invalidNumber')),
+            expenses: Yup.array()
+                .of(
+                    Yup.object({
+                        activity: Yup.string().required(t('errorMessages.required')),
+                        description: Yup.string().required(t('errorMessages.required')),
+                        payment_date: Yup.string().required(t('errorMessages.required')),
+                        seller: Yup.string().required(t('errorMessages.required')),
+                        payment_method: Yup.string().required(t('errorMessages.required')),
+                        receipt_no: Yup.string().required(t('errorMessages.required')),
+                        amount: Yup.number()
+                            .required(t('errorMessages.required'))
+                            .min(0, t('errorMessages.invalidNumber')),
+                    })
+                )
+                .min(1, t('errorMessages.minExpenses')),
+        });
+        onSubmit: onSubmit,
     });
 
     return (
@@ -144,7 +98,6 @@ const FillForm = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                     )}
                 </div>
 
-                <FormikProvider value={formik}>
                     <FieldArray
                         name="expenses"
                         render={(arrayHelpers) => (
@@ -176,6 +129,8 @@ const FillForm = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                                         </div>
 
                                         <ReceiptUploader
+                                            projectId={projectId}
+                                            reportId={reportId}
                                             expenseId={`${index}`}
                                             onFileSelect={(file) => formik.setFieldValue(`expenses.${index}.file`, file)}
                                             onError={(error) => alert(error)}
@@ -208,7 +163,6 @@ const FillForm = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                             </div>
                         )}
                     />
-                </FormikProvider>
 
                 <Button text={t('submit')} type="submit" disabled={formik.isSubmitting} />
             </form>
@@ -216,4 +170,62 @@ const FillForm = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
     );
 };
 
-export default FillForm;
+const initialValues = {
+    err_id: '',
+    date: '',
+    total_grant: '',
+    total_other_sources: '',
+    expenses: [
+        {
+            activity: '',
+            description: '',
+            payment_date: '',
+            seller: '',
+            payment_method: 'cash',
+            receipt_no: '',
+            amount: '',
+            file: null,
+        },
+    ],
+}
+
+const onSubmit = async (values, { setSubmitting }) => {
+    try {
+        const completedExpenses = values.expenses.filter((expense) => expense.file);
+
+        const uploadedFiles = await Promise.all(
+            completedExpenses.map((expense) =>
+                // TODO: Differentiate between form and supporting images
+                uploadImages([expense.file], ImageCategory.REPORT_EXPENSES_SUPPORTING_IMAGE, project?.id || '', t)
+            )
+        );
+
+        const submissionData = {
+            ...values,
+            expenses: completedExpenses.map((expense, index) => ({
+                ...expense,
+                receipt_url: uploadedFiles[index]?.[0]?.url || '',
+            })),
+        };
+
+        const response = await fetch('/api/fill-form', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(submissionData),
+        });
+
+        if (!response.ok) throw new Error(t('formSubmitFailed'));
+        onSubmitAnotherForm();
+    } catch (error) {
+        console.error('Error submitting form:', error);
+        alert(error.message);
+    } finally {
+        setSubmitting(false);
+    }
+}
+
+
+
+
+
+export default ReportFinances;
