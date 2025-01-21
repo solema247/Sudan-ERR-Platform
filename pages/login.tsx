@@ -9,9 +9,13 @@ import Button from '../components/ui/Button';
 import OfflineForm from '../components/forms/OfflineForm';
 const LogoImage = '/icons/icon-512x512.png';
 import i18n from '../services/i18n'; 
+import jwt from 'jsonwebtoken';
+
+export interface User {
+    err_id: string
+}
 
 const Login = () => {
-    // State management
     const [errId, setErrId] = useState('');
     const [pin, setPin] = useState('');
     const [error, setError] = useState('');
@@ -73,7 +77,10 @@ const Login = () => {
             const data = await response.json();
 
             if (data.success) {
-                router.push('/menu'); // Redirect to the menu page
+                router.push({
+                    pathname: '/menu',
+                    query: { errId: errId }
+                }); 
             } else {
                 setError(data.message || t('loginError')); // Use translated error message
             }

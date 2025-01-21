@@ -10,15 +10,9 @@ import ScanCustomForm from '../pages/scan-custom-form'; // Import the new compon
 import ProjectApplication from '../components/forms/NewProject/NewProjectForm';
 import ProjectStatus from '../pages/project-status';
 import FeedbackForm from '../components/forms/FeedbackForm'; // Correct import path
-const LogoImage = '/icons/icon-512x512.png'; 
+import Project from '../components/forms/NewProject/Project';
 
-export interface Project {
-    id: string;
-    project_objectives: string;
-    state: string;
-    locality: string;
-    // TODO: Anything else?
-}
+const LogoImage = '/icons/icon-512x512.png'; 
 
 const getCurrentTimestamp = () => {
     const now = new Date();
@@ -36,6 +30,7 @@ const Menu = () => {
     const [selectedProject, setSelectedProject] = useState<Project | null>(null); // Stores selected project
 
     const router = useRouter();
+    const errId = router.query.errId;
     const { t, i18n } = useTranslation('menu');
 
     // Validate session on load
@@ -237,6 +232,7 @@ const Menu = () => {
             {showFillForm && (
                 <MessageBubble>
                     <ReportingForm
+                        errId={errId}
                         project={selectedProject} 
                         onReturnToMenu={() => handleMenuSelection('reporting')} 
                         onSubmitAnotherForm={() => {

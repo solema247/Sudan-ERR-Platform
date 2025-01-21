@@ -8,7 +8,7 @@ import ReceiptChooser from './ReceiptUploader';
 import { supabase } from '../../../services/supabaseClient';
 import { uploadImages, ImageCategory } from '../../../services/uploadImages';
 import { v4 as uuidv4 } from 'uuid';
-import { Project } from '../../../pages/menu'; // TODO: Better place for type definitions.
+import { Project } from '../../forms/NewProject/Project';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 
@@ -16,7 +16,6 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
  * F4 Financial Reporting form, called from Menu.tsx
  */
 
-// TODO: Ensure we are adding and removing cards
 // TODO: Ensure we are uploading receipts
 // TODO: Differentiate somehow between form and supporting files.
 // TODO: Prepopulate ERR ID, first expense.
@@ -25,7 +24,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 // TODO: Wire back up errors on individual array items. How does this
 // TODO: Wire back up the onBlur, etc. handlers if we need them.
 
-const ReportingForm = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
+const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) => {
     const { t } = useTranslation('fill-form');
     const [categories, setCategories] = useState([]);
     const reportId = getReportId();
@@ -48,7 +47,7 @@ const ReportingForm = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
     const ERROR_MESSAGE_INVALID_NUMBER = "هذا الرقم غير صالح.";
 
     const initialValues = {
-        err_id: '',
+        err_id: errId,
         date: '',
         total_grant: '',
         total_other_sources: '',
@@ -61,7 +60,7 @@ const ReportingForm = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                 payment_method: 'cash',
                 receipt_no: '',
                 amount: '',
-                file: null,
+                receiptFile: null,
             },
         ],
     };
@@ -97,11 +96,11 @@ const ReportingForm = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                 })}
                 onSubmit={async (values, { setSubmitting }) => {
                     try {
-                        const completedExpenses = values.expenses.filter((expense) => expense.file);
+                        const completedExpenses = values.expenses.filter((expense) => expense.receiptFile);
 
                         const uploadedFiles = await Promise.all(
                             completedExpenses.map((expense) =>
-                                uploadImages([expense.file], ImageCategory.REPORT_EXPENSES_SUPPORTING_IMAGE, project.id, t)
+                                uploadImages([expense.receiptFile], ImageCategory.REPORT_EXPENSES_SUPPORTING_IMAGE, project.id, t)
                             )
                         );
 
@@ -187,9 +186,6 @@ const ReportingForm = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                                             </div>
 
                                             <ReceiptChooser
-                                                projectId={project.id}
-                                                reportId={reportId}
-                                                expenseId={`${index}`}
                                                 onFileSelect={(file) => setFieldValue(`expenses.${index}.file`, file)}
                                                 onError={(error) => alert(error)}
                                             />
