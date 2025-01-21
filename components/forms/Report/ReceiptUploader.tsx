@@ -2,17 +2,11 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ReceiptChooser {
-    expenseId: string;
-    projectId: string;
-    reportId: string;
     onFileSelect: (file: File) => void;
     onError: (error: string) => void;
 }
 
 const ReceiptChooser: React.FC<ReceiptChooser> = ({ 
-    expenseId, 
-    projectId, 
-    reportId, 
     onFileSelect, 
     onError 
 }) => {
