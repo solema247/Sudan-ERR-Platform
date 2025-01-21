@@ -4,7 +4,7 @@ import { Formik, Form, Field, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import Button from '../../ui/Button';
 import FormBubble from '../../ui/FormBubble';
-import ActivitiesFieldArray from './NewProjectActivities';
+import NewProjectActivities from './NewProjectActivities';
 
 /**
  * F1 Form
@@ -285,7 +285,7 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
 
                  {/* Add/remove activities and their expenses */}
 
-                 <ActivitiesFieldArray optionsActivities={optionsActivities} optionsExpenses={optionsExpenses} />
+                 <NewProjectActivities optionsActivities={optionsActivities} optionsExpenses={optionsExpenses} />
 
                  {/* Estimated timeframe */}
 

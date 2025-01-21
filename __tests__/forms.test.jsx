@@ -10,11 +10,9 @@ describe('Index', () => {
     })
 
     it('loads F4 Financial Reporting Form', () => {
-        render(<FillForm/>)
+        render(<ReportFinances/>)
     })
 
-    it('submits a valid request to the server', () => {
-
-    })
+    
 })
 

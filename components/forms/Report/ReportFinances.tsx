@@ -13,11 +13,15 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes. TODO: Compress files b
 // TODO: Ensure we are adding and removing cards
 // TODO: Ensure we are uploading receipts
 // TODO: Differentiate somehow between form and supporting files.
+// TODO: Prepopulate ERR ID, first expense.
+// TODO: Report ID should be assigned when upload begins, right? Or at creation?
 
 
 const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
-    const { t } = useTranslation('fillForm');
+    const { t } = useTranslation('fill-form');
     const [categories, setCategories] = useState([]);
+    const { projectId } = project; // TODO: Right? Is that where we are pulling this from?
+    const reportId = getReportId();
 
     useEffect(() => {
         const populateCategories = async () => {
@@ -31,35 +35,43 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
             }
         };
         populateCategories();
+
+        const populateKnownProjectDetails = async () => {
+            // TODO: Grab ERR_ID room id and the first known expense.
+        }
+
     }, []);
+
+    const ERROR_MESSAGE_FIELD_REQUIRED = "هذه الخانة مطلوبه.";
+    const ERROR_MESSAGE_INVALID_NUMBER = "هذا الرقم غير صالح.";
 
     const formik = useFormik({
         initialValues: initialValues,
         validationSchema: Yup.object({
-            err_id: Yup.string().required(t('errorMessages.required')),
-            date: Yup.string().required(t('errorMessages.required')),
+            err_id: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
+            date: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
             total_grant: Yup.number()
-                .required(t('errorMessages.required'))
-                .min(0, t('errorMessages.invalidNumber')),
+                .required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED)
+                .min(0, t('errorMessages.invalidNumber') || ERROR_MESSAGE_FIELD_REQUIRED),
             total_other_sources: Yup.number()
-                .required(t('errorMessages.required'))
-                .min(0, t('errorMessages.invalidNumber')),
+                .required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED)
+                .min(0, t('errorMessages.invalidNumber') || ERROR_MESSAGE_FIELD_REQUIRED),
             expenses: Yup.array()
                 .of(
                     Yup.object({
-                        activity: Yup.string().required(t('errorMessages.required')),
-                        description: Yup.string().required(t('errorMessages.required')),
-                        payment_date: Yup.string().required(t('errorMessages.required')),
-                        seller: Yup.string().required(t('errorMessages.required')),
-                        payment_method: Yup.string().required(t('errorMessages.required')),
-                        receipt_no: Yup.string().required(t('errorMessages.required')),
+                        activity: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
+                        description: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
+                        payment_date: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
+                        seller: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
+                        payment_method: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
+                        receipt_no: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
                         amount: Yup.number()
-                            .required(t('errorMessages.required'))
-                            .min(0, t('errorMessages.invalidNumber')),
+                            .required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED)
+                            .min(0, t('errorMessages.invalidNumber') || ERROR_MESSAGE_INVALID_NUMBER),
                     })
                 )
                 .min(1, t('errorMessages.minExpenses')),
-        });
+        }),
         onSubmit: onSubmit,
     });
 
@@ -77,7 +89,7 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                         value={formik.values.err_id}
                         className={`w-full p-2 border rounded ${formik.touched.err_id && formik.errors.err_id ? 'border-red-500' : 'border-gray-300'}`}
                     />
-                    {formik.touched.err_id && formik.errors.err_id && (
+                    {formik.touched.err_id && formik.errors.err_id && typeof formik.errors.err_id === 'string' && (
                         <div className="text-red-500 text-sm">{formik.errors.err_id}</div>
                     )}
                 </div>
@@ -93,7 +105,7 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                         value={formik.values.date}
                         className={`w-full p-2 border rounded ${formik.touched.date && formik.errors.date ? 'border-red-500' : 'border-gray-300'}`}
                     />
-                    {formik.touched.date && formik.errors.date && (
+                    {formik.touched.date && formik.errors.date && typeof formik.errors.date === 'string' && (
                         <div className="text-red-500 text-sm">{formik.errors.date}</div>
                     )}
                 </div>
@@ -170,6 +182,12 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
     );
 };
 
+// TODO: Where is this coming from?
+const getReportId = () => {
+    const reportId = "REPORT_ID";
+    return reportId;
+}
+
 const initialValues = {
     err_id: '',
     date: '',
@@ -223,6 +241,7 @@ const onSubmit = async (values, { setSubmitting }) => {
         setSubmitting(false);
     }
 }
+
 
 
 

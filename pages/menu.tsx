@@ -1,4 +1,3 @@
-// /pages/menu.tsx
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -6,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import ChatContainer from '../components/ui/ChatContainer';
 import MessageBubble from '../components/ui/MessageBubble';
 import Button from '../components/ui/Button';
-import FillForm from '../components/forms/Report/fill-form';
+import FillForm from '../components/forms/Report/ReportFinances';
 import ScanForm from '../pages/scan-form';
 import ScanCustomForm from '../pages/scan-custom-form'; // Import the new component
 import ProjectApplication from '../components/forms/NewProject/NewProject';
