@@ -1,18 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import ChatContainer from '../components/ui/ChatContainer';
 import MessageBubble from '../components/ui/MessageBubble';
 import Button from '../components/ui/Button';
-import FillForm from '../components/forms/Report/ReportFinances';
+import ReportingForm from '../components/forms/Report/ReportingForm';
 import ScanForm from '../pages/scan-form';
 import ScanCustomForm from '../pages/scan-custom-form'; // Import the new component
-import ProjectApplication from '../components/forms/NewProject/NewProject';
+import ProjectApplication from '../components/forms/NewProject/NewProjectForm';
 import ProjectStatus from '../pages/project-status';
 import FeedbackForm from '../components/forms/FeedbackForm'; // Correct import path
 const LogoImage = '/icons/icon-512x512.png'; 
 
+export interface Project {
+    id: string;
+    project_objectives: string;
+    state: string;
+    locality: string;
+    // TODO: Anything else?
+}
 
 const getCurrentTimestamp = () => {
     const now = new Date();
@@ -26,8 +32,8 @@ const Menu = () => {
     const [showScanCustomForm, setShowScanCustomForm] = useState(false);
     const [showProjectApplication, setShowProjectApplication] = useState(false);
     const [showProjectStatus, setShowProjectStatus] = useState(false);
-    const [projects, setProjects] = useState([]); // Stores active projects
-    const [selectedProject, setSelectedProject] = useState(null); // Stores selected project
+    const [projects, setProjects] = useState<Project[]>([]); // Stores active projects
+    const [selectedProject, setSelectedProject] = useState<Project | null>(null); // Stores selected project
 
     const router = useRouter();
     const { t, i18n } = useTranslation('menu');
@@ -230,7 +236,7 @@ const Menu = () => {
             {/* Other workflows */}
             {showFillForm && (
                 <MessageBubble>
-                    <FillForm 
+                    <ReportingForm
                         project={selectedProject} 
                         onReturnToMenu={() => handleMenuSelection('reporting')} 
                         onSubmitAnotherForm={() => {

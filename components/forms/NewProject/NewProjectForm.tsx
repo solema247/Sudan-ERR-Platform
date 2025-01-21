@@ -19,7 +19,7 @@ interface NewProjectApplicationProps {
 }
 
 
-const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu }) => {
+const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu }) => {
    const { t, i18n } = useTranslation('projectApplication');
    const [availableRegions, setAvailableRegions] = useState([]);
    const [localitiesDict, setLocalitiesDict] = useState({});
@@ -367,4 +367,4 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
    );
  };
 
- export default NewProjectApplication;
+ export default NewProjectForm;
