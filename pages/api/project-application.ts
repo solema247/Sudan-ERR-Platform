@@ -52,8 +52,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 // Group localities by state_name, using Arabic names if language is Arabic
                 const groupedStates = statesResultRaw.data.reduce((acc: any[], item: any) => {
-                    const stateName = item.state_name_ar ? item.state_name_ar : item.state_name;
-                    const localityName = item.locality_ar ? item.locality_ar : item.locality;
+                    // Get language from query params
+                    const language = req.query.language as string;
+                    const isArabic = language === 'ar';
+                    
+                    const stateName = isArabic ? item.state_name_ar : item.state_name;
+                    const localityName = isArabic ? item.locality_ar : item.locality;
                     
                     const state = acc.find((s: any) => s.state_name === stateName);
                     if (state) {
