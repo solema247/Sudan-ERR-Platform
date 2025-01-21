@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-interface ReceiptUploaderProps {
+interface ReceiptChooser {
     expenseId: string;
     projectId: string;
     reportId: string;
@@ -9,7 +9,7 @@ interface ReceiptUploaderProps {
     onError: (error: string) => void;
 }
 
-const ReceiptUploader: React.FC<ReceiptUploaderProps> = ({ 
+const ReceiptChooser: React.FC<ReceiptChooser> = ({ 
     expenseId, 
     projectId, 
     reportId, 
@@ -64,4 +64,4 @@ const ReceiptUploader: React.FC<ReceiptUploaderProps> = ({
     );
 };
 
-export default ReceiptUploader; 
+export default ReceiptChooser; 

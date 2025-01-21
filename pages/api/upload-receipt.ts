@@ -5,6 +5,8 @@ import formidable, { Fields, Files } from 'formidable';
 import fs from 'fs';
 import { promisify } from 'util';
 
+// TODO: Double check that we are only talking about receipts here and that this is not the place for other supporting images.
+
 const unlinkFile = promisify(fs.unlink);
 
 export const config = {
@@ -80,7 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .insert([{
                 filename,
                 path: filePath,
-                category: ImageCategory.REPORT_EXPENSES,
+                category: ImageCategory.REPORT_EXPENSES_RECEIPT,
                 project_id: projectId,
                 notes: `Receipt for expense ${expenseId}`,
                 created_at: new Date().toISOString(),

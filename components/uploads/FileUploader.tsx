@@ -13,6 +13,7 @@ interface FileUploaderProps {
   * 
   * TODO: Move non-UI controller stuff into api or elsewhere
   * TODO: See if we need the URL anywhere else besides what we are doing here.
+  * TODO: Figure out what we are doing with upload results viz. array vs. singular
   * 
   * @param param0 
   * @returns 
@@ -44,13 +45,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({ projectId, onUploadComplete
             projectId,
             t,
             "Scanned report",
-            {
-              noFile: t("errors.no_file"),
-              uploadFailed: t("errors.upload_failed")
-            }
           );
-          if (result.errorMessage) { 
-            throw new Error(result.errorMessage);
+          if (result[0].errorMessage) { 
+            throw new Error(result[0].errorMessage);
           }
         }
 

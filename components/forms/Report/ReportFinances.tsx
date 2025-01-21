@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { useFormik, FieldArray, FormikProvider } from 'formik';
+import { Formik, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import FormBubble from '../../ui/FormBubble';
 import Button from '../../ui/Button';
-import ReceiptUploader from './ReceiptUploader';
+import ReceiptChooser from './ReceiptUploader';
 import { supabase } from '../../../services/supabaseClient';
 import { uploadImages, ImageCategory } from '../../../services/uploadImages';
+import { v4 as uuidv4 } from 'uuid';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes. TODO: Compress files before they upload.
 
@@ -15,6 +16,8 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes. TODO: Compress files b
 // TODO: Differentiate somehow between form and supporting files.
 // TODO: Prepopulate ERR ID, first expense.
 // TODO: Report ID should be assigned when upload begins, right? Or at creation?
+// TODO: Wire uploader back up.
+// TODO: Wire back up errors on individual array items. How does this
 
 
 const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
@@ -45,9 +48,9 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
     const ERROR_MESSAGE_FIELD_REQUIRED = "هذه الخانة مطلوبه.";
     const ERROR_MESSAGE_INVALID_NUMBER = "هذا الرقم غير صالح.";
 
-    const formik = useFormik({
-        initialValues: initialValues,
-        validationSchema: Yup.object({
+    <Formik
+        initialValues={initialValues},
+        validationSchema = {Yup.object({
             err_id: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
             date: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
             total_grant: Yup.number()
@@ -71,13 +74,44 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                     })
                 )
                 .min(1, t('errorMessages.minExpenses')),
-        }),
-        onSubmit: onSubmit,
-    });
-
-    return (
+        })}
+        onSubmit = {async (values, { setSubmitting }) => {
+            try {
+                const completedExpenses = values.expenses.filter((expense) => expense.file);
+        
+                const uploadedFiles = await Promise.all(
+                    completedExpenses.map((expense) =>
+                        // TODO: Differentiate between form and supporting images
+                        uploadImages([expense.file], ImageCategory.REPORT_EXPENSES_SUPPORTING_IMAGE, project?.id || '', t)
+                    )
+                );
+        
+                // const submissionData = {
+                //     ...values,
+                //     expenses: completedExpenses.map((expense, index) => ({
+                //         ...expense,
+                //         receipt_url: uploadedFiles[index]?.[0]?.url || '',
+                //     })),
+                // };
+        
+                // const response = await fetch('/api/fill-form', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(submissionData),
+                // });
+        
+                // if (!response.ok) throw new Error(t('formSubmitFailed'));
+                onSubmitAnotherForm();
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert(error.message);
+            } finally {
+                setSubmitting(false);
+            }
+        }        
+    }>
         <FormBubble title={t('formTitle')} showRequiredLegend>
-            <form onSubmit={formik.handleSubmit} className="space-y-4">
+            <form className="space-y-4">
                 <div>
                     <label htmlFor="err_id">{t('errId')}</label>
                     <input
@@ -115,6 +149,7 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                         render={(arrayHelpers) => (
                             <div>
                                 {formik.values.expenses.map((expense, index) => (
+                                    // Begin expense card
                                     <div key={index} className="border p-4 rounded mb-4">
                                         <div>
                                             <label htmlFor={`expenses.${index}.activity`}>{t('activity')}</label>
@@ -133,14 +168,9 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                                                     </option>
                                                 ))}
                                             </select>
-                                            {formik.touched.expenses?.[index]?.activity && formik.errors.expenses?.[index]?.activity && (
-                                                <div className="text-red-500 text-sm">
-                                                    {formik.errors.expenses[index].activity}
-                                                </div>
-                                            )}
                                         </div>
 
-                                        <ReceiptUploader
+                                        <ReceiptChooser
                                             projectId={projectId}
                                             reportId={reportId}
                                             expenseId={`${index}`}
@@ -179,13 +209,13 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                 <Button text={t('submit')} type="submit" disabled={formik.isSubmitting} />
             </form>
         </FormBubble>
+        </Formik>
     );
 };
 
-// TODO: Where is this coming from?
+// TODO: Check that this is correct...
 const getReportId = () => {
-    const reportId = "REPORT_ID";
-    return reportId;
+    return uuidv4();
 }
 
 const initialValues = {
@@ -206,44 +236,6 @@ const initialValues = {
         },
     ],
 }
-
-const onSubmit = async (values, { setSubmitting }) => {
-    try {
-        const completedExpenses = values.expenses.filter((expense) => expense.file);
-
-        const uploadedFiles = await Promise.all(
-            completedExpenses.map((expense) =>
-                // TODO: Differentiate between form and supporting images
-                uploadImages([expense.file], ImageCategory.REPORT_EXPENSES_SUPPORTING_IMAGE, project?.id || '', t)
-            )
-        );
-
-        const submissionData = {
-            ...values,
-            expenses: completedExpenses.map((expense, index) => ({
-                ...expense,
-                receipt_url: uploadedFiles[index]?.[0]?.url || '',
-            })),
-        };
-
-        const response = await fetch('/api/fill-form', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(submissionData),
-        });
-
-        if (!response.ok) throw new Error(t('formSubmitFailed'));
-        onSubmitAnotherForm();
-    } catch (error) {
-        console.error('Error submitting form:', error);
-        alert(error.message);
-    } finally {
-        setSubmitting(false);
-    }
-}
-
-
-
 
 
 
