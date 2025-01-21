@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import NewProject from '../components/forms/NewProject/NewProject';
-import FillForm from '../pages/fill-form';
+import FillForm from '../components/forms/Report/fill-form';
 
 
 describe('Index', () => {

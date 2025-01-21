@@ -37,15 +37,20 @@ const FileUploader: React.FC<FileUploaderProps> = ({ projectId, onUploadComplete
       const urls: string[] = [];
 
       try {
+        for (const file of selectedFiles) {
           let result = await uploadImages(
-            selectedFiles, 
+            files, 
             ImageCategory.FORM_SCANNED, 
             projectId,
             t,
             "Scanned report",
+            {
+              noFile: t("errors.no_file"),
+              uploadFailed: t("errors.upload_failed")
+            }
           );
-          if (result[0].errorMessage) { 
-            throw new Error(result[0].errorMessage);
+          if (result.errorMessage) { 
+            throw new Error(result.errorMessage);
           }
         }
 

@@ -123,7 +123,7 @@ npm run dev
 - `/api/submit-feedback` - Collects community feedback to improve the chatbot and reporting system.
 - `/api/project-application` - Manages project application submissions.
 - `/api/project-status` - Retrieves the status of submitted project applications.
-- `/api/fill-form` - Handles the submission of filled forms with structured data.
+- `/api/fill-form` - Handles the submission of expense reports and receipts.
  
 
 ## Development
