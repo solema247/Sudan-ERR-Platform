@@ -42,8 +42,8 @@
   "Community Kitchen/Food Supply": "مطبخ الحي / توفير الغذاء",
   "Communication & Internet": "الاتصالات والإنترنت",
   "Volunteers": "المتطوعين",
-  "Women’s Activities": "أنشطة النساء",
-  "Children’s Activities": "أنشطة الأطفال",
+  "Women's Activities": "أنشطة النساء",
+  "Children's Activities": "أنشطة الأطفال",
   "Productive Activities": "الأنشطة الإنتاجية",
   "Protection & Evacuation": "الحماية والإجلاء",
   "quantity": "الكمية",
@@ -85,5 +85,7 @@
     "message": "هل ناقشت هذا المشروع مع جميع أصحاب المصلحة المعنيين في غرفة الطوارئ في منطقتك؟ هذا مهم لضمان دعم المجتمع ونجاح المشروع.",
     "confirm": "نعم، لقد توافقت مع أصحاب المصلحة",
     "review": "لا، أحتاج إلى المراجعة أولاً"
-  }
+  },
+  "Womens Activities": "أنشطة النساء",
+  "Childrens Activities": "أنشطة الأطفال"
 }
