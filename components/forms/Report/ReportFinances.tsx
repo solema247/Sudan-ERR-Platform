@@ -18,6 +18,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes. TODO: Compress files b
 // TODO: Report ID should be assigned when upload begins, right? Or at creation?
 // TODO: Wire uploader back up.
 // TODO: Wire back up errors on individual array items. How does this
+// TODO: Wire back up the onBlur, etc. handlers if we need them.
 
 
 const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
@@ -48,8 +49,9 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
     const ERROR_MESSAGE_FIELD_REQUIRED = "هذه الخانة مطلوبه.";
     const ERROR_MESSAGE_INVALID_NUMBER = "هذا الرقم غير صالح.";
 
+    <FormBubble title={t('formTitle')} showRequiredLegend>
     <Formik
-        initialValues={initialValues},
+        initialValues={initialValues}
         validationSchema = {Yup.object({
             err_id: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
             date: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
@@ -110,21 +112,28 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
             }
         }        
     }>
-        <FormBubble title={t('formTitle')} showRequiredLegend>
-            <form className="space-y-4">
+         {({
+         values,
+         errors,
+         touched,
+         handleChange,
+         handleBlur,
+         handleSubmit,
+         isSubmitting,
+         /* and other goodies */
+       }) =>
+
+            <form className="space-y-4" onSubmit={handleSubmit}>
                 <div>
                     <label htmlFor="err_id">{t('errId')}</label>
                     <input
                         id="err_id"
                         name="err_id"
                         type="text"
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        value={formik.values.err_id}
-                        className={`w-full p-2 border rounded ${formik.touched.err_id && formik.errors.err_id ? 'border-red-500' : 'border-gray-300'}`}
+                        className={`w-full p-2 border rounded ${touched.err_id && errors.err_id ? 'border-red-500' : 'border-gray-300'}`}
                     />
-                    {formik.touched.err_id && formik.errors.err_id && typeof formik.errors.err_id === 'string' && (
-                        <div className="text-red-500 text-sm">{formik.errors.err_id}</div>
+                    {touched.err_id && errors.err_id && typeof errors.err_id === 'string' && (
+                        <div className="text-red-500 text-sm">{errors.err_id}</div>
                     )}
                 </div>
 
@@ -134,13 +143,10 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                         id="date"
                         name="date"
                         type="date"
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        value={formik.values.date}
-                        className={`w-full p-2 border rounded ${formik.touched.date && formik.errors.date ? 'border-red-500' : 'border-gray-300'}`}
+                        className={`w-full p-2 border rounded ${touched.date && errors.date ? 'border-red-500' : 'border-gray-300'}`}
                     />
-                    {formik.touched.date && formik.errors.date && typeof formik.errors.date === 'string' && (
-                        <div className="text-red-500 text-sm">{formik.errors.date}</div>
+                    {touched.date && errors.date && typeof errors.date === 'string' && (
+                        <div className="text-red-500 text-sm">{errors.date}</div>
                     )}
                 </div>
 
@@ -148,7 +154,7 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                         name="expenses"
                         render={(arrayHelpers) => (
                             <div>
-                                {formik.values.expenses.map((expense, index) => (
+                                {values.expenses.map((expense, index) => (
                                     // Begin expense card
                                     <div key={index} className="border p-4 rounded mb-4">
                                         <div>
@@ -157,8 +163,6 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                                                 id={`expenses.${index}.activity`}
                                                 name={`expenses.${index}.activity`}
                                                 value={expense.activity}
-                                                onChange={formik.handleChange}
-                                                onBlur={formik.handleBlur}
                                                 className="w-full p-2 border rounded"
                                             >
                                                 <option value="">{t('pleaseSelect')}</option>
@@ -174,7 +178,7 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                                             projectId={projectId}
                                             reportId={reportId}
                                             expenseId={`${index}`}
-                                            onFileSelect={(file) => formik.setFieldValue(`expenses.${index}.file`, file)}
+                                            onFileSelect={(file) => setFieldValue(`expenses.${index}.file`, file)}
                                             onError={(error) => alert(error)}
                                         />
 
@@ -206,12 +210,14 @@ const ReportFinances = ({ project, onReturnToMenu, onSubmitAnotherForm }) => {
                         )}
                     />
 
-                <Button text={t('submit')} type="submit" disabled={formik.isSubmitting} />
+                <Button text={t('submit')} type="submit" disabled={isSubmitting} />
             </form>
-        </FormBubble>
-        </Formik>
-    );
-};
+
+            }
+        
+            </Formik>
+    </FormBubble>
+}                          
 
 // TODO: Check that this is correct...
 const getReportId = () => {
