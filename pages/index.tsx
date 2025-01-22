@@ -2,7 +2,13 @@ import { useState, useEffect } from 'react';
 import crypto from 'crypto';
 import { useTranslation } from 'react-i18next';
 import Calculator from '../components/calculator/Calculator';
-import MainApp from '../components/main/MainApp';
+import MainApp from '../pages/main/MainApp';
+
+/**
+ * Index.tsx
+ * 
+ * Home component shows calculator.
+ */
 
 const Home = () => {
   const { t } = useTranslation('home');

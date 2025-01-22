@@ -8,7 +8,6 @@ import ReceiptChooser from './ReceiptUploader';
 import { supabase } from '../../../services/supabaseClient';
 import { uploadImages, ImageCategory } from '../../../services/uploadImages';
 import { v4 as uuidv4 } from 'uuid';
-import { Project } from '../../forms/NewProject/Project';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 
