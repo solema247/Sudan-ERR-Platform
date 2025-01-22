@@ -13,6 +13,8 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 
 /**
  * F4 Financial Reporting form, called from Menu.tsx
+ * 
+    language
  */
 
 // TODO: Ensure we are uploading receipts
@@ -22,6 +24,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 // TODO: Wire uploader back up.
 // TODO: Wire back up errors on individual array items. How does this
 // TODO: Wire back up the onBlur, etc. handlers if we need them.
+
 
 const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) => {
     const { t } = useTranslation('fillForm');
@@ -62,6 +65,11 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
                 receiptFile: null,
             },
         ],
+        excess_expenses: '',
+        surplus_use: '',
+        training: '',
+        lessons: '',
+        total_expenses: ''
     };
 
     return (
@@ -77,6 +85,9 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
                     total_other_sources: Yup.number()
                         .required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED)
                         .min(0, t('errorMessages.invalidNumber') || ERROR_MESSAGE_INVALID_NUMBER),
+                    excess_expenses: Yup.string(),
+                    surplus_use: Yup.string(),
+                    training: Yup.string(),
                     expenses: Yup.array()
                         .of(
                             Yup.object({
@@ -124,6 +135,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
                 }) => (
                     <form className="space-y-4" onSubmit={handleSubmit}>
                          <p className="text-3xl">{t('formTitle')}</p>
+                         
                         <div>
                             <label htmlFor="err_id" className="font-bold block text-base text-black-bold mb-1">{t('errId')}</label>
                             <input
@@ -158,8 +170,70 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
                             {touched.date && errors.date && typeof errors.date === 'string' && (
                                 <div className="text-red-500 text-sm">{errors.date}</div>
                             )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="total_grant" className="font-bold block text-base text-black-bold mb-1">{t('totalGrant')}</label>
+                            <input
+                                id="total_grant"
+                                name="total_grant"
+                                type="number"
+                                min="1"
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.total_grant}
+                                className={`text-sm w-full p-2 border rounded-lg ${
+                                    touched.total_grant && errors.total_grant ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            />
+                            {touched.total_grant && errors.total_grant && typeof errors.total_grant === 'string' && (
+                                <div className="text-red-500 text-sm">{errors.total_grant}</div>
+                            )}
                             <h3 className="text-2xl font-bold pt-4">Activities and Expenses</h3>
                         </div>
+
+                        <div>
+                            <label htmlFor="total_other_sources" className="font-bold block text-base text-black-bold mb-1">{t('totalGrant')}</label>
+                            <input
+                                id="total_other_sources"
+                                name="total_other_sources"
+                                type="number"
+                                min="1"
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.total_other_sources}
+                                className={`text-sm w-full p-2 border rounded-lg ${
+                                    touched.total_other_sources && errors.total_other_sources ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            />
+                            {touched.total_other_sources && errors.total_other_sources && typeof errors.total_other_sources === 'string' && (
+                                <div className="text-red-500 text-sm">{errors.total_other_sources}</div>
+                            )}
+                            <h3 className="text-2xl font-bold pt-4">Activities and Expenses</h3>
+                        </div>
+
+                        <div>
+                            <label htmlFor="excess_expenses" className="font-bold block text-base text-black-bold mb-1">{t('totalGrant')}</label>
+                            <input
+                                id="excess_expenses"
+                                name="excess_expenses"
+                                type="text"
+                                min="1"
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.excess_expenses}
+                                className={`text-sm w-full p-2 border rounded-lg ${
+                                    touched.excess_expenses && errors.excess_expenses ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            />
+                            {touched.excess_expenses && errors.excess_expenses && typeof errors.excess_expenses === 'string' && (
+                                <div className="text-red-500 text-sm">{errors.excess_expenses}</div>
+                            )}
+                            <h3 className="text-2xl font-bold pt-4">Activities and Expenses</h3>
+                        </div>
+
+
+                        
 
                         <FieldArray
                             name="expenses"

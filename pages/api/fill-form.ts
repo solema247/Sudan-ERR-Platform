@@ -52,10 +52,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const { data: formRecord, error: summaryError } = await supabase
                 .from('MAG F4 Summary')
                 .insert([{
+                    created_at: new Date().toISOString(),
                     err_id,
                     err_report_id,
                     report_date: date || new Date().toISOString(),
-                    created_at: new Date().toISOString(),
                     total_grant,
                     total_other_sources,
                     excess_expenses: additional_excess_expenses,
