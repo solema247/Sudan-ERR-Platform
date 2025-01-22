@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Home from '../pages/index'
-import MainApp from '../pages/main/MainApp'
+import MainApp from '../pages/MainApp'
 
 jest.mock('next/router', () => require('next-router-mock'));
 

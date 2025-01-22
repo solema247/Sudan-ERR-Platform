@@ -5,10 +5,10 @@ import ChatContainer from '../components/ui/ChatContainer';
 import MessageBubble from '../components/ui/MessageBubble';
 import Button from '../components/ui/Button';
 import ReportingForm from '../components/forms/Report/ReportingForm';
-import ScanForm from '../pages/scan-form';
-import ScanCustomForm from '../pages/scan-custom-form'; // Import the new component
+import ScanForm from './scan-form';
+import ScanCustomForm from './scan-custom-form'; // Import the new component
 import ProjectApplication from '../components/forms/NewProject/NewProjectForm';
-import ProjectStatus from '../pages/project-status';
+import ProjectStatus from './project-status';
 import FeedbackForm from '../components/forms/FeedbackForm'; // Correct import path
 import Project from '../components/forms/NewProject/Project';
 

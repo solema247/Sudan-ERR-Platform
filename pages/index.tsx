@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import crypto from 'crypto';
 import { useTranslation } from 'react-i18next';
 import Calculator from '../components/calculator/Calculator';
-import MainApp from '../pages/main/MainApp';
+import MainApp from './MainApp';
 
 /**
  * Index.tsx
