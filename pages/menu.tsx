@@ -12,6 +12,26 @@ import ProjectStatus from '../pages/project-status';
 import FeedbackForm from '../components/forms/FeedbackForm'; // Correct import path
 import Project from '../components/forms/NewProject/Project';
 
+/**
+ * Chat-style menu.
+ * 
+*/
+
+enum Workflow {
+    FILL_FORM,
+    SCAN_FORM,
+    SCAN_CUSTOM_FORM,
+    PROJECT_APPLICATION,
+    PROJECT_STATUS
+}
+
+enum CurrentMenu {
+    MAIN,
+    REPORTING,
+    FEEDBACK,
+    PROJECTS
+}
+
 const LogoImage = '/icons/icon-512x512.png'; 
 
 const getCurrentTimestamp = () => {
@@ -20,7 +40,7 @@ const getCurrentTimestamp = () => {
 };
 
 const Menu = () => {
-    const [currentMenu, setCurrentMenu] = useState('main'); // Tracks the current menu
+    const [currentMenu, setCurrentMenu] = useState(CurrentMenu.MAIN);
     const [showFillForm, setShowFillForm] = useState(false);
     const [showScanForm, setShowScanForm] = useState(false);
     const [showScanCustomForm, setShowScanCustomForm] = useState(false);
@@ -47,7 +67,7 @@ const Menu = () => {
 
     // Fetch active projects when 'reporting' menu is selected
     useEffect(() => {
-        if (currentMenu === 'reporting') {
+        if (currentMenu === CurrentMenu.REPORTING) {
             const fetchProjects = async () => {
                 try {
                     const response = await fetch('/api/get-projects', { credentials: 'include' });
@@ -74,7 +94,7 @@ const Menu = () => {
     }, [i18n.language]);
 
     // Menu selection handler
-    const handleMenuSelection = (menu: string) => {
+    const handleMenuSelection = (menu: CurrentMenu) => {
         setCurrentMenu(menu);
         setShowFillForm(false);
         setShowScanForm(false);
@@ -85,18 +105,19 @@ const Menu = () => {
     };
 
     // Workflow selection handler
-    const handleWorkflowSelection = (workflow: string) => {
+
+    const handleWorkflowSelection = (workflow: Workflow) => {
         setShowFillForm(false);
         setShowScanForm(false);
         setShowScanCustomForm(false);
         setShowProjectApplication(false);
         setShowProjectStatus(false);
 
-        if (workflow === 'fill-form') setShowFillForm(true);
-        if (workflow === 'scan-form') setShowScanForm(true);
-        if (workflow === 'scan-custom-form') setShowScanCustomForm(true);
-        if (workflow === 'project-application') setShowProjectApplication(true);
-        if (workflow === 'project-status') setShowProjectStatus(true);
+        if (workflow === Workflow.FILL_FORM) setShowFillForm(true);
+        if (workflow === Workflow.SCAN_FORM) setShowScanForm(true);
+        if (workflow === Workflow.SCAN_CUSTOM_FORM) setShowScanCustomForm(true);
+        if (workflow === Workflow.PROJECT_APPLICATION) setShowProjectApplication(true);
+        if (workflow === Workflow.PROJECT_STATUS) setShowProjectStatus(true);
     };
 
     return (
@@ -115,7 +136,7 @@ const Menu = () => {
             </div>
 
             {/* Main Menu */}
-            {currentMenu === 'main' && (
+            {currentMenu === CurrentMenu.MAIN && (
                 <>
                     <div className="flex items-center mb-4 space-x-4">
                         <img
@@ -140,16 +161,16 @@ const Menu = () => {
                         fullWidth
                     />
                     <div className="grid grid-cols-1 space-y-3">
-                        <Button text={t('projects')} onClick={() => handleMenuSelection('projects')} className="w-full" />
-                        <Button text={t('reporting')} onClick={() => handleMenuSelection('reporting')} className="w-full" />
-                        <Button text={t('feedback')} onClick={() => setCurrentMenu('feedback')} className="w-full" />
+                        <Button text={t('projects')} onClick={() => handleMenuSelection(CurrentMenu.PROJECTS)} />
+                        <Button text={t('reporting')} onClick={() => handleMenuSelection(CurrentMenu.REPORTING)} className="w-full" />
+                        <Button text={t('feedback')} onClick={() => setCurrentMenu(CurrentMenu.FEEDBACK)} className="w-full" />
                         <Button text={t('exitChat')} onClick={() => router.push('/login')} className="w-full" />
                     </div>
                 </>
             )}
 
             {/* Add this new block for the 'projects' menu */}
-            {currentMenu === 'projects' && (
+            {currentMenu === CurrentMenu.PROJECTS && (
                 <>
                     <MessageBubble
                         text={t('projectsInstructions')}
@@ -159,17 +180,17 @@ const Menu = () => {
                     <div className="grid grid-cols-1 space-y-2">
                         <Button
                             text={t('projectApplication')}
-                            onClick={() => handleWorkflowSelection('project-application')}
+                            onClick={() => handleWorkflowSelection(Workflow.PROJECT_APPLICATION)}
                             className="w-full"
                         />
                         <Button
                             text={t('projectStatus')}
-                            onClick={() => handleWorkflowSelection('project-status')}
+                            onClick={() => handleWorkflowSelection(Workflow.PROJECT_STATUS)}
                             className="w-full"
                         />
                         <Button
                             text={t('returnToMainMenu')}
-                            onClick={() => handleMenuSelection('main')}
+                            onClick={() => handleMenuSelection(CurrentMenu.MAIN)}
                             className="w-full"
                         />
                     </div>
@@ -177,7 +198,7 @@ const Menu = () => {
             )}
 
             {/* Project Selection for Reporting */}
-            {currentMenu === 'reporting' && !selectedProject && (
+            {currentMenu === CurrentMenu.REPORTING && !selectedProject && (
                 <>
                     <MessageBubble
                         text={t('selectProject')}
@@ -193,13 +214,13 @@ const Menu = () => {
                                 className="w-full"
                             />
                         ))}
-                        <Button text={t('returnToMainMenu')} onClick={() => handleMenuSelection('main')} className="w-full" />
+                        <Button text={t('returnToMainMenu')} onClick={() => handleMenuSelection(CurrentMenu.MAIN)} className="w-full" />
                     </div>
                 </>
             )}
 
             {/* Reporting Menu for Selected Project */}
-            {currentMenu === 'reporting' && selectedProject && (
+            {currentMenu === CurrentMenu.REPORTING && selectedProject && (
                 <>
                     <MessageBubble
                         text={t('reportingInstructions', { project: selectedProject.project_objectives })}
@@ -209,21 +230,21 @@ const Menu = () => {
                     <div className="grid grid-cols-1 space-y-2">
                         <Button
                             text={t('reportFillForm')}
-                            onClick={() => handleWorkflowSelection('fill-form')}
+                            onClick={() => handleWorkflowSelection(Workflow.FILL_FORM)}
                             className="w-full"
                         />
                         <Button
                             text={t('reportScanForm')}
-                            onClick={() => handleWorkflowSelection('scan-form')}
+                            onClick={() => handleWorkflowSelection(Workflow.SCAN_FORM)}
                             className="w-full"
                         />
                         <Button
                             text={t('reportScanCustomForm')}
-                            onClick={() => handleWorkflowSelection('scan-custom-form')}
+                            onClick={() => handleWorkflowSelection(Workflow.SCAN_CUSTOM_FORM)}
                             className="w-full"
                         />
                         <Button text={t('selectDifferentProject')} onClick={() => setSelectedProject(null)} className="w-full" />
-                        <Button text={t('returnToMainMenu')} onClick={() => handleMenuSelection('main')} className="w-full" />
+                        <Button text={t('returnToMainMenu')} onClick={() => handleMenuSelection(CurrentMenu.MAIN)} className="w-full" />
                     </div>
                 </>
             )}
@@ -234,7 +255,7 @@ const Menu = () => {
                     <ReportingForm
                         errId={errId}
                         project={selectedProject} 
-                        onReturnToMenu={() => handleMenuSelection('reporting')} 
+                        onReturnToMenu={() => handleMenuSelection(CurrentMenu.REPORTING)} 
                         onSubmitAnotherForm={() => {
                             setShowFillForm(false);
                             setTimeout(() => setShowFillForm(true), 0); // Reset workflow
@@ -245,7 +266,7 @@ const Menu = () => {
 
             {showScanForm && (
                 <MessageBubble>
-                    <ScanForm project={selectedProject} onReturnToMenu={() => handleMenuSelection('reporting')} />
+                    <ScanForm project={selectedProject} onReturnToMenu={() => handleMenuSelection(CurrentMenu.REPORTING)} />
                 </MessageBubble>
             )}
 
@@ -253,7 +274,7 @@ const Menu = () => {
                 <MessageBubble>
                     <ScanCustomForm
                         project={selectedProject}
-                        onReturnToMenu={() => handleMenuSelection('reporting')}
+                        onReturnToMenu={() => handleMenuSelection(CurrentMenu.REPORTING)}
                         onSubmitAnotherForm={() => {
                             setShowScanCustomForm(false);
                             setTimeout(() => setShowScanCustomForm(true), 0); // Reset workflow
@@ -264,18 +285,18 @@ const Menu = () => {
 
             {showProjectApplication && (
                 <MessageBubble>
-                    <ProjectApplication onReturnToMenu={() => handleMenuSelection('projects')} />
+                    <ProjectApplication onReturnToMenu={() => handleMenuSelection(CurrentMenu.PROJECTS)} />
                 </MessageBubble>
             )}
 
             {showProjectStatus && (
                 <MessageBubble>
-                    <ProjectStatus onReturnToMenu={() => handleMenuSelection('main')} />
+                    <ProjectStatus onReturnToMenu={() => handleMenuSelection(CurrentMenu.MAIN)} />
                 </MessageBubble>
             )}
 
             {/* Feedback Menu */}
-            {currentMenu === 'feedback' && (
+            {currentMenu === CurrentMenu.FEEDBACK && (
                 <>
                     <MessageBubble
                         text={t('feedbackInstructions')}
@@ -285,12 +306,12 @@ const Menu = () => {
                     <div className="grid grid-cols-1 space-y-2">
                         <Button
                             text={t('appFeedback')}
-                            onClick={() => setCurrentMenu('appFeedback')}
+                            onClick={() => setCurrentMenu(CurrentMenu.FEEDBACK)}
                             className="w-full"
                         />
                         <Button
                             text={t('returnToMainMenu')}
-                            onClick={() => handleMenuSelection('main')}
+                            onClick={() => handleMenuSelection(CurrentMenu.MAIN)}
                             className="w-full"
                         />
                     </div>
@@ -298,9 +319,9 @@ const Menu = () => {
             )}
 
             {/* Feedback Form */}
-            {currentMenu === 'appFeedback' && (
+            {currentMenu === CurrentMenu.FEEDBACK && (
                 <MessageBubble>
-                    <FeedbackForm onReturnToMenu={() => handleMenuSelection('feedback')} />
+                    <FeedbackForm onReturnToMenu={() => handleMenuSelection(CurrentMenu.FEEDBACK)} />
                 </MessageBubble>
             )}
         </ChatContainer>
