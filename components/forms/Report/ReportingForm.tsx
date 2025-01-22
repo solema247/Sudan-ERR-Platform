@@ -65,7 +65,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
     };
 
     return (
-        <FormBubble title={t('formTitle')} showRequiredLegend>
+        <FormBubble>
             <Formik
                 initialValues={initialValues}
                 validationSchema={Yup.object({
@@ -123,8 +123,9 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
                     setFieldValue,
                 }) => (
                     <form className="space-y-4" onSubmit={handleSubmit}>
+                         <p className="text-3xl">{t('formTitle')}</p>
                         <div>
-                            <label htmlFor="err_id">{t('errId')}</label>
+                            <label htmlFor="err_id" className="font-bold block text-base text-black-bold mb-1">{t('errId')}</label>
                             <input
                                 id="err_id"
                                 name="err_id"
@@ -132,7 +133,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
                                 onChange={handleChange}
                                 onBlur={handleBlur}
                                 value={values.err_id}
-                                className={`w-full p-2 border rounded ${
+                                className={`text-sm w-full p-2 border rounded-lg ${
                                     touched.err_id && errors.err_id ? 'border-red-500' : 'border-gray-300'
                                 }`}
                             />
@@ -142,7 +143,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
                         </div>
 
                         <div>
-                            <label htmlFor="date">{t('date')}</label>
+                            <label htmlFor="date" className="font-bold block text-base text-black-bold mb-1">{t('date')}</label>
                             <input
                                 id="date"
                                 name="date"
@@ -150,13 +151,14 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
                                 onChange={handleChange}
                                 onBlur={handleBlur}
                                 value={values.date}
-                                className={`w-full p-2 border rounded ${
+                                className={`text-sm w-full p-2 border rounded-lg ${
                                     touched.date && errors.date ? 'border-red-500' : 'border-gray-300'
                                 }`}
                             />
                             {touched.date && errors.date && typeof errors.date === 'string' && (
                                 <div className="text-red-500 text-sm">{errors.date}</div>
                             )}
+                            <h3 className="text-2xl font-bold pt-4">Activities and Expenses</h3>
                         </div>
 
                         <FieldArray
@@ -164,9 +166,10 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
                             render={(arrayHelpers) => (
                                 <div>
                                     {values.expenses.map((expense, index) => (
-                                        <div key={index} className="border p-4 rounded mb-4">
+                                        <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md">
                                             <div>
-                                                <label htmlFor={`expenses.${index}.activity`}>{t('activity')}</label>
+                                                <label htmlFor={`expenses.${index}.activity`} className="font-bold block text-base text-black-bold mb-1" >{t('activity')}
+                                                </label>
                                                 <select
                                                     id={`expenses.${index}.activity`}
                                                     name={`expenses.${index}.activity`}
@@ -195,7 +198,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
                                                     arrayHelpers.remove(index)
                                                     console.log(`Removing index ${index}`);
                                                 }}
-                                                className="mt-4 bg-red-500 text-white"
+                                                className="text-red-500 mt-2 font-bold"
                                             />
                                         </div>
                                     ))}
