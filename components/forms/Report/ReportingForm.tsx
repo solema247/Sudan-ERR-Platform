@@ -24,7 +24,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 // TODO: Wire back up the onBlur, etc. handlers if we need them.
 
 const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) => {
-    const { t } = useTranslation('fill-form');
+    const { t } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
     const reportId = getReportId();
 
@@ -46,7 +46,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
     const ERROR_MESSAGE_INVALID_NUMBER = "هذا الرقم غير صالح.";
 
     const initialValues = {
-        err_id: errId,
+        err_id: errId,      // TODO: Test
         date: '',
         total_grant: '',
         total_other_sources: '',
