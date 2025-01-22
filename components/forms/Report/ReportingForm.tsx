@@ -192,14 +192,13 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
                                                 onError={(error) => alert(error)}
                                             />
 
-                                            <Button
-                                                text={t('removeExpense')}
-                                                onClick={() => {
-                                                    arrayHelpers.remove(index)
-                                                    console.log(`Removing index ${index}`);
-                                                }}
-                                                className="text-red-500 mt-2 font-bold"
-                                            />
+                                        <button
+                                            type="button"
+                                            className="text-red-500 mt-2 font-bold"
+                                            onClick={() => arrayHelpers.remove(index)}
+                                        >
+                                        {t('remove')}
+                                        </button>
                                         </div>
                                     ))}
 
@@ -223,7 +222,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
                             )}
                         />
 
-                        <Button text={t('submit')} type="submit" disabled={isSubmitting} />
+                        <Button text={t('submitReport')} type="submit" disabled={isSubmitting} />
                     </form>
                 )}
             </Formik>

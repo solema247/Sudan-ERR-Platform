@@ -39,8 +39,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 additional_training_needs = '',
                 lessons = '',
                 expenses = [],
-                phone_number = '',
-                banking_details = '',
                 language
             } = req.body;
 
@@ -65,8 +63,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     training: additional_training_needs,
                     lessons,
                     total_expenses,
-                    phone_number,
-                    banking_details,
                     language
                 }])
                 .select()

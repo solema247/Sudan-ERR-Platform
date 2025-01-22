@@ -29,6 +29,7 @@
   "chooseReceiptFile": "Choose Receipt File",
   "noFileChosen": "No file chosen",
   "submit": "Submit",
+  "submitReport": "Submit this Report",
   "formSuccess": "Form submitted successfully!",
   "submitAnother": "Submit Another Form",
   "returnToMenu": "Return to Main Menu",
@@ -57,5 +58,6 @@
   "enterPhoneNumber": "Enter your phone number",
   "phoneNumber": "Phone Number",
   "enterBankingDetails": "Enter your banking details",
-  "bankingDetails": "Bank Details"
+  "bankingDetails": "Bank Details",
+  "remove": "Remove"
 }
