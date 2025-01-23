@@ -59,11 +59,13 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
 
         >
         {({ isSubmitting }) => (
-         <Form>
-           <Field type="email" name="email" />
-           <ErrorMessage name="email" component="div" />
-           <Field type="password" name="password" />
-           <ErrorMessage name="password" component="div" />
+         <Form className="space-y-4">
+            <p className="text-3xl">{t('formTitle')}</p>
+            <Field type="text" name="err_id"/>
+            <ErrorMessage name="err_id" component="div" />
+            <Field type="date" name="date"/>
+            <ErrorMessage name="date" component="div" />
+
            <button type="submit" disabled={isSubmitting}>
              Submit
            </button>
@@ -73,50 +75,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
         </FormBubble>
     );
 }
-{/* 
-
-//                 <Form>
-//                 <Field type="email" name="email" />
-//                 <ErrorMessage name="email" component="div" />
-//                 <Field type="password" name="password" />
-//                 <ErrorMessage name="password" component="div" />
-//                 <button type="submit" disabled={isSubmitting}>
-//                     Submit
-//                 </button>
-//                 </Form>
-//             )}
-//             </Formik>
-//         </div>
-//         ); */}
-
-
-//             <Formik
-//                 initialValues={initialValues}
-               
-               
-//                     <form className="space-y-4" onSubmit={handleSubmit}>
-//                          <p className="text-3xl">{t('formTitle')}</p>
                          
-//                         {/* Err_Id */}
-                         
-//                         <div>
-//                             <label htmlFor="err_id" className="font-bold block text-base text-black-bold mb-1">{t('errId')}</label>
-//                             <input
-//                                 id="err_id"
-//                                 name="err_id"
-//                                 type="text"
-//                                 onChange={handleChange}
-//                                 onBlur={handleBlur}
-//                                 value={values.err_id}
-//                                 className={`text-sm w-full p-2 border rounded-lg ${
-//                                     touched.err_id && errors.err_id ? 'border-red-500' : 'border-gray-300'
-//                                 }`}
-//                             />
-//                             {touched.err_id && errors.err_id && typeof errors.err_id === 'string' && (
-//                                 <div className="text-red-500 text-sm">{errors.err_id}</div>
-//                             )}
-//                         </div>
-
 //                         {/* Date */}
 
 //                         <div>
@@ -363,4 +322,4 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
 
 // const getReportId = () => uuidv4();
 
-// export default ReportingForm;
+export default ReportingForm;

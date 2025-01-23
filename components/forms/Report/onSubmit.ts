@@ -1,7 +1,7 @@
 import { uploadImages, ImageCategory } from '../../../services/uploadImages';
 import { useTranslation } from 'react-i18next';
 
-export default function onSubmit{async (values, { setSubmitting }) => {
+export default async function onSubmit(values, { setSubmitting }) {
     const { t } = useTranslation('fillForm');
     
     const { project } = values; // TODO: Make sure it comes through.
@@ -15,11 +15,11 @@ export default function onSubmit{async (values, { setSubmitting }) => {
             )
         );
 
-        onSubmitAnotherForm();
+        // onSubmitAnotherForm();           // TODO: Find out what this was for.
     } catch (error) {
         console.error('Error submitting form:', error);
         alert(error.message);
     } finally {
         setSubmitting(false);
     }
-}}
+}
