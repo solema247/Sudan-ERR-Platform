@@ -12,6 +12,7 @@ import NewProjectActivities from './NewProjectActivities';
  * 
  * 
  * TODO: Make this whole thing typesafe
+ * TODO: Convert everything to Formik <Field> shorthand
  */
 
 interface NewProjectApplicationProps {
