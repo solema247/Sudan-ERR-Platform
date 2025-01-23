@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Formik, FieldArray } from 'formik';
+import { Formik, Form, Field, FieldArray, ErrorMessage } from 'formik';
 import { useTranslation } from 'react-i18next';
 import FormBubble from '../../ui/FormBubble';
 import Button from '../../ui/Button';
 import ReceiptChooser from './ReceiptUploader';
 import { supabase } from '../../../services/supabaseClient';
-import { uploadImages, ImageCategory } from '../../../services/uploadImages';
 import getInitialValues from './values';
-import getValidationScheme from './validation';
+import getValidationSchema from './validation';
+import onSubmit from './onSubmit';
 import { v4 as uuidv4 } from 'uuid';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
@@ -46,44 +46,31 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
         populateCategories();
     }, []);
 
-    const initialValues = getInitialValues(err_id);
-    
-   const validationSchema = getValidationSchema();
+    const initialValues = getInitialValues(errId);
+    const validationSchema = getValidationSchema();
    
-   return (
+    return (
         <FormBubble>
 
         <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
-            onSubmit={async (values, { setSubmitting }) => {
-                try {
-                    const completedExpenses = values.expenses.filter((expense) => expense.receiptFile);
-
-                    const uploadedFiles = await Promise.all(
-                        completedExpenses.map((expense) =>
-                            uploadImages([expense.receiptFile], ImageCategory.REPORT_EXPENSES_SUPPORTING_IMAGE, project.id, t)
-                        )
-                    );
-
-                    onSubmitAnotherForm();
-                } catch (error) {
-                    console.error('Error submitting form:', error);
-                    alert(error.message);
-                } finally {
-                    setSubmitting(false);
-                }
-            }}
+            onSubmit={onSubmit}
 
         >
         {({ isSubmitting }) => (
-
-            <Form className="space-y-4">
-
-            </Form>
-
-        )}
+         <Form>
+           <Field type="email" name="email" />
+           <ErrorMessage name="email" component="div" />
+           <Field type="password" name="password" />
+           <ErrorMessage name="password" component="div" />
+           <button type="submit" disabled={isSubmitting}>
+             Submit
+           </button>
+         </Form>
+       )}
         </Formik>
+        </FormBubble>
     );
 }
 {/* 
