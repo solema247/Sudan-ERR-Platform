@@ -1,5 +1,5 @@
 
-export default function getInitialValues(errId:number) {
+export default function getInitialValues(errId:string) {
     return {
         err_id: errId,      
         date: '',

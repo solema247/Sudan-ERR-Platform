@@ -12,20 +12,20 @@ import { v4 as uuidv4 } from 'uuid';
 import Project from '../NewProject/Project'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
+type errId = string;
 
 /**
  * F4 Financial Reporting form, called from Menu.tsx
  */
 
 interface ReportingFormProps {
-    errId: string;
+    errId: errId;
     project: Project;
     onReturnToMenu: ()=> void;
-    onSubmitAnotherForm: ()=> void; // TODO: Figure out what this does.
-
+    onSubmitAnotherForm: ()=> void; // TODO: Figure out if we still need this.
 }
 
-const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) => {
+const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: ReportingFormProps) => {
     const { t } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
 
