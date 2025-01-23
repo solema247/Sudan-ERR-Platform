@@ -28,6 +28,7 @@ interface ReportingFormProps {
 const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: ReportingFormProps) => {
     const { t } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
+    const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
     useEffect(() => {
         populateCategories(setCategories)
@@ -37,6 +38,10 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
     const validationSchema = getValidationSchema();
 
     return (
+        <>
+        {isFormSubmitted ? (
+            <FormSubmitted onReturnToMenu={onReturnToMenu} />
+          ) : (
         <FormBubble>
             <Formik
                 initialValues={initialValues}
@@ -142,6 +147,8 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                 )}
             </Formik>
         </FormBubble>
+    )}
+    </>
     );
 };
 
@@ -155,6 +162,21 @@ async function populateCategories(setCategories) {
         if (!error) {
            setCategories(data);
        }
+}
+
+// TODO: Reuse this in other forms.
+
+const FormSubmitted = ({onReturnToMenu}) => {
+    const { t } = useTranslation('fillForm');
+
+    return (
+        <div className="bg-white p-4 rounded-lg">
+            <p className="text-black-bold text-base mb-4">{t('formSubmitted')}</p>
+            <div className="flex justify-center">
+            <Button text={t('returnToMenu')} onClick={onReturnToMenu} />
+            </div>
+        </div>
+    )
 }
 
 

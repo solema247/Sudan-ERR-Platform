@@ -6,7 +6,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers }) => {
     const { t } = useTranslation('fill-form');
 
     return (
-        <div key={index} >
+        <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md">
             <label htmlFor={`expenses[${index}].activity`} className="font-bold block text-base text-black-bold mb-1">
             {t('excessExpenses')}
             </label>
