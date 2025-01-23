@@ -58,13 +58,88 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
             onSubmit={onSubmit}
 
         >
-        {({ isSubmitting }) => (
-         <Form className="space-y-4">
+        {({ isSubmitting, values }) => (
+         <Form className="flex flex-col">
             <p className="text-3xl">{t('formTitle')}</p>
+
+            <label htmlFor="err_id" className="font-bold block text-base text-black-bold mb-1">{t('errId')}</label>
             <Field type="text" name="err_id"/>
             <ErrorMessage name="err_id" component="div" />
+            
+            <label htmlFor="date" className="font-bold block text-base text-black-bold mb-1">{t('date')}</label>
             <Field type="date" name="date"/>
             <ErrorMessage name="date" component="div" />
+
+            <label htmlFor="total_grant" className="font-bold block text-base text-black-bold mb-1">{t('totalGrant')}</label>
+            <Field type="number" name="total_grant" min="0"/>
+            <ErrorMessage name="date" component="div" />
+
+            <label htmlFor="other_sources" className="font-bold block text-base text-black-bold mb-1">{t('totalOtherSources')}</label>
+            <Field type="number" name="total_other_sources" min="0"/>
+            <ErrorMessage name="total_other_sources" component="div" />
+
+            <h3 className="text-2xl font-bold pt-4">Activities and Expenses</h3>
+
+             <FieldArray
+                name="expenses"
+                render={(arrayHelpers) => (
+                        <div>
+                            {values.expenses.map((expense, index) => (
+                            <div>
+                                    {/* <ReceiptChooser
+                                        onFileSelect={(file) => setFieldValue(`expenses.${index}.file`, file)}
+                                        onError={(error) => alert(error)}
+                                    /> */}
+
+                                <button
+                                    type="button"
+                                    className="text-red-500 mt-2 font-bold"
+                                    onClick={() => arrayHelpers.remove(index)}
+                                >
+                                {t('remove')}
+                                </button>
+                                </div>
+                            ))}
+
+                            <Button
+                                text={t('addExpense')}
+                                onClick={() =>
+                                    arrayHelpers.push({
+                                        activity: '',
+                                        description: '',
+                                        payment_date: '',
+                                        seller: '',
+                                        payment_method: 'cash',
+                                        receipt_no: '',
+                                        amount: '',
+                                        file: null,
+                                    })
+                                }
+                                className="bg-blue-500 text-white mt-4"
+                            />
+                        </div>
+                )}
+            />
+
+            <label htmlFor="excess_expenses" className="font-bold block text-base text-black-bold mb-1">{t('excessExpenses')}</label>
+            <Field type="text" name="excessExpenses"/>
+            <ErrorMessage name="excessExpenses" component="div" />
+
+            <label htmlFor="surplus_use" className="font-bold block text-base text-black-bold mb-1">{t('surplusUse')}</label>
+            <Field type="text" name="surplus_use"/>
+            <ErrorMessage name="surplus_use" component="div" />
+
+            <label htmlFor="training" className="font-bold block text-base text-black-bold mb-1">{t('training')}</label>
+            <Field type="text" name="training"/>
+            <ErrorMessage name="training" component="div" />
+
+            <label htmlFor="lessons" className="font-bold block text-base text-black-bold mb-1">{t('lessons')}</label>
+            <Field type="text" name="lessons"/>
+            <ErrorMessage name="lessons" component="div" />
+
+            <label htmlFor="total_expenses" className="font-bold block text-base text-black-bold mb-1">{t('totalExpenses')}</label>
+            <Field type="text" name="total_expenses"/>
+            <ErrorMessage name="totalExpenses" component="div" />
 
            <button type="submit" disabled={isSubmitting}>
              Submit
@@ -75,251 +150,6 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
         </FormBubble>
     );
 }
-                         
-//                         {/* Date */}
-
-//                         <div>
-//                             <label htmlFor="date" className="font-bold block text-base text-black-bold mb-1">{t('date')}</label>
-//                             <input
-//                                 id="date"
-//                                 name="date"
-//                                 type="date"
-//                                 onChange={handleChange}
-//                                 onBlur={handleBlur}
-//                                 value={values.date}
-//                                 className={`text-sm w-full p-2 border rounded-lg ${
-//                                     touched.date && errors.date ? 'border-red-500' : 'border-gray-300'
-//                                 }`}
-//                             />
-//                             {touched.date && errors.date && typeof errors.date === 'string' && (
-//                                 <div className="text-red-500 text-sm">{errors.date}</div>
-//                             )}
-//                         </div>
-
-//                         {/* Total Grant */}
-
-//                         <div>
-//                             <label htmlFor="total_grant" className="font-bold block text-base text-black-bold mb-1">{t('totalGrant')}</label>
-//                             <input
-//                                 id="total_grant"
-//                                 name="total_grant"
-//                                 type="number"
-//                                 min="1"
-//                                 onChange={handleChange}
-//                                 onBlur={handleBlur}
-//                                 value={values.total_grant}
-//                                 className={`text-sm w-full p-2 border rounded-lg ${
-//                                     touched.total_grant && errors.total_grant ? 'border-red-500' : 'border-gray-300'
-//                                 }`}
-//                             />
-//                             {touched.total_grant && errors.total_grant && typeof errors.total_grant === 'string' && (
-//                                 <div className="text-red-500 text-sm">{errors.total_grant}</div>
-//                             )}
-//                         </div>
-
-//                         {/* Total Other Sources */}
-
-//                         <div>
-//                             <label htmlFor="total_other_sources" className="font-bold block text-base text-black-bold mb-1">{t('totalOtherSources')}</label>
-//                             <input
-//                                 id="total_other_sources"
-//                                 name="total_other_sources"
-//                                 type="number"
-//                                 min="1"
-//                                 onChange={handleChange}
-//                                 onBlur={handleBlur}
-//                                 value={values.total_other_sources}
-//                                 className={`text-sm w-full p-2 border rounded-lg ${
-//                                     touched.total_other_sources && errors.total_other_sources ? 'border-red-500' : 'border-gray-300'
-//                                 }`}
-//                             />
-//                             {touched.total_other_sources && errors.total_other_sources && typeof errors.total_other_sources === 'string' && (
-//                                 <div className="text-red-500 text-sm">{errors.total_other_sources}</div>
-//                             )}
-//                         </div>
-
-                      
-
-//                         {/* Add and remove activities and expenses */}
-                        
-//                         <h3 className="text-2xl font-bold pt-4">Activities and Expenses</h3>
-
-//                         <FieldArray
-//                             name="expenses"
-//                             render={(arrayHelpers) => (
-//                                 <div>
-//                                     {values.expenses.map((expense, index) => (
-//                                         <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md">
-//                                             <div>
-//                                                 <label htmlFor={`expenses.${index}.activity`} className="font-bold block text-base text-black-bold mb-1" >{t('activity')}
-//                                                 </label>
-//                                                 <select
-//                                                     id={`expenses.${index}.activity`}
-//                                                     name={`expenses.${index}.activity`}
-//                                                     value={expense.activity}
-//                                                     onChange={handleChange}
-//                                                     onBlur={handleBlur}
-//                                                     className="w-full p-2 border rounded"
-//                                                 >
-//                                                     <option value="">{t('pleaseSelect')}</option>
-//                                                     {categories.map((category) => (
-//                                                         <option key={category.id} value={category.name}>
-//                                                             {category.name}
-//                                                         </option>
-//                                                     ))}
-//                                                 </select>
-//                                             </div>
-
-//                                             <ReceiptChooser
-//                                                 onFileSelect={(file) => setFieldValue(`expenses.${index}.file`, file)}
-//                                                 onError={(error) => alert(error)}
-//                                             />
-
-//                                         <button
-//                                             type="button"
-//                                             className="text-red-500 mt-2 font-bold"
-//                                             onClick={() => arrayHelpers.remove(index)}
-//                                         >
-//                                         {t('remove')}
-//                                         </button>
-//                                         </div>
-//                                     ))}
-
-//                                     <Button
-//                                         text={t('addExpense')}
-//                                         onClick={() =>
-//                                             arrayHelpers.push({
-//                                                 activity: '',
-//                                                 description: '',
-//                                                 payment_date: '',
-//                                                 seller: '',
-//                                                 payment_method: 'cash',
-//                                                 receipt_no: '',
-//                                                 amount: '',
-//                                                 file: null,
-//                                             })
-//                                         }
-//                                         className="bg-blue-500 text-white mt-4"
-//                                     />
-//                                 </div>
-//                             )}
-//                         />
-
-//                           {/* Excess Expenses */}
-
-//                           <div>
-//                             <label htmlFor="excess_expenses" className="font-bold block text-base text-black-bold mb-1">{t('excessExpenses')}</label>
-//                             <input
-//                                 id="excess_expenses"
-//                                 name="excess_expenses"
-//                                 type="text"
-//                                 min="1"
-//                                 onChange={handleChange}
-//                                 onBlur={handleBlur}
-//                                 value={values.excess_expenses}
-//                                 className={`text-sm w-full p-2 border rounded-lg ${
-//                                     touched.excess_expenses && errors.excess_expenses ? 'border-red-500' : 'border-gray-300'
-//                                 }`}
-//                             />
-//                             {touched.excess_expenses && errors.excess_expenses && typeof errors.excess_expenses === 'string' && (
-//                                 <div className="text-red-500 text-sm">{errors.excess_expenses}</div>
-//                             )}
-//                         </div>
-
-//                          {/* Surplus use */}
-
-//                          <div>
-//                             <label htmlFor="surplusUse" className="font-bold block text-base text-black-bold mb-1">{t('surplusUse')}</label>
-//                             <input
-//                                 id="surplusUse"
-//                                 name="surplusUse"
-//                                 type="text"
-//                                 min="1"
-//                                 onChange={handleChange}
-//                                 onBlur={handleBlur}
-//                                 value={values.surplus_use}
-//                                 className={`text-sm w-full p-2 border rounded-lg ${
-//                                     touched.surplus_use && errors.surplus_use ? 'border-red-500' : 'border-gray-300'
-//                                 }`}
-//                             />
-//                             {touched.surplus_use && errors.surplus_use && typeof errors.surplus_use === 'string' && (
-//                                 <div className="text-red-500 text-sm">{errors.surplus_use}</div>
-//                             )}
-//                         </div>
-
-//                         {/* Training */}
-
-//                         <div>
-//                             <label htmlFor="training" className="font-bold block text-base text-black-bold mb-1">{t('training')}</label>
-//                             <input
-//                                 id="training"
-//                                 name="training"
-//                                 type="text"
-//                                 min="1"
-//                                 onChange={handleChange}
-//                                 onBlur={handleBlur}
-//                                 value={values.training}
-//                                 className={`text-sm w-full p-2 border rounded-lg ${
-//                                     touched.training && errors.training ? 'border-red-500' : 'border-gray-300'
-//                                 }`}
-//                             />
-//                             {touched.training && errors.training && typeof errors.training === 'string' && (
-//                                 <div className="text-red-500 text-sm">{errors.training}</div>
-//                             )}
-//                         </div>
-
-//                         {/* Lessons */}
-
-//                         <div>
-//                             <label htmlFor="lessons" className="font-bold block text-base text-black-bold mb-1">{t('lessons')}</label>
-//                             <input
-//                                 id="lessons"
-//                                 name="lessons"
-//                                 type="text"
-//                                 min="1"
-//                                 onChange={handleChange}
-//                                 onBlur={handleBlur}
-//                                 value={values.lessons}
-//                                 className={`text-sm w-full p-2 border rounded-lg ${
-//                                     touched.lessons && errors.lessons ? 'border-red-500' : 'border-gray-300'
-//                                 }`}
-//                             />
-//                             {touched.lessons && errors.lessons && typeof errors.lessons === 'string' && (
-//                                 <div className="text-red-500 text-sm">{errors.lessons}</div>
-//                             )}
-//                         </div>
-
-//                          {/* Total Expenses */}
-
-//                          <div>
-//                             <label htmlFor="totalExpenses" className="font-bold block text-base text-black-bold mb-1">{t('totalExpenses')}</label>
-//                             <input
-//                                 id="total_expenses"
-//                                 name="total_expenses"
-//                                 type="text"
-//                                 min="1"
-//                                 onChange={handleChange}
-//                                 onBlur={handleBlur}
-//                                 value={values.total_expenses}
-//                                 className={`text-sm w-full p-2 border rounded-lg ${
-//                                     touched.total_expenses && errors.total_expenses ? 'border-red-500' : 'border-gray-300'
-//                                 }`}
-//                             />
-//                             {touched.total_expenses && errors.total_expenses && typeof errors.total_expenses === 'string' && (
-//                                 <div className="text-red-500 text-sm">{errors.total_expenses}</div>
-//                             )}
-//                         </div>
-
-
-//                         <Button text={t('submitReport')} type="submit" disabled={isSubmitting} />
-//                     </form>
-//                 )}
-//             </Formik>
-//         </FormBubble>
-//     );
-// };
-
-
-// const getReportId = () => uuidv4();
+       
 
 export default ReportingForm;
