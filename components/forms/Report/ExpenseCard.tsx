@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 
 const ExpenseCard = ({ expense, index, arrayHelpers }) => {
-    const t = useTranslation('fill-form');
-    
+    const { t } = useTranslation('fill-form');
+
     return (
+        
         <div key={index} >
             <Field
                 name={`expenses[${index}].activity`}
