@@ -7,8 +7,9 @@ import { supabase } from '../../../services/supabaseClient';
 import ExpenseCard from './ExpenseCard';
 import getInitialValues from './values';
 import getValidationSchema from './validation';
-import onSubmit from './onSubmit';
+import onSubmit from './uploading';
 import { v4 as uuidv4 } from 'uuid';
+import Project from '../NewProject/Project'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 
@@ -16,22 +17,20 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
  * F4 Financial Reporting form, called from Menu.tsx
  */
 
+interface ReportingFormProps {
+    errId: string;
+    project: Project;
+    onReturnToMenu: ()=> void;
+    onSubmitAnotherForm: ()=> void; // TODO: Figure out what this does.
+
+}
+
 const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) => {
     const { t } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
-        const populateCategories = async () => {
-            const { data, error } = await supabase
-                .from('expense_categories')
-                .select('id, name, language')
-                .eq('language', 'en');
-
-            if (!error) {
-                setCategories(data);
-            }
-        };
-        populateCategories();
+        populateCategories(setCategories)
     }, []);
 
     const initialValues = getInitialValues(errId);
@@ -145,5 +144,18 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }) 
         </FormBubble>
     );
 };
+
+
+async function populateCategories(setCategories) {
+    const { data, error } = await supabase
+        .from('expense_categories')
+        .select('id, name, language')
+        .eq('language', 'en');
+
+        if (!error) {
+           setCategories(data);
+       }
+}
+
 
 export default ReportingForm;
