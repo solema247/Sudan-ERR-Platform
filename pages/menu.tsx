@@ -12,6 +12,7 @@ import ScanCustomForm from '../pages/scan-custom-form'; // Import the new compon
 import ProjectApplication from '../components/forms/NewProject/NewProject';
 import ProjectStatus from '../pages/project-status';
 import FeedbackForm from '../components/forms/FeedbackForm'; // Correct import path
+import ScanPrefillForm from '../pages/scan-prefill-form';
 const LogoImage = '/icons/icon-512x512.png'; 
 
 
@@ -27,6 +28,7 @@ const Menu = () => {
     const [showScanCustomForm, setShowScanCustomForm] = useState(false);
     const [showProjectApplication, setShowProjectApplication] = useState(false);
     const [showProjectStatus, setShowProjectStatus] = useState(false);
+    const [showScanPrefillForm, setShowScanPrefillForm] = useState(false);
     const [projects, setProjects] = useState([]); // Stores active projects
     const [selectedProject, setSelectedProject] = useState(null); // Stores selected project
 
@@ -81,6 +83,7 @@ const Menu = () => {
         setShowScanCustomForm(false);
         setShowProjectApplication(false);
         setShowProjectStatus(false);
+        setShowScanPrefillForm(false);
         setSelectedProject(null); // Reset selected project when navigating away
     };
 
@@ -91,12 +94,14 @@ const Menu = () => {
         setShowScanCustomForm(false);
         setShowProjectApplication(false);
         setShowProjectStatus(false);
+        setShowScanPrefillForm(false);
 
         if (workflow === 'fill-form') setShowFillForm(true);
         if (workflow === 'scan-form') setShowScanForm(true);
         if (workflow === 'scan-custom-form') setShowScanCustomForm(true);
         if (workflow === 'project-application') setShowProjectApplication(true);
         if (workflow === 'project-status') setShowProjectStatus(true);
+        if (workflow === 'scan-prefill-form') setShowScanPrefillForm(true);
     };
 
     return (
@@ -300,6 +305,13 @@ const Menu = () => {
             {currentMenu === 'appFeedback' && (
                 <MessageBubble>
                     <FeedbackForm onReturnToMenu={() => handleMenuSelection('feedback')} />
+                </MessageBubble>
+            )}
+
+            {/* Scan Prefill Form */}
+            {showScanPrefillForm && (
+                <MessageBubble>
+                    <ScanPrefillForm project={selectedProject} />
                 </MessageBubble>
             )}
         </ChatContainer>

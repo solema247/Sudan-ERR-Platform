@@ -32,7 +32,7 @@ interface PrefilledFormProps {
     additional_training_needs?: string;
   };
   onFormSubmit: (formData: any) => void;
-  project: {
+  project?: {
     id: string;
   };
 }

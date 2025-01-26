@@ -6,7 +6,7 @@ import FileUploader from "../components/uploads/FileUploader";
 import MessageBubble from "../components/ui/MessageBubble";
 import Button from "../components/ui/Button";
 
-const ScanPrefillForm: React.FC = () => {
+const ScanPrefillForm: React.FC<{ project?: any }> = ({ project }) => {
   const { t } = useTranslation("scan-form"); // Load translations from scan-form.json
   const [structuredData, setStructuredData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -77,7 +77,11 @@ const ScanPrefillForm: React.FC = () => {
       {!showFileUploader && !showCompletionOptions ? (
         <>
           <h2 className="text-lg font-semibold mb-4">{t("prefilled_form_title")}</h2>
-          <PrefilledForm data={structuredData} onFormSubmit={handleFormSubmit} />
+          <PrefilledForm 
+            data={structuredData} 
+            onFormSubmit={handleFormSubmit}
+            project={project}
+          />
         </>
       ) : showFileUploader ? (
         <>
