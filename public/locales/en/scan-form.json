@@ -42,7 +42,6 @@
   },
   "expense_entry": "Expense Entry {{index}}",
   "errors": {
-    "upload_failed": "Failed to upload files.",
     "scan_failed": "Failed to scan the form.",
     "submit_failed": "An error occurred while submitting the form.",
     "method_not_allowed": "Method not allowed.",
@@ -55,5 +54,30 @@
   "messages": {
     "form_submission_success": "Form submitted successfully!",
     "form_success": "Form and photos uploaded successfully!"
+  },
+  "buttons": {
+    "add_expense": "Add New Expense",
+    "remove_expense": "Remove Expense"
+  },
+  "upload_instructions": "Upload additional project files (e.g., photos, documentation, or other supporting materials)",
+  "validation": {
+    "required": "This field is required",
+    "err_id_required": "ERR ID is required",
+    "date_required": "Date is required",
+    "activity_required": "Activity is required",
+    "description_required": "Description is required",
+    "payment_date_required": "Payment date is required",
+    "seller_required": "Seller is required",
+    "receipt_no_required": "Receipt number is required",
+    "amount_required": "Amount is required",
+    "amount_invalid": "Amount must be a valid number",
+    "total_grant_required": "Total grant is required",
+    "total_other_sources_required": "Total other sources is required",
+    "expense_errors": "Please fix errors in expense entry #{{index}}",
+    "please_fix_errors": "Please fix the following errors:",
+    "form_errors_summary": "The following fields need to be filled:",
+    "expense_summary_error": "Expense #{{index}} is missing required fields: {{fields}}",
+    "missing_field": "Missing required field",
+    "fill_required_fields": "Please fill in all required fields marked with *"
   }
 }

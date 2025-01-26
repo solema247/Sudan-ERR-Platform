@@ -29,6 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       additional_training_needs,
       expenses,
       files = [],
+      projectId,
     } = req.body;
 
     const err_report_id = `${err_id || 'UNKNOWN'}-${Date.now()}`;
@@ -62,7 +63,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Insert expense items into MAG F4 Expenses table
     for (const expense of expenses) {
-      const { activity, description, payment_date, seller, payment_method, receipt_no, amount } = expense;
+      const { 
+        activity, 
+        description, 
+        payment_date, 
+        seller, 
+        payment_method, 
+        receipt_no, 
+        amount,
+        receipt_upload 
+      } = expense;
 
       if (!(activity && description && payment_date && seller && receipt_no && amount)) {
         console.warn('Skipping incomplete expense entry:', expense);
@@ -80,6 +90,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           payment_method,
           receipt_no,
           expense_amount: parseFloat(amount) || 0,
+          receipt_id: receipt_upload,
+          project_id: projectId
         },
       ]);
 

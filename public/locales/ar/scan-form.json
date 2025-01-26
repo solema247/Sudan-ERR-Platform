@@ -42,7 +42,6 @@
   },
   "expense_entry": "إدخال النفقات {{index}}",
   "errors": {
-    "upload_failed": "فشل في تحميل الملفات.",
     "scan_failed": "فشل في إستخراج البيانات.",
     "submit_failed": "حدث خطأ أثناء إرسال النموذج.",
     "method_not_allowed": "الطريقة غير مسموح بها.",
@@ -55,5 +54,30 @@
   "messages": {
     "form_submission_success": "تم إرسال النموذج بنجاح!",
     "form_success": "تم تحميل النموذج والصور بنجاح!"
+  },
+  "buttons": {
+    "add_expense": "إضافة نفقة جديدة",
+    "remove_expense": "حذف النفقة"
+  },
+  "upload_instructions": "يمكنك تحميل ملفات إضافية للمشروع (مثل: الصور، المستندات، أو أي مواد داعمة أخرى)",
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "err_id_required": "رقم غرفة الطوارئ مطلوب",
+    "date_required": "التاريخ مطلوب",
+    "activity_required": "النشاط مطلوب",
+    "description_required": "الوصف مطلوب",
+    "payment_date_required": "تاريخ الدفع مطلوب",
+    "seller_required": "البائع مطلوب",
+    "receipt_no_required": "رقم الإيصال مطلوب",
+    "amount_required": "المبلغ مطلوب",
+    "amount_invalid": "يجب أن يكون المبلغ رقمًا صحيحًا",
+    "total_grant_required": "إجمالي المنحة مطلوب",
+    "total_other_sources_required": "إجمالي المصادر الأخرى مطلوب",
+    "expense_errors": "يرجى تصحيح الأخطاء في إدخال النفقات رقم {{index}}",
+    "please_fix_errors": "يرجى تصحيح الأخطاء التالية:",
+    "form_errors_summary": "الحقول التالية تحتاج إلى تعبئة:",
+    "expense_summary_error": "النفقة رقم {{index}} تفتقد الحقول المطلوبة: {{fields}}",
+    "missing_field": "حقل مطلوب مفقود",
+    "fill_required_fields": "يرجى ملء جميع الحقول المطلوبة المميزة بعلامة *"
   }
 }

@@ -55,7 +55,11 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
       setChatSteps((prevSteps) => [
         ...prevSteps,
         <ScanBubble key="prefilledForm">
-          <PrefilledForm data={data.data} onFormSubmit={handleFormSubmit} />
+          <PrefilledForm 
+            data={data.data} 
+            onFormSubmit={handleFormSubmit} 
+            project={project}
+          />
         </ScanBubble>
       ]);
     } catch (error) {
@@ -72,7 +76,12 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     setChatSteps((prevSteps) => [
       ...prevSteps,
       <ScanBubble key="fileUploader">
-        <FileUploader projectId={project.id} onUploadComplete={handleUploadComplete} />
+        <div className="space-y-4">
+          <p className="text-gray-600">
+            {t("upload_instructions")}
+          </p>
+          <FileUploader projectId={project.id} onUploadComplete={handleUploadComplete} />
+        </div>
       </ScanBubble>
     ]);
   };
