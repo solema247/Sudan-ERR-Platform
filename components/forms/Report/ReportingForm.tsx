@@ -75,7 +75,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                         <Field type="number" name="total_other_sources" min="0" className="text-sm w-full p-2 border rounded-lg"/>
                         <ErrorMessage name="total_other_sources" component="div" />
 
-                        <h3 className="text-2xl font-bold pt-4">Activities and Expenses</h3>
+                        <h3 className="text-2xl font-bold">Activities and Expenses</h3>
 
                         <FieldArray
                             name="expenses"
