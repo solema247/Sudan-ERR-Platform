@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Formik, Form, Field, FieldArray, ErrorMessage } from 'formik';
+import { Formik, Form, Field, FieldArray, ErrorMessage, useFormikContext } from 'formik';
 import { useTranslation } from 'react-i18next';
 import FormBubble from '../../ui/FormBubble';
 import Button from '../../ui/Button';
@@ -33,6 +33,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
     const { t } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+    const { setFieldValue } = useFormikContext<any>();
 
     useEffect(() => {
         populateCategories(setCategories)
@@ -154,6 +155,21 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                             </label>
                             <Field type="text" name="total_expenses" className="text-sm w-full p-2 border rounded-lg"/>
                             <ErrorMessage name="total_expenses" component="div" />
+                        </div>
+
+                        <div className="mb-3">
+                            <label htmlFor="supportingFiles" className="font-bold block text-base text-black-bold mb-1">
+                                {t('chooseFiles')}
+                            </label>
+                            <input id="file" 
+                                name="supportingFiles"
+                                type="file" 
+                                multiple
+                                onChange={(event) => {
+                                    const files = Array.from(event.currentTarget.files);
+                                    setFieldValue("supportingFiles", files);
+                            }} />
+                            <ErrorMessage name={`expenses[${index}].receiptFiles`} component="div" />
                         </div>
 
                         <div className="mb-10">

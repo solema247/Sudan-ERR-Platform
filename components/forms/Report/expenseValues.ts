@@ -6,7 +6,7 @@ const expenseValues = {
     payment_method: 'cash',
     receipt_no: '',
     amount: '',
-    file: null,
+    receiptFiles: null,
 }
 
 export default expenseValues;

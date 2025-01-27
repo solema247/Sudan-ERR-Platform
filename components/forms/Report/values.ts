@@ -18,6 +18,7 @@ export default function getInitialValues(errId:string) {
             },
         ],
         excess_expenses: '',
+        supporting_files: '',
         surplus_use: '',
         training: '',
         lessons: '',

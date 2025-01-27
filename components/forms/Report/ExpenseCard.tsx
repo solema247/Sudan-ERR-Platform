@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Formik, Form, Field, FieldArray, ErrorMessage } from 'formik';
+import { useFormikContext, Formik, Form, Field, FieldArray, ErrorMessage } from 'formik';
 import { useTranslation } from 'react-i18next';
 
 export interface ActivityOption {
@@ -18,6 +18,7 @@ interface ExpenseCardProps {
 const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardProps) => {
         const { t } = useTranslation('fillForm');
         const [isCollapsed, setIsCollapsed] = useState(false);
+        const { setFieldValue } = useFormikContext<any>();
         
         return ( 
             <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md mt-3 mb-3">
@@ -119,13 +120,18 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardPro
                 </div>
                 
                 <div className="mb-3">
-                    <label htmlFor={`expenses[${index}].receiptFile`} className="font-bold block text-base text-black-bold mb-1">
+                    <label htmlFor={`expenses[${index}].receiptFiles`} className="font-bold block text-base text-black-bold mb-1">
                         {t('chooseReceiptFile')}
                     </label>
-                    <input id="file" name={`expenses[${index}].receiptFile`} type="file" onChange={(event) => {
-                        arrayHelpers.setFieldValue(`expenses[${index}].receiptFile`, event.currentTarget.files[0]);
+                    <input id="file" 
+                        name={`expenses[${index}].receiptFiles`} 
+                        type="file" 
+                        multiple
+                        onChange={(event) => {
+                            const files = Array.from(event.currentTarget.files);
+                            setFieldValue(`expenses[${index}].receiptFiles`, files);
                     }} />
-                    <ErrorMessage name={`expenses[${index}].receiptFile`} component="div" />
+                    <ErrorMessage name={`expenses[${index}].receiptFiles`} component="div" />
                 </div>
             
                 <div className="flex">
