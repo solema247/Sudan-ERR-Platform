@@ -11,6 +11,9 @@ import onSubmit from './uploading';
 import Project from '../NewProject/Project'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
+const TABLE_NAME_EXPENSE_CATEGORIES = 'expense_categories';
+const TABLE_NAME_NEW_PROJECT_APPLICATIONS = 'err_projects';
+
 type errId = string;
 
 /**
@@ -25,7 +28,6 @@ interface ReportingFormProps {
 }
 
 
-
 const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: ReportingFormProps) => {
     const { t } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
@@ -33,6 +35,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
 
     useEffect(() => {
         populateCategories(setCategories)
+        populateExpenses()
     }, []);
 
     const initialValues = getInitialValues(errId);
@@ -54,41 +57,39 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                         <p className="text-3xl">{t('formTitle')}</p>
 
                         <div className="mb-3">
-                        <label htmlFor="err_id" className="font-bold block text-base text-black-bold mb-1">
-                            {t('errId')}
-                        </label>
-                        <Field type="text" name="err_id" className="text-sm w-full p-2 border rounded-lg"/>
-                        <ErrorMessage name="err_id" component="div" />
+                            <label htmlFor="err_id" className="font-bold block text-base text-black-bold mb-1">
+                                {t('errId')}
+                            </label>
+                            <Field type="text" name="err_id" className="text-sm w-full p-2 border rounded-lg"/>
+                            <ErrorMessage name="err_id" component="div" />
                         </div>
 
                         <div className="mb-3">
-                        <label htmlFor="date" className="font-bold block text-base text-black-bold mb-1">
-                            {t('date')}
-                        </label>
-                        <Field type="date" name="date" className="text-sm w-full p-2 border rounded-lg"/>
-                        <ErrorMessage name="date" component="div" />
+                            <label htmlFor="date" className="font-bold block text-base text-black-bold mb-1">
+                                {t('date')}
+                            </label>
+                            <Field type="date" name="date" className="text-sm w-full p-2 border rounded-lg"/>
+                            <ErrorMessage name="date" component="div" />
                         </div>
 
 
                         <div className="mb-3">
-                        <label htmlFor="total_grant" className="font-bold block text-base text-black-bold mb-1">
-                            {t('totalGrant')}
-                        </label>
-                        <Field type="number" name="total_grant" min="0" className="text-sm w-full p-2 border rounded-lg"/>
-                        <ErrorMessage name="total_grant" component="div" />
+                            <label htmlFor="total_grant" className="font-bold block text-base text-black-bold mb-1">
+                                {t('totalGrant')}
+                            </label>
+                            <Field type="number" name="total_grant" min="0" className="text-sm w-full p-2 border rounded-lg"/>
+                            <ErrorMessage name="total_grant" component="div" />
                         </div>
-
 
                         <div>
-                        <label htmlFor="other_sources" className="font-bold block text-base text-black-bold mb-1">
-                            {t('totalOtherSources')}
-                        </label>
-                        <Field type="number" name="total_other_sources" min="0" className="text-sm w-full p-2 border rounded-lg"/>
-                        <ErrorMessage name="total_other_sources" component="div" />
+                            <label htmlFor="other_sources" className="font-bold block text-base text-black-bold mb-1">
+                                {t('totalOtherSources')}
+                            </label>
+                            <Field type="number" name="total_other_sources" min="0" className="text-sm w-full p-2 border rounded-lg"/>
+                            <ErrorMessage name="total_other_sources" component="div" />
                         </div>
 
-
-                        <h3 className="text-2xl font-bold">Activities and Expenses</h3>
+                        <h3 className="text-2xl font-bold">{t('formTitle')}</h3>
 
                         <FieldArray
                             name="expenses"
@@ -125,38 +126,38 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
 
 
                         <div className="mb-3 mt-9">
-                        <label htmlFor="excess_expenses" className="font-bold block text-base text-black-bold mb-1">
-                            {t('excessExpenses')}
-                        </label>
-                        <Field type="text" name="excessExpenses" className="text-sm w-full p-2 border rounded-lg"/>
-                        <ErrorMessage name="excessExpenses" component="div" />
+                            <label htmlFor="excess_expenses" className="font-bold block text-base text-black-bold mb-1">
+                                {t('excessExpenses')}
+                            </label>
+                            <Field type="text" name="excessExpenses" className="text-sm w-full p-2 border rounded-lg"/>
+                            <ErrorMessage name="excessExpenses" component="div" />
                         </div>
 
 
                         <div className="mb-3">
-                        <label htmlFor="surplus_use" className="font-bold block text-base text-black-bold mb-1">
-                            {t('surplusUse')}
-                        </label>
-                        <Field type="text" name="surplus_use" className="text-sm w-full p-2 border rounded-lg"/>
-                        <ErrorMessage name="surplus_use" component="div" />
+                            <label htmlFor="surplus_use" className="font-bold block text-base text-black-bold mb-1">
+                                {t('surplusUse')}
+                            </label>
+                            <Field type="text" name="surplus_use" className="text-sm w-full p-2 border rounded-lg"/>
+                            <ErrorMessage name="surplus_use" component="div" />
                         </div>
 
 
                         <div className="mb-3">
-                        <label htmlFor="training" className="font-bold block text-base text-black-bold mb-1">
-                            {t('trainingNeeds')}
-                        </label>
-                        <Field type="text" name="training" className="text-sm w-full p-2 border rounded-lg"/>
-                        <ErrorMessage name="training" component="div" />
+                            <label htmlFor="training" className="font-bold block text-base text-black-bold mb-1">
+                                {t('trainingNeeds')}
+                            </label>
+                            <Field type="text" name="training" className="text-sm w-full p-2 border rounded-lg"/>
+                            <ErrorMessage name="training" component="div" />
                         </div>
 
 
                         <div className="mb-3">
-                        <label htmlFor="lessons" className="font-bold block text-base text-black-bold mb-1">
-                            {t('lessonsLearned')}
-                        </label>
-                        <Field type="text" name="lessons" className="text-sm w-full p-2 border rounded-lg"/>
-                        <ErrorMessage name="lessons" component="div" />
+                            <label htmlFor="lessons" className="font-bold block text-base text-black-bold mb-1">
+                                {t('lessonsLearned')}
+                            </label>
+                            <Field type="text" name="lessons" className="text-sm w-full p-2 border rounded-lg"/>
+                            <ErrorMessage name="lessons" component="div" />
                         </div>
 
                         <div className="mb-3">
@@ -167,9 +168,9 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                             <ErrorMessage name="total_expenses" component="div" />
                         </div>
 
-                        <button type="submit" disabled={isSubmitting}>
-                            {t('submitReport')}
-                        </button>
+                        <div className="mb-10">
+                            <Button text= {t('submitReport')} disabled={isSubmitting}/>
+                        </div>
                     </Form>
                 )}
             </Formik>
@@ -182,7 +183,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
 
 async function populateCategories(setCategories) {
     const { data, error } = await supabase
-        .from('expense_categories')
+        .from(TABLE_NAME_EXPENSE_CATEGORIES)
         .select('id, name, language')
         .eq('language', 'en');
 
@@ -194,7 +195,16 @@ async function populateCategories(setCategories) {
         }
 }
 
-// TODO: Reuse this in other forms.
+async function populateExpenses(project: Project) {
+    const { data, error } = await supabase
+        .from(TABLE_NAME_NEW_PROJECT_APPLICATIONS)
+        .select('planned_activities')
+        .eq('id', project.id)
+
+
+    // TODO: Grab JSON or other record of project application.
+    // TODO: Push the first expense to the front of the field array.
+}
 
 const FormSubmitted = ({onReturnToMenu}) => {
     const { t } = useTranslation('fillForm');

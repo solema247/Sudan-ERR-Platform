@@ -19,7 +19,6 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardPro
         const { t } = useTranslation('fillForm');
         const [isCollapsed, setIsCollapsed] = useState(false);
         
-
         return ( 
             <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md mt-3 mb-3">
                 <div className="mb-3">
@@ -94,16 +93,16 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardPro
                 </div>
                 
                 <div className="mb-3">
-                <label htmlFor={`expenses[${index}].receipt_no`} className="font-bold block text-base text-black-bold mb-1">
-                {t('receiptNo')}
-                </label>
-                <Field
-                    name={`expenses[${index}].receipt_no`}
-                    type="text"
-                    placeholder="Receipt No."
-                    className="text-sm w-full p-2 border rounded-lg"
-                />
-                <ErrorMessage name={`expenses[${index}].receipt_no`} component="div" />
+                    <label htmlFor={`expenses[${index}].receipt_no`} className="font-bold block text-base text-black-bold mb-1">
+                    {t('receiptNo')}
+                    </label>
+                    <Field
+                        name={`expenses[${index}].receipt_no`}
+                        type="text"
+                        placeholder="Receipt No."
+                        className="text-sm w-full p-2 border rounded-lg"
+                    />
+                    <ErrorMessage name={`expenses[${index}].receipt_no`} component="div" />
                 </div>
 
                 <div className="mb-3">
