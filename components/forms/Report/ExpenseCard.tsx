@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Formik, Form, Field, FieldArray, ErrorMessage } from 'formik';
 import { useTranslation } from 'react-i18next';
 
@@ -16,9 +17,11 @@ interface ExpenseCardProps {
 
 const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardProps) => {
         const { t } = useTranslation('fillForm');
+        const [isCollapsed, setIsCollapsed] = useState(false);
+        
 
         return ( 
-            <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md">
+            <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md mt-3 mb-3">
                 <div className="mb-3">
                 <label htmlFor={`expenses[${index}].activity`} className="font-bold block text-base text-black-bold mb-1">
                 {t('activity')}
@@ -35,9 +38,9 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardPro
                     ))}
                 </Field>
                 <ErrorMessage name={`expenses[${index}].activity`} component="div" />
-                </div>
+            </div>
 
-                <div className="mb-3">
+            <div className="mb-3">
                     <label htmlFor={`expenses[${index}].description`} className="font-bold block text-base text-black-bold mb-1">
                     {t('description')}
                     </label>
@@ -51,34 +54,34 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardPro
                 </div>
 
                 <div className="mb-3">
-                <label htmlFor={`expenses[${index}].payment_date`} className="font-bold block text-base text-black-bold mb-1">
-                    {t('paymentDate')}
-                </label>
-                <Field
-                    name={`expenses[${index}].payment_date`}
-                    type="date"
-                    className="text-sm w-full p-2 border rounded-lg"
-                />
-                <ErrorMessage name={`expenses[${index}].payment_date`} component="div" />
+                    <label htmlFor={`expenses[${index}].payment_date`} className="font-bold block text-base text-black-bold mb-1">
+                        {t('paymentDate')}
+                    </label>
+                    <Field
+                        name={`expenses[${index}].payment_date`}
+                        type="date"
+                        className="text-sm w-full p-2 border rounded-lg"
+                    />
+                    <ErrorMessage name={`expenses[${index}].payment_date`} component="div" />
                 </div>
 
                 <div className="mb-3">
-                <label htmlFor={`expenses[${index}].seller`} className="font-bold block text-base text-black-bold mb-1">
-                    {t('seller')}
-                </label>
-                <Field
-                    name={`expenses[${index}].seller`}
-                    type="text"
-                    placeholder="Seller"
-                    className="text-sm w-full p-2 border rounded-lg"
-                />
-                <ErrorMessage name={`expenses[${index}].seller`} component="div" />
+                    <label htmlFor={`expenses[${index}].seller`} className="font-bold block text-base text-black-bold mb-1">
+                        {t('seller')}
+                    </label>
+                    <Field
+                        name={`expenses[${index}].seller`}
+                        type="text"
+                        placeholder="Seller"
+                        className="text-sm w-full p-2 border rounded-lg"
+                    />
+                    <ErrorMessage name={`expenses[${index}].seller`} component="div" />
                 </div>
 
                 <div className="mb-3">
-                <label htmlFor={`expenses[${index}].payment_method`} className="font-bold block text-base text-black-bold mb-1">
-                    {t('paymentMethod')}
-                </label>
+                    <label htmlFor={`expenses[${index}].payment_method`} className="font-bold block text-base text-black-bold mb-1">
+                        {t('paymentMethod')}
+                    </label>
                 <Field
                     name={`expenses[${index}].payment_method`}
                     as="select"
@@ -128,6 +131,14 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardPro
                 <ErrorMessage name={`expenses[${index}].receiptFile`} component="div" />
                 </div>
             
+                <div className="flex">
+
+                <button
+                    type="button"
+                    className="font-bold"
+                    onClick={() => alert('save TODO')}
+                ></button>
+
                 <button
                     type="button"
                     className="text-red-500 mt-2 font-bold"
@@ -135,6 +146,9 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardPro
                 >
                     {t('remove')}
                 </button>
+
+                </div>
+
             </div>
         )           
 }
