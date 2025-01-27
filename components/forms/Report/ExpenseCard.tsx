@@ -81,15 +81,15 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardPro
                     <label htmlFor={`expenses[${index}].payment_method`} className="font-bold block text-base text-black-bold mb-1">
                         {t('paymentMethod')}
                     </label>
-                <Field
-                    name={`expenses[${index}].payment_method`}
-                    as="select"
-                >
-                    <option value="cash">Cash</option>
-                    <option value="credit">Credit</option>
-                    <option value="debit">Debit</option>
-                </Field>
-                <ErrorMessage name={`expenses[${index}].payment_method`} component="div" />
+                    <Field
+                        name={`expenses[${index}].payment_method`}
+                        as="select"
+                    >
+                        <option value="cash">{t('cash')}</option>
+                        <option value="credit">{t('credit')}</option>
+                        <option value="debit">{t('debit')}</option>
+                    </Field>
+                    <ErrorMessage name={`expenses[${index}].payment_method`} component="div" />
                 </div>
                 
                 <div className="mb-3">
@@ -119,15 +119,13 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardPro
                 </div>
                 
                 <div className="mb-3">
-                <label htmlFor={`expenses[${index}].receiptFile`} className="font-bold block text-base text-black-bold mb-1">
-                    {t('chooseReceiptFile')}
-                </label>
-                <Field
-                    name={`expenses[${index}].receiptFile`}
-                    type="file"
-                    className="text-sm w-full p-2 border rounded-lg"
-                />
-                <ErrorMessage name={`expenses[${index}].receiptFile`} component="div" />
+                    <label htmlFor={`expenses[${index}].receiptFile`} className="font-bold block text-base text-black-bold mb-1">
+                        {t('chooseReceiptFile')}
+                    </label>
+                    <input id="file" name={`expenses[${index}].receiptFile`} type="file" onChange={(event) => {
+                        arrayHelpers.setFieldValue(`expenses[${index}].receiptFile`, event.currentTarget.files[0]);
+                    }} />
+                    <ErrorMessage name={`expenses[${index}].receiptFile`} component="div" />
                 </div>
             
                 <div className="flex">
@@ -135,8 +133,10 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardPro
                 <button
                     type="button"
                     className="font-bold"
-                    onClick={() => alert('save TODO')}
-                ></button>
+                    onClick={() => setIsCollapsed(true)}
+                >
+                    {t('done')}
+                </button>
 
                 <button
                     type="button"
