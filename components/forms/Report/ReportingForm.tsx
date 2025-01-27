@@ -24,6 +24,8 @@ interface ReportingFormProps {
     onSubmitAnotherForm: ()=> void; // TODO: Figure out if we still need this.
 }
 
+
+
 const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: ReportingFormProps) => {
     const { t } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
@@ -186,7 +188,10 @@ async function populateCategories(setCategories) {
 
         if (!error) {
            setCategories(data);
-       }
+        }
+        else {
+            alert(error)
+        }
 }
 
 // TODO: Reuse this in other forms.
