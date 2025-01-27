@@ -9,6 +9,7 @@ import getInitialValues from './values';
 import getValidationSchema from './validation';
 import onSubmit from './uploading';
 import Project from '../NewProject/Project'
+import expenseValues from './expenseValues';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 const TABLE_NAME_EXPENSE_CATEGORIES = 'expense_categories';
@@ -35,11 +36,12 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
 
     useEffect(() => {
         populateCategories(setCategories)
-        populateExpenses()
+        populateExpenses(project)
     }, []);
 
     const initialValues = getInitialValues(errId);
     const validationSchema = getValidationSchema();
+    const newExpense = expenseValues;
 
     return (
         <>
@@ -50,13 +52,13 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
             <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
-                onSubmit={onSubmit}
-            >
+                onSubmit={onSubmit} >
                 {({ isSubmitting, values }) => (
                     <Form className="prose flex flex-col">
-                        <p className="text-3xl">{t('formTitle')}</p>
+                        <span className="text-3xl">{t('formTitle')}</span>
+                        <span className="font-bold">{project.project_objectives}</span>
 
-                        <div className="mb-3">
+                        <div className="mt-6 mb-3">
                             <label htmlFor="err_id" className="font-bold block text-base text-black-bold mb-1">
                                 {t('errId')}
                             </label>
@@ -71,7 +73,6 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                             <Field type="date" name="date" className="text-sm w-full p-2 border rounded-lg"/>
                             <ErrorMessage name="date" component="div" />
                         </div>
-
 
                         <div className="mb-3">
                             <label htmlFor="total_grant" className="font-bold block text-base text-black-bold mb-1">
@@ -107,23 +108,13 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                                     <Button
                                         text={t('addExpense')}
                                         onClick={() =>
-                                            arrayHelpers.push({
-                                                activity: '',
-                                                description: '',
-                                                payment_date: '',
-                                                seller: '',
-                                                payment_method: 'cash',
-                                                receipt_no: '',
-                                                amount: '',
-                                                file: null,
-                                            })
-                                        }
+                                            arrayHelpers.push(newExpense)
+                                        }                                             
                                         className="bg-blue-500 text-white mt-4"
                                     />
                                 </div>
                             )}
                         />
-
 
                         <div className="mb-3 mt-9">
                             <label htmlFor="excess_expenses" className="font-bold block text-base text-black-bold mb-1">
@@ -133,7 +124,6 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                             <ErrorMessage name="excessExpenses" component="div" />
                         </div>
 
-
                         <div className="mb-3">
                             <label htmlFor="surplus_use" className="font-bold block text-base text-black-bold mb-1">
                                 {t('surplusUse')}
@@ -142,7 +132,6 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                             <ErrorMessage name="surplus_use" component="div" />
                         </div>
 
-
                         <div className="mb-3">
                             <label htmlFor="training" className="font-bold block text-base text-black-bold mb-1">
                                 {t('trainingNeeds')}
@@ -150,7 +139,6 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                             <Field type="text" name="training" className="text-sm w-full p-2 border rounded-lg"/>
                             <ErrorMessage name="training" component="div" />
                         </div>
-
 
                         <div className="mb-3">
                             <label htmlFor="lessons" className="font-bold block text-base text-black-bold mb-1">

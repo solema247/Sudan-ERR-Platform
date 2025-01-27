@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Formik, Form, Field, FieldArray, ErrorMessage } from 'formik';
 import { useTranslation } from 'react-i18next';
 
-interface ActivityOption {
+export interface ActivityOption {
     id: string,
     name: string
 }
@@ -11,7 +11,7 @@ interface ExpenseCardProps {
     expense: any,
     index: number,
     arrayHelpers: any,
-    categories: [ActivityOption]
+    categories: any,
 }
 
 
