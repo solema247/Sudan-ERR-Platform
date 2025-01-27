@@ -2,13 +2,27 @@ import { Formik, Form, Field, FieldArray, ErrorMessage } from 'formik';
 import ReceiptChooser from './ReceiptUploader';
 import { useTranslation } from 'react-i18next';
 
-const ExpenseCard = ({ expense, index, arrayHelpers }) => {
+
+/**
+ * 
+                activity: '',
+                description: '',
+                payment_date: '',
+                seller: '',
+                payment_method: 'cash',
+                receipt_no: '',
+                amount: '',
+                receiptFile: null,
+            }
+ */
+
+            const ExpenseCard = ({ expense, index, arrayHelpers }) => {
     const { t } = useTranslation('fill-form');
 
     return (
         <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md">
             <label htmlFor={`expenses[${index}].activity`} className="font-bold block text-base text-black-bold mb-1">
-            {t('excessExpenses')}
+            {t('activity')}
             </label>
             <Field
                 name={`expenses[${index}].activity`}
@@ -87,15 +101,6 @@ const ExpenseCard = ({ expense, index, arrayHelpers }) => {
                 className="text-sm w-full p-2 border rounded-lg"
             />
             
-            <label htmlFor="excess_expenses" className="font-bold block text-base text-black-bold mb-1">
-                 {t('excessExpenses')}
-            </label>
-
-            <ReceiptChooser
-                onFileSelect={(file) => arrayHelpers.setFieldValue(`expenses.${index}.file`, file)}
-                onError={(error) => alert(error)}
-            />
-
             <button
                 type="button"
                 className="text-red-500 mt-2 font-bold"

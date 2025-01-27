@@ -8,7 +8,6 @@ import ExpenseCard from './ExpenseCard';
 import getInitialValues from './values';
 import getValidationSchema from './validation';
 import onSubmit from './uploading';
-import { v4 as uuidv4 } from 'uuid';
 import Project from '../NewProject/Project'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
@@ -49,7 +48,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                 onSubmit={onSubmit}
             >
                 {({ isSubmitting, values }) => (
-                    <Form className="flex flex-col">
+                    <Form className="prose flex flex-col">
                         <p className="text-3xl">{t('formTitle')}</p>
 
                         <label htmlFor="err_id" className="font-bold block text-base text-black-bold mb-1">
