@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
             }
  */
 
-            const ExpenseCard = ({ expense, index, arrayHelpers }) => {
+    const ExpenseCard = ({ expense, index, arrayHelpers }) => {
     const { t } = useTranslation('fill-form');
 
     return (
@@ -40,7 +40,8 @@ import { useTranslation } from 'react-i18next';
                 placeholder="Description"
                 className="text-sm w-full p-2 border rounded-lg"
             />
-
+            <ErrorMessage name={`expenses[${index}].description`} component="div" />
+            
             <label htmlFor={`expenses[${index}].payment_date`} className="font-bold block text-base text-black-bold mb-1">
                  {t('paymentDate')}
             </label>
@@ -49,6 +50,8 @@ import { useTranslation } from 'react-i18next';
                 type="date"
                 className="text-sm w-full p-2 border rounded-lg"
             />
+            <ErrorMessage name={`expenses[${index}].payment_date`} component="div" />
+
             
             <label htmlFor={`expenses[${index}].seller`} className="font-bold block text-base text-black-bold mb-1">
                  {t('seller')}
@@ -59,6 +62,8 @@ import { useTranslation } from 'react-i18next';
                 placeholder="Seller"
                 className="text-sm w-full p-2 border rounded-lg"
             />
+            <ErrorMessage name={`expenses[${index}].seller`} component="div" />
+
             
             <label htmlFor={`expenses[${index}].payment_method`} className="font-bold block text-base text-black-bold mb-1">
                  {t('paymentMethod')}
@@ -71,6 +76,8 @@ import { useTranslation } from 'react-i18next';
                 <option value="credit">Credit</option>
                 <option value="debit">Debit</option>
             </Field>
+            <ErrorMessage name={`expenses[${index}].payment_method`} component="div" />
+
 
             <label htmlFor={`expenses[${index}].receipt_no`} className="font-bold block text-base text-black-bold mb-1">
             {t('receiptNo')}
@@ -81,6 +88,8 @@ import { useTranslation } from 'react-i18next';
                 placeholder="Receipt No."
                 className="text-sm w-full p-2 border rounded-lg"
             />
+            <ErrorMessage name={`expenses[${index}].receipt_no`} component="div" />
+
             
             <label htmlFor={`expenses[${index}].amount`} className="font-bold block text-base text-black-bold mb-1">
                  {t('amount')}
@@ -91,6 +100,8 @@ import { useTranslation } from 'react-i18next';
                 placeholder="Amount"
                 className="text-sm w-full p-2 border rounded-lg"
             />
+            <ErrorMessage name={`expenses[${index}].amount`} component="div" />
+
 
             <label htmlFor={`expenses[${index}].receiptFile`} className="font-bold block text-base text-black-bold mb-1">
                  {t('receiptFile')}
@@ -100,7 +111,9 @@ import { useTranslation } from 'react-i18next';
                 type="file"
                 className="text-sm w-full p-2 border rounded-lg"
             />
-            
+            <ErrorMessage name={`expenses[${index}].receiptFile`} component="div" />
+
+        
             <button
                 type="button"
                 className="text-red-500 mt-2 font-bold"
