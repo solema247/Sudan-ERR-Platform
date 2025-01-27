@@ -98,6 +98,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                                             expense={expense}
                                             index={index}
                                             arrayHelpers={arrayHelpers}
+                                            categories={categories}
                                         />
                                     ))}
                                     <Button

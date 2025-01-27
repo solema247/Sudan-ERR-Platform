@@ -1,7 +1,14 @@
 import { Formik, Form, Field, FieldArray, ErrorMessage } from 'formik';
 import { useTranslation } from 'react-i18next';
 
-const ExpenseCard = ({ expense, index, arrayHelpers }) => {
+interface ExpenseCardProps {
+    expense: any,
+    index: number,
+    arrayHelpers: any,
+    categories: any
+}
+
+const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardProps) => {
         const { t } = useTranslation('fillForm');
 
         return ( 
@@ -12,11 +19,17 @@ const ExpenseCard = ({ expense, index, arrayHelpers }) => {
                 </label>
                 <Field
                     name={`expenses[${index}].activity`}
-                    type="text"
-                    placeholder="Activity"
+                    as="select" name="activity"
                     className="text-sm w-full p-2 border rounded-lg mb-3"
-                />
-                </div>
+                >                    
+                    {
+                        ({ value }) => (
+                        <option key={value} value={value}>
+                            {value}
+                        </option>
+                        )
+                    }
+                </Field>
 
                 <div className="mb-3">
                     <label htmlFor={`expenses[${index}].description`} className="font-bold block text-base text-black-bold mb-1">
