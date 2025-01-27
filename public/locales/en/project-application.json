@@ -78,6 +78,6 @@
   },
   "enterPhoneNumber": "Enter your phone number",
   "phoneNumber": "Phone Number",
-  "enterBankDetails": "Enter your banking details",
-  "bankDetails": "Bank Details"
+  "enterBankingDetails": "Enter your banking details",
+  "bankingDetails": "Bank Details"
 }

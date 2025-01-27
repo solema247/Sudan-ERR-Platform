@@ -57,7 +57,9 @@
   "addAnotherExpense": "إضافة مصروف آخر",
   "enterPhoneNumber": "أدخل رقم هاتفك",
   "phoneNumber": "رقم التليفون",
-  "enterBankDetails": "أدخل تفاصيل البنك الخاص بك",
-  "bankDetails": "تفاصيل البنك",
-  "remove": "إزالة"
+  "enterBankingDetails": "أدخل تفاصيل البنك الخاص بك",
+  "bankingDetails": "تفاصيل البنك",
+  "remove": "إزالة",
+  "removeExpense": "إزالة هذه النفقات",
+  "totalExpenses": "إجمالي النفقات"
 }

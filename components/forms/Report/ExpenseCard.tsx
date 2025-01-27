@@ -6,7 +6,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers }) => {
 
         return ( 
             <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md">
-                <div className="mb3">
+                <div className="mb-3">
                 <label htmlFor={`expenses[${index}].activity`} className="font-bold block text-base text-black-bold mb-1">
                 {t('activity')}
                 </label>
@@ -18,7 +18,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers }) => {
                 />
                 </div>
 
-                <div className="mb3">
+                <div className="mb-3">
                     <label htmlFor={`expenses[${index}].description`} className="font-bold block text-base text-black-bold mb-1">
                     {t('description')}
                     </label>
@@ -31,7 +31,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers }) => {
                     <ErrorMessage name={`expenses[${index}].description`} component="div" />
                 </div>
 
-                <div className="mb3">
+                <div className="mb-3">
                 <label htmlFor={`expenses[${index}].payment_date`} className="font-bold block text-base text-black-bold mb-1">
                     {t('paymentDate')}
                 </label>
@@ -43,7 +43,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers }) => {
                 <ErrorMessage name={`expenses[${index}].payment_date`} component="div" />
                 </div>
 
-                <div className="mb3">
+                <div className="mb-3">
                 <label htmlFor={`expenses[${index}].seller`} className="font-bold block text-base text-black-bold mb-1">
                     {t('seller')}
                 </label>
@@ -56,7 +56,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers }) => {
                 <ErrorMessage name={`expenses[${index}].seller`} component="div" />
                 </div>
 
-                <div className="mb3">
+                <div className="mb-3">
                 <label htmlFor={`expenses[${index}].payment_method`} className="font-bold block text-base text-black-bold mb-1">
                     {t('paymentMethod')}
                 </label>
@@ -71,7 +71,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers }) => {
                 <ErrorMessage name={`expenses[${index}].payment_method`} component="div" />
                 </div>
                 
-                <div className="mb3">
+                <div className="mb-3">
                 <label htmlFor={`expenses[${index}].receipt_no`} className="font-bold block text-base text-black-bold mb-1">
                 {t('receiptNo')}
                 </label>
@@ -84,7 +84,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers }) => {
                 <ErrorMessage name={`expenses[${index}].receipt_no`} component="div" />
                 </div>
 
-                <div className="mb3">
+                <div className="mb-3">
                 <label htmlFor={`expenses[${index}].amount`} className="font-bold block text-base text-black-bold mb-1">
                     {t('amount')}
                 </label>
@@ -97,10 +97,9 @@ const ExpenseCard = ({ expense, index, arrayHelpers }) => {
                 <ErrorMessage name={`expenses[${index}].amount`} component="div" />
                 </div>
                 
-                <div className
-                ="mb3">
+                <div className="mb-3">
                 <label htmlFor={`expenses[${index}].receiptFile`} className="font-bold block text-base text-black-bold mb-1">
-                    {t('receiptFile')}
+                    {t('chooseReceiptFile')}
                 </label>
                 <Field
                     name={`expenses[${index}].receiptFile`}
