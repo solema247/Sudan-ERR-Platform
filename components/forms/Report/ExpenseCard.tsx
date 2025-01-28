@@ -134,23 +134,23 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }:ExpenseCardPro
                 <ErrorMessage name={`expenses[${index}].receiptFiles`} component="div" />
             </div>
             
-            <div className="flex">
+            <div className="flex justify-between">
 
-            <button
-                type="button"
-                className="font-bold"
-                onClick={() => setIsCollapsed(true)}
-            >
-                {t('Done')}
-            </button>
+                <button
+                    type="button"
+                    className="font-bold"
+                    onClick={() => setIsCollapsed(true)}
+                >
+                    {t('Done')}
+                </button>
 
-            <button
-                type="button"
-                className="text-red-500 mt-2 font-bold"
-                onClick={() => arrayHelpers.remove(index)}
-            >
-                {t('remove')}
-            </button>
+                <button
+                    type="button"
+                    className="text-red-500 mt-2 font-bold"
+                    onClick={() => arrayHelpers.remove(index)}
+                >
+                    {t('remove')}
+                </button>
 
         </div>
 

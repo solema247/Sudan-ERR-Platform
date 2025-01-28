@@ -10,7 +10,7 @@ import getValidationSchema from './validation';
 import onSubmit from './uploading';
 import Project from '../NewProject/Project'
 import expenseValues from './expenseValues';
-import UploadChooser from './UploadChooser';
+import { UploadChooser, reportUploadType } from './UploadChooser';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 const TABLE_NAME_EXPENSE_CATEGORIES = 'expense_categories';
@@ -159,6 +159,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
 
                         <div className="mb-3">                            
                             <UploadChooser
+                                uploadType= {reportUploadType.SUPPORTING}
                                 selectedFiles = {values.supporting_files}
                                 projectId = {project.id}
                                 reportId = {reportId}

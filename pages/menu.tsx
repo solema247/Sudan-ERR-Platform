@@ -89,7 +89,7 @@ const Menu = () => {
     }, [currentMenu]);
 
     const createNewReportId = () => {
-        activeReportId = crypto.randomUUID()
+        setActiveReportId(crypto.randomUUID());
     }
     
 
@@ -263,7 +263,7 @@ const Menu = () => {
             {showFillForm && (
                 <MessageBubble>
                     <ReportingForm
-                        errId={errId}
+                        errId={errId as string}
                         reportId={activeReportId}
                         project={selectedProject} 
                         onReturnToMenu={() => handleMenuSelection(CurrentMenu.REPORTING)} 
