@@ -3,7 +3,7 @@ const expenseValues = {
     description: '',
     payment_date: '',
     seller: '',
-    payment_method: 'cash',
+    payment_method: '',
     receipt_no: '',
     amount: '',
     receiptFiles: null,

@@ -14,7 +14,7 @@ export default function getInitialValues(errId:string) {
                 payment_method: 'cash',
                 receipt_no: '',
                 amount: '',
-                receiptFile: null,
+                receiptFiles: null,
             },
         ],
         excess_expenses: '',
@@ -22,6 +22,7 @@ export default function getInitialValues(errId:string) {
         surplus_use: '',
         training: '',
         lessons: '',
-        total_expenses: ''
+        total_expenses: '',
+        supportingFiles: null
     };
 }

@@ -169,7 +169,7 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                                     const files = Array.from(event.currentTarget.files);
                                     setFieldValue("supportingFiles", files);
                             }} />
-                            <ErrorMessage name={`expenses[${index}].receiptFiles`} component="div" />
+                            <ErrorMessage name="supportingFiles" component="div" />
                         </div>
 
                         <div className="mb-10">
