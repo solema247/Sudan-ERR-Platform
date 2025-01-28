@@ -4,7 +4,6 @@ import { supabase } from '../../../services/supabaseClient';
 
 // TODO: Get the correct bucket.
 
-
 export enum reportUploadType {
   RECEIPT,
   SUPPORTING
