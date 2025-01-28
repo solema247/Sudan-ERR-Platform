@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Field, ErrorMessage, useFormikContext } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Trash2, Check } from "lucide-react";
+import { UploadChooser, reportUploadType } from './UploadChooser';
 
 
 export interface ActivityOption {
@@ -122,7 +123,12 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardPr
                         <ErrorMessage name={`expenses[${index}].amount`} component="div" />
                     </div>
 
-                    <div className="mb-3">
+                       uploadType= {reportUploadType.RECEIPT}
+                        selectedFiles = {values.supporting_files}
+                        projectId = {project.id}
+                        reportId = {reportId}
+
+                    {/* <div className="mb-3">
                         <label htmlFor={`expenses[${index}].receiptFiles`} className="font-bold block text-base text-black-bold mb-1">
                             {t('chooseReceiptFile')}
                         </label>
@@ -137,7 +143,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardPr
                             }}
                         />
                         <ErrorMessage name={`expenses[${index}].receiptFiles`} component="div" />
-                    </div>
+                    </div> */}
 
                     <div className="flex justify-between content-center">
                         <button
