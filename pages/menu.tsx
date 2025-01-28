@@ -264,8 +264,8 @@ const Menu = () => {
                 <MessageBubble>
                     <ReportingForm
                         errId={errId}
-                        project={selectedProject} 
                         reportId={activeReportId}
+                        project={selectedProject} 
                         onReturnToMenu={() => handleMenuSelection(CurrentMenu.REPORTING)} 
                         onSubmitAnotherForm={() => {
                             setShowFillForm(false);

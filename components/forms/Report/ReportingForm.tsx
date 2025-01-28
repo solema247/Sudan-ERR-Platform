@@ -16,21 +16,21 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 const TABLE_NAME_EXPENSE_CATEGORIES = 'expense_categories';
 const TABLE_NAME_NEW_PROJECT_APPLICATIONS = 'err_projects';
 
-type errId = string;
 
 /**
  * F4 Financial Reporting form, called from Menu.tsx
  */
 
 interface ReportingFormProps {
-    errId: errId;
+    errId: string;
+    reportId: string;
     project: Project;
     onReturnToMenu: ()=> void;
     onSubmitAnotherForm: ()=> void; // TODO: Figure out if we still need this.
 }
 
 
-const ReportingForm: React.FC<ReportingFormProps> = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: ReportingFormProps) => {
+const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project, onReturnToMenu, onSubmitAnotherForm }: ReportingFormProps) => {
     const { t } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
