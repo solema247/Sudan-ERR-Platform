@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Field, ErrorMessage, useFormikContext } from 'formik';
 import { useTranslation } from 'react-i18next';
+import { Pencil, Trash2, Check } from "lucide-react";
+
 
 export interface ActivityOption {
     id: string,
@@ -17,12 +19,12 @@ interface ExpenseCardProps {
 const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardProps) => {
     const { t } = useTranslation('fillForm');
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const { setFieldValue } = useFormikContext();
+    const { values, setFieldValue } = useFormikContext();
 
     return (
-        <>
+            <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md mt-3 mb-3">
             {!isCollapsed ? (
-                <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md mt-3 mb-3">
+                <>
                     <div className="mb-3">
                         <label htmlFor={`expenses[${index}].activity`} className="font-bold block text-base text-black-bold mb-1">
                             {t('activity')}
@@ -137,34 +139,42 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardPr
                         <ErrorMessage name={`expenses[${index}].receiptFiles`} component="div" />
                     </div>
 
-                    <div className="flex justify-between">
+                    <div className="flex justify-between content-center">
                         <button
                             type="button"
-                            className="font-bold"
                             onClick={() => setIsCollapsed(true)}
                         >
-                            {t('Done')}
+                            <div className="flex content-center">
+                              <Check/>
+                            </div>
                         </button>
 
                         <button
                             type="button"
-                            className="text-red-500 mt-2 font-bold"
                             onClick={() => arrayHelpers.remove(index)}
                         >
-                            {t('remove')}
+                            <div className="flex content-center text-red-500">
+                                <Trash2/>
+                            </div>
                         </button>
                     </div>
-                </div>
+                    </>
             ) : (
-                <button
-                    type="button"
-                    className="font-bold text-blue-500"
-                    onClick={() => setIsCollapsed(false)}
-                >
-                    {t('Edit')}
-                </button>
+                <div className="flex flex-row justify-between">
+                    <span>
+                        {expense.activity}
+                    </span>
+
+                    <button
+                        type="button"
+                        className="font-bold text-blue-500"
+                        onClick={() => setIsCollapsed(false)}
+                    >
+                        {t('Edit')}
+                    </button>
+                </div>
             )}
-        </>
+            </div>
     );
 };
 
