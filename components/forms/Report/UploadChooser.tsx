@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Upload, Trash2, Check } from "lucide-react";
+import { supabase } from '../../../services/supabaseClient';
 
-// TODO: Localize
+// TODO: Get the correct bucket.
+
 
 export enum reportUploadType {
   RECEIPT,
@@ -15,22 +17,72 @@ interface UploadChooserProps {
   uploadType: reportUploadType;
 }
 
+interface FileWithProgress {
+  file: File;
+  uploaded: boolean;
+  progress: number;
+}
+
 export const UploadChooser: React.FC<UploadChooserProps> = ({ selectedFiles, projectId, reportId, uploadType: UploadChooserProps }: UploadChooserProps) => {
-  const [files, setFiles] = useState<{ file: File; uploaded: boolean }[]>([]);
+  const [files, setFiles] = useState<FileWithProgress[]>([]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(e.target.files || []).map((file) => ({ file, uploaded: false }));
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []).map((file) => ({ file, uploaded: false, progress: 0 }));
     setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
+  
+    selectedFiles.forEach(async (newFile) => {
+      const uploadPath = `${projectId}/${reportId}/${newFile.file.name}`;
+      const chunkSize = 1024 * 1024; // 1MB chunk size
+      const totalChunks = Math.ceil(newFile.file.size / chunkSize);
+  
+      try {
+        for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+          const start = chunkIndex * chunkSize;
+          const end = Math.min(start + chunkSize, newFile.file.size);
+          const chunk = newFile.file.slice(start, end);
+  
+          const { error } = await supabase.storage.from("your-bucket-name").upload(`${uploadPath}.chunk${chunkIndex}`, chunk, { upsert: true });
+  
+          if (error) {
+            console.error("Chunk upload error:", error);
+            return;
+          }
+  
+          const progress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
+          setFiles((prevFiles) => {
+            const updatedFiles = [...prevFiles];
+            const fileIndex = prevFiles.findIndex((f) => f.file === newFile.file);
+            if (fileIndex >= 0) {
+              updatedFiles[fileIndex] = {
+                ...updatedFiles[fileIndex],
+                progress,
+              };
+            }
+            return updatedFiles;
+          });
+        }
+  
+        // Mark as uploaded
+        setFiles((prevFiles) => {
+          const updatedFiles = [...prevFiles];
+          const fileIndex = prevFiles.findIndex((f) => f.file === newFile.file);
+          if (fileIndex >= 0) {
+            updatedFiles[fileIndex] = {
+              ...updatedFiles[fileIndex],
+              uploaded: true,
+              progress: 100,
+            };
+          }
+          return updatedFiles;
+        });
+      } catch (err) {
+        console.error("Unexpected upload error:", err);
+      }
+    });
   };
-
+  
   const removeFile = (index: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-  };
-
-  const handleUpload = () => {
-    console.log("Uploading files:", files);
-    // Simulate file upload and mark files as uploaded
-    setFiles((prevFiles) => prevFiles.map((file) => ({ ...file, uploaded: true })));
   };
 
   return (
@@ -38,9 +90,6 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({ selectedFiles, pro
       <div className="flex flex-col gap-4">
         <UploadBox onFileChange={handleFileChange} />
         <UploadedList files={files} removeFile={removeFile} />
-        {files.length > 0 && (
-          <PerformUploadButton onUpload={handleUpload} />
-        )}
       </div>
     </div>
   );
@@ -72,7 +121,7 @@ const UploadBox: React.FC<UploadBoxProps> = ({ onFileChange }) => {
 };
 
 interface UploadedListProps {
-  files: { file: File; uploaded: boolean }[];
+  files: FileWithProgress[];
   removeFile: (index: number) => void;
 }
 
@@ -82,14 +131,23 @@ const UploadedList: React.FC<UploadedListProps> = ({ files, removeFile }) => {
       {files.length > 0 && (
         <div className="mt-4">
           <ul className="space-y-2">
-            {files.map(({ file, uploaded }, index) => (
+            {files.map(({ file, uploaded, progress }, index) => (
               <li
                 key={index}
-                className="flex items-center justify-between p-2 border rounded-md"
+                className="flex items-center justify-between gap-4 p-2 border rounded-md"
               >
                 <span className="truncate">{file.name}</span>
-                <div className="flex items-center justify-between">
-                  {uploaded && <Check className="text-green-500" size={16} />}
+                <div className="flex items-center gap-2">
+                  {uploaded ? (
+                    <Check className="text-green-500" size={16} />
+                  ) : (
+                    <div className="w-20 h-2 bg-gray-200 rounded">
+                      <div
+                        className="h-2 bg-blue-500 rounded"
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                    </div>
+                  )}
                   <button
                     onClick={() => removeFile(index)}
                     className="text-red-500 hover:text-red-700"
@@ -103,20 +161,5 @@ const UploadedList: React.FC<UploadedListProps> = ({ files, removeFile }) => {
         </div>
       )}
     </div>
-  );
-};
-
-interface PerformUploadButtonProps {
-  onUpload: () => void;
-}
-
-const PerformUploadButton: React.FC<PerformUploadButtonProps> = ({ onUpload }) => {
-  return (
-    <button
-      onClick={onUpload}
-      className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600"
-    >
-      Upload Files
-    </button>
   );
 };
