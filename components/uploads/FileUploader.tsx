@@ -9,7 +9,7 @@ interface FileUploaderProps {
 }
 
 /**
-  * UI for choosing files to upload for expense reports.
+  * UI for choosing files to upload for expense reports (TODO: For Scan Form only, right?)
   * 
   * TODO: Move non-UI controller stuff into api or elsewhere
   * TODO: See if we need the URL anywhere else besides what we are doing here.

@@ -39,6 +39,7 @@ const getCurrentTimestamp = () => {
     return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
+
 const Menu = () => {
     const [currentMenu, setCurrentMenu] = useState(CurrentMenu.MAIN);
     const [showFillForm, setShowFillForm] = useState(false);
@@ -48,6 +49,7 @@ const Menu = () => {
     const [showProjectStatus, setShowProjectStatus] = useState(false);
     const [projects, setProjects] = useState<Project[]>([]); // Stores active projects
     const [selectedProject, setSelectedProject] = useState<Project | null>(null); // Stores selected project
+    const [activeReportId, setActiveReportId] = useState(null)
 
     const router = useRouter();
     const errId = router.query.errId;
@@ -86,6 +88,11 @@ const Menu = () => {
         }
     }, [currentMenu]);
 
+    const createNewReportId = () => {
+        activeReportId = crypto.randomUUID()
+    }
+    
+
     // Update direction and language attributes dynamically
     useEffect(() => {
         const direction = i18n.language === 'ar' ? 'rtl' : 'ltr';
@@ -113,7 +120,10 @@ const Menu = () => {
         setShowProjectApplication(false);
         setShowProjectStatus(false);
 
-        if (workflow === Workflow.FILL_FORM) setShowFillForm(true);
+        if (workflow === Workflow.FILL_FORM) {
+            createNewReportId();
+            setShowFillForm(true);
+        }
         if (workflow === Workflow.SCAN_FORM) setShowScanForm(true);
         if (workflow === Workflow.SCAN_CUSTOM_FORM) setShowScanCustomForm(true);
         if (workflow === Workflow.PROJECT_APPLICATION) setShowProjectApplication(true);
@@ -255,9 +265,11 @@ const Menu = () => {
                     <ReportingForm
                         errId={errId}
                         project={selectedProject} 
+                        reportId={activeReportId}
                         onReturnToMenu={() => handleMenuSelection(CurrentMenu.REPORTING)} 
                         onSubmitAnotherForm={() => {
                             setShowFillForm(false);
+                            createNewReportId();
                             setTimeout(() => setShowFillForm(true), 0); // Reset workflow
                         }}
                     />

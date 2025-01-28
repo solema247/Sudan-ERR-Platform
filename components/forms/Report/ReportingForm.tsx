@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Formik, Form, Field, FieldArray, ErrorMessage, useFormikContext } from 'formik';
+import { Formik, Form, Field, FieldArray, ErrorMessage } from 'formik';
 import { useTranslation } from 'react-i18next';
 import FormBubble from '../../ui/FormBubble';
 import Button from '../../ui/Button';
@@ -10,6 +10,7 @@ import getValidationSchema from './validation';
 import onSubmit from './uploading';
 import Project from '../NewProject/Project'
 import expenseValues from './expenseValues';
+import UploadChooser from './UploadChooser';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 const TABLE_NAME_EXPENSE_CATEGORIES = 'expense_categories';
@@ -29,11 +30,10 @@ interface ReportingFormProps {
 }
 
 
-const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: ReportingFormProps) => {
+const ReportingForm: React.FC<ReportingFormProps> = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: ReportingFormProps) => {
     const { t } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
-    const { setFieldValue } = useFormikContext<any>();
 
     useEffect(() => {
         populateCategories(setCategories)
@@ -157,19 +157,12 @@ const ReportingForm = ({ errId, project, onReturnToMenu, onSubmitAnotherForm }: 
                             <ErrorMessage name="total_expenses" component="div" />
                         </div>
 
-                        <div className="mb-3">
-                            <label htmlFor="supportingFiles" className="font-bold block text-base text-black-bold mb-1">
-                                {t('chooseFiles')}
-                            </label>
-                            <input id="file" 
-                                name="supportingFiles"
-                                type="file" 
-                                multiple
-                                onChange={(event) => {
-                                    const files = Array.from(event.currentTarget.files);
-                                    setFieldValue("supportingFiles", files);
-                            }} />
-                            <ErrorMessage name="supportingFiles" component="div" />
+                        <div className="mb-3">                            
+                            <UploadChooser
+                                selectedFiles = {values.supporting_files}
+                                projectId = {project.id}
+                                reportId = {reportId}
+                            />
                         </div>
 
                         <div className="mb-10">
