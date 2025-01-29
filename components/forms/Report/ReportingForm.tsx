@@ -173,7 +173,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                             <label htmlFor="total_expenses" className="font-bold block text-base text-black-bold mb-1">
                                 {t('totalExpenses')}
                             </label>
-                            <Field type="text" name="total_expenses" className="text-sm w-full p-2 border rounded-lg"/>
+                            <Field type="number" name="total_expenses" className="text-sm w-full p-2 border rounded-lg"/>
                             <ErrorMessage name="total_expenses" component="div" />
                         </div>
 

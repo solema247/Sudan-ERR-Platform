@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Upload, Trash2, Check } from "lucide-react";
 import { supabase } from '../../../../services/supabaseClient';
+import { useTranslation } from 'react-i18next';
+
 
 // TODO: Get the correct bucket.
 
@@ -99,6 +101,8 @@ interface UploadBoxProps {
 }
 
 const UploadBox: React.FC<UploadBoxProps> = ({ onFileChange, uploadType }) => {
+  const { t } = useTranslation('fillForm');
+  
   return (
     <div className="border-dashed border-2 border-gray-300 p-4 rounded-md">
       <input
@@ -115,14 +119,14 @@ const UploadBox: React.FC<UploadBoxProps> = ({ onFileChange, uploadType }) => {
         <Upload className="mr-2" />
         {uploadType == reportUploadType.RECEIPT ? 
         (
-          <span>Choose Receipt Files</span>
-         ) 
-         : 
-         ( 
+          <span>{t('chooseReceiptFiles')}</span>
+        ) 
+        : 
+        ( 
           <span>
-           Choose Files
+           {t('choosefiles')}
            </span>
-          ) 
+        ) 
         }
       </label>
     </div>
