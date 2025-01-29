@@ -13,28 +13,30 @@ interface ExpenseEntry {
   seller: string;
   payment_method: string;
   receipt_no: string;
-  amount: string;
+  amount: number;
   receipt_upload?: string;
 }
 
 interface PrefilledFormProps {
   data: {
-    date?: string;
-    err_id?: string;
-    expenses?: ExpenseEntry[];
-    total_grant?: string;
-    total_other_sources?: string;
-    total_expenses?: string;
-    remainder?: string;
-    additional_excess_expenses?: string;
-    additional_surplus_use?: string;
-    lessons_learned?: string;
-    additional_training_needs?: string;
+    date: string;
+    err_id: string;
+    expenses: ExpenseEntry[];
+    financial_summary: {
+      total_expenses: number;
+      total_grant_received: number;
+      total_other_sources: number;
+      remainder: number;
+    };
+    additional_questions: {
+      excess_expenses: string;
+      surplus_use: string;
+      lessons_learned: string;
+      training_needs: string;
+    };
   };
-  onFormSubmit: (formData: any) => void;
-  project?: {
-    id: string;
-  };
+  onFormSubmit: (formData?: any) => void;
+  project?: any;
 }
 
 // Add this helper component for required field labels
@@ -50,14 +52,14 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
     date: data.date || "",
     err_id: data.err_id || "",
     expenses: data.expenses || [],
-    total_grant: data.total_grant || "",
-    total_other_sources: data.total_other_sources || "",
-    total_expenses: data.total_expenses || "",
-    remainder: data.remainder || "",
-    additional_excess_expenses: data.additional_excess_expenses || "",
-    additional_surplus_use: data.additional_surplus_use || "",
-    lessons_learned: data.lessons_learned || "",
-    additional_training_needs: data.additional_training_needs || "",
+    total_grant: data.financial_summary?.total_grant_received || "",
+    total_other_sources: data.financial_summary?.total_other_sources || "",
+    total_expenses: data.financial_summary?.total_expenses || "",
+    remainder: data.financial_summary?.remainder || "",
+    additional_excess_expenses: data.additional_questions?.excess_expenses || "",
+    additional_surplus_use: data.additional_questions?.surplus_use || "",
+    lessons_learned: data.additional_questions?.lessons_learned || "",
+    additional_training_needs: data.additional_questions?.training_needs || "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -101,15 +103,8 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
     setFormData({ ...formData, expenses: newExpenses });
   };
 
-  const handleFileSelect = (index: number, file: File) => {
-    setReceiptFiles(prev => ({
-      ...prev,
-      [index]: file
-    }));
-    setReceiptUploads(prev => ({
-      ...prev,
-      [index]: file.name
-    }));
+  const handleReceiptUpload = (index: number, file: File) => {
+    setReceiptFiles(prev => ({ ...prev, [index]: file }));
   };
 
   const handleReceiptError = (error: string) => {
@@ -124,7 +119,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
       seller: '',
       payment_method: 'cash',
       receipt_no: '',
-      amount: '',
+      amount: 0,
     };
 
     setFormData(prev => ({
@@ -186,7 +181,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
       }
       if (!expense.amount) {
         expenseError.amount = t('field_labels.amount');
-      } else if (isNaN(parseFloat(expense.amount))) {
+      } else if (isNaN(parseFloat(expense.amount.toString()))) {
         expenseError.amount = t('validation.amount_invalid');
       }
 
@@ -288,7 +283,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
   };
 
   return (
-    <div className="w-full space-y-4 bg-white rounded-lg">
+    <div className="space-y-6">
       <label>
         <RequiredLabel text={t("field_labels.err_id")} />
         <input
@@ -335,6 +330,16 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
               </button>
             </div>
             <label>
+              <RequiredLabel text={t("field_labels.payment_date")} />
+              <input
+                type="date"
+                name="payment_date"
+                value={expense.payment_date}
+                onChange={(e) => handleExpenseChange(index, e)}
+                className={`w-full p-2 border rounded ${errors.expenses?.[index]?.payment_date ? 'border-red-500' : ''}`}
+              />
+            </label>
+            <label>
               <RequiredLabel text={t("field_labels.activity")} />
               <input
                 type="text"
@@ -343,9 +348,6 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
                 onChange={(e) => handleExpenseChange(index, e)}
                 className={`w-full p-2 border rounded ${errors.expenses?.[index]?.activity ? 'border-red-500' : ''}`}
               />
-              {errors.expenses?.[index]?.activity && (
-                <p className="text-red-500 text-sm mt-1">{errors.expenses?.[index]?.activity}</p>
-              )}
             </label>
             <label>
               <RequiredLabel text={t("field_labels.description")} />
@@ -356,27 +358,9 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
                 onChange={(e) => handleExpenseChange(index, e)}
                 className={`w-full p-2 border rounded ${errors.expenses?.[index]?.description ? 'border-red-500' : ''}`}
               />
-              {errors.expenses?.[index]?.description && (
-                <p className="text-red-500 text-sm mt-1">{errors.expenses?.[index]?.description}</p>
-              )}
             </label>
             <label>
-              <RequiredLabel text={t("field_labels.payment_date")} />
-              <input
-                type="date"
-                name="payment_date"
-                value={expense.payment_date}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className={`w-full p-2 border rounded ${errors.expenses?.[index]?.payment_date ? 'border-red-500' : ''}`}
-              />
-              {errors.expenses?.[index]?.payment_date && (
-                <p className="text-red-500 text-sm mt-1">{errors.expenses?.[index]?.payment_date}</p>
-              )}
-            </label>
-            <div className="mb-1">
-              <label className="block">
-                <RequiredLabel text={t("field_labels.seller")} />
-              </label>
+              <RequiredLabel text={t("field_labels.seller")} />
               <input
                 type="text"
                 name="seller"
@@ -384,24 +368,16 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
                 onChange={(e) => handleExpenseChange(index, e)}
                 className={`w-full p-2 border rounded ${errors.expenses?.[index]?.seller ? 'border-red-500' : ''}`}
               />
-              {errors.expenses?.[index]?.seller && (
-                <p className="text-red-500 text-sm mt-1">{errors.expenses?.[index]?.seller}</p>
-              )}
-            </div>
+            </label>
             <label>
               <RequiredLabel text={t("field_labels.payment_method")} />
-              <select
+              <input
+                type="text"
                 name="payment_method"
                 value={expense.payment_method}
                 onChange={(e) => handleExpenseChange(index, e)}
                 className={`w-full p-2 border rounded ${errors.expenses?.[index]?.payment_method ? 'border-red-500' : ''}`}
-              >
-                <option value="cash">{t("payment_methods.cash")}</option>
-                <option value="bank app">{t("payment_methods.bank_app")}</option>
-              </select>
-              {errors.expenses?.[index]?.payment_method && (
-                <p className="text-red-500 text-sm mt-1">{errors.expenses?.[index]?.payment_method}</p>
-              )}
+              />
             </label>
             <label>
               <RequiredLabel text={t("field_labels.receipt_no")} />
@@ -412,157 +388,130 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
                 onChange={(e) => handleExpenseChange(index, e)}
                 className={`w-full p-2 border rounded ${errors.expenses?.[index]?.receipt_no ? 'border-red-500' : ''}`}
               />
-              {errors.expenses?.[index]?.receipt_no && (
-                <p className="text-red-500 text-sm mt-1">{errors.expenses?.[index]?.receipt_no}</p>
-              )}
             </label>
             <label>
               <RequiredLabel text={t("field_labels.amount")} />
               <input
-                type="number"
+                type="text"
                 name="amount"
-                value={expense.amount}
+                value={expense.amount.toString()}
                 onChange={(e) => handleExpenseChange(index, e)}
                 className={`w-full p-2 border rounded ${errors.expenses?.[index]?.amount ? 'border-red-500' : ''}`}
               />
-              {errors.expenses?.[index]?.amount && (
-                <p className="text-red-500 text-sm mt-1">{errors.expenses?.[index]?.amount}</p>
-              )}
             </label>
-            <div className="mt-2">
-              <ReceiptUploader
-                expenseId={uuidv4()}
-                projectId={project.id}
-                reportId={formData.err_id}
-                onFileSelect={(file) => handleFileSelect(index, file)}
-                onError={handleReceiptError}
-              />
-              {receiptUploads[index] && (
-                <p className="text-sm text-green-600 mt-2">
-                  ✓ {receiptUploads[index]}
-                </p>
-              )}
-            </div>
+            <ReceiptUploader
+              expenseId={uuidv4()}
+              projectId={project.id}
+              reportId={formData.err_id}
+              onFileSelect={(file) => handleReceiptUpload(index, file)}
+              onError={(error) => setErrors({ ...errors, [`receipt_${index}`]: error })}
+            />
           </div>
         ))}
-        
-        <Button
-          text={t("buttons.add_expense")}
-          onClick={addNewExpense}
-          className="mt-8 mb-8 bg-green-600 hover:bg-green-700 text-white"
-        />
       </div>
 
-      <label>
-        <RequiredLabel text={t("field_labels.total_grant")} />
-        <input
-          type="number"
-          name="total_grant"
-          onChange={handleInputChange}
-          value={formData.total_grant}
-          className={`w-full p-2 border rounded ${errors.total_grant ? 'border-red-500' : ''}`}
-        />
-        {errors.total_grant && (
-          <p className="text-red-500 text-sm mt-1">{errors.total_grant}</p>
-        )}
-      </label>
-      <label>
-        <RequiredLabel text={t("field_labels.total_other_sources")} />
-        <input
-          type="number"
-          name="total_other_sources"
-          onChange={handleInputChange}
-          value={formData.total_other_sources}
-          className={`w-full p-2 border rounded ${errors.total_other_sources ? 'border-red-500' : ''}`}
-        />
-        {errors.total_other_sources && (
-          <p className="text-red-500 text-sm mt-1">{errors.total_other_sources}</p>
-        )}
-      </label>
-      <label>
-        <RequiredLabel text={t("field_labels.additional_excess_expenses")} />
-        <textarea
-          name="additional_excess_expenses"
-          onChange={handleInputChange}
-          value={formData.additional_excess_expenses}
-          className={`w-full p-2 border rounded ${errors.additional_excess_expenses ? 'border-red-500' : ''}`}
-        />
-        {errors.additional_excess_expenses && (
-          <p className="text-red-500 text-sm mt-1">{errors.additional_excess_expenses}</p>
-        )}
-      </label>
-      <label>
-        <RequiredLabel text={t("field_labels.additional_surplus_use")} />
-        <textarea
-          name="additional_surplus_use"
-          onChange={handleInputChange}
-          value={formData.additional_surplus_use}
-          className={`w-full p-2 border rounded ${errors.additional_surplus_use ? 'border-red-500' : ''}`}
-        />
-        {errors.additional_surplus_use && (
-          <p className="text-red-500 text-sm mt-1">{errors.additional_surplus_use}</p>
-        )}
-      </label>
-      <label>
-        <RequiredLabel text={t("field_labels.additional_training_needs")} />
-        <textarea
-          name="additional_training_needs"
-          onChange={handleInputChange}
-          value={formData.additional_training_needs}
-          className={`w-full p-2 border rounded ${errors.additional_training_needs ? 'border-red-500' : ''}`}
-        />
-        {errors.additional_training_needs && (
-          <p className="text-red-500 text-sm mt-1">{errors.additional_training_needs}</p>
-        )}
-      </label>
-      <label>
-        <RequiredLabel text={t("field_labels.lessons_learned")} />
-        <textarea
-          name="lessons_learned"
-          onChange={handleInputChange}
-          value={formData.lessons_learned}
-          className={`w-full p-2 border rounded ${errors.lessons_learned ? 'border-red-500' : ''}`}
-        />
-        {errors.lessons_learned && (
-          <p className="text-red-500 text-sm mt-1">{errors.lessons_learned}</p>
-        )}
-      </label>
+      {/* Financial Summary Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">{t("field_labels.financial_summary")}</h3>
+        
+        <label>
+          <RequiredLabel text={t("field_labels.total_expenses")} />
+          <input
+            type="text"
+            name="total_expenses"
+            value={formData.total_expenses}
+            onChange={handleInputChange}
+            className="form-input w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
+          />
+        </label>
 
-      {/* Add error summary just before the submit button */}
-      {Object.keys(errors).length > 0 && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-red-700">
-                {t('validation.fill_required_fields')}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+        <label>
+          <RequiredLabel text={t("field_labels.total_grant")} />
+          <input
+            type="text"
+            name="total_grant"
+            value={formData.total_grant}
+            onChange={handleInputChange}
+            className="form-input w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
+          />
+        </label>
 
-      <Button
-        text={
-          isSubmitting
-            ? t("button_text.processing")
-            : isSubmitted
-            ? t("button_text.submitted")
-            : t("button_text.submit")
-        }
-        onClick={handleSubmit}
-        type="button"
-        disabled={isSubmitting || isSubmitted} // Disable button during processing or after submission
-        className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all"
+        <label>
+          <RequiredLabel text={t("field_labels.total_other_sources")} />
+          <input
+            type="text"
+            name="total_other_sources"
+            value={formData.total_other_sources}
+            onChange={handleInputChange}
+            className="form-input w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
+          />
+        </label>
+
+        <label>
+          <RequiredLabel text={t("field_labels.remainder")} />
+          <input
+            type="text"
+            name="remainder"
+            value={formData.remainder}
+            onChange={handleInputChange}
+            className="form-input w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
+          />
+        </label>
+      </div>
+
+      {/* Additional Questions Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">{t("field_labels.additional_questions")}</h3>
+        
+        <label>
+          <RequiredLabel text={t("field_labels.excess_expenses_q")} />
+          <textarea
+            name="additional_excess_expenses"
+            value={formData.additional_excess_expenses}
+            onChange={handleInputChange}
+            className="form-textarea w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
+          />
+        </label>
+
+        <label>
+          <RequiredLabel text={t("field_labels.surplus_use_q")} />
+          <textarea
+            name="additional_surplus_use"
+            value={formData.additional_surplus_use}
+            onChange={handleInputChange}
+            className="form-textarea w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
+          />
+        </label>
+
+        <label>
+          <RequiredLabel text={t("field_labels.lessons_learned_q")} />
+          <textarea
+            name="lessons_learned"
+            value={formData.lessons_learned}
+            onChange={handleInputChange}
+            className="form-textarea w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
+          />
+        </label>
+
+        <label>
+          <RequiredLabel text={t("field_labels.training_needs_q")} />
+          <textarea
+            name="additional_training_needs"
+            value={formData.additional_training_needs}
+            onChange={handleInputChange}
+            className="form-textarea w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
+          />
+        </label>
+      </div>
+
+      <Button 
+        onClick={handleSubmit} 
+        disabled={isSubmitting}
+        text={isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
+        className="w-full py-2 px-4 bg-primaryGreen text-white rounded hover:bg-green-700"
       />
     </div>
   );
 };
 
 export default PrefilledForm;
-
-

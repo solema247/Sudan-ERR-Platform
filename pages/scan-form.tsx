@@ -19,6 +19,10 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
   const [structuredData, setStructuredData] = useState<any>(null);
   const [showFileUploader, setShowFileUploader] = useState(false);
   const [chatSteps, setChatSteps] = useState<JSX.Element[]>([]);
+  const [uploadType, setUploadType] = useState<'image' | 'pdf'>('image');
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfProcessing, setPdfProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -119,35 +123,128 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     ]);
   };
 
+  const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      if (file.type === 'application/pdf') {
+        setPdfFile(file);
+        console.log(t("pdf_selected", { fileName: file.name }));
+      } else {
+        alert(t("errors.invalid_file_type"));
+      }
+    }
+  };
+
+  const handlePdfUpload = async () => {
+    if (!pdfFile) return;
+
+    setPdfProcessing(true);
+    const formData = new FormData();
+    formData.append("file", pdfFile);
+
+    try {
+      const response = await fetch("/api/scan-pdf-form", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.data) {
+        setStructuredData(result.data);
+        
+        const newChatStep = (
+          <ScanBubble key={chatSteps.length}>
+            <PrefilledForm 
+              data={result.data} 
+              onFormSubmit={handleFormSubmit} 
+              project={project}
+            />
+          </ScanBubble>
+        );
+
+        setChatSteps(prev => [...prev, newChatStep]);
+      }
+
+      if (onSubmitAnotherForm) {
+        onSubmitAnotherForm();
+      }
+    } catch (error) {
+      console.error("Failed to scan the form.", error);
+      setError(t("errors.server_error"));
+    } finally {
+      setPdfProcessing(false);
+      setPdfFile(null);
+    }
+  };
+
   return (
     <>
-      {/* Display File Input for Scanning as the first chat bubble */}
       {!structuredData && !showFileUploader && chatSteps.length === 0 && (
         <ScanBubble>
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">{t("title")}</h2>
-            {/* Instruction Text */}
             <p className="text-gray-700">{t("instruction")}</p>
-            {/* Stack Choose File and Upload and Scan buttons vertically, aligned to the left */}
-            <div className="flex flex-col items-start space-y-2">
-              <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg cursor-pointer inline-flex items-center justify-center">
-                {t("choose_file")}
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleFileChange} 
-                  className="hidden" 
-                />
-              </label>
-              {file && <span className="text-gray-600">{file.name}</span>} {/* Display selected file name */}
-
+            
+            <div className="flex space-x-2 rounded-xl bg-blue-900/20 p-1">
               <button
-                onClick={handleUpload}
-                className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all"
-                disabled={!file || isLoading}
+                className={`w-full rounded-lg py-2.5 text-sm font-medium leading-5 
+                  ${uploadType === 'image' ? 'bg-white text-blue-700 shadow' : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'}`}
+                onClick={() => setUploadType('image')}
               >
-                {isLoading ? t("processing") : t("upload_and_scan")}
+                {t("upload_image")}
               </button>
+              <button
+                className={`w-full rounded-lg py-2.5 text-sm font-medium leading-5
+                  ${uploadType === 'pdf' ? 'bg-white text-blue-700 shadow' : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'}`}
+                onClick={() => setUploadType('pdf')}
+              >
+                {t("upload_pdf")}
+              </button>
+            </div>
+            
+            <div className="mt-4">
+              {uploadType === 'image' ? (
+                <div className="flex flex-col items-start space-y-2">
+                  <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg cursor-pointer inline-flex items-center justify-center">
+                    {t("choose_file")}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleFileChange} 
+                      className="hidden" 
+                    />
+                  </label>
+                  {file && <span className="text-gray-600">{file.name}</span>}
+                  <button
+                    onClick={handleUpload}
+                    className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all"
+                    disabled={!file || isLoading}
+                  >
+                    {isLoading ? t("processing") : t("upload_and_scan")}
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-start space-y-2">
+                  <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg cursor-pointer inline-flex items-center justify-center">
+                    {t("choose_pdf")}
+                    <input 
+                      type="file" 
+                      accept="application/pdf" 
+                      onChange={handlePdfChange} 
+                      className="hidden" 
+                    />
+                  </label>
+                  {pdfFile && <span className="text-gray-600">{pdfFile.name}</span>}
+                  <button
+                    onClick={handlePdfUpload}
+                    className="bg-primaryGreen text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all"
+                    disabled={!pdfFile || pdfProcessing}
+                  >
+                    {pdfProcessing ? t("processing") : t("upload_and_scan")}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </ScanBubble>

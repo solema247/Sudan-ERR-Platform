@@ -29,7 +29,15 @@
     "additional_excess_expenses": "How did you cover excess expenses?",
     "additional_surplus_use": "How would you spend the surplus?",
     "lessons_learned": "Lessons learned in budget planning",
-    "additional_training_needs": "Additional training needs"
+    "additional_training_needs": "Additional training needs",
+    "financial_summary": "Financial Summary",
+    "additional_questions": "Additional Questions",
+    "total_expenses": "Total Expenses",
+    "remainder": "Remainder",
+    "excess_expenses_q": "How did you cover excess expenses?",
+    "surplus_use_q": "How would you spend the surplus?",
+    "lessons_learned_q": "Lessons learned in budget planning",
+    "training_needs_q": "Additional training needs"
   },
   "button_text": {
     "submit": "Submit",
@@ -49,7 +57,8 @@
     "expense_insert_failed": "Failed to save one or more expense entries.",
     "internal_server_error": "An unexpected error occurred while processing your request.",
     "file_required": "File name and content are required.",
-    "upload_failed": "Failed to upload files."
+    "upload_failed": "Failed to upload files.",
+    "invalid_file_type": "Please select a valid PDF file"
   },
   "messages": {
     "form_submission_success": "Form submitted successfully!",
@@ -57,7 +66,9 @@
   },
   "buttons": {
     "add_expense": "Add New Expense",
-    "remove_expense": "Remove Expense"
+    "remove_expense": "Remove Expense",
+    "submit": "Submit Form",
+    "submitting": "Submitting..."
   },
   "upload_instructions": "Upload additional project files (e.g., photos, documentation, or other supporting materials)",
   "validation": {
@@ -79,5 +90,9 @@
     "expense_summary_error": "Expense #{{index}} is missing required fields: {{fields}}",
     "missing_field": "Missing required field",
     "fill_required_fields": "Please fill in all required fields marked with *"
-  }
+  },
+  "upload_image": "Upload Image",
+  "upload_pdf": "Upload PDF",
+  "choose_pdf": "Choose PDF",
+  "pdf_selected": "Selected PDF: {{fileName}}"
 }

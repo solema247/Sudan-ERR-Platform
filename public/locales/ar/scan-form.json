@@ -29,7 +29,9 @@
     "additional_excess_expenses": "كيف قمت بتغطية النفقات الإضافية؟",
     "additional_surplus_use": "كيف ستستخدم المبلغ المتبقي؟",
     "lessons_learned": "الدروس المستفادة في تخطيط الميزانية",
-    "additional_training_needs": "احتياجات التدريب الإضافية"
+    "additional_training_needs": "احتياجات التدريب الإضافية",
+    "financial_summary": "الملخص المالي",
+    "additional_questions": "أسئلة إضافية"
   },
   "button_text": {
     "submit": "إرسال",
@@ -49,7 +51,8 @@
     "expense_insert_failed": "فشل في حفظ إدخال واحد أو أكثر من النفقات.",
     "internal_server_error": "حدث خطأ غير متوقع أثناء معالجة طلبك.",
     "file_required": "اسم الملف ومحتواه مطلوبان.",
-    "upload_failed": "فشل في تحميل الملفات."
+    "upload_failed": "فشل في تحميل الملفات.",
+    "invalid_file_type": "يرجى اختيار ملف PDF صالح"
   },
   "messages": {
     "form_submission_success": "تم إرسال النموذج بنجاح!",
@@ -57,7 +60,9 @@
   },
   "buttons": {
     "add_expense": "إضافة نفقة جديدة",
-    "remove_expense": "حذف النفقة"
+    "remove_expense": "حذف النفقة",
+    "submit": "إرسال",
+    "submitting": "جاري الإرسال..."
   },
   "upload_instructions": "يمكنك تحميل ملفات إضافية للمشروع (مثل: الصور، المستندات، أو أي مواد داعمة أخرى)",
   "validation": {
@@ -79,5 +84,9 @@
     "expense_summary_error": "النفقة رقم {{index}} تفتقد الحقول المطلوبة: {{fields}}",
     "missing_field": "حقل مطلوب مفقود",
     "fill_required_fields": "يرجى ملء جميع الحقول المطلوبة المميزة بعلامة *"
-  }
+  },
+  "upload_image": "تحميل صورة",
+  "upload_pdf": "تحميل PDF",
+  "choose_pdf": "اختر ملف PDF",
+  "pdf_selected": "تم اختيار ملف PDF: {{fileName}}"
 }
