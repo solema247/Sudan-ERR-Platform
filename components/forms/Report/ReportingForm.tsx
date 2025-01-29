@@ -183,6 +183,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                                 uploadType= {reportUploadType.SUPPORTING}
                                 projectId = {project.id}
                                 reportId = {reportId}
+                                
                             />
                         </div>
 

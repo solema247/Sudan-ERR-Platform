@@ -1,6 +1,8 @@
 import { uploadImages, ImageCategory } from '../../../services/uploadImages';
 import { useTranslation } from 'react-i18next';
 
+// TODO: I think this is the DRY uploading point but double check.
+
 export default async function onSubmit(values, { setSubmitting }) {
     const { t } = useTranslation('fillForm');
     
