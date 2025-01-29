@@ -62,5 +62,6 @@
   "bankingDetails": "تفاصيل البنك",
   "remove": "إزالة",
   "removeExpense": "إزالة هذه النفقات",
-  "totalExpenses": "إجمالي النفقات"
+  "totalExpenses": "إجمالي النفقات",
+  "activitiesAndExpenses": "الأنشطة والنفقات"
 }

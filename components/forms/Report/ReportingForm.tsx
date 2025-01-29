@@ -91,7 +91,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                             <ErrorMessage name="total_other_sources" component="div" />
                         </div>
 
-                        <h3 className="text-2xl font-bold">{t('formTitle')}</h3>
+                        <h3 className="text-2xl font-bold">{t('activitiesAndExpenses')}</h3>
 
                         <FieldArray
                             name="expenses"
@@ -183,7 +183,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                                 uploadType= {reportUploadType.SUPPORTING}
                                 projectId = {project.id}
                                 reportId = {reportId}
-                                
+
                             />
                         </div>
 

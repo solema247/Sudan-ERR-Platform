@@ -60,5 +60,6 @@
   "enterPhoneNumber": "Enter your phone number",
   "phoneNumber": "Phone Number",
   "remove": "Remove",
-  "totalExpenses": "Total expenses"
+  "totalExpenses": "Total expenses",
+  "activitiesAndExpenses": "Activities and expenses"
 }

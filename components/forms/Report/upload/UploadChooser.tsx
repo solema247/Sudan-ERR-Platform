@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { Upload, Trash2, Check } from "lucide-react";
 import { supabase } from '../../../../services/supabaseClient';
 import { useTranslation } from 'react-i18next';
+import tus from 'tus-js-client';
 
-
-// TODO: Get the correct bucket.
+// TODO: onHandleFileChange is choosing a new file, right? We choose and the upload process starts?
 
 export enum reportUploadType {
   RECEIPT,
@@ -12,9 +12,10 @@ export enum reportUploadType {
 }
 
 interface UploadChooserProps {
+  uploadType: reportUploadType;  
   projectId: string;
   reportId: string;
-  uploadType: reportUploadType;
+  receiptId: string?;
 }
 
 interface FileWithProgress {
@@ -23,77 +24,102 @@ interface FileWithProgress {
   progress: number;
 }
 
-export const UploadChooser: React.FC<UploadChooserProps> = ({ projectId, reportId, uploadType: UploadChooserProps }: UploadChooserProps) => {
+export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projectId, reportId, receiptId }:UploadChooserProps) => {
   const [files, setFiles] = useState<FileWithProgress[]>([]);
+  const BUCKET_NAME = "images";
+  const SUPABASE_PROJECT_ID = "inrddslmakqrezinnejh";
+
+  const getNewFilename = () => {
+    return crypto.randomUUID;
+  }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []).map((file) => ({ file, uploaded: false, progress: 0 }));
     setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
-  
-    selectedFiles.forEach(async (newFile) => {
-      const uploadPath = `${projectId}/${reportId}/${newFile.file.name}`;
-      const chunkSize = 1024 * 1024; // 1MB chunk size
-      const totalChunks = Math.ceil(newFile.file.size / chunkSize);
-  
-      try {
-        for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-          const start = chunkIndex * chunkSize;
-          const end = Math.min(start + chunkSize, newFile.file.size);
-          const chunk = newFile.file.slice(start, end);
-  
-          const { error } = await supabase.storage.from("your-bucket-name").upload(`${uploadPath}.chunk${chunkIndex}`, chunk, { upsert: true });
-  
-          if (error) {
-            console.error("Chunk upload error:", error);
-            return;
-          }
-  
-          const progress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
-          setFiles((prevFiles) => {
-            const updatedFiles = [...prevFiles];
-            const fileIndex = prevFiles.findIndex((f) => f.file === newFile.file);
-            if (fileIndex >= 0) {
-              updatedFiles[fileIndex] = {
-                ...updatedFiles[fileIndex],
-                progress,
-              };
-            }
-            return updatedFiles;
-          });
-        }
-  
-        // Mark as uploaded
-        setFiles((prevFiles) => {
-          const updatedFiles = [...prevFiles];
-          const fileIndex = prevFiles.findIndex((f) => f.file === newFile.file);
-          if (fileIndex >= 0) {
-            updatedFiles[fileIndex] = {
-              ...updatedFiles[fileIndex],
-              uploaded: true,
-              progress: 100,
-            };
-          }
-          return updatedFiles;
-        });
-      } catch (err) {
-        console.error("Unexpected upload error:", err);
-      }
-    });
-  };
-  
-  const removeFile = (index: number) => {
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-  };
 
-  return (
-    <div className="max-w-lg mx-auto">
-      <div className="flex flex-col gap-4">
-        <UploadBox onFileChange={handleFileChange} uploadType = {reportUploadType.RECEIPT} />
-        <UploadedList files={files} removeFile={removeFile} />
-      </div>
-    </div>
-  );
-};
+    selectedFiles.forEach(async (newFile) => {
+      beginUploadProcessFor(newFile, uploadType, projectId, reportId);         // TODO: Make this typesefae
+    })
+  }
+      
+  const beginUploadProcessFor = (newFile, uploadType, projectId, reportId) => {
+    const filename = getNewFilename(newFile);
+    const uploadPath = getUploadPath(newFile, uploadType, projectId, reportId);
+    // TODO: Compress?
+
+    // TUC process
+    const { data: { session } } = await supabase.auth.getSession()
+
+    return new Promise((resolve, reject) => {
+      var upload = new tus.Upload(newFile, {
+          endpoint: `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/upload/resumable`,
+          retryDelays: [0, 3000, 5000, 10000, 20000],
+          headers: {
+              authorization: `Bearer ${session.access_token}`,
+              'x-upsert': 'true', // optionally set upsert to true to overwrite existing files
+          },
+          uploadDataDuringCreation: true,
+          removeFingerprintOnSuccess: true, // Important if you want to allow re-uploading the same file https://github.com/tus/tus-js-client/blob/main/docs/api.md#removefingerprintonsuccess
+          metadata: {
+              bucketName: BUCKET_NAME,
+              objectName: filename,
+              contentType: 'image/png',
+              cacheControl: 3600,
+          },
+          chunkSize: 6 * 1024 * 1024, // NOTE: it must be set to 6MB (for now) do not change it
+          onError: function (error) {
+              console.log('Failed because: ' + error)
+              reject(error)
+          },
+          onProgress: function (bytesUploaded, bytesTotal) {
+              var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
+              console.log(bytesUploaded, bytesTotal, percentage + '%')
+          },
+          onSuccess: function () {
+              console.log('Download %s from %s', upload.file.name, upload.url)
+              resolve()
+          },
+      })
+
+
+      // Check if there are any previous uploads to continue.
+      return upload.findPreviousUploads().then(function (previousUploads) {
+          // Found previous uploads so we select the first one.
+          if (previousUploads.length) {
+              upload.resumeFromPreviousUpload(previousUploads[0])
+          }
+
+          // Start the upload
+          upload.start()
+      })
+  })
+
+
+
+//   // ${projectId}/${reportId}/${newFile.file.name}`;
+//   // TODO: does this include filename
+//   const getUploadPath = (filename: string, uploadType: reportUploadType, projectId: string, reportId: string) => {
+
+//     switch(uploadType) {
+//       case reportUploadType.RECEIPT:
+//         return `images/projects/{projectId}/reports/{reportId}/receipts/{filename}`
+//         break;
+//       case reportUploadType.SUPPORTING:
+//         `images/projects/{projectId}/reports/{reportId}/{filename}`
+//         break;
+//     }
+//   }
+
+
+//   return (
+//     <div className="max-w-lg mx-auto">
+//       <div className="flex flex-col gap-4">
+//         <UploadBox onFileChange={handleFileChange} uploadType={uploadType} />
+//         <UploadedList files={files} removeFile={removeFile} />
+//       </div>
+//     </div>
+//   );
+// };
 
 interface UploadBoxProps {
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -102,32 +128,12 @@ interface UploadBoxProps {
 
 const UploadBox: React.FC<UploadBoxProps> = ({ onFileChange, uploadType }) => {
   const { t } = useTranslation('fillForm');
-  
   return (
     <div className="border-dashed border-2 border-gray-300 p-4 rounded-md">
-      <input
-        type="file"
-        multiple
-        id="file-upload"
-        className="hidden"
-        onChange={onFileChange}
-      />
-      <label
-        htmlFor="file-upload"
-        className="flex items-center justify-center p-4 border rounded-md cursor-pointer hover:bg-gray-50"
-      >
+      <input type="file" multiple id="file-upload" className="hidden" onChange={onFileChange} />
+      <label htmlFor="file-upload" className="flex items-center justify-center p-4 border rounded-md cursor-pointer hover:bg-gray-50">
         <Upload className="mr-2" />
-        {uploadType == reportUploadType.RECEIPT ? 
-        (
-          <span>{t('chooseReceiptFiles')}</span>
-        ) 
-        : 
-        ( 
-          <span>
-           {t('choosefiles')}
-           </span>
-        ) 
-        }
+        {uploadType === reportUploadType.RECEIPT ? <span>{t('chooseReceiptFiles')}</span> : <span>{t('choosefiles')}</span>}
       </label>
     </div>
   );
@@ -145,26 +151,15 @@ const UploadedList: React.FC<UploadedListProps> = ({ files, removeFile }) => {
         <div className="mt-4">
           <ul className="space-y-2">
             {files.map(({ file, uploaded, progress }, index) => (
-              <li
-                key={index}
-                className="flex items-center justify-between gap-4 p-2 border rounded-md"
-              >
+              <li key={index} className="flex items-center justify-between gap-4 p-2 border rounded-md">
                 <span className="truncate">{file.name}</span>
                 <div className="flex items-center gap-2">
-                  {uploaded ? (
-                    <Check className="text-green-500" size={16} />
-                  ) : (
+                  {uploaded ? <Check className="text-green-500" size={16} /> : (
                     <div className="w-20 h-2 bg-gray-200 rounded">
-                      <div
-                        className="h-2 bg-blue-500 rounded"
-                        style={{ width: `${progress}%` }}
-                      ></div>
+                      <div className="h-2 bg-blue-500 rounded" style={{ width: `${progress}%` }}></div>
                     </div>
                   )}
-                  <button
-                    onClick={() => removeFile(index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
+                  <button onClick={() => removeFile(index)} className="text-red-500 hover:text-red-700">
                     <Trash2 size={16} />
                   </button>
                 </div>
