@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Upload, Trash2, Check } from "lucide-react";
-import { supabase } from '../../../services/supabaseClient';
+import { supabase } from '../../../../services/supabaseClient';
 
 // TODO: Get the correct bucket.
 
@@ -10,7 +10,6 @@ export enum reportUploadType {
 }
 
 interface UploadChooserProps {
-  selectedFiles: string[];
   projectId: string;
   reportId: string;
   uploadType: reportUploadType;
@@ -22,7 +21,7 @@ interface FileWithProgress {
   progress: number;
 }
 
-export const UploadChooser: React.FC<UploadChooserProps> = ({ selectedFiles, projectId, reportId, uploadType: UploadChooserProps }: UploadChooserProps) => {
+export const UploadChooser: React.FC<UploadChooserProps> = ({ projectId, reportId, uploadType: UploadChooserProps }: UploadChooserProps) => {
   const [files, setFiles] = useState<FileWithProgress[]>([]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,7 +86,7 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({ selectedFiles, pro
   return (
     <div className="max-w-lg mx-auto">
       <div className="flex flex-col gap-4">
-        <UploadBox onFileChange={handleFileChange} />
+        <UploadBox onFileChange={handleFileChange} uploadType = {reportUploadType.RECEIPT} />
         <UploadedList files={files} removeFile={removeFile} />
       </div>
     </div>
@@ -96,9 +95,10 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({ selectedFiles, pro
 
 interface UploadBoxProps {
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  uploadType: reportUploadType;
 }
 
-const UploadBox: React.FC<UploadBoxProps> = ({ onFileChange }) => {
+const UploadBox: React.FC<UploadBoxProps> = ({ onFileChange, uploadType }) => {
   return (
     <div className="border-dashed border-2 border-gray-300 p-4 rounded-md">
       <input
@@ -113,7 +113,17 @@ const UploadBox: React.FC<UploadBoxProps> = ({ onFileChange }) => {
         className="flex items-center justify-center p-4 border rounded-md cursor-pointer hover:bg-gray-50"
       >
         <Upload className="mr-2" />
-        Choose Files
+        {uploadType == reportUploadType.RECEIPT ? 
+        (
+          <span>Choose Receipt Files</span>
+         ) 
+         : 
+         ( 
+          <span>
+           Choose Files
+           </span>
+          ) 
+        }
       </label>
     </div>
   );

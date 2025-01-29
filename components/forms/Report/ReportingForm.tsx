@@ -5,12 +5,12 @@ import FormBubble from '../../ui/FormBubble';
 import Button from '../../ui/Button';
 import { supabase } from '../../../services/supabaseClient';
 import ExpenseCard from './ExpenseCard';
-import getInitialValues from './values';
+import getInitialValues from './values/values';
 import getValidationSchema from './validation';
 import onSubmit from './uploading';
 import Project from '../NewProject/Project'
-import expenseValues from './expenseValues';
-import { UploadChooser, reportUploadType } from './UploadChooser';
+import expenseValues from './values/expenseValues';
+import { UploadChooser, reportUploadType } from './upload/UploadChooser';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 const TABLE_NAME_EXPENSE_CATEGORIES = 'expense_categories';
@@ -121,7 +121,12 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                             <label htmlFor="excess_expenses" className="font-bold block text-base text-black-bold mb-1">
                                 {t('excessExpenses')}
                             </label>
-                            <Field type="text" name="excessExpenses" className="text-sm w-full p-2 border rounded-lg"/>
+                            <Field 
+                                type="text" 
+                                name="excessExpenses" 
+                                className="text-sm w-full p-2 border rounded-lg"
+                                placeholder={t('excessExpenses')}
+                            />
                             <ErrorMessage name="excessExpenses" component="div" />
                         </div>
 
@@ -129,7 +134,12 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                             <label htmlFor="surplus_use" className="font-bold block text-base text-black-bold mb-1">
                                 {t('surplusUse')}
                             </label>
-                            <Field type="text" name="surplus_use" className="text-sm w-full p-2 border rounded-lg"/>
+                            <Field 
+                                type="text" 
+                                name="surplus_use" 
+                                className="text-sm w-full p-2 border rounded-lg"
+                                placeholder={t('surplusUse')}
+                            />
                             <ErrorMessage name="surplus_use" component="div" />
                         </div>
 
@@ -137,7 +147,12 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                             <label htmlFor="training" className="font-bold block text-base text-black-bold mb-1">
                                 {t('trainingNeeds')}
                             </label>
-                            <Field type="text" name="training" className="text-sm w-full p-2 border rounded-lg"/>
+                            <Field 
+                                type="text" 
+                                name="training" 
+                                className="text-sm w-full p-2 border rounded-lg"
+                                placeholder={t('trainingNeeds')}
+                            />
                             <ErrorMessage name="training" component="div" />
                         </div>
 
@@ -145,7 +160,12 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                             <label htmlFor="lessons" className="font-bold block text-base text-black-bold mb-1">
                                 {t('lessonsLearned')}
                             </label>
-                            <Field type="text" name="lessons" className="text-sm w-full p-2 border rounded-lg"/>
+                            <Field 
+                                type="text" 
+                                name="lessons" 
+                                className="text-sm w-full p-2 border rounded-lg"
+                                placeholder={t('lessonsLearned')}
+                            />
                             <ErrorMessage name="lessons" component="div" />
                         </div>
 
@@ -159,8 +179,8 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
 
                         <div className="mb-3">                            
                             <UploadChooser
+
                                 uploadType= {reportUploadType.SUPPORTING}
-                                selectedFiles = {values.supporting_files}
                                 projectId = {project.id}
                                 reportId = {reportId}
                             />

@@ -3,8 +3,8 @@ export default function getInitialValues(errId:string) {
     return {
         err_id: errId,      
         date: '',
-        total_grant: '',
-        total_other_sources: '',
+        total_grant: 0,
+        total_other_sources: 0,
         expenses: [
             {
                 activity: '',
@@ -13,7 +13,7 @@ export default function getInitialValues(errId:string) {
                 seller: '',
                 payment_method: 'cash',
                 receipt_no: '',
-                amount: '',
+                amount: 0,
                 receiptFiles: null,
             },
         ],
@@ -22,7 +22,7 @@ export default function getInitialValues(errId:string) {
         surplus_use: '',
         training: '',
         lessons: '',
-        total_expenses: '',
+        total_expenses: 0,
         supportingFiles: null
     };
 }

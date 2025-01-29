@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Field, ErrorMessage, useFormikContext } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Trash2, Check } from "lucide-react";
-import { UploadChooser, reportUploadType } from './UploadChooser';
+import { UploadChooser, reportUploadType } from './upload/UploadChooser';
 
 
 export interface ActivityOption {
@@ -117,16 +117,16 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardPr
                         <Field
                             name={`expenses[${index}].amount`}
                             type="number"
-                            placeholder="Amount"
                             className="text-sm w-full p-2 border rounded-lg"
                         />
                         <ErrorMessage name={`expenses[${index}].amount`} component="div" />
                     </div>
 
-                       uploadType= {reportUploadType.RECEIPT}
-                        selectedFiles = {values.supporting_files}
-                        projectId = {project.id}
-                        reportId = {reportId}
+                    <UploadChooser
+                       uploadType = {reportUploadType.RECEIPT}
+                       projectId = ""
+                       reportId = ""
+                    />
 
                     {/* <div className="mb-3">
                         <label htmlFor={`expenses[${index}].receiptFiles`} className="font-bold block text-base text-black-bold mb-1">
@@ -168,7 +168,12 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardPr
             ) : (
                 <div className="flex flex-row justify-between">
                     <span>
-                        {expense.activity}
+                        <p><span className="font-bold">Activity:&nbsp;</span>
+                        {expense.activity}</p>
+
+                        <p><span className="font-bold">Amount:&nbsp;</span>
+                        5000
+                        </p>
                     </span>
 
                     <button
@@ -176,7 +181,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardPr
                         className="font-bold text-blue-500"
                         onClick={() => setIsCollapsed(false)}
                     >
-                        {t('Edit')}
+                       <Pencil/>
                     </button>
                 </div>
             )}

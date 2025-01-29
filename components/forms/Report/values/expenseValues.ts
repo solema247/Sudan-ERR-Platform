@@ -5,7 +5,7 @@ const expenseValues = {
     seller: '',
     payment_method: '',
     receipt_no: '',
-    amount: '',
+    amount: 0,
     receiptFiles: null,
 }
 
