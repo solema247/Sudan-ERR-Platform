@@ -9,9 +9,7 @@
       "memory": 1024
     }
   },
-  "api": {
-    "bodyParser": {
-      "sizeLimit": "10mb"
-    }
+  "env": {
+    "MAX_BODY_SIZE": "10mb"
   }
 } 
