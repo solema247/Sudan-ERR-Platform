@@ -5,6 +5,7 @@ import ScanBubble from "../components/ui/ScanBubble";
 import PrefilledForm from "../components/forms/PrefilledForm";
 import FileUploader from "../components/uploads/FileUploader";
 import Button from "../components/ui/Button";
+import BulkPdfProcessor from "../components/forms/BulkPdfProcessor";
 
 interface ScanFormProps {
   onReturnToMenu: () => void;
@@ -19,10 +20,12 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
   const [structuredData, setStructuredData] = useState<any>(null);
   const [showFileUploader, setShowFileUploader] = useState(false);
   const [chatSteps, setChatSteps] = useState<JSX.Element[]>([]);
-  const [uploadType, setUploadType] = useState<'image' | 'pdf'>('image');
+  const [uploadType, setUploadType] = useState<'image' | 'pdf' | 'bulk-pdf'>('image');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfProcessing, setPdfProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bulkPdfFile, setBulkPdfFile] = useState<File | null>(null);
+  const [bulkPdfProcessing, setBulkPdfProcessing] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -74,20 +77,25 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     }
   };
 
-  const handleFormSubmit = () => {
-    // Add FileUploader as a new chat step after form submission
-    setShowFileUploader(true);
-    setChatSteps((prevSteps) => [
-      ...prevSteps,
-      <ScanBubble key="fileUploader">
-        <div className="space-y-4">
-          <p className="text-gray-600">
-            {t("upload_instructions")}
-          </p>
-          <FileUploader projectId={project.id} onUploadComplete={handleUploadComplete} />
-        </div>
-      </ScanBubble>
-    ]);
+  const handleFormSubmit = (formData: any, isBulkProcessing?: boolean) => {
+    if (!isBulkProcessing) {
+      // Single form processing - show FileUploader
+      setShowFileUploader(true);
+      setChatSteps((prevSteps) => [
+        ...prevSteps,
+        <ScanBubble key="fileUploader">
+          <div className="space-y-4">
+            <p className="text-gray-600">
+              {t("upload_instructions")}
+            </p>
+            <FileUploader projectId={project.id} onUploadComplete={handleUploadComplete} />
+          </div>
+        </ScanBubble>
+      ]);
+    } else {
+      // For bulk processing, don't add chat steps until all forms are processed
+      return Promise.resolve(); // Just resolve immediately for bulk processing
+    }
   };
 
   const handleUploadComplete = () => {
@@ -143,6 +151,63 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     formData.append("file", pdfFile);
 
     try {
+      console.log('Sending request to scan-single-pdf...');
+      const response = await fetch("/api/scan-single-pdf", {
+        method: "POST",
+        body: formData,
+      });
+
+      console.log('Response received:', response.status);
+      const result = await response.json();
+      console.log('Parsed result:', result);
+
+      if (result.data) {
+        console.log('Setting form data:', result.data);
+        setStructuredData(result.data);
+        
+        const newChatStep = (
+          <ScanBubble key={chatSteps.length}>
+            <PrefilledForm 
+              data={result.data} 
+              onFormSubmit={handleFormSubmit} 
+              project={project}
+            />
+          </ScanBubble>
+        );
+
+        setChatSteps(prev => [...prev, newChatStep]);
+      } else {
+        console.error('No data in result:', result);
+      }
+    } catch (error) {
+      console.error("Failed to scan the form.", error);
+      setError(t("errors.server_error"));
+    } finally {
+      setPdfProcessing(false);
+      setPdfFile(null);
+    }
+  };
+
+  const handleBulkPdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      if (file.type === 'application/pdf') {
+        setBulkPdfFile(file);
+        console.log(t("pdf_selected", { fileName: file.name }));
+      } else {
+        alert(t("errors.invalid_file_type"));
+      }
+    }
+  };
+
+  const handleBulkPdfUpload = async () => {
+    if (!bulkPdfFile) return;
+
+    setBulkPdfProcessing(true);
+    const formData = new FormData();
+    formData.append("file", bulkPdfFile);
+
+    try {
       const response = await fetch("/api/scan-pdf-form", {
         method: "POST",
         body: formData,
@@ -165,16 +230,12 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
 
         setChatSteps(prev => [...prev, newChatStep]);
       }
-
-      if (onSubmitAnotherForm) {
-        onSubmitAnotherForm();
-      }
     } catch (error) {
       console.error("Failed to scan the form.", error);
       setError(t("errors.server_error"));
     } finally {
-      setPdfProcessing(false);
-      setPdfFile(null);
+      setBulkPdfProcessing(false);
+      setBulkPdfFile(null);
     }
   };
 
@@ -201,6 +262,13 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
               >
                 {t("upload_pdf")}
               </button>
+              <button
+                className={`w-full rounded-lg py-2.5 text-sm font-medium leading-5
+                  ${uploadType === 'bulk-pdf' ? 'bg-white text-blue-700 shadow' : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'}`}
+                onClick={() => setUploadType('bulk-pdf')}
+              >
+                {t("upload_bulk_pdf")}
+              </button>
             </div>
             
             <div className="mt-4">
@@ -224,7 +292,7 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
                     {isLoading ? t("processing") : t("upload_and_scan")}
                   </button>
                 </div>
-              ) : (
+              ) : uploadType === 'pdf' ? (
                 <div className="flex flex-col items-start space-y-2">
                   <label className="bg-primaryGreen text-white py-2 px-4 rounded-lg cursor-pointer inline-flex items-center justify-center">
                     {t("choose_pdf")}
@@ -244,6 +312,11 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
                     {pdfProcessing ? t("processing") : t("upload_and_scan")}
                   </button>
                 </div>
+              ) : (
+                <BulkPdfProcessor
+                  project={project}
+                  onFormSubmit={handleFormSubmit}
+                />
               )}
             </div>
           </div>

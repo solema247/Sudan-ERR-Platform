@@ -94,5 +94,15 @@
   "upload_image": "Upload Image",
   "upload_pdf": "Upload PDF",
   "choose_pdf": "Choose PDF",
-  "pdf_selected": "Selected PDF: {{fileName}}"
+  "pdf_selected": "Selected PDF: {{fileName}}",
+  "upload_bulk_pdf": "Bulk Upload PDF",
+  "multiple_forms": {
+    "title": "Multiple Forms Detected",
+    "select_prompt": "Select forms to process",
+    "select_all": "Select All",
+    "process_selected": "Process Selected Forms",
+    "processing_form": "Processing Form {{current}} of {{total}}",
+    "form_submitted": "Form submitted successfully!",
+    "all_forms_processed": "All selected forms have been processed"
+  }
 }

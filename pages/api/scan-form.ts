@@ -135,33 +135,28 @@ async function chatGPTClassification(rawText: string): Promise<any> {
 // Function to parse OpenAI response to structured form fields
 function parseOpenAIResponse(response: string) {
   try {
-    // Attempt to parse JSON response directly, assuming OpenAI now returns JSON format
     const parsedResponse = JSON.parse(response);
 
     return {
       date: parsedResponse.date || '',
       err_id: parsedResponse.err_id || '',
-      expenses: parsedResponse.expenses?.map((expense: any) => ({
-        activity: expense.activity || '',
-        description: expense.description || '',
-        payment_date: expense.payment_date || '',
-        seller: expense.seller || '',
-        payment_method: expense.payment_method || 'cash',
-        receipt_no: expense.receipt_no || '',
-        amount: expense.amount || '',
-      })) || [],
-      total_grant: parsedResponse.financial_summary?.total_grant_received || '',
-      total_other_sources: parsedResponse.financial_summary?.total_other_sources || '',
-      total_expenses: parsedResponse.financial_summary?.total_expenses || '',
-      remainder: parsedResponse.financial_summary?.remainder || '',
-      additional_excess_expenses: parsedResponse.additional_questions?.excess_expenses || '',
-      additional_surplus_use: parsedResponse.additional_questions?.surplus_use || '',
-      lessons_learned: parsedResponse.additional_questions?.lessons_learned || '',
-      additional_training_needs: parsedResponse.additional_questions?.training_needs || '',
+      expenses: parsedResponse.expenses || [],
+      financial_summary: {
+        total_expenses: parsedResponse.financial_summary?.total_expenses || '',
+        total_grant_received: parsedResponse.financial_summary?.total_grant_received || '',
+        total_other_sources: parsedResponse.financial_summary?.total_other_sources || '',
+        remainder: parsedResponse.financial_summary?.remainder || ''
+      },
+      additional_questions: {
+        excess_expenses: parsedResponse.additional_questions?.excess_expenses || '',
+        surplus_use: parsedResponse.additional_questions?.surplus_use || '',
+        lessons_learned: parsedResponse.additional_questions?.lessons_learned || '',
+        training_needs: parsedResponse.additional_questions?.training_needs || ''
+      }
     };
   } catch (error) {
     console.error('Error parsing OpenAI response:', error);
-    return {}; // Return an empty object or handle fallback parsing if needed
+    return {};
   }
 }
 

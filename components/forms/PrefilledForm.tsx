@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"; // Import i18n
 import Button from "../ui/Button";
 import ReceiptUploader from '../uploads/ReceiptUploader';
 import { v4 as uuidv4 } from 'uuid';
+import { cleanFormData } from '../../utils/numberFormatting';
 
 interface ExpenseEntry {
   activity: string;
@@ -213,55 +214,20 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
     return [];
   };
 
-  const handleSubmit = async () => {
-    if (!validateForm()) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsSubmitting(true);
+
     try {
-      // Format date properly for database
-      const submissionData = {
-        ...formData,
-        date: formData.date ? new Date(formData.date).toISOString().split('T')[0] : null,
-        expenses: await Promise.all(
-          formData.expenses.map(async (expense, index) => {
-            const receiptFile = receiptFiles[index];
-            if (!receiptFile) {
-              return expense;
-            }
+      // Clean the form data before submission
+      const cleanedData = cleanFormData(formData);
 
-            const uploadFormData = new FormData();
-            uploadFormData.append('file', receiptFile);
-            uploadFormData.append('expenseId', uuidv4());
-            uploadFormData.append('projectId', project.id);
-            uploadFormData.append('reportId', formData.err_id);
-
-            const uploadResponse = await fetch('/api/upload-receipt', {
-              method: 'POST',
-              body: uploadFormData
-            });
-
-            if (!uploadResponse.ok) {
-              const errorData = await uploadResponse.json();
-              throw new Error(errorData.message || 'Receipt upload failed');
-            }
-
-            const uploadResult = await uploadResponse.json();
-
-            return {
-              ...expense,
-              receipt_upload: uploadResult.filename
-            };
-          })
-        ),
-        projectId: project.id
-      };
-
-      const response = await fetch("/api/submit-prefilled-form", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submissionData),
+      const response = await fetch('/api/submit-prefilled-form', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cleanedData),
       });
 
       if (!response.ok) throw new Error(t("errors.submit_failed"));
@@ -269,7 +235,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
       console.log(t("form_submit_success"), result.message);
 
       setIsSubmitted(true);
-      onFormSubmit(submissionData);
+      onFormSubmit(cleanedData);
     } catch (error) {
       console.error('Submit error:', error);
       setErrors(prev => ({

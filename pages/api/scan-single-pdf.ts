@@ -37,16 +37,18 @@ async function parseForm(req: NextApiRequest): Promise<{ filePath: string }> {
   });
 
   return new Promise((resolve, reject) => {
-    form.parse(req, (err, fields, files) => {
+    form.parse(req, (err, fields, files: any) => {
       if (err) {
         reject(err);
         return;
       }
-      const file = files.file[0] as formidable.File;
+      
+      const file = files.file?.[0];
       if (!file) {
         reject(new Error('No file uploaded'));
         return;
       }
+      
       resolve({ filePath: file.filepath });
     });
   });
@@ -69,16 +71,6 @@ async function extractTextFromPdf(pdfPath: string): Promise<string> {
   }
 }
 
-function cleanJsonString(str: string): string {
-  // Remove any text before the first {
-  const startIndex = str.indexOf('{');
-  const endIndex = str.lastIndexOf('}') + 1;
-  if (startIndex === -1 || endIndex === 0) {
-    throw new Error('No valid JSON object found in response');
-  }
-  return str.slice(startIndex, endIndex);
-}
-
 async function processText(text: string): Promise<any> {
   const langCode = franc(text);
   const detectedLanguage = langCode === 'ara' ? 'ar' : 'en';
@@ -93,7 +85,7 @@ async function processText(text: string): Promise<any> {
       messages: [
         {
           role: 'system',
-          content: 'Extract all forms from the text. Return a JSON object with a "forms" array containing all detected forms. Each form should have ERR ID, date, expenses, and financial summary. Always return an array of forms, even if there is only one form.'
+          content: 'Extract a single form from the text. Return a JSON object with the form data including ERR ID, date, expenses, and financial summary.'
         },
         { role: 'user', content: prompt }
       ],
@@ -107,21 +99,31 @@ async function processText(text: string): Promise<any> {
       throw new Error('Empty response from OpenAI');
     }
 
-    // Log the raw response for debugging
-    console.log('Raw OpenAI response:', content);
-
-    try {
-      // Validate JSON before parsing
-      const parsed = JSON.parse(content);
-      return parsed;
-    } catch (parseError) {
-      console.error('JSON Parse Error. Content:', content);
-      throw new Error(`Failed to parse OpenAI response as JSON: ${parseError.message}`);
-    }
+    return JSON.parse(content);
   } catch (error) {
     console.error('OpenAI API Error:', error);
     throw error;
   }
+}
+
+function transformFormData(openAIResponse: any) {
+  return {
+    date: openAIResponse.date || '',
+    err_id: openAIResponse.err_id || '',
+    expenses: openAIResponse.expenses || [],
+    financial_summary: {
+      total_expenses: openAIResponse.financial_summary?.total_expenses || '',
+      total_grant_received: openAIResponse.financial_summary?.total_grant_received || '',
+      total_other_sources: openAIResponse.financial_summary?.total_other_sources || '',
+      remainder: openAIResponse.financial_summary?.remainder || ''
+    },
+    additional_questions: {
+      excess_expenses: openAIResponse.additional_questions?.excess_expenses || '',
+      surplus_use: openAIResponse.additional_questions?.surplus_use || '',
+      lessons_learned: openAIResponse.additional_questions?.lessons_learned || '',
+      training_needs: openAIResponse.additional_questions?.training_needs || ''
+    }
+  };
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -132,17 +134,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   let filePath: string | null = null;
   try {
+    console.log('Parsing uploaded file...');
     const { filePath: parsedFilePath } = await parseForm(req);
     filePath = parsedFilePath;
+    console.log('File parsed successfully:', filePath);
 
+    console.log('Extracting text from PDF...');
     const extractedText = await extractTextFromPdf(filePath);
-    const structuredData = await processText(extractedText);
+    console.log('Text extracted, length:', extractedText.length);
 
-    // The OpenAI response has the forms array inside the data
-    // We need to send just the forms array to match what BulkPdfProcessor expects
+    console.log('Processing text with OpenAI...');
+    const structuredData = await processText(extractedText);
+    console.log('OpenAI response:', structuredData);
+
+    // Transform the data to match PrefilledForm format
+    const formData = transformFormData(structuredData);
+    console.log('Transformed form data:', formData);
+
     return res.status(200).json({ 
       message: 'PDF processed successfully', 
-      forms: structuredData.forms  // <-- Extract the forms array from the response
+      data: formData
     });
 
   } catch (error: any) {
