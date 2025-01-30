@@ -52,7 +52,8 @@
     "internal_server_error": "حدث خطأ غير متوقع أثناء معالجة طلبك.",
     "file_required": "اسم الملف ومحتواه مطلوبان.",
     "upload_failed": "فشل في تحميل الملفات.",
-    "invalid_file_type": "يرجى اختيار ملف PDF صالح"
+    "invalid_file_type": "يرجى اختيار ملف PDF صالح",
+    "file_too_large": "حجم الملف يتجاوز الحد الأقصى المسموح به {{maxSize}}"
   },
   "messages": {
     "form_submission_success": "تم إرسال النموذج بنجاح!",

@@ -1,0 +1,18 @@
+{
+  "functions": {
+    "api/scan-pdf-form.ts": {
+      "maxDuration": 60,
+      "memory": 1024,
+      "bodyParser": {
+        "sizeLimit": "10mb"
+      }
+    },
+    "api/scan-single-pdf.ts": {
+      "maxDuration": 60,
+      "memory": 1024,
+      "bodyParser": {
+        "sizeLimit": "10mb"
+      }
+    }
+  }
+} 

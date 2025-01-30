@@ -58,7 +58,8 @@
     "internal_server_error": "An unexpected error occurred while processing your request.",
     "file_required": "File name and content are required.",
     "upload_failed": "Failed to upload files.",
-    "invalid_file_type": "Please select a valid PDF file"
+    "invalid_file_type": "Please select a valid PDF file",
+    "file_too_large": "File size exceeds maximum limit of {{maxSize}}"
   },
   "messages": {
     "form_submission_success": "Form submitted successfully!",

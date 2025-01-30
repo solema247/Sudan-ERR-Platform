@@ -21,6 +21,8 @@ interface BulkPdfProcessorProps {
   onFormSubmit: (formData: any, isBulkProcessing?: boolean) => void;
 }
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+
 const BulkPdfProcessor: React.FC<BulkPdfProcessorProps> = ({ project, onFormSubmit }) => {
   const { t } = useTranslation('scanForm');
   const [file, setFile] = useState<File | null>(null);
@@ -36,6 +38,10 @@ const BulkPdfProcessor: React.FC<BulkPdfProcessorProps> = ({ project, onFormSubm
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        alert(t('errors.file_too_large', { maxSize: '10MB' }));
+        return;
+      }
       setFile(selectedFile);
       setDetectedForms([]);
       setSelectedFormIndex(null);

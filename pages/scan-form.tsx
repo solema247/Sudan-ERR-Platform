@@ -13,6 +13,8 @@ interface ScanFormProps {
   project?: any; // Add project as an optional prop
 }
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm, project }) => {
   const { t, i18n } = useTranslation("scanForm"); // Load translations from scan-form.json
   const [file, setFile] = useState<File | null>(null);
@@ -134,6 +136,10 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
   const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
+      if (file.size > MAX_FILE_SIZE) {
+        alert(t('errors.file_too_large', { maxSize: '10MB' }));
+        return;
+      }
       if (file.type === 'application/pdf') {
         setPdfFile(file);
         console.log(t("pdf_selected", { fileName: file.name }));
@@ -191,6 +197,10 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
   const handleBulkPdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
+      if (file.size > MAX_FILE_SIZE) {
+        alert(t('errors.file_too_large', { maxSize: '10MB' }));
+        return;
+      }
       if (file.type === 'application/pdf') {
         setBulkPdfFile(file);
         console.log(t("pdf_selected", { fileName: file.name }));
