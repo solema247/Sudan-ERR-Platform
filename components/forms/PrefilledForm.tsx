@@ -470,8 +470,11 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
         </label>
       </div>
 
-      <Button 
-        onClick={handleSubmit} 
+      <Button
+        onClick={async (e) => {
+          e.preventDefault();
+          await handleSubmit(e);
+        }}
         disabled={isSubmitting}
         text={isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
         className="w-full py-2 px-4 bg-primaryGreen text-white rounded hover:bg-green-700"

@@ -3,10 +3,10 @@ import { FC } from 'react';
 
 interface ButtonProps {
     text: string;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => any;
     type?: "button" | "submit" | "reset";
     disabled?: boolean;
-    className?: string; // Add this line
+    className?: string;
 }
 
 const Button: FC<ButtonProps> = ({ text, onClick, type = "button", disabled = false, className }) => {
@@ -17,12 +17,11 @@ const Button: FC<ButtonProps> = ({ text, onClick, type = "button", disabled = fa
             disabled={disabled}
             className={`bg-primaryGreen text-white py-2 px-4 m-1 rounded-lg shadow-md hover:bg-green-700 transition-all inline-flex justify-center w-auto ${
                 disabled ? "opacity-50 cursor-not-allowed" : ""
-            } ${className || ""}`} // Include additional className
+            } ${className || ""}`}
         >
             {text}
         </button>
     );
 }
-
 
 export default Button;

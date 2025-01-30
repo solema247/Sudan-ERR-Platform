@@ -88,5 +88,15 @@
   "upload_image": "تحميل صورة",
   "upload_pdf": "تحميل PDF",
   "choose_pdf": "اختر ملف PDF",
-  "pdf_selected": "تم اختيار ملف PDF: {{fileName}}"
+  "pdf_selected": "تم اختيار ملف PDF: {{fileName}}",
+  "upload_bulk_pdf": "تحميل ملفات PDF متعددة",
+  "multiple_forms": {
+    "title": "تم اكتشاف نماذج متعددة",
+    "select_prompt": "اختر النماذج للمعالجة",
+    "select_all": "اختيار الكل",
+    "process_selected": "معالجة النماذج المحددة",
+    "processing_form": "معالجة النموذج {{current}} من {{total}}",
+    "form_submitted": "تم إرسال النموذج بنجاح!",
+    "all_forms_processed": "تمت معالجة جميع النماذج المحددة"
+  }
 }
