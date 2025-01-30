@@ -1,10 +1,10 @@
 {
   "functions": {
-    "api/scan-pdf-form": {
+    ".next/server/pages/api/scan-pdf-form.js": {
       "maxDuration": 60,
       "memory": 1024
     },
-    "api/scan-single-pdf": {
+    ".next/server/pages/api/scan-single-pdf.js": {
       "maxDuration": 60,
       "memory": 1024
     }
