@@ -1,10 +1,10 @@
 {
   "functions": {
-    "/api/scan-pdf-form": {
+    "api/scan-pdf-form": {
       "maxDuration": 60,
       "memory": 1024
     },
-    "/api/scan-single-pdf": {
+    "api/scan-single-pdf": {
       "maxDuration": 60,
       "memory": 1024
     }
