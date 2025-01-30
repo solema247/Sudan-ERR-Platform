@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -7,10 +6,11 @@ import vision from '@google-cloud/vision';
 import OpenAI from 'openai';
 import { franc } from 'franc';
 import pdf from 'pdf-parse';
+import { supabase } from '../../services/supabaseClient';
 
 export const config = {
   api: {
-    bodyParser: false,
+    bodyParser: true,
   },
 };
 
@@ -27,31 +27,34 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-async function parseForm(req: NextApiRequest): Promise<{ filePath: string }> {
-  const uploadDir = os.tmpdir();
-  const form = formidable({
-    multiples: false,
-    keepExtensions: true,
-    uploadDir,
-    filename: (name, ext) => `${Date.now()}-${name}${ext}`
-  });
+async function downloadFile(url: string): Promise<string> {
+  try {
+    // Get the file path from the URL
+    const pathMatch = url.match(/\/storage\/v1\/object\/public\/pdf-uploads\/(.*)/);
+    if (!pathMatch) throw new Error('Invalid Supabase storage URL format');
+    
+    const filePath = pathMatch[1];
+    console.log('Attempting to download:', filePath);
 
-  return new Promise((resolve, reject) => {
-    form.parse(req, (err, fields, files: any) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      
-      const file = files.file?.[0];
-      if (!file) {
-        reject(new Error('No file uploaded'));
-        return;
-      }
-      
-      resolve({ filePath: file.filepath });
-    });
-  });
+    const { data, error } = await supabase
+      .storage
+      .from('pdf-uploads')
+      .download(filePath);
+
+    if (error) throw error;
+    if (!data) throw new Error('No data received from storage');
+
+    const tmpDir = os.tmpdir();
+    const tmpFile = path.join(tmpDir, `${Date.now()}.pdf`);
+    
+    fs.writeFileSync(tmpFile, Buffer.from(await data.arrayBuffer()));
+    console.log('File downloaded successfully to:', tmpFile);
+    
+    return tmpFile;
+  } catch (error) {
+    console.error('Download error:', error);
+    throw new Error(`Failed to download file: ${error.message}`);
+  }
 }
 
 async function extractTextFromPdf(pdfPath: string): Promise<string> {
@@ -133,27 +136,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   let filePath: string | null = null;
+  
   try {
-    console.log('Parsing uploaded file...');
-    const { filePath: parsedFilePath } = await parseForm(req);
-    filePath = parsedFilePath;
-    console.log('File parsed successfully:', filePath);
+    const { fileUrl } = req.body;
+    if (!fileUrl) {
+      throw new Error('No file URL provided');
+    }
 
-    console.log('Extracting text from PDF...');
+    // Download file from Supabase
+    filePath = await downloadFile(fileUrl);
+
     const extractedText = await extractTextFromPdf(filePath);
-    console.log('Text extracted, length:', extractedText.length);
-
-    console.log('Processing text with OpenAI...');
     const structuredData = await processText(extractedText);
-    console.log('OpenAI response:', structuredData);
-
-    // Transform the data to match PrefilledForm format
-    const formData = transformFormData(structuredData);
-    console.log('Transformed form data:', formData);
 
     return res.status(200).json({ 
       message: 'PDF processed successfully', 
-      data: formData
+      data: structuredData
     });
 
   } catch (error: any) {

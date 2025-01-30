@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PrefilledForm from './PrefilledForm';
+import { supabase } from '../../services/supabaseClient';
 
 interface FormPreview {
   err_id: string;
@@ -53,13 +54,30 @@ const BulkPdfProcessor: React.FC<BulkPdfProcessorProps> = ({ project, onFormSubm
     if (!file) return;
     setIsProcessing(true);
 
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+      const filePath = `${project.id}/${fileName}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('pdf-uploads')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('pdf-uploads')
+        .getPublicUrl(filePath);
+
+      // Send URL to our API
       const response = await fetch('/api/scan-pdf-form', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fileUrl: publicUrl }),
       });
 
       if (!response.ok) {
@@ -76,6 +94,12 @@ const BulkPdfProcessor: React.FC<BulkPdfProcessorProps> = ({ project, onFormSubm
         ...form,
         selected: false
       })));
+
+      // Clean up: Delete the file from storage
+      await supabase.storage
+        .from('pdf-uploads')
+        .remove([filePath]);
+
     } catch (error) {
       console.error('Upload error:', error);
       alert(error.message);

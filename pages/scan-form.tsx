@@ -6,6 +6,7 @@ import PrefilledForm from "../components/forms/PrefilledForm";
 import FileUploader from "../components/uploads/FileUploader";
 import Button from "../components/ui/Button";
 import BulkPdfProcessor from "../components/forms/BulkPdfProcessor";
+import { supabase } from "../services/supabaseClient";
 
 interface ScanFormProps {
   onReturnToMenu: () => void;
@@ -153,14 +154,30 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     if (!pdfFile) return;
 
     setPdfProcessing(true);
-    const formData = new FormData();
-    formData.append("file", pdfFile);
-
     try {
-      console.log('Sending request to scan-single-pdf...');
+      // Upload to Supabase Storage first
+      const fileExt = pdfFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+      const filePath = `single/${fileName}`; // Put single uploads in their own folder
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('pdf-uploads')
+        .upload(filePath, pdfFile);
+
+      if (uploadError) throw uploadError;
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('pdf-uploads')
+        .getPublicUrl(filePath);
+
+      // Send URL to our API
       const response = await fetch("/api/scan-single-pdf", {
         method: "POST",
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fileUrl: publicUrl }),
       });
 
       console.log('Response received:', response.status);
@@ -182,12 +199,16 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
         );
 
         setChatSteps(prev => [...prev, newChatStep]);
-      } else {
-        console.error('No data in result:', result);
       }
+
+      // Clean up: Delete the file from storage
+      await supabase.storage
+        .from('pdf-uploads')
+        .remove([filePath]);
+
     } catch (error) {
       console.error("Failed to scan the form.", error);
-      setError(t("errors.server_error"));
+      setError(t("errors.scan_failed"));
     } finally {
       setPdfProcessing(false);
       setPdfFile(null);
