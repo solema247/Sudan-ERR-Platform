@@ -2,17 +2,16 @@
   "functions": {
     "api/scan-pdf-form.ts": {
       "maxDuration": 60,
-      "memory": 1024,
-      "bodyParser": {
-        "sizeLimit": "10mb"
-      }
+      "memory": 1024
     },
     "api/scan-single-pdf.ts": {
       "maxDuration": 60,
-      "memory": 1024,
-      "bodyParser": {
-        "sizeLimit": "10mb"
-      }
+      "memory": 1024
+    }
+  },
+  "api": {
+    "bodyParser": {
+      "sizeLimit": "10mb"
     }
   }
 } 
