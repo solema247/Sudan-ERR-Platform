@@ -10,7 +10,6 @@ import { supabase } from '../../services/supabaseClient';
 
 export const config = {
   api: {
-    bodyParser: true,
     bodyParser: {
       sizeLimit: process.env.MAX_BODY_SIZE || '10mb'
     }
