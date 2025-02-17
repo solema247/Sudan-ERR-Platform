@@ -40,9 +40,9 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projec
     const selectedFiles = Array.from(e.target.files || []).map((file) => ({ file, uploaded: false, progress: 0 }));
     setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
 
-    selectedFiles.forEach(async (newFile) => {
-      await beginUploadProcessFor(newFile, uploadType, projectId, reportId);         // TODO: Make this typesefae
-    })
+    // selectedFiles.forEach(async (newFile) => {
+    //   await beginUploadProcessFor(newFile, uploadType, projectId, reportId);         // TODO: Make this typesefae
+    // })
   }
       
   const beginUploadProcessFor = async (newFile, uploadType, projectId, reportId) => {
@@ -56,7 +56,7 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projec
     const { data: { session } } = await supabase.auth.getSession()
 
     return new Promise((resolve, reject) => {
-      var upload = new tus.Upload(newFile, {
+      var upload = new tus.Upload(newFile.file, {
           endpoint: `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/upload/resumable`,
           retryDelays: [0, 3000, 5000, 10000, 20000],
           headers: {
