@@ -101,10 +101,7 @@ const Login = () => {
 
                 if (error) {
                     console.log('loginError');
-                    console.log(error);
                 }
-
-                console.log(data);
 
             // End demo login.
 
@@ -165,8 +162,6 @@ const Login = () => {
                 </button>*/}
             </div>
 
-            
-
             {/* Success Message Notification */}
             {successMessage && (
                 <div className="fixed top-4 bg-green-100 text-green-700 p-2 rounded shadow-lg">
@@ -226,5 +221,3 @@ const Login = () => {
 };
 
 export default Login;
-
-

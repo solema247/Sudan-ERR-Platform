@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import { Upload, Trash2, Check } from "lucide-react";
+import { Upload as UploadIcon, Trash2, Check } from "lucide-react";
 import { supabase } from '../../../../services/supabaseClient';
 import { useTranslation } from 'react-i18next';
-import tus from 'tus-js-client';
-
-// TODO: onHandleFileChange is choosing a new file, right? We choose and the upload process starts?
+import * as tus from 'tus-js-client';
 
 export enum reportUploadType {
   RECEIPT,
@@ -33,7 +31,6 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projec
   const [files, setFiles] = useState<FileWithProgress[]>([]);
   const BUCKET_NAME = "images";
   const SUPABASE_PROJECT_ID = "inrddslmakqrezinnejh";
-  const session = supabase.auth.getSession; 
 
   const getNewFilename = () => {
     return crypto.randomUUID;
@@ -44,15 +41,16 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projec
     setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
 
     selectedFiles.forEach(async (newFile) => {
-      beginUploadProcessFor(newFile, uploadType, projectId, reportId);         // TODO: Make this typesefae
+      await beginUploadProcessFor(newFile, uploadType, projectId, reportId);         // TODO: Make this typesefae
     })
   }
       
-  const beginUploadProcessFor = (newFile, uploadType, projectId, reportId) => {
+  const beginUploadProcessFor = async (newFile, uploadType, projectId, reportId) => {
   // const filename = getNewFilename(newFile);
     const filename = "test.png";
     const uploadPath = getUploadPath(newFile, uploadType, projectId, reportId);
-    // TODO: Compress?
+
+    // TODO: Compression
 
     // TUC process
     const { data: { session } } = await supabase.auth.getSession()
@@ -139,7 +137,7 @@ const UploadBox: React.FC<UploadBoxProps> = ({ onFileChange, uploadType }) => {
     <div className="border-dashed border-2 border-gray-300 p-4 rounded-md">
       <input type="file" multiple id="file-upload" className="hidden" onChange={onFileChange} />
       <label htmlFor="file-upload" className="flex items-center justify-center p-4 border rounded-md cursor-pointer hover:bg-gray-50">
-        <Upload className="mr-2" />
+        <UploadIcon className="mr-2" />
         {uploadType === reportUploadType.RECEIPT ? <span>{t('chooseReceiptFiles')}</span> : <span>{t('choosefiles')}</span>}
       </label>
     </div>
