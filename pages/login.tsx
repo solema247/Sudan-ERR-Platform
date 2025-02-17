@@ -9,7 +9,14 @@ import Button from '../components/ui/Button';
 import OfflineForm from '../components/forms/OfflineForm';
 const LogoImage = '/icons/icon-512x512.png';
 import i18n from '../services/i18n'; 
-import jwt from 'jsonwebtoken';
+import { supabase } from '../services/supabaseClient';
+
+
+/**
+ * Login.tsx
+ * 
+ * UI for logging in
+ */
 
 export interface User {
     err_id: string
@@ -76,11 +83,32 @@ const Login = () => {
 
             const data = await response.json();
 
+            /**
+             * 
+             * This anonymous Supabase login is so that we can get a session token for image buckets.
+             * 
+             * TODO: Replace this with full-blown Supabase auth.
+             * 
+             * */
+
             if (data.success) {
                 router.push({
                     pathname: '/menu',
                     query: { errId: errId }
                 }); 
+
+                const { data, error } = await supabase.auth.signInAnonymously();
+
+                if (error) {
+                    console.log('loginError');
+                    console.log(error);
+                }
+
+                console.log(data);
+
+            // End demo login.
+
+
             } else {
                 setError(data.message || t('loginError')); // Use translated error message
             }

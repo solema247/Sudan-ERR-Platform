@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next';
 import ChatContainer from '../components/ui/ChatContainer';
 import MessageBubble from '../components/ui/MessageBubble';
 import Button from '../components/ui/Button';
-import ReportingForm from '../components/forms/Report/ReportingForm';
+import ReportingForm from '../components/forms/ReportForm/ReportingForm';
 import ScanForm from './scan-form';
 import ScanCustomForm from './scan-custom-form'; // Import the new component
-import ProjectApplication from '../components/forms/NewProject/NewProjectForm';
+import ProjectApplication from '../components/forms/NewProjectForm/NewProjectForm';
 import ProjectStatus from './project-status';
 import FeedbackForm from '../components/forms/FeedbackForm'; // Correct import path
-import Project from '../components/forms/NewProject/Project';
+import Project from '../components/forms/NewProjectForm/Project';
 
 /**
  * Chat-style menu.

@@ -8,7 +8,7 @@ import ExpenseCard from './ExpenseCard';
 import getInitialValues from './values/values';
 import getValidationSchema from './validation';
 import onSubmit from './uploading';
-import Project from '../NewProject/Project'
+import Project from '../NewProjectForm/Project'
 import expenseValues from './values/expenseValues';
 import { UploadChooser, reportUploadType } from './upload/UploadChooser';
 
@@ -43,6 +43,8 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
     const initialValues = getInitialValues(errId);
     const validationSchema = getValidationSchema();
     const newExpense = expenseValues;
+
+    const token = supabase.auth.getSession()
 
     return (
         <>
