@@ -20,6 +20,7 @@ export interface UploadChooserProps {
 
 
 export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projectId, expenseId }:UploadChooserProps) => {
+  const key = (uploadType === reportUploadType.SUPPORTING ? "SUPPORTING" : `RECEIPT-${expenseId}`)
   const [files, setFiles] = useState<FileWithProgress[]>([]); 
   const BUCKET_NAME = "images";
   const SUPABASE_PROJECT_ID = "inrddslmakqrezinnejh"; // TODO: Move into env.local.
@@ -41,11 +42,11 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projec
     // TODO
   }
 
-  const key = (uploadType === reportUploadType.SUPPORTING ? "SUPPORTING" : `RECEIPT-${expenseId}`)
 
   return (
     <div className="max-w-lg mx-auto">
       <div className="flex flex-col gap-4">
+        <p>{key}</p>
         <UploadBox key={`${key}-uploadBox`} onFileChange={handleFileChange} uploadType={uploadType} />
         <UploadedList key={`${key}-uploadedList`} id={key} files={files} removeFile={removeFile} />
       </div>
@@ -66,7 +67,7 @@ const UploadBox: React.FC<UploadBoxProps> = ({ onFileChange, uploadType }) => {
       <input type="file" multiple id="file-upload" className="hidden" onChange={onFileChange} />
       <label htmlFor="file-upload" className="flex items-center justify-center p-4 border rounded-md cursor-pointer hover:bg-gray-50">
         <UploadIcon className="mr-2" />
-        {uploadType === reportUploadType.RECEIPT ? <span>{t('chooseReceiptFiles')}</span> : <span>{t('choosefiles')}</span>}
+        {uploadType === reportUploadType.RECEIPT ? <span>{t('chooseReceiptFiles')}</span> : <span>{t('chooseFiles')}</span>}
       </label>
     </div>
   );
