@@ -12,6 +12,7 @@ import Project from '../NewProjectForm/Project'
 import expenseValues from './values/expenseValues';
 import { UploadChooser, reportUploadType } from './upload/UploadChooser';
 
+
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
 const TABLE_NAME_EXPENSE_CATEGORIES = 'expense_categories';
 const TABLE_NAME_NEW_PROJECT_APPLICATIONS = 'err_projects';
@@ -181,11 +182,10 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
 
                         <div className="mb-3">                            
                             <UploadChooser
-
+                                key={999}
                                 uploadType= {reportUploadType.SUPPORTING}
                                 projectId = {project.id}
                                 reportId = {reportId}
-
                             />
                         </div>
 

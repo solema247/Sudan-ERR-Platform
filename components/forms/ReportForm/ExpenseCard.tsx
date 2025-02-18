@@ -123,9 +123,10 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardPr
                     </div>
 
                     <UploadChooser
-                       uploadType = {reportUploadType.RECEIPT}
-                       projectId = ""
-                       reportId = ""
+                        key={index}
+                        uploadType = {reportUploadType.RECEIPT}
+                        projectId = ""
+                        reportId = ""
                     />
 
                     {/* <div className="mb-3">

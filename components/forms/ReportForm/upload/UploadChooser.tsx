@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useId } from "react";
 import { Upload as UploadIcon, Trash2, Check } from "lucide-react";
 import { supabase } from '../../../../services/supabaseClient';
 import { useTranslation } from 'react-i18next';
@@ -27,18 +27,19 @@ interface UploadedListProps {
   removeFile: (index: number) => void;
 }
 
+
+
 export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projectId, reportId, receiptId }:UploadChooserProps) => {
+  const id = useId();
   const [files, setFiles] = useState<FileWithProgress[]>([]);
   const BUCKET_NAME = "images";
-  const SUPABASE_PROJECT_ID = "inrddslmakqrezinnejh";
-
-  const getNewFilename = () => {
-    return crypto.randomUUID;
-  }
+  const SUPABASE_PROJECT_ID = "inrddslmakqrezinnejh"; // TODO: Move into env.local.
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []).map((file) => ({ file, uploaded: false, progress: 0 }));
     setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
+
+    // Starts uploading right away.
 
     // selectedFiles.forEach(async (newFile) => {
     //   await beginUploadProcessFor(newFile, uploadType, projectId, reportId);         // TODO: Make this typesefae
@@ -61,7 +62,7 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projec
           retryDelays: [0, 3000, 5000, 10000, 20000],
           headers: {
               authorization: `Bearer ${session.access_token}`,
-              'x-upsert': 'true', // optionally set upsert to true to overwrite existing files
+              'x-upsert': 'true',
           },
           uploadDataDuringCreation: true,
           removeFingerprintOnSuccess: true, // Important if you want to allow re-uploading the same file https://github.com/tus/tus-js-client/blob/main/docs/api.md#removefingerprintonsuccess
@@ -86,7 +87,6 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projec
       })
 
 
-      // Check if there are any previous uploads to continue.
       return upload.findPreviousUploads().then(function (previousUploads) {
           // Found previous uploads so we select the first one.
           if (previousUploads.length) {
@@ -119,8 +119,8 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projec
   return (
     <div className="max-w-lg mx-auto">
       <div className="flex flex-col gap-4">
-        <UploadBox onFileChange={handleFileChange} uploadType={uploadType} />
-        <UploadedList files={files} removeFile={removeFile} />
+        <UploadBox key={id} onFileChange={handleFileChange} uploadType={uploadType} />
+        <UploadedList key={id} files={files} removeFile={removeFile} />
       </div>
     </div>
   );  
@@ -147,6 +147,8 @@ const UploadBox: React.FC<UploadBoxProps> = ({ onFileChange, uploadType }) => {
 
 
 const UploadedList: React.FC<UploadedListProps> = ({ files, removeFile }) => {
+  const { t } = useTranslation('fillForm');
+
   return (
     <div>
       {files.length > 0 && (
@@ -161,8 +163,8 @@ const UploadedList: React.FC<UploadedListProps> = ({ files, removeFile }) => {
                       <div className="h-2 bg-blue-500 rounded" style={{ width: `${progress}%` }}></div>
                     </div>
                   )}
-                  <button onClick={() => removeFile(index)} className="text-red-500 hover:text-red-700">
-                    <Trash2 size={16} />
+                  <button onClick={() => removeFile(index)} className="text-red-500 hover:text-red-700 text-xs">
+                    {t('Remove').toLowerCase()}
                   </button>
                 </div>
               </li>
