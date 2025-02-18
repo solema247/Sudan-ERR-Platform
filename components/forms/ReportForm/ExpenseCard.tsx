@@ -123,13 +123,13 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardPr
                         <ErrorMessage name={`expenses[${index}].amount`} component="div" />
                     </div>
 
-                    <UploadChooser
+                    {/* <UploadChooser
                         key={`${reportUploadType.RECEIPT.toString}-${index}}`}
                         uploadType = {reportUploadType.RECEIPT}
                         projectId = ""
                         reportId = ""
                         expenseId={index.toString()}
-                    />
+                    /> */}
 
                     <div className="flex justify-between content-center">
                         <button

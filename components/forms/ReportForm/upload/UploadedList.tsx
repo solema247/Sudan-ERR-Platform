@@ -20,7 +20,7 @@ export const UploadedList: React.FC<UploadedListProps> = ({ id, files, removeFil
         <div className="mt-4">
           <ul className="space-y-2">
             {files.map(({ file, uploaded, progress }, index) => (
-              <li key={id} className="flex items-center justify-between gap-4 p-2 border rounded-md">
+              <li key={`${index}`} className="flex items-center justify-between gap-4 p-2 border rounded-md">
                 <span className="truncate">{file.name}</span>
                 <div className="flex items-center gap-2">
                   {uploaded ? <Check className="text-green-500" size={16} /> : (

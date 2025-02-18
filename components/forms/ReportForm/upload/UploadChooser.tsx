@@ -46,8 +46,8 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projec
   return (
     <div className="max-w-lg mx-auto">
       <div className="flex flex-col gap-4">
-        <UploadBox key={key} onFileChange={handleFileChange} uploadType={uploadType} />
-        <UploadedList key={key} id={key} files={files} removeFile={removeFile} />
+        <UploadBox key={`${key}-uploadBox`} onFileChange={handleFileChange} uploadType={uploadType} />
+        <UploadedList key={`${key}-uploadedList`} id={key} files={files} removeFile={removeFile} />
       </div>
     </div>
   );  
