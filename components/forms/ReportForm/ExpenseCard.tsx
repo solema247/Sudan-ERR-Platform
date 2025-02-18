@@ -3,6 +3,7 @@ import { Field, ErrorMessage, useFormikContext } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Trash2, Check } from "lucide-react";
 import { UploadChooser, reportUploadType } from './upload/UploadChooser';
+import { FilesDictionary } from './upload/UploadInterfaces';
 
 // TODO: Expense IDs and other IDs.
 
@@ -12,13 +13,14 @@ export interface ActivityOption {
 }
 
 interface ExpenseCardProps {
+    filesState: [FilesDictionary, React.Dispatch<React.SetStateAction<FilesDictionary>>],
     expense: any,
     index: number,
     arrayHelpers: any,
     categories: any,
 }
 
-const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardProps) => {
+const ExpenseCard = ({ filesState, expense, index, arrayHelpers, categories }: ExpenseCardProps) => {
     const { t } = useTranslation('fillForm');
     const [isCollapsed, setIsCollapsed] = useState(false);
     const { values, setFieldValue } = useFormikContext();
@@ -125,6 +127,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardPr
 
                     <UploadChooser
                         key={`RECEIPT-${index}}`}
+                        filesState={filesState}
                         uploadType = {reportUploadType.RECEIPT}
                         projectId = ""
                         reportId = ""

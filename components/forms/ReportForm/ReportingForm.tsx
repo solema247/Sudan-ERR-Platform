@@ -11,6 +11,7 @@ import onSubmit from './uploading';
 import Project from '../NewProjectForm/Project'
 import expenseValues from './values/expenseValues';
 import { UploadChooser, reportUploadType } from './upload/UploadChooser';
+import { FilesDictionary } from './upload/UploadInterfaces';
 
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
@@ -35,6 +36,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
     const { t } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+    const [files, setFiles] = useState<FilesDictionary>({});
 
     useEffect(() => {
         populateCategories(setCategories)
@@ -101,6 +103,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                                     {values.expenses.map((expense, index) => (
                                         <ExpenseCard
                                             key={`${index}`}
+                                            filesState={[files, setFiles]}
                                             expense={expense}
                                             index={index}
                                             arrayHelpers={arrayHelpers}
@@ -181,6 +184,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                         <div className="mb-3">                            
                             <UploadChooser
                                 key={reportUploadType.SUPPORTING.toString()}
+                                filesState={[files, setFiles]}
                                 uploadType= {reportUploadType.SUPPORTING}
                                 projectId = {project.id}
                                 reportId = {reportId}
