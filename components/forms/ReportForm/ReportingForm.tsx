@@ -45,8 +45,6 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
     const validationSchema = getValidationSchema();
     const newExpense = expenseValues;
 
-    const token = supabase.auth.getSession()
-
     return (
         <>
         {isFormSubmitted ? (

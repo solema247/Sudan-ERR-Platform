@@ -5,13 +5,13 @@ import { FileWithProgress } from "./UploadInterfaces";
 import { Upload as UploadIcon, Trash2, Check } from "lucide-react";
 
 
-
 interface UploadedListProps {
+    id: string;
     files: FileWithProgress[];
     removeFile: (index: number) => void;
 }
 
-export const UploadedList: React.FC<UploadedListProps> = ({ files, removeFile }) => {
+export const UploadedList: React.FC<UploadedListProps> = ({ id, files, removeFile }) => {
   const { t } = useTranslation('fillForm');
 
   return (
@@ -20,7 +20,7 @@ export const UploadedList: React.FC<UploadedListProps> = ({ files, removeFile })
         <div className="mt-4">
           <ul className="space-y-2">
             {files.map(({ file, uploaded, progress }, index) => (
-              <li key={index} className="flex items-center justify-between gap-4 p-2 border rounded-md">
+              <li key={id} className="flex items-center justify-between gap-4 p-2 border rounded-md">
                 <span className="truncate">{file.name}</span>
                 <div className="flex items-center gap-2">
                   {uploaded ? <Check className="text-green-500" size={16} /> : (

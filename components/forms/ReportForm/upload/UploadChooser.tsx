@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import { Upload as UploadIcon } from "lucide-react";
 import { supabase } from '../../../../services/supabaseClient';
 import { useTranslation } from 'react-i18next';
-import { v4 as uuidv4 } from 'uuid';
 import { UploadedList } from './UploadedList';
 import { FileWithProgress } from './UploadInterfaces';
-
 import * as tus from 'tus-js-client'; 
 
 export enum reportUploadType {
@@ -17,22 +15,19 @@ export interface UploadChooserProps {
   uploadType: reportUploadType;  
   projectId: string;
   reportId: string;
-  receiptId?: string;
+  expenseId?: string;
 }
 
 
-export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projectId, reportId, receiptId }:UploadChooserProps) => {
-  const id = uuidv4();
-  const [files, setFiles] = useState<FileWithProgress[]>([]); // TODO: Base this on a dictionary as a hack around state share.
+export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projectId, expenseId }:UploadChooserProps) => {
+  const [files, setFiles] = useState<FileWithProgress[]>([]); 
   const BUCKET_NAME = "images";
   const SUPABASE_PROJECT_ID = "inrddslmakqrezinnejh"; // TODO: Move into env.local.
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []).map((file) => ({ file, uploaded: false, progress: 0 }));
-    setFiles((prevFiles) => {
-      console.log("Previous Files:", prevFiles);
-      return [...prevFiles, ...selectedFiles];
-    })
+    setFiles(prevFiles => [...prevFiles, ...selectedFiles]);
+
 
     // Starts uploading right away.
 
@@ -46,11 +41,13 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({ uploadType, projec
     // TODO
   }
 
+  const key = (uploadType === reportUploadType.SUPPORTING ? "SUPPORTING" : `RECEIPT-${expenseId}`)
+
   return (
     <div className="max-w-lg mx-auto">
       <div className="flex flex-col gap-4">
-        <UploadBox key={id} onFileChange={handleFileChange} uploadType={uploadType} />
-        <UploadedList key={id} files={files} removeFile={removeFile} />
+        <UploadBox key={key} onFileChange={handleFileChange} uploadType={uploadType} />
+        <UploadedList key={key} id={key} files={files} removeFile={removeFile} />
       </div>
     </div>
   );  

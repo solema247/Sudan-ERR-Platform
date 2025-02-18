@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { Field, ErrorMessage, useFormikContext } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Trash2, Check } from "lucide-react";
 import { UploadChooser, reportUploadType } from './upload/UploadChooser';
 
+// TODO: Expense IDs and other IDs.
 
 export interface ActivityOption {
     id: string,
@@ -123,10 +124,11 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardPr
                     </div>
 
                     <UploadChooser
-                        key={`${reportUploadType.RECEIPT.toString}-${index}-${Math.random()}}`}
+                        key={`${reportUploadType.RECEIPT.toString}-${index}}`}
                         uploadType = {reportUploadType.RECEIPT}
                         projectId = ""
                         reportId = ""
+                        expenseId={index.toString()}
                     />
 
                     <div className="flex justify-between content-center">
