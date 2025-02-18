@@ -102,7 +102,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                                 <div>
                                     {values.expenses.map((expense, index) => (
                                         <ExpenseCard
-                                            key={index}
+                                            key={`${index}`}
                                             expense={expense}
                                             index={index}
                                             arrayHelpers={arrayHelpers}
@@ -182,7 +182,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
 
                         <div className="mb-3">                            
                             <UploadChooser
-                                key={999}
+                                key={reportUploadType.SUPPORTING.toString()}
                                 uploadType= {reportUploadType.SUPPORTING}
                                 projectId = {project.id}
                                 reportId = {reportId}

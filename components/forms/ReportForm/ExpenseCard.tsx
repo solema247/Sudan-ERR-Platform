@@ -123,28 +123,11 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardPr
                     </div>
 
                     <UploadChooser
-                        key={index}
+                        key={`${reportUploadType.RECEIPT.toString}-${index}-${Math.random()}}`}
                         uploadType = {reportUploadType.RECEIPT}
                         projectId = ""
                         reportId = ""
                     />
-
-                    {/* <div className="mb-3">
-                        <label htmlFor={`expenses[${index}].receiptFiles`} className="font-bold block text-base text-black-bold mb-1">
-                            {t('chooseReceiptFile')}
-                        </label>
-                        <input
-                            id="file"
-                            name={`expenses[${index}].receiptFiles`}
-                            type="file"
-                            multiple
-                            onChange={(event) => {
-                                const files = Array.from(event.currentTarget.files);
-                                setFieldValue(`expenses[${index}].receiptFiles`, files);
-                            }}
-                        />
-                        <ErrorMessage name={`expenses[${index}].receiptFiles`} component="div" />
-                    </div> */}
 
                     <div className="flex justify-between content-center">
                         <button
