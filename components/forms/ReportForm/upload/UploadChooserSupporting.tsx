@@ -41,10 +41,6 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
     selectedFiles.forEach((fileObj, index) => beginFileUpload(fileObj, index));     
   };
 
-  const beginFileUpload(fileObj: File, index: number) => {
-    
-  }
-
   const removeFile = (index: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
