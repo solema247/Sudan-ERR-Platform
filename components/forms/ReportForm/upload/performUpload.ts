@@ -3,7 +3,6 @@ import * as tus from "tus-js-client";
 
 const supabaseProjectId = "inrddslmakqrezinnejh";
 
-
 export default async function uploadFile(bucketName, fileName, file) {
     const { data: { session } } = await supabase.auth.getSession()
 
