@@ -7,11 +7,13 @@ import { supabase } from '../../../services/supabaseClient';
 import ExpenseCard from './ExpenseCard';
 import getInitialValues from './values/values';
 import getValidationSchema from './validation';
-import onSubmit from './uploading';
+import onSubmit from './upload/uploading';
 import Project from '../NewProjectForm/Project'
 import expenseValues from './values/expenseValues';
 import { UploadChooser, reportUploadType } from './upload/UploadChooser';
-import { FilesDictionary } from './upload/UploadInterfaces';
+import { UploadChooserSupporting } from './upload/UploadChooserSupporting';
+import { v4 as uuidv4 } from 'uuid';
+
 
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
@@ -36,7 +38,6 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
     const { t } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
-    const [files, setFiles] = useState<FilesDictionary>({});
 
     useEffect(() => {
         populateCategories(setCategories)
@@ -46,6 +47,11 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
     const initialValues = getInitialValues(errId);
     const validationSchema = getValidationSchema();
     const newExpense = expenseValues;
+
+    const getNewExpense = () => ({
+        ...newExpense,
+        id: uuidv4(),
+    });
 
     return (
         <>
@@ -102,8 +108,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                                 <div>
                                     {values.expenses.map((expense, index) => (
                                         <ExpenseCard
-                                            key={`${index}`}
-                                            filesState={[files, setFiles]}
+                                            key={`${expense.id}`}
                                             expense={expense}
                                             index={index}
                                             arrayHelpers={arrayHelpers}
@@ -113,7 +118,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                                     <Button
                                         text={t('addExpense')}
                                         onClick={() =>
-                                            arrayHelpers.push(newExpense)
+                                            arrayHelpers.push(getNewExpense())
                                         }                                             
                                         className="bg-blue-500 text-white mt-4"
                                     />
@@ -182,9 +187,9 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                         </div>
 
                         <div className="mb-3">                            
-                            <UploadChooser
+                            <UploadChooserSupporting
+                                id="UPLOAD_SUPPORTING_FILES"
                                 key={reportUploadType.SUPPORTING.toString()}
-                                filesState={[files, setFiles]}
                                 uploadType= {reportUploadType.SUPPORTING}
                                 projectId = {project.id}
                                 reportId = {reportId}

@@ -13,22 +13,21 @@ export interface ActivityOption {
 }
 
 interface ExpenseCardProps {
-    filesState: [FilesDictionary, React.Dispatch<React.SetStateAction<FilesDictionary>>],
     expense: any,
     index: number,
     arrayHelpers: any,
     categories: any,
 }
 
-const ExpenseCard = ({ filesState, expense, index, arrayHelpers, categories }: ExpenseCardProps) => {
+const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardProps) => {
     const { t } = useTranslation('fillForm');
     const [isCollapsed, setIsCollapsed] = useState(false);
     const { values, setFieldValue } = useFormikContext();
 
     return (
-            <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md mt-3 mb-3">
+            <div className="p-4 bg-gray-100 rounded-lg shadow-md mt-3 mb-3">
             {!isCollapsed ? (
-                <>
+                <div>
                     <div className="mb-3">
                         <label htmlFor={`expenses[${index}].activity`} className="font-bold block text-base text-black-bold mb-1">
                             {t('activity')}
@@ -125,15 +124,17 @@ const ExpenseCard = ({ filesState, expense, index, arrayHelpers, categories }: E
                         <ErrorMessage name={`expenses[${index}].amount`} component="div" />
                     </div>
 
+
+
                     <UploadChooser
-                        key={`RECEIPT-${index}}`}
-                        filesState={filesState}
-                        uploadType = {reportUploadType.RECEIPT}
-                        projectId = ""
-                        reportId = ""
-                        expenseId={index.toString()}
+                        key={expense.id}
+                        expense={expense}
+                        uploadType= {reportUploadType.RECEIPT}
+                        projectId = {expense.id}
+                        reportId = {expense.id}
                     />
 
+                    
                     <div className="flex justify-between content-center">
                         <button
                             type="button"
@@ -152,8 +153,11 @@ const ExpenseCard = ({ filesState, expense, index, arrayHelpers, categories }: E
                                 <Trash2/>
                             </div>
                         </button>
+
                     </div>
-                    </>
+                        
+                    </div>
+
             ) : (
                 <div className="flex flex-row justify-between">
                     <span>

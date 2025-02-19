@@ -6,12 +6,11 @@ import { Upload as UploadIcon, Trash2, Check } from "lucide-react";
 
 
 interface UploadedListProps {
-    id: string;
     files: FileWithProgress[];
     removeFile: (index: number) => void;
 }
 
-export const UploadedList: React.FC<UploadedListProps> = ({ id, files, removeFile }) => {
+export const UploadedList: React.FC<UploadedListProps> = ({ files, removeFile }) => {
   const { t } = useTranslation('fillForm');
 
   return (

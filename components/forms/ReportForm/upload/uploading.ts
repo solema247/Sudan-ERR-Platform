@@ -1,4 +1,4 @@
-import { uploadImages, ImageCategory } from '../../../services/uploadImages';
+import { uploadImages, ImageCategory } from '../../../../services/uploadImages';
 import { useTranslation } from 'react-i18next';
 
 // TODO: I think this is the DRY uploading point but double check.

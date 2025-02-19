@@ -10,16 +10,18 @@ export enum reportUploadType {
 }
 
 export interface UploadChooserProps {
+  id: string;
   uploadType: reportUploadType;
   projectId: string;
   reportId: string;
-  expense: any;
+  expenseId?: string;
 }
 
-export const UploadChooser: React.FC<UploadChooserProps> = ({
+export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
+  id,
   uploadType,
   projectId,
-  expense,
+  expenseId,
 }: UploadChooserProps) => {
 
   const [files, setFiles] = useState<FileWithProgress[]>([]);
@@ -42,6 +44,7 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({
   return (
     <div className="max-w-lg mx-auto">
       <div className="flex flex-col gap-4">
+        {id}
         <UploadBox
           uploadType={uploadType}
           onFileChange={handleFileChange}
