@@ -1,4 +1,3 @@
-export type FilesDictionary = Record<string, FileWithProgress[]>;
 
 export interface FileWithProgress {
     file: File;

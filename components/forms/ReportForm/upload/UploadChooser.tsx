@@ -30,9 +30,12 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({
       file,
       uploaded: false,
       progress: 0,
+      startedUploading: false
     }));
 
     setFiles((prevState) => [...prevState, ...selectedFiles]);
+
+
   };
 
   const removeFile = (index: number) => {

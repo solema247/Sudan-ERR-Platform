@@ -7,7 +7,7 @@ import { supabase } from '../../../services/supabaseClient';
 import ExpenseCard from './ExpenseCard';
 import getInitialValues from './values/values';
 import getValidationSchema from './validation';
-import onSubmit from './upload/uploading';
+import onSubmit from './upload/onSubmit';
 import Project from '../NewProjectForm/Project'
 import expenseValues from './values/expenseValues';
 import { UploadChooser, reportUploadType } from './upload/UploadChooser';
