@@ -40,7 +40,7 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
     }));
 
     setFiles((prevState) => [...prevState, ...selectedFiles]);
-    // selectedFiles.forEach((file, index) => performUpload(BUCKET_NAME, "filenameTODO", file)); 
+    selectedFiles.forEach((file, index) => performUpload(BUCKET_NAME, "filenameTODO", file.file)); 
   };
 
   const removeFile = (index: number) => {

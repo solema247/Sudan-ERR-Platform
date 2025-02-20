@@ -85,9 +85,9 @@ const Login = () => {
 
             /**
              * 
-             * This anonymous Supabase login is so that we can get a session token for image buckets.
+             * This Supabase login is so that we can get a session token for image buckets.
              * 
-             * TODO: Replace this with full-blown Supabase auth.
+             * TODO: Replace this with better Supabase auth for the users who sign up.
              * 
              * */
 
@@ -97,7 +97,10 @@ const Login = () => {
                     query: { errId: errId }
                 }); 
 
-                const { data, error } = await supabase.auth.signInAnonymously();
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: process.env.NEXT_PUBLIC_BUCKET_LOGIN,
+                    password: process.env.NEXT_PUBLIC_LOGIN_PASSWORD,
+                })
 
                 if (error) {
                     console.log('loginError');
