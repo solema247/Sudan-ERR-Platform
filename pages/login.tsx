@@ -97,12 +97,16 @@ const Login = () => {
                     query: { errId: errId }
                 }); 
 
+                const demo_login = process.env.NEXT_PUBLIC_BUCKET_LOGIN;
+                const demo_password = process.env.NEXT_PUBLIC_BUCKET_PASSWORD;
+
                 const { data, error } = await supabase.auth.signInWithPassword({
-                    email: process.env.NEXT_PUBLIC_BUCKET_LOGIN,
-                    password: process.env.NEXT_PUBLIC_LOGIN_PASSWORD,
+                    email: demo_login,
+                    password: demo_password
                 })
 
                 if (error) {
+                    console.log(error);
                     console.log('loginError');
                 }
 
