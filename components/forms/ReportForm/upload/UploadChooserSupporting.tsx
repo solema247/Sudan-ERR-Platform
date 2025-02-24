@@ -3,10 +3,9 @@ import { Upload as UploadIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { UploadedList } from "./UploadedList";
 import { FileWithProgress } from "./UploadInterfaces";
-import { supabase } from "../../../../services/supabaseClient";
 import performUpload from './performUpload';
+import { v4 as uuidv4 } from 'uuid';
 
-// TODO: Does the "file" have its own progress percentage and status in it? It should.
 // TODO: Create filenames.
 // TODO: Place in correct buckets.
 // TODO: Remove "remove" if the upload was successful.
@@ -36,27 +35,37 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
     const selectedFiles: FileWithProgress[] = Array.from(e.target.files || []).map((file) => ({
+      id: uuidv4(),
       file,
       uploaded: false,
       progress: 0,
-      startedUploading: false
+      startedUploading: false,
+      error: null
     }));
 
     setFilesWithProgress((prevState) => [...prevState, ...selectedFiles]);
     selectedFiles.forEach((file, index) => performUpload("filenameTodo.png", file.file, {
         onProgress: (percentage) => {
             console.log(`Updating file progress to ${percentage}`); // TODO: But is it happening in state?
-            setFilesWithProgress((prevFiles) => {
-                const newFiles = prevFiles;
-                newFiles[index] = { ...newFiles[index], progress: percentage };
-                return newFiles;
-            })
+            setFilesWithProgress((prevFiles) =>
+                prevFiles.map((f) =>
+                  f.id === file.id ? { ...f, progress: percentage } : f
+                )
+            );
         },
         onError: (error) => {
-            // TODO: Handle error
+            setFilesWithProgress((prevFiles) =>
+                prevFiles.map((f) =>
+                  f.id === file.id ? { ...f, error } : f
+                )
+              );
         },
         onSuccess: (url) => {
-            // TODO: Any success notification.
+            setFilesWithProgress((prevFiles) =>
+                prevFiles.map((f) =>
+                  f.id === file.id ? { ...f, uploaded: true } : f
+                )
+              );
         }
     })); 
   };

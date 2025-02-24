@@ -37,7 +37,6 @@ export default async function uploadFile(fileName: string, file: File, { onProgr
             },
             onProgress: function (bytesUploaded, bytesTotal) {
                 var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
-                console.log(bytesUploaded, bytesTotal, percentage + '%')
                 if (onProgress) onProgress(percentage)
             },
             onSuccess: function () {
