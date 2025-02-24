@@ -9,6 +9,7 @@ import performUpload from './performUpload';
 // TODO: Does the "file" have its own progress percentage and status in it? It should.
 // TODO: Create filenames.
 // TODO: Place in correct buckets.
+// TODO: Remove "remove" if the upload was successful.
 
 export enum reportUploadType {
   RECEIPT,
@@ -44,7 +45,12 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
     setFilesWithProgress((prevState) => [...prevState, ...selectedFiles]);
     selectedFiles.forEach((file, index) => performUpload("filenameTodo.png", file.file, {
         onProgress: (percentage) => {
-            file.progress = percentage
+            console.log(`Updating file progress to ${percentage}`); // TODO: But is it happening in state?
+            setFilesWithProgress((prevFiles) => {
+                const newFiles = prevFiles;
+                newFiles[index] = { ...newFiles[index], progress: percentage };
+                return newFiles;
+            })
         },
         onError: (error) => {
             // TODO: Handle error
