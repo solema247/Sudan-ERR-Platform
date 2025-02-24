@@ -2,16 +2,24 @@ import { supabase } from "../../../../services/supabaseClient"
 import * as tus from "tus-js-client";
 
 const supabaseProjectId = "inrddslmakqrezinnejh";
+const bucketName = "images"
+const key = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_KEY;
 
-export default async function uploadFile(bucketName, fileName, file) {
-    const { data: { session } } = await supabase.auth.getSession()
+const { data: { session } } = await supabase.auth.getSession()
 
+interface UploadCallbacks {
+    onProgress: any,
+    onSuccess: any,
+    onError: any
+}
+
+export default async function uploadFile(fileName: string, file: File, { onProgress, onSuccess, onError }: UploadCallbacks ) {
     return new Promise((resolve, reject) => {
         var upload = new tus.Upload(file, {
             endpoint: `https://${supabaseProjectId}.supabase.co/storage/v1/upload/resumable`,
             retryDelays: [0, 3000, 5000, 10000, 20000],
             headers: {
-                authorization: `Bearer ${session.access_token}`,
+                authorization: `Bearer ${key}`,
                 'x-upsert': 'true', // optionally set upsert to true to overwrite existing files
             },
             uploadDataDuringCreation: true,
@@ -30,10 +38,12 @@ export default async function uploadFile(bucketName, fileName, file) {
             onProgress: function (bytesUploaded, bytesTotal) {
                 var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
                 console.log(bytesUploaded, bytesTotal, percentage + '%')
+                if (onProgress) onProgress(percentage)
             },
             onSuccess: function () {
                 console.log("Uploaded: " + upload.url)
-                resolve(true)   // TODO: Check that this is the type we want.
+                if (onSuccess) onSuccess(upload.url)
+                resolve(true)   // TODO: Check that this is the return resolution we want.
             },
         })
 
@@ -48,5 +58,3 @@ export default async function uploadFile(bucketName, fileName, file) {
         })
     })
 }
-
-

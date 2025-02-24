@@ -6,6 +6,10 @@ import { FileWithProgress } from "./UploadInterfaces";
 import { supabase } from "../../../../services/supabaseClient";
 import performUpload from './performUpload';
 
+// TODO: Does the "file" have its own progress percentage and status in it? It should.
+// TODO: Create filenames.
+// TODO: Place in correct buckets.
+
 export enum reportUploadType {
   RECEIPT,
   SUPPORTING,
@@ -26,25 +30,33 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
   expenseId,
 }: UploadChooserProps) => {
 
-  const [files, setFiles] = useState<FileWithProgress[]>([]);
+  const [filesWithProgress, setFilesWithProgress] = useState<FileWithProgress[]>([]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
-  const BUCKET_NAME = "images";
-
-  const selectedFiles: FileWithProgress[] = Array.from(e.target.files || []).map((file) => ({
+    const selectedFiles: FileWithProgress[] = Array.from(e.target.files || []).map((file) => ({
       file,
       uploaded: false,
       progress: 0,
       startedUploading: false
     }));
 
-    setFiles((prevState) => [...prevState, ...selectedFiles]);
-    selectedFiles.forEach((file, index) => performUpload(BUCKET_NAME, "filenameTODO", file.file)); 
+    setFilesWithProgress((prevState) => [...prevState, ...selectedFiles]);
+    selectedFiles.forEach((file, index) => performUpload("filenameTodo.png", file.file, {
+        onProgress: (percentage) => {
+            file.progress = percentage
+        },
+        onError: (error) => {
+            // TODO: Handle error
+        },
+        onSuccess: (url) => {
+            // TODO: Any success notification.
+        }
+    })); 
   };
 
   const removeFile = (index: number) => {
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    setFilesWithProgress((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
 
@@ -55,7 +67,7 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
           uploadType={uploadType}
           onFileChange={handleFileChange}
         />
-        <UploadedList files={files} removeFile={removeFile} />
+        <UploadedList files={filesWithProgress} removeFile={removeFile} />
       </div>
     </div>
   );

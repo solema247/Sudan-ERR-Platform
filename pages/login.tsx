@@ -105,6 +105,9 @@ const Login = () => {
                     password: demo_password
                 })
 
+                console.log("Logging in, we get:");
+                console.log(data);
+
                 if (error) {
                     console.log(error);
                     console.log('loginError');
