@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.           // TODO: Do compression.
 const TABLE_NAME_EXPENSE_CATEGORIES = 'expense_categories';
 const TABLE_NAME_NEW_PROJECT_APPLICATIONS = 'err_projects';
 

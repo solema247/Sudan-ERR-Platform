@@ -67,13 +67,8 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
             );
       }
       })
-      // TODO: Record in DB
-    }
-
-
-      performUpload(getPath(fileWithProgress.file, projectId, reportId) {
+    })
        
-    })); 
   };
 
   const getPath = (file: File, projectId: string, reportId: string) => `projects/${projectId}/reports/${reportId}/${file.name}`;

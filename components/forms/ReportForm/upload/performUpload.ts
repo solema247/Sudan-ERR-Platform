@@ -26,7 +26,7 @@ export default async function uploadFile(file: File, path: string, { onProgress,
             removeFingerprintOnSuccess: true, // Important if you want to allow re-uploading the same file https://github.com/tus/tus-js-client/blob/main/docs/api.md#removefingerprintonsuccess
             metadata: {
                 bucketName: bucketName,
-                objectName: file.name, // TODO: Or name?
+                objectName: path, // TODO: Or name?
                 contentType: 'image/png',   // TODO: Or non-PNG.
                 cacheControl: '3600'
             },
