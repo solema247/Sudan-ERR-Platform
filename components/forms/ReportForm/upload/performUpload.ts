@@ -13,7 +13,7 @@ interface UploadCallbacks {
     onError: any
 }
 
-export default async function uploadFile(fileName: string, file: File, { onProgress, onSuccess, onError }: UploadCallbacks ) {
+export default async function uploadFile(file: File, path: string, { onProgress, onSuccess, onError }: UploadCallbacks ) {
     return new Promise((resolve, reject) => {
         var upload = new tus.Upload(file, {
             endpoint: `https://${supabaseProjectId}.supabase.co/storage/v1/upload/resumable`,
@@ -26,8 +26,8 @@ export default async function uploadFile(fileName: string, file: File, { onProgr
             removeFingerprintOnSuccess: true, // Important if you want to allow re-uploading the same file https://github.com/tus/tus-js-client/blob/main/docs/api.md#removefingerprintonsuccess
             metadata: {
                 bucketName: bucketName,
-                objectName: fileName,
-                contentType: 'image/png',
+                objectName: file.name, // TODO: Or name?
+                contentType: 'image/png',   // TODO: Or non-PNG.
                 cacheControl: '3600'
             },
             chunkSize: 6 * 1024 * 1024, // NOTE: it must be set to 6MB (for now) do not change it

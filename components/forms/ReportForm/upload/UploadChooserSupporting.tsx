@@ -6,9 +6,6 @@ import { FileWithProgress } from "./UploadInterfaces";
 import performUpload from './performUpload';
 import { v4 as uuidv4 } from 'uuid';
 
-// TODO: Create filenames.
-// TODO: Place in correct buckets.
-// TODO: Remove "remove" if the upload was successful.
 
 export enum reportUploadType {
   RECEIPT,
@@ -25,9 +22,8 @@ export interface UploadChooserProps {
 
 export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
   id,
-  uploadType,
   projectId,
-  expenseId,
+  reportId,
 }: UploadChooserProps) => {
 
   const [filesWithProgress, setFilesWithProgress] = useState<FileWithProgress[]>([]);
@@ -44,31 +40,43 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
     }));
 
     setFilesWithProgress((prevState) => [...prevState, ...selectedFiles]);
-    selectedFiles.forEach((file, index) => performUpload("filenameTodo.png", file.file, {
+
+    selectedFiles.forEach((fileWithProgress, index) => {
+      let file = fileWithProgress.file;
+      const path = getPath(file, projectId, reportId)
+      performUpload(file, path, {
         onProgress: (percentage) => {
-            console.log(`Updating file progress to ${percentage}`); // TODO: But is it happening in state?
-            setFilesWithProgress((prevFiles) =>
-                prevFiles.map((f) =>
-                  f.id === file.id ? { ...f, progress: percentage } : f
-                )
+          setFilesWithProgress((prevFiles) =>
+              prevFiles.map((f) =>
+                f.id === fileWithProgress.id ? { ...f, progress: percentage } : f
+              )
+          );
+      },
+      onError: (error) => {
+          setFilesWithProgress((prevFiles) =>
+              prevFiles.map((f) =>
+                f.id === fileWithProgress.id ? { ...f, error } : f
+              )
             );
-        },
-        onError: (error) => {
-            setFilesWithProgress((prevFiles) =>
-                prevFiles.map((f) =>
-                  f.id === file.id ? { ...f, error } : f
-                )
-              );
-        },
-        onSuccess: (url) => {
-            setFilesWithProgress((prevFiles) =>
-                prevFiles.map((f) =>
-                  f.id === file.id ? { ...f, uploaded: true } : f
-                )
-              );
-        }
+      },
+      onSuccess: (url) => {
+          setFilesWithProgress((prevFiles) =>
+              prevFiles.map((f) =>
+                f.id === fileWithProgress.id ? { ...f, uploaded: true } : f
+              )
+            );
+      }
+      })
+      // TODO: Record in DB
+    }
+
+
+      performUpload(getPath(fileWithProgress.file, projectId, reportId) {
+       
     })); 
   };
+
+  const getPath = (file: File, projectId: string, reportId: string) => `projects/${projectId}/reports/${reportId}/${file.name}`;
 
   const removeFile = (index: number) => {
     setFilesWithProgress((prevFiles) => prevFiles.filter((_, i) => i !== index));
@@ -79,7 +87,7 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
     <div className="max-w-lg mx-auto">
       <div className="flex flex-col gap-4">
         <UploadBox
-          uploadType={uploadType}
+          uploadType={reportUploadType.SUPPORTING}
           onFileChange={handleFileChange}
         />
         <UploadedList files={filesWithProgress} removeFile={removeFile} />
