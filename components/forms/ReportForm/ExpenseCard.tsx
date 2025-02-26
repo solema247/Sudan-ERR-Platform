@@ -2,9 +2,8 @@ import { useId, useRef, useState } from 'react';
 import { Field, ErrorMessage, useFormikContext } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Trash2, Check } from "lucide-react";
-import { UploadChooser, reportUploadType } from './upload/UploadChooser';
+import { UploadChooser, reportUploadType } from './upload/UploadChooserReceipts';
 
-// TODO: Expense IDs and other IDs.
 
 export interface ActivityOption {
     id: string,

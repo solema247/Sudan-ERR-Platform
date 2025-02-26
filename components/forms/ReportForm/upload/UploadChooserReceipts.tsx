@@ -3,6 +3,7 @@ import { Upload as UploadIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { UploadedList } from "./UploadedList";
 import { FileWithProgress } from "./UploadInterfaces";
+import { v4 as uuidv4 } from 'uuid';
 
 export enum reportUploadType {
   RECEIPT,
@@ -27,6 +28,7 @@ export const UploadChooser: React.FC<UploadChooserProps> = ({
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
     const selectedFiles: FileWithProgress[] = Array.from(e.target.files || []).map((file) => ({
+      id: uuidv4(),
       file,
       uploaded: false,
       progress: 0,

@@ -5,6 +5,7 @@ import { UploadedList } from "./UploadedList";
 import { FileWithProgress } from "./UploadInterfaces";
 import performUpload from './performUpload';
 import { v4 as uuidv4 } from 'uuid';
+import { postImageRecordToDb } from './postImageToDb';
 
 
 export enum reportUploadType {
@@ -65,6 +66,7 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
                 f.id === fileWithProgress.id ? { ...f, uploaded: true } : f
               )
             );
+          postImageRecordToDb(id, reportId, "SUPPORTING");
       }
       })
     })

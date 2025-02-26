@@ -10,7 +10,7 @@ import getValidationSchema from './validation';
 import onSubmit from './upload/onSubmit';
 import Project from '../NewProjectForm/Project'
 import expenseValues from './values/expenseValues';
-import { UploadChooser, reportUploadType } from './upload/UploadChooser';
+import { UploadChooser, reportUploadType } from './upload/UploadChooserReceipts';
 import { UploadChooserSupporting } from './upload/UploadChooserSupporting';
 import { v4 as uuidv4 } from 'uuid';
 
