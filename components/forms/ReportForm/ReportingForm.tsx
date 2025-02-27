@@ -6,7 +6,7 @@ import Button from '../../ui/Button';
 import { supabase } from '../../../services/supabaseClient';
 import ExpenseCard from './ExpenseCard';
 import getInitialValues from './values/values';
-import getValidationSchema from './validation';
+import getValidationSchema from './values/validation';
 import onSubmit from './upload/onSubmit';
 import Project from '../NewProjectForm/Project'
 import expenseValues from './values/expenseValues';
@@ -19,6 +19,10 @@ import { v4 as uuidv4 } from 'uuid';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.           // TODO: Do compression.
 const TABLE_NAME_EXPENSE_CATEGORIES = 'expense_categories';
 const TABLE_NAME_NEW_PROJECT_APPLICATIONS = 'err_projects';
+const TABLE_NAME_REPORTS = 'summary';
+
+// TODO: Grab JSON or other record of project application.
+// TODO: Push the first expense to the front of the field array.
 
 
 /**
@@ -56,7 +60,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
     return (
         <>
         {isFormSubmitted ? (
-            <FormSubmitted onReturnToMenu={onReturnToMenu} />
+            <AfterFormSubmitted onReturnToMenu={onReturnToMenu} />
           ) : (
         <FormBubble>
             <Formik
@@ -197,7 +201,13 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                         </div>
 
                         <div className="mb-10">
-                            <Button text= {t('submitReport')} disabled={isSubmitting}/>
+                            <Button 
+                                text= {t('submitReport')} 
+                                disabled={isSubmitting}
+                                onClick={() =>
+                                    submitReportingForm(values)
+                                }  
+                            />
                         </div>
                     </Form>
                 )}
@@ -228,13 +238,16 @@ async function populateExpenses(project: Project) {
         .from(TABLE_NAME_NEW_PROJECT_APPLICATIONS)
         .select('planned_activities')
         .eq('id', project.id)
-
-
-    // TODO: Grab JSON or other record of project application.
-    // TODO: Push the first expense to the front of the field array.
 }
 
-const FormSubmitted = ({onReturnToMenu}) => {
+const submitReportingForm = async (values) => {
+    const json = JSON.stringify(values);
+    const { data, error } = await supabase
+        .from(TABLE_NAME_REPORTS)
+        .insert(json)
+}
+
+const AfterFormSubmitted = ({onReturnToMenu}) => {
     const { t } = useTranslation('fillForm');
 
     return (

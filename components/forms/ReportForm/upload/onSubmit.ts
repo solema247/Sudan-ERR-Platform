@@ -1,7 +1,7 @@
 import { uploadImages, ImageCategory } from '../../../../services/uploadImages';
 import { useTranslation } from 'react-i18next';
 
-// TODO: I think this is the DRY uploading point but double check.
+// Old way of submitting expense images.
 
 export default async function onSubmit(values, { setSubmitting }) {
     const { t } = useTranslation('fillForm');

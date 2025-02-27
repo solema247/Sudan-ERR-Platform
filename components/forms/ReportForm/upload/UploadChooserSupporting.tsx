@@ -5,7 +5,7 @@ import { UploadedList } from "./UploadedList";
 import { FileWithProgress } from "./UploadInterfaces";
 import performUpload from './performUpload';
 import { v4 as uuidv4 } from 'uuid';
-import { postImageRecordToDb } from './postImageToDb';
+import { postImageRecordToDb } from './postImageRecordToDb';
 
 
 export enum reportUploadType {
