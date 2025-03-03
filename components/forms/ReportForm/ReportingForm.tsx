@@ -19,6 +19,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.           // TODO: Do 
 const TABLE_NAME_EXPENSE_CATEGORIES = 'expense_categories';
 const TABLE_NAME_NEW_PROJECT_APPLICATIONS = 'err_projects';
 const TABLE_NAME_REPORTS = 'summary';
+const TABLE_NAME_EXPENSES = 'expenses';
 
 // TODO: Grab JSON or other record of project application.
 // TODO: Push the first expense to the front of the field array.
@@ -204,7 +205,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                                 text= {t('submitReport')} 
                                 disabled={isSubmitting}
                                 onClick={() =>
-                                    submitReportingForm(values, reportId, project.id)
+                                    submitReportingForm(values, reportId, project, setIsFormSubmitted)
                                 }  
                             />
                         </div>
@@ -239,23 +240,20 @@ async function populateExpenses(project: Project) {
         .eq('id', project.id)
 }
 
-const submitReportingForm = async (values, reportId: string, project: Project) => {
+const submitReportingForm = async (values, reportId: string, project: Project, setIsFormSubmitted) => {
     try {
         const json = JSON.stringify(values);
         submitSummary(json, reportId, project);
 
-        const expenses = json['expenses'];
-        submitExpenses(expenses, reportId, project.id);   // TODO: Right?
-
-        // TODO: And receipts: Are those just Image files? No. Submit Receipt with ALSO image tracking.
+        submitExpenses(json['expenses'], reportId, project.id);
 
         // TODO: How do we get receipt ID into Receipt entry? 
 
-        // TODO: Set it as sent in state.
-
+        setIsFormSubmitted(true)        
     }
     catch(e) {
-
+        alert("Something went wrong while submitting the form.");
+        console.log(e);
     }
 }
 
@@ -283,12 +281,52 @@ const submitSummary = async (json, reportId:string, project: Project) => {
         "project_name": project.id      // TODO: Projects should have names.
     }
 
-    // TODO: Submit summary.
+    try {
+        const { data, error } = await supabase
+            .from(TABLE_NAME_REPORTS)  // Name of the table you're inserting into
+            .insert([summaryJson]);  // Insert the summaryJson object
+
+        if (error) {
+            console.error('Error inserting summary:', error.message);
+        } else {
+            console.log('Summary inserted successfully:', data);
+        }
+    } catch (err) {
+        console.error('Error submitting report:', err.message);
+    }
+};
 
 }
 
-const submitExpenses = async (json, reportId: string, projectId: string) => {
+const submitExpenses = async (expenses, reportId: string, projectId: string) => {
+    expenses.forEach( (expense) => {
+        const { activity, description, payment_date, seller, payment_method, cash, receipt_no, amount, receiptFiles } = expenses;
 
+        // TODO: payment_date
+        const expenseId = uuidv4(); // TODO: Check whether we need this ID to be created in any earlier step.
+
+        const expenseJson = {
+            expenseId: expenseId,
+            project_id: projectId,
+            created_at: new Date().toISOString(),
+            expense_activity: activity,
+            expense_description: description,
+            expense_amount: amount,
+            payment_method: payment_method,
+            receipt_no: receipt_no,
+            seller: seller,
+            language: "en" // TODO: Right
+        }
+
+        try {
+            const { data, error } = await supabase
+            .from(TABLE_NAME_EXPENSES)
+            .insert(expenseJson);    
+        } catch(err) {
+            alert('Error posting expenses.');
+        }
+
+    })
 }
 
 const AfterFormSubmitted = ({onReturnToMenu}) => {
