@@ -3,7 +3,7 @@ import * as tus from "tus-js-client";
 
 const supabaseProjectId = "inrddslmakqrezinnejh";
 const bucketName = "images"
-const key = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_KEY;
+const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const { data: { session } } = await supabase.auth.getSession()
 

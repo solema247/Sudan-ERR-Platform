@@ -15,7 +15,6 @@ import { UploadChooserSupporting } from './upload/UploadChooserSupporting';
 import { v4 as uuidv4 } from 'uuid';
 
 
-
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.           // TODO: Do compression.
 const TABLE_NAME_EXPENSE_CATEGORIES = 'expense_categories';
 const TABLE_NAME_NEW_PROJECT_APPLICATIONS = 'err_projects';
@@ -205,7 +204,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                                 text= {t('submitReport')} 
                                 disabled={isSubmitting}
                                 onClick={() =>
-                                    submitReportingForm(values)
+                                    submitReportingForm(values, reportId, project.id)
                                 }  
                             />
                         </div>
@@ -240,11 +239,56 @@ async function populateExpenses(project: Project) {
         .eq('id', project.id)
 }
 
-const submitReportingForm = async (values) => {
-    const json = JSON.stringify(values);
-    const { data, error } = await supabase
-        .from(TABLE_NAME_REPORTS)
-        .insert(json)
+const submitReportingForm = async (values, reportId: string, project: Project) => {
+    try {
+        const json = JSON.stringify(values);
+        submitSummary(json, reportId, project);
+
+        const expenses = json['expenses'];
+        submitExpenses(expenses, reportId, project.id);   // TODO: Right?
+
+        // TODO: And receipts: Are those just Image files? No. Submit Receipt with ALSO image tracking.
+
+        // TODO: How do we get receipt ID into Receipt entry? 
+
+        // TODO: Set it as sent in state.
+
+    }
+    catch(e) {
+
+    }
+}
+
+
+// TODO: id
+const submitSummary = async (json, reportId:string, project: Project) => {
+    const { id, err_id, date, total_grant, total_other_sources, excess_expenses, surplus_use, training, lessons, total_expenses, supporting_file, remainder, beneficiaries } = json
+    const reportDate = new Date().toISOString();
+
+    const summaryJson = {
+        "id": reportId,
+        "err_id": err_id,
+        "project_id": project.id,
+        "report_date": reportDate,
+        "total_expenses": total_expenses,
+        "total_grant": total_grant,
+        "excess_expenses": excess_expenses,
+        "surplus_use": surplus_use,
+        "lessons": lessons,
+        "training": training,
+        "total_other_sources": total_other_sources,
+        "language": "en",       // TODO: Right?
+        "remainder": remainder,
+        "beneficiaries": beneficiaries,
+        "project_name": project.id      // TODO: Projects should have names.
+    }
+
+    // TODO: Submit summary.
+
+}
+
+const submitExpenses = async (json, reportId: string, projectId: string) => {
+
 }
 
 const AfterFormSubmitted = ({onReturnToMenu}) => {
