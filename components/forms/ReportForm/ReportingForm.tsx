@@ -297,9 +297,7 @@ const submitSummary = async (json, reportId:string, project: Project) => {
 };
 
 
-
 const submitExpenses = async (expenses, reportId: string, projectId: string) => {
-    const submitExpenses = async (expenses, reportId: string, projectId: string) => {
         const expensePromises = expenses.map(async (expense) => {
             const { activity, description, payment_date, seller, payment_method, cash, receipt_no, amount, receiptFiles } = expense;
     
@@ -336,7 +334,11 @@ const submitExpenses = async (expenses, reportId: string, projectId: string) => 
         await Promise.all(expensePromises); // Wait for all expenses to be submitted
 }
 
-const AfterFormSubmitted = ({onReturnToMenu}) => {
+interface AfterFormSubmittedProps {
+    onReturnToMenu: any
+}
+
+const AfterFormSubmitted: React.FC<AfterFormSubmittedProps> = ({ onReturnToMenu }) => {
     const { t } = useTranslation('fillForm');
 
     return (
