@@ -44,8 +44,11 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
     useEffect(() => {
-        populateCategories(setCategories)
-        populateExpenses(project)
+        const fetchData = async () => {
+            populateCategories(setCategories)
+            populateExpenses(project)    
+        }
+        fetchData();
     }, []);
 
     const initialValues = getInitialValues(errId);
@@ -204,8 +207,8 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                             <Button 
                                 text= {t('submitReport')} 
                                 disabled={isSubmitting}
-                                onClick={() =>
-                                    submitReportingForm(values, reportId, project, setIsFormSubmitted)
+                                onClick={async () =>
+                                    await submitEntireForm(values, reportId, project, setIsFormSubmitted)
                                 }  
                             />
                         </div>
@@ -240,15 +243,11 @@ async function populateExpenses(project: Project) {
         .eq('id', project.id)
 }
 
-const submitReportingForm = async (values, reportId: string, project: Project, setIsFormSubmitted) => {
+const submitEntireForm = async (values, reportId: string, project: Project, setIsFormSubmitted) => {
     try {
         const json = JSON.stringify(values);
-        submitSummary(json, reportId, project);
-
-        submitExpenses(json['expenses'], reportId, project.id);
-
-        // TODO: How do we get receipt ID into Receipt entry? 
-
+        await submitSummary(json, reportId, project);
+        await submitExpenses(json['expenses'], reportId, project.id);
         setIsFormSubmitted(true)        
     }
     catch(e) {
@@ -291,42 +290,50 @@ const submitSummary = async (json, reportId:string, project: Project) => {
         } else {
             console.log('Summary inserted successfully:', data);
         }
+        return data;
     } catch (err) {
         console.error('Error submitting report:', err.message);
     }
 };
 
-}
+
 
 const submitExpenses = async (expenses, reportId: string, projectId: string) => {
-    expenses.forEach( (expense) => {
-        const { activity, description, payment_date, seller, payment_method, cash, receipt_no, amount, receiptFiles } = expenses;
-
-        // TODO: payment_date
-        const expenseId = uuidv4(); // TODO: Check whether we need this ID to be created in any earlier step.
-
-        const expenseJson = {
-            expenseId: expenseId,
-            project_id: projectId,
-            created_at: new Date().toISOString(),
-            expense_activity: activity,
-            expense_description: description,
-            expense_amount: amount,
-            payment_method: payment_method,
-            receipt_no: receipt_no,
-            seller: seller,
-            language: "en" // TODO: Right
-        }
-
-        try {
-            const { data, error } = await supabase
-            .from(TABLE_NAME_EXPENSES)
-            .insert(expenseJson);    
-        } catch(err) {
-            alert('Error posting expenses.');
-        }
-
-    })
+    const submitExpenses = async (expenses, reportId: string, projectId: string) => {
+        const expensePromises = expenses.map(async (expense) => {
+            const { activity, description, payment_date, seller, payment_method, cash, receipt_no, amount, receiptFiles } = expense;
+    
+            const expenseId = uuidv4(); // Generate a new expense ID
+    
+            const expenseJson = {
+                expenseId: expenseId,
+                project_id: projectId,
+                created_at: new Date().toISOString(),
+                expense_activity: activity,
+                expense_description: description,
+                expense_amount: amount,
+                payment_method: payment_method,
+                receipt_no: receipt_no,
+                seller: seller,
+                language: "en" // TODO: Adjust language if necessary
+            };
+    
+            try {
+                const { data, error } = await supabase
+                    .from(TABLE_NAME_EXPENSES)
+                    .insert([expenseJson]);
+    
+                if (error) {
+                    alert('Error posting expenses.');
+                    throw error;
+                }
+            } catch (err) {
+                console.error('Error posting expenses:', err.message);
+                throw err;
+            }
+        });
+    
+        await Promise.all(expensePromises); // Wait for all expenses to be submitted
 }
 
 const AfterFormSubmitted = ({onReturnToMenu}) => {
