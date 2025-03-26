@@ -1,6 +1,6 @@
 <div align="center">
   <img src="public/icons/icon-512x512.png" alt="Sudan ERR Bot Logo" width="200"/>
-  <h1>Sudan ERR Bot</h1>
+  <h1>Sudan ERR Platform</h1>
   <p><strong>Sudan Emergency Response Rooms open-source platform for managing humanitarian funds and local interventions</strong></p>
 </div>
 
