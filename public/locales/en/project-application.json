@@ -52,6 +52,7 @@
   "description": "Description",
   "frequency": "Frequency",
   "unitPrice": "Unit Price",
+  "total": "Total Amount",
   "addRow": "Add Row",
   "remove": "Remove",
   "returnToMenu": "Return to Menu",
@@ -61,16 +62,18 @@
     "header": "Activities and Expenses",
     "add": "Add Activity",
     "remove": "Remove Activity",
+    "info": "Activity Info",
+    "placeholder": "Select Activity",
+    "quantity": {
+      "label": "Quantity",
+      "placeholder": "Enter quantity"
+    },
+    "duration": "Activity Duration",
+    "location": "Place of Operation",
     "expenses": {
       "add": "Add Expense",
       "remove": "Remove Expense",
-      "label": "Select Activity",
-      "placeholder": "Select Activity",
-      "quantity": {
-        "label": "Quantity",
-        "placeholder": "Enter quantity"
-      },
-      "expenseLabel": "Expenses",
+      "label": "Expenses",
       "selectExpense": "Select Expense",
       "description": "Expense Description",
       "amount": "Amount"
@@ -78,12 +81,25 @@
   },
   "enterPhoneNumber": "Enter your phone number",
   "phoneNumber": "Phone Number",
-  "enterBankDetails": "Enter your banking details",
-  "bankDetails": "Banking Details",
+  "enterBankDetails": "Enter ERR banking details",
+  "bankDetails": "ERR Banking Details",
   "confirmDialog": {
     "title": "Stakeholder Alignment",
     "message": "Have you discussed this project with all relevant ERR stakeholders in your area? This is important to ensure community support and project success.",
     "confirm": "Yes, I have aligned with stakeholders",
     "review": "No, I need to review first"
-  }
+  },
+  "programOfficer": {
+    "name": "Program Officer Name",
+    "phone": "Program Officer Phone"
+  },
+  "reportingOfficer": {
+    "name": "Reporting Officer Name",
+    "phone": "Reporting Officer Phone"
+  },
+  "financeOfficer": {
+    "name": "Finance Officer Name",
+    "phone": "Finance Officer Phone"
+  },
+  "errMembers": "ERR Members"
 }

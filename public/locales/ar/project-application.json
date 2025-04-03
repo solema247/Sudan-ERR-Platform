@@ -52,6 +52,7 @@
   "description": "الوصف",
   "frequency": "التكرار",
   "unitPrice": "سعر الوحدة",
+  "total": "الإجمالي",
   "addRow": "إضافة صف",
   "remove": "إزالة",
   "returnToMenu": "العودة إلى القائمة",
@@ -61,16 +62,18 @@
     "header": "الأنشطة والنفقات",
     "add": "إضافة نشاط",
     "remove": "إزالة النشاط",
+    "info": "معلومات النشاط",
+    "placeholder": "اختر نشاطاً",
+    "quantity": {
+      "label": "الكمية",
+      "placeholder": "أدخل الكمية"
+    },
+    "duration": "مدة النشاط",
+    "location": "مكان التنفيذ",
     "expenses": {
       "add": "إضافة نفقات",
       "remove": "إزالة النفقات",
-      "label": "اختر نشاطاً",
-      "placeholder": "اختر نشاطاً",
-      "quantity": {
-        "label": "الكمية",
-        "placeholder": "أدخل الكمية"
-      },
-      "expenseLabel": "المصروفات",
+      "label": "المصروفات",
       "selectExpense": "اختر المصروفات",
       "description": "وصف المصروفات",
       "amount": "المبلغ"
@@ -78,8 +81,8 @@
   },
   "enterPhoneNumber": "أدخل رقم هاتفك",
   "phoneNumber": "رقم التليفون",
-  "enterBankDetails": "أدخل تفاصيل البنك الخاص بك",
-  "bankDetails": "تفاصيل البنك",
+  "bankDetails": "تفاصيل البنك لغرفة الطوارئ",
+  "enterBankDetails": "أدخل تفاصيل البنك لغرفة الطوارئ",
   "confirmDialog": {
     "title": "التوافق مع أصحاب المصلحة",
     "message": "هل ناقشت هذا المشروع مع جميع أصحاب المصلحة المعنيين في غرفة الطوارئ في منطقتك؟ هذا مهم لضمان دعم المجتمع ونجاح المشروع.",
@@ -87,5 +90,18 @@
     "review": "لا، أحتاج إلى المراجعة أولاً"
   },
   "Womens Activities": "أنشطة النساء",
-  "Childrens Activities": "أنشطة الأطفال"
+  "Childrens Activities": "أنشطة الأطفال",
+  "programOfficer": {
+    "name": "اسم مسؤول البرامج",
+    "phone": "رقم هاتف مسؤول البرامج"
+  },
+  "reportingOfficer": {
+    "name": "اسم مسؤول التقارير",
+    "phone": "رقم هاتف مسؤول التقارير"
+  },
+  "financeOfficer": {
+    "name": "اسم المسؤول المالي",
+    "phone": "رقم هاتف المسؤول المالي"
+  },
+  "errMembers": "أعضاء غرفة الطوارئ"
 }

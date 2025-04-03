@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@google-cloud/vision": "^4.3.2",
+    "@heroicons/react": "^2.2.0",
     "@react-pdf/renderer": "^4.1.5",
     "@supabase/supabase-js": "^2.46.1",
     "@types/pdf-parse": "^1.1.4",

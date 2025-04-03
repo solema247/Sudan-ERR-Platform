@@ -134,8 +134,6 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
      ),
      estimated_timeframe: Yup.string().required(t('validation.required')),
      additional_support: Yup.string(),
-     officer_name: Yup.string().required(t('validation.required')),
-     phone_number: Yup.string().required(t('validation.required')),
      banking_details: Yup.string(),
    });
 
@@ -234,9 +232,13 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
                planned_activities: [],
                estimated_timeframe: '',
                additional_support: '',
-               officer_name: '',
-               phone_number: '',
-               banking_details: ''
+               banking_details: '',
+               programOfficerName: '',
+               programOfficerPhone: '',
+               reportingOfficerName: '',
+               reportingOfficerPhone: '',
+               financeOfficerName: '',
+               financeOfficerPhone: '',
              }}
              validationSchema={validationSchema}
              onSubmit={(values, actions) => {
@@ -249,19 +251,19 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
                  <p className="text-3xl">{t('newProjectApplication')}</p>
 
                  {/* Date */}
-                 <div className="mb-3">
+                 <div className="mb-2">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('date')}</label>
                    <Field name="date" type="date" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
                  </div>
 
                  {/* Room ID */}
-                 <div className="mb-3">
+                 <div className="mb-2">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('errId')}</label>
                    <Field name="err" type="text" className="text-sm w-full p-2 border rounded-lg" placeholder={t('enterErrId')} disabled={isLoading} />
                  </div>
 
                   {/* Objectives */}
-                  <div className="mb-3">
+                  <div className="mb-2">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('projectObjectives')}</label>
                    <Field 
                      name="project_objectives"
@@ -272,7 +274,7 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
                  </div>
 
                  {/* Intended beneficiaries */}
-                  <div className="mb-3">
+                  <div className="mb-2">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('intendedBeneficiaries')}</label>
                    <Field 
                      name="intended_beneficiaries"
@@ -283,7 +285,7 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
                  </div>
 
                  {/* Estimated beneficiaries*/}
-                  <div className="mb-3">
+                  <div className="mb-2">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('estimatedBeneficiaries')}</label>
                    <Field 
                      name="estimated_beneficiaries"
@@ -295,7 +297,7 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
                  </div>
 
                  {/* State or region */}
-                 <div className="mb-3">
+                 <div className="mb-2">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('state')}</label>
                    <Field
                      name="state"
@@ -320,7 +322,7 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
 
                  {/* Locality*/}
 
-                 <div className="mb-3">
+                 <div className="mb-2">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('locality')}</label>
                    <Field
                      name="locality"
@@ -349,7 +351,7 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
 
                  {/* Estimated timeframe */}
 
-                 <div className="mb-3">
+                 <div className="mb-2">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('estimatedTimeframe')}</label>
                    <Field
                      as="textarea"
@@ -362,7 +364,7 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
 
                  {/* Additional support */}
 
-                 <div className="mb-3">
+                 <div className="mb-2">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('additionalSupport')}</label>
                    <Field
                      as="textarea"
@@ -373,33 +375,8 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
                    />
                  </div>
 
-                 {/* Officer name */}
-
-                 <div className="mb-3">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('officerName')}</label>
-                   <Field
-                     name="officer_name"
-                     type="text"
-                     className="text-sm w-full p-2 border rounded-lg"
-                     placeholder={t('enterOfficerName')}
-                     disabled={isLoading}
-                   />
-                 </div>
-
-                 {/* Phone number */}
-                 <div className="mb-3">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('phoneNumber')}</label>
-                   <Field
-                     name="phone_number"
-                     type="text"
-                     className="text-sm w-full p-2 border rounded-lg"
-                     placeholder={t('enterPhoneNumber')}
-                     disabled={isLoading}
-                   />
-                 </div>
-
                  {/* Banking details */}
-                 <div className="mb-3">
+                 <div className="mb-2">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('bankDetails')}</label>
                    <Field
                      name="banking_details"
@@ -408,6 +385,60 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
                      placeholder={t('enterBankDetails')}
                      disabled={isLoading}
                    />
+                 </div>
+
+                 {/* Add label and update the new fields section */}
+                 <div className="mb-2">
+                   <label className="font-bold block text-base text-black-bold mb-1">{t('errMembers')}</label>
+                   <div className="space-y-4">
+                     {/* Program Officer */}
+                     <div className="grid grid-cols-2 gap-4">
+                       <Field
+                         name="programOfficerName"
+                         type="text"
+                         placeholder={t('programOfficer.name')}
+                         className="text-sm w-full p-2 border rounded-lg"
+                       />
+                       <Field
+                         name="programOfficerPhone"
+                         type="tel"
+                         placeholder={t('programOfficer.phone')}
+                         className="text-sm w-full p-2 border rounded-lg"
+                       />
+                     </div>
+
+                     {/* Reporting Officer */}
+                     <div className="grid grid-cols-2 gap-4">
+                       <Field
+                         name="reportingOfficerName"
+                         type="text"
+                         placeholder={t('reportingOfficer.name')}
+                         className="text-sm w-full p-2 border rounded-lg"
+                       />
+                       <Field
+                         name="reportingOfficerPhone"
+                         type="tel"
+                         placeholder={t('reportingOfficer.phone')}
+                         className="text-sm w-full p-2 border rounded-lg"
+                       />
+                     </div>
+
+                     {/* Finance Officer */}
+                     <div className="grid grid-cols-2 gap-4">
+                       <Field
+                         name="financeOfficerName"
+                         type="text"
+                         placeholder={t('financeOfficer.name')}
+                         className="text-sm w-full p-2 border rounded-lg"
+                       />
+                       <Field
+                         name="financeOfficerPhone"
+                         type="tel"
+                         placeholder={t('financeOfficer.phone')}
+                         className="text-sm w-full p-2 border rounded-lg"
+                       />
+                     </div>
+                   </div>
                  </div>
 
                  <div className="container py-4 px-4 mx-0 min-w-full flex flex-col items-center">
