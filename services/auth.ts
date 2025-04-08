@@ -21,6 +21,7 @@ export const generateToken = (payload: object, expiresIn = '1h') => {
     return jwt.sign(payload, SECRET_KEY, { expiresIn });
 };
 
+
 /**
  * Validate and decode a JWT token
  * @param token - JWT to validate

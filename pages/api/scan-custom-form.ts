@@ -10,7 +10,7 @@ import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
 import os from 'os';
-import { uploadImageAndInsertRecord, ImageCategory } from '../../services/uploadImageAndInsertRecord';
+import { uploadImages as uploadImages, ImageCategory } from '../../services/uploadImages';
 
 // At the top of the file with other constants
 const BUCKET_NAME = "images";  // This should already exist

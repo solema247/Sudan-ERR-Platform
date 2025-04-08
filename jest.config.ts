@@ -1,5 +1,9 @@
 import type { Config } from 'jest';
 import nextJest from 'next/jest.js'
+import dotenv from 'dotenv';
+
+dotenv.config({path: '.env.local'});
+
 
 // How to make Jest unit tests work with NextJS: 
 // https://nextjs.org/docs/app/building-your-application/testing/jest

@@ -85,5 +85,7 @@
     "message": "Have you discussed this project with all relevant ERR stakeholders in your area? This is important to ensure community support and project success.",
     "confirm": "Yes, I have aligned with stakeholders",
     "review": "No, I need to review first"
-  }
+  },
+  "enterBankingDetails": "Enter your banking details",
+  "bankingDetails": "Bank Details"
 }

@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import CustomScanBubble from "../components/ui/CustomScanBubble";
 import Button from "../components/ui/Button";
 import CustomFormReview from "../components/forms/CustomFormReview";
-import MessageBubble from "../components/ui/MessageBubble";
 import { useRouter } from "next/router";
 
 interface ScanCustomFormProps {

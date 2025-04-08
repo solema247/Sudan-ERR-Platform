@@ -8,8 +8,8 @@ import { generateToken } from '../../services/auth'; // Import token generation 
  * 
  * User logs on using an Err_Id.
  * 
- * TODO: Secure password storage
- * TODO: Other forms of login
+ * TODO: Secure password storage by comparing against hash.
+ * TODO: Any other forms of login.
 */
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
