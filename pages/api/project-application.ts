@@ -1,6 +1,7 @@
 // pages/api/project-application.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '../../services/supabaseClient';
+import { newSupabase } from '../../services/newSupabaseClient';
 import { validateJWT } from '../../services/auth';
 
 /**
@@ -87,63 +88,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         if (req.method === 'POST') {
-            const {
-                date,
-                state,
-                locality,
+            const { 
+                currentLanguage, 
                 err,
-                project_objectives,
-                intended_beneficiaries,
-                estimated_beneficiaries,
-                planned_activities,
-                expenses,
-                estimated_timeframe,
-                additional_support,
-                officer_name,
-                phone_number,
-                banking_details
+                programOfficerName,
+                programOfficerPhone,
+                reportingOfficerName,
+                reportingOfficerPhone,
+                financeOfficerName,
+                financeOfficerPhone,
+                ...formData 
             } = req.body;
 
             console.log('Received POST data:', {
-                date,
-                state,
-                locality,
-                err,
-                project_objectives,
-                intended_beneficiaries,
-                estimated_beneficiaries,
-                planned_activities,
-                expenses,
-                estimated_timeframe,
-                additional_support,
-                officer_name,
-                phone_number,
-                banking_details
+                currentLanguage,
+                ...formData
             });
 
-            // Validate planned_activities and expenses fields
-            const validatedPlannedActivities = Array.isArray(planned_activities) ? planned_activities : [];
-            const validatedExpenses = Array.isArray(expenses) ? expenses : [];
-
             try {
-                // Insert project application into Supabase
-                const { data, error } = await supabase.from('err_projects').insert([
+                const { data, error } = await newSupabase.from('err_projects').insert([
                     {
-                        date,
-                        state,
-                        locality,
-                        err,
-                        project_objectives,
-                        intended_beneficiaries,
-                        estimated_beneficiaries,
-                        planned_activities: validatedPlannedActivities,
-                        expenses: validatedExpenses,
-                        estimated_timeframe,
-                        additional_support,
-                        officer_name,
-                        phone_number,
-                        banking_details,        
-                        language: 'en', // Default language is English
+                        ...formData,
+                        err_id: err,
+                        program_officer_name: programOfficerName,
+                        program_officer_phone: programOfficerPhone,
+                        reporting_officer_name: reportingOfficerName,
+                        reporting_officer_phone: reportingOfficerPhone,
+                        finance_officer_name: financeOfficerName,
+                        finance_officer_phone: financeOfficerPhone,
+                        language: currentLanguage || 'en',
+                        status: 'pending'
                     },
                 ]);
 

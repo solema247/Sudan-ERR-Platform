@@ -113,29 +113,17 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
    }, [i18n.language, t]);
 
    const validationSchema = Yup.object({
-     date: Yup.string().required(t('validation.required')),
-     err: Yup.string().required(t('validation.required')),
-     state: Yup.string().required(t('validation.required')),
-     locality: Yup.string().required(t('validation.required')),
-     project_objectives: Yup.string().required(t('validation.required')),
-     intended_beneficiaries: Yup.string().required(t('validation.required')),
-     estimated_beneficiaries: Yup.number().required(t('validation.required')),
-     planned_activities: Yup.array().of(
-       Yup.object({
-         selectedActivity: Yup.string().required(t('validation.required')),
-         quantity: Yup.number().required(t('validation.required')),
-         expenses: Yup.array().of(
-           Yup.object({
-             expense: Yup.string().required(t('validation.required')),
-             description: Yup.string().required(t('validation.required')),
-             amount: Yup.number().required(t('validation.required')),
-           })
-         ),
-       })
-     ),
-     estimated_timeframe: Yup.string().required(t('validation.required')),
+     date: Yup.string(),
+     err: Yup.string(),
+     state: Yup.string(),
+     locality: Yup.string(),
+     project_objectives: Yup.string(),
+     intended_beneficiaries: Yup.string(),
+     estimated_beneficiaries: Yup.number(),
+     planned_activities: Yup.array(),
+     estimated_timeframe: Yup.string(),
      additional_support: Yup.string(),
-     banking_details: Yup.string(),
+     banking_details: Yup.string()
    });
 
  const getAvailableStates = (localitiesData) => {
@@ -146,23 +134,31 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
  const getLocalitiesDict = (localitiesData) => {
      let dict = {};
      localitiesData.forEach((item) => {
-         const { state_name, localities } = item; // Destructure the state_name and locality
+         const { state_name, localities } = item;
 
          if (!dict[state_name]) {
-             dict[state_name] = []; // Initialize array if it doesn't exist
+             dict[state_name] = [];
          }
          if (!dict[state_name].includes(localities)) {
              localities.forEach((locality) => {
-                 dict[state_name].push(locality); // Add locality if it's not already in the array
-             })
-
+                 // Only add non-null localities
+                 if (locality !== null) {
+                     dict[state_name].push(locality);
+                 }
+             });
          }
-     })
+     });
      return dict;
-   }
+ };
 
    const handleSubmit = async (values, { setSubmitting }) => {
-     setPendingSubmission({ values, setSubmitting });
+     setPendingSubmission({ 
+       values: {
+         ...values,
+         currentLanguage: i18n.language // Add current language to form data
+       }, 
+       setSubmitting 
+     });
      setShowConfirmDialog(true);
    };
 
@@ -174,24 +170,30 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
      setLoading(true);
      
      try {
-       console.log("Making POST request to /api/project-application");
+       console.log("Starting submission with values:", values); // Log the values being sent
+       
        const res = await fetch('/api/project-application', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify(values),
        });
-              
+       
+       // Log the response status
+       console.log("Response status:", res.status);
+       
        if (res.ok) {
-         console.log("Submission successful");
+         const responseData = await res.json();
+         console.log("Submission successful:", responseData);
          setIsFormSubmitted(true);
        } else {
          const errorData = await res.json();
-         console.error('Submission failed:', errorData);
-         alert(t('submissionFailed'));
+         console.error('Submission failed with status:', res.status);
+         console.error('Error details:', errorData);
+         alert(t('submissionFailed') + ': ' + (errorData.message || 'Unknown error'));
        }
      } catch (error) {
-       console.error('Error submitting form:', error);
-       alert(t('submissionFailed'));
+       console.error('Error during submission:', error);
+       alert(t('submissionFailed') + ': ' + error.message);
      } finally {
        setLoading(false);
        setSubmitting(false);
@@ -240,12 +242,19 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
                financeOfficerPhone: '',
              }}
              validationSchema={validationSchema}
-             onSubmit={(values, actions) => {
-               console.log("Formik onSubmit triggered");
-               handleSubmit(values, actions);
+             onSubmit={(values, { setSubmitting }) => {
+               console.log("Form submission started");
+               setPendingSubmission({ 
+                 values: {
+                   ...values,
+                   currentLanguage: i18n.language
+                 }, 
+                 setSubmitting 
+               });
+               setShowConfirmDialog(true);
              }}
            >
-             {({ isSubmitting, values, setFieldValue }) => (
+             {({ isSubmitting, values, setFieldValue, errors, touched }) => (
                <Form className="space-y-3 bg-white p-3 rounded-lg">
                  <p className="text-3xl">{t('newProjectApplication')}</p>
 
@@ -253,12 +262,18 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
                  <div className="mb-2">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('date')}</label>
                    <Field name="date" type="date" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
+                   {touched.date && errors.date && (
+                     <div className="text-red-500 text-sm mt-1">{errors.date}</div>
+                   )}
                  </div>
 
-                 {/* Room ID */}
+                 {/* ERR ID */}
                  <div className="mb-2">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('errId')}</label>
                    <Field name="err" type="text" className="text-sm w-full p-2 border rounded-lg" placeholder={t('enterErrId')} disabled={isLoading} />
+                   {touched.err && errors.err && (
+                     <div className="text-red-500 text-sm mt-1">{errors.err}</div>
+                   )}
                  </div>
 
                   {/* Objectives */}
@@ -270,6 +285,9 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
                      className="text-sm w-full p-2 border rounded-lg" 
                      disabled={isLoading} 
                    />
+                   {touched.project_objectives && errors.project_objectives && (
+                     <div className="text-red-500 text-sm mt-1">{errors.project_objectives}</div>
+                   )}
                  </div>
 
                  {/* Intended beneficiaries */}
@@ -441,11 +459,16 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
                  </div>
 
                  <div className="container py-4 px-4 mx-0 min-w-full flex flex-col items-center">
+                   {/* Add error summary above the submit button */}
+                   {Object.keys(errors).length > 0 && Object.keys(touched).length > 0 && (
+                     <div className="text-red-500 text-sm mb-4">
+                       {t('validation.pleaseFixErrors')}
+                     </div>
+                   )}
                    <Button
                      type="submit"
                      text={isLoading ? t('button.processing') : t('button.submit')}
                      disabled={isSubmitting || isLoading}
-                     onClick={() => console.log("Submit button clicked")}
                    />
                  </div>
                </Form>

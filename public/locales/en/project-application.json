@@ -101,5 +101,9 @@
     "name": "Finance Officer Name",
     "phone": "Finance Officer Phone"
   },
-  "errMembers": "ERR Members"
+  "errMembers": "ERR Members",
+  "validation": {
+    "required": "This field is required",
+    "pleaseFixErrors": "Please fix the highlighted errors before submitting"
+  }
 }
