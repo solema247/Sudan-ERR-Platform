@@ -1,6 +1,6 @@
 // /pages/api/get-projects.ts
 import { NextApiRequest, NextApiResponse } from "next";
-import { supabase } from "../../services/supabaseClient";
+import { newSupabase } from "../../services/newSupabaseClient";
 import { validateJWT } from "../../services/auth";
 
 export default async function handler(
@@ -29,11 +29,11 @@ export default async function handler(
         // Extract user's ERR ID from the validated token
         const { err_id } = user;
 
-        // Query Supabase for active projects for this ERR ID
-        const { data: projects, error } = await supabase
+        // Query new database for active projects for this ERR ID
+        const { data: projects, error } = await newSupabase
             .from("err_projects")
             .select("id, project_objectives, state, locality")
-            .eq("err", err_id)
+            .eq("err_id", err_id)
             .eq("status", "active");
 
         if (error) {
