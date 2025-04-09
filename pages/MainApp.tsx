@@ -46,8 +46,13 @@ const MainApp = () => {
   const handleLogout = () => {
     // Clear the JWT token cookie
     document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    // Go to root path which will show calculator when not authenticated
-    window.location.href = '/';
+    
+    // Clear both session storage items
+    sessionStorage.setItem('isUnlocked', 'false');
+    sessionStorage.setItem('fromInternalPage', 'false');
+    
+    // Use router to redirect to home
+    router.push('/');
   };
 
   return (

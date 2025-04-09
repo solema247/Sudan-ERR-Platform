@@ -130,6 +130,7 @@ const Login = () => {
 
     // Navigate back to the home page
     const handleBackToHome = () => {
+        sessionStorage.setItem('fromInternalPage', 'true');
         router.push('/');
     };
 
