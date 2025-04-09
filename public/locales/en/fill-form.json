@@ -26,9 +26,12 @@
   "trainingNeeds": "Additional training needs",
   "lessonsLearned": "Lessons learned in budget planning",
   "chooseFile": "Choose File",
+  "chooseFiles": "Choose Files",
   "chooseReceiptFile": "Choose Receipt File",
+  "chooseReceiptFiles": "Choose Receipt Files",
   "noFileChosen": "No file chosen",
   "submit": "Submit",
+  "submitReport": "Submit this Report",
   "formSuccess": "Form submitted successfully!",
   "submitAnother": "Submit Another Form",
   "returnToMenu": "Return to Main Menu",
@@ -56,6 +59,7 @@
   "addAnotherExpense": "Add Another Expense",
   "enterPhoneNumber": "Enter your phone number",
   "phoneNumber": "Phone Number",
-  "enterBankingDetails": "Enter your banking details",
-  "bankingDetails": "Bank Details"
+  "remove": "Remove",
+  "totalExpenses": "Total expenses",
+  "activitiesAndExpenses": "Activities and expenses"
 }

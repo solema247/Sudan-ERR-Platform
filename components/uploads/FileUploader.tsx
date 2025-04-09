@@ -1,7 +1,7 @@
 // Components/FileUploader.tsx
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { uploadImageAndInsertRecord, ImageCategory } from "../../services/uploadImageAndInsertRecord";
+import { uploadImages, ImageCategory } from "../../services/uploadImages";
 
 interface FileUploaderProps {
   projectId: string;
@@ -9,10 +9,11 @@ interface FileUploaderProps {
 }
 
 /**
-  * UI for choosing files to upload for expense reports.
+  * UI for choosing files to upload for expense reports (TODO: For Scan Form only, right?)
   * 
   * TODO: Move non-UI controller stuff into api or elsewhere
   * TODO: See if we need the URL anywhere else besides what we are doing here.
+  * TODO: Figure out what we are doing with upload results viz. array vs. singular
   * 
   * @param param0 
   * @returns 
@@ -38,15 +39,15 @@ const FileUploader: React.FC<FileUploaderProps> = ({ projectId, onUploadComplete
 
       try {
         for (const file of selectedFiles) {
-          let result = await uploadImageAndInsertRecord(
-            file, 
+          let result = await uploadImages(
+            files, 
             ImageCategory.FORM_SCANNED, 
             projectId,
             t,
             "Scanned report",
           );
-          if (result.errorMessage) { 
-            throw new Error(result.errorMessage);
+          if (result[0].errorMessage) { 
+            throw new Error(result[0].errorMessage);
           }
         }
 

@@ -39,8 +39,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 additional_training_needs = '',
                 lessons = '',
                 expenses = [],
-                phone_number = '',
-                banking_details = '',
                 language
             } = req.body;
 
@@ -62,10 +60,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const { data: formRecord, error: summaryError } = await supabase
                 .from('MAG F4 Summary')
                 .insert([{
+                    created_at: new Date().toISOString(),
                     err_id,
                     err_report_id,
                     report_date: date || new Date().toISOString(),
-                    created_at: new Date().toISOString(),
                     total_grant,
                     total_other_sources,
                     excess_expenses: additional_excess_expenses,
@@ -73,8 +71,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     training: additional_training_needs,
                     lessons,
                     total_expenses,
-                    phone_number,
-                    banking_details,
                     language
                 }])
                 .select()

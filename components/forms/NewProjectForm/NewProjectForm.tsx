@@ -4,7 +4,7 @@ import { Formik, Form, Field, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import Button from '../../ui/Button';
 import FormBubble from '../../ui/FormBubble';
-import ActivitiesFieldArray from './NewProjectActivities';
+import NewProjectActivities from './NewProjectActivities';
 
 /**
  * F1 Form
@@ -12,6 +12,7 @@ import ActivitiesFieldArray from './NewProjectActivities';
  * 
  * 
  * TODO: Make this whole thing typesafe
+ * TODO: Convert everything to Formik <Field> shorthand. It is very verbose right now
  */
 
 interface NewProjectApplicationProps {
@@ -52,7 +53,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ isOpen, onConfirm, onCanc
   );
 };
 
-const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu }) => {
+const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu }) => {
    const { t, i18n } = useTranslation('projectApplication');
    const [availableRegions, setAvailableRegions] = useState([]);
    const [localitiesDict, setLocalitiesDict] = useState({});
@@ -179,9 +180,7 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify(values),
        });
-       
-       console.log("Response received:", res);
-       
+              
        if (res.ok) {
          console.log("Submission successful");
          setIsFormSubmitted(true);
@@ -347,7 +346,7 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
 
                  {/* Add/remove activities and their expenses */}
 
-                 <ActivitiesFieldArray optionsActivities={optionsActivities} optionsExpenses={optionsExpenses} />
+                 <NewProjectActivities optionsActivities={optionsActivities} optionsExpenses={optionsExpenses} />
 
                  {/* Estimated timeframe */}
 
@@ -464,4 +463,4 @@ const NewProjectApplication:React.FC<NewProjectApplicationProps> = ({ onReturnTo
    );
  };
 
- export default NewProjectApplication;
+ export default NewProjectForm;

@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { addFormToSessionQueue } from '../../services/sessionUtils';
-import { supabase } from '../../services/supabaseClient';
 
 interface OfflineFormProps {
   onClose: () => void;

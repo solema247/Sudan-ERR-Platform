@@ -9,9 +9,20 @@ import Button from '../components/ui/Button';
 import OfflineForm from '../components/forms/OfflineForm';
 const LogoImage = '/icons/icon-512x512.png';
 import i18n from '../services/i18n'; 
+import { supabase } from '../services/supabaseClient';
+
+
+/**
+ * Login.tsx
+ * 
+ * UI for logging in
+ */
+
+export interface User {
+    err_id: string
+}
 
 const Login = () => {
-    // State management
     const [errId, setErrId] = useState('');
     const [pin, setPin] = useState('');
     const [error, setError] = useState('');
@@ -72,8 +83,39 @@ const Login = () => {
 
             const data = await response.json();
 
+            /**
+             * 
+             * This Supabase login is so that we can get a session token for image buckets.
+             * 
+             * TODO: Replace this with better Supabase auth for the users who sign up.
+             * 
+             * */
+
             if (data.success) {
-                router.push('/menu'); // Redirect to the menu page
+                router.push({
+                    pathname: '/menu',
+                    query: { errId: errId }
+                }); 
+
+                const demo_login = process.env.NEXT_PUBLIC_BUCKET_LOGIN;
+                const demo_password = process.env.NEXT_PUBLIC_BUCKET_PASSWORD;
+
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: demo_login,
+                    password: demo_password
+                })
+
+                console.log("Logging in, we get:");
+                console.log(data);
+
+                if (error) {
+                    console.log(error);
+                    console.log('loginError');
+                }
+
+            // End demo login.
+
+
             } else {
                 setError(data.message || t('loginError')); // Use translated error message
             }
@@ -129,8 +171,6 @@ const Login = () => {
                     Español
                 </button>*/}
             </div>
-
-            
 
             {/* Success Message Notification */}
             {successMessage && (
@@ -191,5 +231,3 @@ const Login = () => {
 };
 
 export default Login;
-
-
