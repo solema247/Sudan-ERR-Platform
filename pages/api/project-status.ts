@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '../../services/supabaseClient';
+import { newSupabase } from '../../services/newSupabaseClient'; // Change to new client
 import { validateJWT } from '../../services/auth'; // Import JWT validation helper
 
 /**
@@ -18,13 +18,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === 'GET') {
         try {
-            // Fetch project applications for the logged-in user's ERR ID
-            const { data, error } = await supabase
+            // Use new database and err_id (which is now text)
+            const { data, error } = await newSupabase
                 .from('err_projects')
                 .select(
                     'id, state, locality, planned_activities, expenses, status, submitted_at'
                 )
-                .eq('err', user.err_id); // Match using the 'err' column
+                .eq('err_id', user.err_id); // Changed from 'err' to 'err_id'
 
             if (error) {
                 console.error('Error fetching project applications:', error);
