@@ -65,11 +65,12 @@ const MainApp = ({ onLogout }) => {
           text={t('downloadGuide')}
           onClick={handleDownload}
         />
-        <Button 
-          text="Logout" 
+        <button 
           onClick={handleLogout}
-          className="bg-red-500 hover:bg-red-600"
-        />
+          className="w-full py-2 px-4 rounded bg-red-600 hover:bg-red-700 text-white font-medium"
+        >
+          {t('logout')}
+        </button>
         <div className="flex justify-center space-x-4 mt-4">
           <button onClick={() => changeLanguage('en')} className="mx-2 text-blue-500 underline">
             English

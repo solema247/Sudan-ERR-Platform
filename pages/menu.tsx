@@ -51,6 +51,7 @@ const Menu = () => {
     const [projects, setProjects] = useState<Project[]>([]); // Stores active projects
     const [selectedProject, setSelectedProject] = useState<Project | null>(null); // Stores selected project
     const [activeReportId, setActiveReportId] = useState(null)
+    const [showScanPrefillForm, setShowScanPrefillForm] = useState(false);
 
     const router = useRouter();
     const errId = router.query.errId;

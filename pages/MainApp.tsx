@@ -65,17 +65,17 @@ const MainApp = () => {
           text={t('downloadGuide')}
           onClick={handleDownload}
         />
+        <Button 
+          text={t('logout')} 
+          onClick={handleLogout}
+          className="bg-red-600 hover:bg-red-700 text-white"
+        />
         <div className="flex justify-center space-x-4 mt-4">
           <button onClick={() => changeLanguage('en')} className="mx-2 text-blue-500 underline">
             English
           </button>
           <button onClick={() => changeLanguage('ar')} className="mx-2 text-blue-500 underline">
             العربية
-          </button>
-        </div>
-        <div className="mt-4">
-          <button onClick={handleLogout} className="text-red-500 underline">
-            {t('logout')}
           </button>
         </div>
       </div>

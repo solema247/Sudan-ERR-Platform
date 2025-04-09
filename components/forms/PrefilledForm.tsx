@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next"; // Import i18n
 import Button from "../ui/Button";
-import ReceiptUploader from '../uploads/ReceiptUploader';
+// import ReceiptUploader from '../uploads/ReceiptUploader';  // Comment this out
 import { v4 as uuidv4 } from 'uuid';
 import { cleanFormData } from '../../utils/numberFormatting';
 
@@ -365,13 +365,13 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
                 className={`w-full p-2 border rounded ${errors.expenses?.[index]?.amount ? 'border-red-500' : ''}`}
               />
             </label>
-            <ReceiptUploader
+            {/* <ReceiptUploader
               expenseId={uuidv4()}
               projectId={project.id}
               reportId={formData.err_id}
               onFileSelect={(file) => handleReceiptUpload(index, file)}
               onError={(error) => setErrors({ ...errors, [`receipt_${index}`]: error })}
-            />
+            /> */}
           </div>
         ))}
       </div>

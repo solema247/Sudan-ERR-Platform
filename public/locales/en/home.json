@@ -4,5 +4,6 @@
   "offlineMode": "Offline Mode",
   "downloadGuide": "Download User Guide",
   "backToApp": "Back to App",
-  "download": "Download PDF"
+  "download": "Download PDF",
+  "logout": "Log Out"
 }

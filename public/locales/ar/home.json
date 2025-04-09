@@ -6,5 +6,6 @@
   "offlineMode": " الوضع الغير متصل بالإنترنت",
   "downloadGuide": "تحميل دليل المستخدم",
   "backToApp": "العودة إلى التطبيق",
-  "download": "تحميل PDF"
+  "download": "تحميل PDF",
+  "logout": "تسجيل الخروج"
 }
