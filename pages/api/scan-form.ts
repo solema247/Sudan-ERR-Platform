@@ -78,7 +78,7 @@ async function preprocessImageToBuffer(imagePath: string): Promise<Buffer> {
 // Function to run Google Vision OCR on the processed image buffer
 async function googleVisionOCR(imageBuffer: Buffer): Promise<string> {
   const [result] = await visionClient.textDetection({
-    image: { content: imageBuffer },
+    image: { content: imageBuffer.toString('base64') },
     imageContext: { languageHints: ['en', 'ar', 'es'] },
   });
   const detections = result.textAnnotations;
@@ -115,8 +115,6 @@ async function chatGPTClassification(rawText: string): Promise<any> {
   const detectedLanguage = detectLanguage(cleanedText);
   const prompt = getPromptForLanguage(detectedLanguage, cleanedText);
 
-  console.log('Prompt sent to OpenAI:', prompt);
-
   const response = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages: [{ role: 'user', content: prompt }],
@@ -125,11 +123,58 @@ async function chatGPTClassification(rawText: string): Promise<any> {
   });
 
   const openAIOutput = response.choices[0].message?.content || 'An error occurred while processing the data.';
-  console.log('OpenAI Response:', openAIOutput);
+  
+  const structuredData = {
+    err_id: '',
+    date: '',
+    expenses: [],
+    financial_summary: {
+      total_expenses: 0,
+      total_grant_received: 0,
+      total_other_sources: 0,
+      remainder: 0
+    },
+    additional_questions: {
+      excess_expenses: '',
+      surplus_use: '',
+      lessons_learned: '',
+      training_needs: ''
+    }
+  };
 
-  // Parse OpenAI response into structured data
-  const structuredData = parseOpenAIResponse(openAIOutput);
-  return structuredData;
+  try {
+    const parsed = JSON.parse(openAIOutput);
+    
+    // Map the parsed data with proper type checking
+    return {
+      err_id: parsed?.err_id || '',
+      date: parsed?.date || '',
+      expenses: Array.isArray(parsed?.expenses) ? parsed.expenses.map(expense => ({
+        activity: expense?.activity || '',
+        description: expense?.description || '',
+        amount: Number(expense?.amount) || 0,
+        payment_date: expense?.payment_date || '',
+        payment_method: expense?.payment_method || '',
+        receipt_no: expense?.receipt_no || '',
+        seller: expense?.seller || ''
+      })) : [],
+      financial_summary: {
+        total_expenses: Number(parsed?.financial_summary?.total_expenses) || 0,
+        total_grant_received: Number(parsed?.financial_summary?.total_grant_received) || 0,
+        total_other_sources: Number(parsed?.financial_summary?.total_other_sources) || 0,
+        remainder: Number(parsed?.financial_summary?.remainder) || 0
+      },
+      additional_questions: {
+        excess_expenses: parsed?.additional_questions?.excess_expenses || '',
+        surplus_use: parsed?.additional_questions?.surplus_use || '',
+        lessons_learned: parsed?.additional_questions?.lessons_learned || '',
+        training_needs: parsed?.additional_questions?.training_needs || ''
+      }
+    };
+  } catch (error) {
+    console.error('Error parsing OpenAI response:', error);
+    return structuredData; // Return default structure on error
+  }
 }
 
 // Function to parse OpenAI response to structured form fields

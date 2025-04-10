@@ -6,6 +6,7 @@ import Button from "../ui/Button";
 // import ReceiptUploader from '../uploads/ReceiptUploader';  // Comment this out
 import { v4 as uuidv4 } from 'uuid';
 import { cleanFormData } from '../../utils/numberFormatting';
+import { newSupabase } from '../../services/newSupabaseClient';
 
 interface ExpenseEntry {
   activity: string;
@@ -49,34 +50,38 @@ const RequiredLabel: React.FC<{ text: string }> = ({ text }) => (
 
 const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, project }) => {
   const { t } = useTranslation("scanForm");  // Access translations
-  const [formData, setFormData] = useState({
-    date: data.date || "",
-    err_id: data.err_id || "",
-    expenses: data.expenses || [],
-    total_grant: data.financial_summary?.total_grant_received || "",
-    total_other_sources: data.financial_summary?.total_other_sources || "",
-    total_expenses: data.financial_summary?.total_expenses || "",
-    remainder: data.financial_summary?.remainder || "",
-    additional_excess_expenses: data.additional_questions?.excess_expenses || "",
-    additional_surplus_use: data.additional_questions?.surplus_use || "",
-    lessons_learned: data.additional_questions?.lessons_learned || "",
-    additional_training_needs: data.additional_questions?.training_needs || "",
-  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [receiptUploads, setReceiptUploads] = useState<{ [key: number]: string }>({});
   const [receiptFiles, setReceiptFiles] = useState<{ [key: number]: File }>({});
-  const [errors, setErrors] = useState<{
-    err_id?: string;
-    date?: string;
-    expenses?: { [key: number]: { [field: string]: string } };
-    total_grant?: string;
-    total_other_sources?: string;
-    additional_excess_expenses?: string;
-    additional_surplus_use?: string;
-    additional_training_needs?: string;
-    lessons_learned?: string;
-  }>({});
+  const [errors, setErrors] = useState<any>({});
+
+  // Initialize form data with default values
+  const [formData, setFormData] = useState({
+    err_id: data?.err_id || '',
+    date: data?.date || '',
+    expenses: data?.expenses?.map(expense => ({
+      activity: expense?.activity || '',
+      description: expense?.description || '',
+      payment_date: expense?.payment_date || '',
+      seller: expense?.seller || '',
+      payment_method: expense?.payment_method || '',
+      receipt_no: expense?.receipt_no || '',
+      amount: expense?.amount || 0,
+    })) || [],
+    financial_summary: {
+      total_expenses: data?.financial_summary?.total_expenses || 0,
+      total_grant_received: data?.financial_summary?.total_grant_received || 0,
+      total_other_sources: data?.financial_summary?.total_other_sources || 0,
+      remainder: data?.financial_summary?.remainder || 0
+    },
+    additional_questions: {
+      excess_expenses: data?.additional_questions?.excess_expenses || '',
+      surplus_use: data?.additional_questions?.surplus_use || '',
+      lessons_learned: data?.additional_questions?.lessons_learned || '',
+      training_needs: data?.additional_questions?.training_needs || ''
+    }
+  });
 
   // Add check at the start of component
   if (!project?.id) {
@@ -196,10 +201,10 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
     }
 
     // Validate totals
-    if (!formData.total_grant) {
+    if (!formData.financial_summary.total_grant_received) {
       newErrors.total_grant = t('field_labels.total_grant');
     }
-    if (!formData.total_other_sources) {
+    if (!formData.financial_summary.total_other_sources) {
       newErrors.total_other_sources = t('field_labels.total_other_sources');
     }
 
@@ -214,37 +219,62 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
     return [];
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  const handleFormSubmit = async (formData: any) => {
     try {
-      // Clean the form data before submission
-      const cleanedData = cleanFormData(formData);
+      // Structure the summary data
+      const summaryDataToInsert = {
+        err_id: formData.err_id,
+        project_id: project.id,
+        report_date: formData.date,
+        total_expenses: formData.financial_summary.total_expenses,
+        total_grant: formData.financial_summary.total_grant_received,
+        total_other_sources: formData.financial_summary.total_other_sources,
+        remainder: formData.financial_summary.remainder,
+        excess_expenses: formData.additional_questions.excess_expenses,
+        surplus_use: formData.additional_questions.surplus_use,
+        lessons: formData.additional_questions.lessons_learned,
+        training: formData.additional_questions.training_needs,
+        language: formData.language || 'en',
+        beneficiaries: formData.beneficiaries || '',
+        project_name: project.project_name,
+        project_objectives: project.project_objectives
+      };
 
-      const response = await fetch('/api/submit-prefilled-form', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(cleanedData),
+      // Submit summary
+      const { data: summaryData, error: summaryError } = await newSupabase
+        .from('err_summary')
+        .insert([summaryDataToInsert])
+        .select()
+        .single();
+
+      if (summaryError) throw summaryError;
+
+      // Structure and submit expenses
+      const expensePromises = formData.expenses.map(async (expense: any) => {
+        const expenseData = {
+          project_id: project.id,
+          expense_activity: expense.activity,
+          expense_description: expense.description,
+          expense_amount: expense.amount,
+          payment_date: expense.payment_date,
+          payment_method: expense.payment_method,
+          receipt_no: expense.receipt_no,
+          seller: expense.seller,
+          language: formData.language || 'en'
+        };
+
+        const { error: expenseError } = await newSupabase
+          .from('err_expense')
+          .insert([expenseData]);
+
+        if (expenseError) throw expenseError;
       });
 
-      if (!response.ok) throw new Error(t("errors.submit_failed"));
-      const result = await response.json();
-      console.log(t("form_submit_success"), result.message);
-
-      setIsSubmitted(true);
-      onFormSubmit(cleanedData);
+      await Promise.all(expensePromises);
+      onFormSubmit(formData);
     } catch (error) {
-      console.error('Submit error:', error);
-      setErrors(prev => ({
-        ...prev,
-        submit: error.message || t("errors.submit_failed")
-      }));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } finally {
-      setIsSubmitting(false);
+      console.error('Error submitting form:', error);
+      alert('Failed to submit form');
     }
   };
 
@@ -278,7 +308,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
       </label>
 
       <div className="space-y-2">
-        {formData.expenses.map((expense, index) => (
+        {(formData.expenses || []).map((expense, index) => (
           <div key={index} className={`border p-2 rounded ${errors.expenses?.[index] ? 'border-red-500 bg-red-50' : 'bg-gray-100'}`}>
             {errors.expenses?.[index] && (
               <p className="text-red-500 text-sm mb-2">
@@ -385,7 +415,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
           <input
             type="text"
             name="total_expenses"
-            value={formData.total_expenses}
+            value={formData.financial_summary.total_expenses.toString()}
             onChange={handleInputChange}
             className="form-input w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
           />
@@ -396,7 +426,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
           <input
             type="text"
             name="total_grant"
-            value={formData.total_grant}
+            value={formData.financial_summary.total_grant_received.toString()}
             onChange={handleInputChange}
             className="form-input w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
           />
@@ -407,7 +437,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
           <input
             type="text"
             name="total_other_sources"
-            value={formData.total_other_sources}
+            value={formData.financial_summary.total_other_sources.toString()}
             onChange={handleInputChange}
             className="form-input w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
           />
@@ -418,7 +448,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
           <input
             type="text"
             name="remainder"
-            value={formData.remainder}
+            value={formData.financial_summary.remainder.toString()}
             onChange={handleInputChange}
             className="form-input w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
           />
@@ -432,8 +462,8 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
         <label>
           <RequiredLabel text={t("field_labels.excess_expenses_q")} />
           <textarea
-            name="additional_excess_expenses"
-            value={formData.additional_excess_expenses}
+            name="excess_expenses"
+            value={formData.additional_questions.excess_expenses}
             onChange={handleInputChange}
             className="form-textarea w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
           />
@@ -442,8 +472,8 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
         <label>
           <RequiredLabel text={t("field_labels.surplus_use_q")} />
           <textarea
-            name="additional_surplus_use"
-            value={formData.additional_surplus_use}
+            name="surplus_use"
+            value={formData.additional_questions.surplus_use}
             onChange={handleInputChange}
             className="form-textarea w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
           />
@@ -453,7 +483,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
           <RequiredLabel text={t("field_labels.lessons_learned_q")} />
           <textarea
             name="lessons_learned"
-            value={formData.lessons_learned}
+            value={formData.additional_questions.lessons_learned}
             onChange={handleInputChange}
             className="form-textarea w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
           />
@@ -462,8 +492,8 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
         <label>
           <RequiredLabel text={t("field_labels.training_needs_q")} />
           <textarea
-            name="additional_training_needs"
-            value={formData.additional_training_needs}
+            name="training_needs"
+            value={formData.additional_questions.training_needs}
             onChange={handleInputChange}
             className="form-textarea w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
           />
@@ -473,7 +503,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
       <Button
         onClick={async (e) => {
           e.preventDefault();
-          await handleSubmit(e);
+          await handleFormSubmit(formData);
         }}
         disabled={isSubmitting}
         text={isSubmitting ? t("buttons.submitting") : t("buttons.submit")}

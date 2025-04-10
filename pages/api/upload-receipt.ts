@@ -16,68 +16,28 @@ export const config = {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
-        return res.status(405).json({ success: false, message: 'Method not allowed' });
+        return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const form = formidable({
-        maxFileSize: 10 * 1024 * 1024, // 10MB
-    });
-
     try {
-        const [fields, files] = await new Promise<[Fields, Files]>((resolve, reject) => {
-            form.parse(req, (err, fields, files) => {
-                if (err) reject(err);
-                resolve([fields, files]);
-            });
-        });
+        const { fileUrl, expenseId, projectId } = req.body;
 
-        const file = files.file?.[0];
-        const expenseId = fields.expenseId?.[0];
-        const projectId = fields.projectId?.[0];
-
-        if (!file || !expenseId || !projectId) {
-            return res.status(400).json({ success: false, message: 'Missing required fields' });
-        }
-
-        const filename = `${Date.now()}_${file.originalFilename}`;
-        const filePath = `receipts/${projectId}/${expenseId}/${filename}`;
-        const fileBuffer = await fs.promises.readFile(file.filepath);
-
-        // Upload to storage
-        const { error: uploadError } = await newSupabase.storage
-            .from('images')
-            .upload(filePath, fileBuffer);
-
-        if (uploadError) throw uploadError;
-
-        // Get public URL
-        const { data: { publicUrl } } = newSupabase.storage
-            .from('images')
-            .getPublicUrl(filePath);
-
-        // Store in receipts table
-        const { error: receiptError } = await newSupabase
+        // Insert receipt record
+        const { data, error } = await newSupabase
             .from('receipts')
             .insert([{
                 expense_id: expenseId,
-                image_url: publicUrl,
+                image_url: fileUrl,
                 created_at: new Date().toISOString()
-            }]);
+            }])
+            .select()
+            .single();
 
-        if (receiptError) throw receiptError;
+        if (error) throw error;
 
-        await unlinkFile(file.filepath);
-
-        res.status(200).json({ 
-            success: true, 
-            filename,
-            url: publicUrl
-        });
+        res.status(200).json({ success: true, data });
     } catch (error) {
         console.error('Error handling receipt upload:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: error.message || 'Error uploading receipt' 
-        });
+        res.status(500).json({ error: 'Failed to process receipt upload' });
     }
 } 
