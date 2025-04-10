@@ -79,8 +79,13 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     }
   };
 
-  const handleFormSubmit = (formData: any) => {
-    // Replace all chat steps with just the success message
+  const handleFormSubmit = (formData: any, isBulkProcessing?: boolean) => {
+    if (isBulkProcessing) {
+      // For bulk processing, just let the BulkPdfProcessor handle the flow
+      return;
+    }
+
+    // For single form processing, show success message
     setChatSteps([
       <ScanBubble key="uploadSuccess">
         <div>
@@ -91,7 +96,7 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
               onClick={() => {
                 setFile(null);
                 setStructuredData(null);
-                setChatSteps([]); // Reset chat steps to restart scan form flow
+                setChatSteps([]); 
                 if (onSubmitAnotherForm) {
                   onSubmitAnotherForm();
                 }
@@ -106,7 +111,6 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
       </ScanBubble>
     ]);
     
-    // Clear the structured data so the form disappears
     setStructuredData(null);
   };
 
