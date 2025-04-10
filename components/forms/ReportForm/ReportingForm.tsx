@@ -38,17 +38,17 @@ interface ReportingFormProps {
 
 
 const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project, onReturnToMenu, onSubmitAnotherForm }: ReportingFormProps) => {
-    const { t } = useTranslation('fillForm');
+    const { t, i18n } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
-            populateCategories(setCategories)
+            populateCategories(setCategories, i18n.language)
             populateExpenses(project)    
         }
         fetchData();
-    }, []);
+    }, [i18n.language]);
 
     const initialValues = getInitialValues(errId);
     const validationSchema = getValidationSchema();
@@ -69,140 +69,159 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                 initialValues={initialValues}
                 validationSchema={validationSchema}
                 onSubmit={onSubmit} >
-                {({ isSubmitting, values }) => (
-                    <Form className="prose flex flex-col">
-                        <span className="text-3xl">{t('formTitle')}</span>
-                        <span className="font-bold">{project.project_objectives}</span>
+                {({ isSubmitting, values, setFieldValue }) => {
+                    // Calculate total whenever expenses change
+                    React.useEffect(() => {
+                        const total = values.expenses.reduce((sum, expense) => {
+                            const amount = parseFloat(expense.amount) || 0;
+                            return sum + amount;
+                        }, 0);
+                        
+                        setFieldValue('total_expenses', total);
+                    }, [values.expenses, setFieldValue]);
 
-                        <div className="mt-6 mb-3">
-                            <label htmlFor="err_id" className="font-bold block text-base text-black-bold mb-1">
-                                {t('errId')}
-                            </label>
-                            <Field type="text" name="err_id" className="text-sm w-full p-2 border rounded-lg"/>
-                            <ErrorMessage name="err_id" component="div" />
-                        </div>
+                    return (
+                        <Form className="prose flex flex-col">
+                            <span className="text-3xl">{t('formTitle')}</span>
+                            <span className="font-bold">{project.project_objectives}</span>
 
-                        <div className="mb-3">
-                            <label htmlFor="date" className="font-bold block text-base text-black-bold mb-1">
-                                {t('date')}
-                            </label>
-                            <Field type="date" name="date" className="text-sm w-full p-2 border rounded-lg"/>
-                            <ErrorMessage name="date" component="div" />
-                        </div>
+                            <div className="mt-6 mb-3">
+                                <label htmlFor="err_id" className="font-bold block text-base text-black-bold mb-1">
+                                    {t('errId')}
+                                </label>
+                                <Field type="text" name="err_id" className="text-sm w-full p-2 border rounded-lg"/>
+                                <ErrorMessage name="err_id" component="div" />
+                            </div>
 
-                        <div className="mb-3">
-                            <label htmlFor="total_grant" className="font-bold block text-base text-black-bold mb-1">
-                                {t('totalGrant')}
-                            </label>
-                            <Field type="number" name="total_grant" min="0" className="text-sm w-full p-2 border rounded-lg"/>
-                            <ErrorMessage name="total_grant" component="div" />
-                        </div>
+                            <div className="mb-3">
+                                <label htmlFor="date" className="font-bold block text-base text-black-bold mb-1">
+                                    {t('date')}
+                                </label>
+                                <Field type="date" name="date" className="text-sm w-full p-2 border rounded-lg"/>
+                                <ErrorMessage name="date" component="div" />
+                            </div>
 
-                        <div>
-                            <label htmlFor="other_sources" className="font-bold block text-base text-black-bold mb-1">
-                                {t('totalOtherSources')}
-                            </label>
-                            <Field type="number" name="total_other_sources" min="0" className="text-sm w-full p-2 border rounded-lg"/>
-                            <ErrorMessage name="total_other_sources" component="div" />
-                        </div>
+                            <div className="mb-3">
+                                <label htmlFor="total_grant" className="font-bold block text-base text-black-bold mb-1">
+                                    {t('totalGrant')}
+                                </label>
+                                <Field type="number" name="total_grant" min="0" className="text-sm w-full p-2 border rounded-lg"/>
+                                <ErrorMessage name="total_grant" component="div" />
+                            </div>
 
-                        <h3 className="text-2xl font-bold">{t('activitiesAndExpenses')}</h3>
+                            <div>
+                                <label htmlFor="other_sources" className="font-bold block text-base text-black-bold mb-1">
+                                    {t('totalOtherSources')}
+                                </label>
+                                <Field type="number" name="total_other_sources" min="0" className="text-sm w-full p-2 border rounded-lg"/>
+                                <ErrorMessage name="total_other_sources" component="div" />
+                            </div>
 
-                        <FieldArray
-                            name="expenses"
-                            render={(arrayHelpers) => (
-                                <div>
-                                    {values.expenses.map((expense, index) => (
-                                        <ExpenseCard
-                                            key={`${expense.id}`}
-                                            expense={expense}
-                                            index={index}
-                                            arrayHelpers={arrayHelpers}
-                                            categories={categories}
+                            <h3 className="text-2xl font-bold">{t('activitiesAndExpenses')}</h3>
+
+                            <FieldArray
+                                name="expenses"
+                                render={(arrayHelpers) => (
+                                    <div>
+                                        {values.expenses.map((expense, index) => (
+                                            <ExpenseCard
+                                                key={`${expense.id}`}
+                                                expense={expense}
+                                                index={index}
+                                                arrayHelpers={arrayHelpers}
+                                                categories={categories}
+                                                projectId={project.id}
+                                                reportId={reportId}
+                                            />
+                                        ))}
+                                        <Button
+                                            text={t('addExpense')}
+                                            onClick={() =>
+                                                arrayHelpers.push(getNewExpense())
+                                            }                                             
+                                            className="bg-blue-500 text-white mt-4 mb-8"
                                         />
-                                    ))}
-                                    <Button
-                                        text={t('addExpense')}
-                                        onClick={() =>
-                                            arrayHelpers.push(getNewExpense())
-                                        }                                             
-                                        className="bg-blue-500 text-white mt-4"
-                                    />
-                                </div>
-                            )}
-                        />
-
-                        <div className="mb-3">
-                            <label htmlFor="excess_expenses" className="font-bold block text-base text-black-bold mb-1">
-                                {t('excessExpenses')}
-                            </label>
-                            <Field
-                                name="excess_expenses"
-                                type="text"
-                                className="text-sm w-full p-2 border rounded-lg"
-                                placeholder={t('enterExcessExpenses')}
+                                    </div>
+                                )}
                             />
-                            <ErrorMessage name="excess_expenses" component="div" className="text-red-500" />
-                        </div>
 
-                        <div className="mb-3">
-                            <label htmlFor="surplus_use" className="font-bold block text-base text-black-bold mb-1">
-                                {t('surplusUse')}
-                            </label>
-                            <Field 
-                                type="text" 
-                                name="surplus_use" 
-                                className="text-sm w-full p-2 border rounded-lg"
-                                placeholder={t('surplusUse')}
-                            />
-                            <ErrorMessage name="surplus_use" component="div" />
-                        </div>
+                            <div className="mb-3">
+                                <label htmlFor="excess_expenses" className="font-bold block text-base text-black-bold mb-1">
+                                    {t('excessExpenses')}
+                                </label>
+                                <Field
+                                    name="excess_expenses"
+                                    type="text"
+                                    className="text-sm w-full p-2 border rounded-lg"
+                                    placeholder={t('excessExpenses')}
+                                />
+                                <ErrorMessage name="excess_expenses" component="div" className="text-red-500" />
+                            </div>
 
-                        <div className="mb-3">
-                            <label htmlFor="training" className="font-bold block text-base text-black-bold mb-1">
-                                {t('trainingNeeds')}
-                            </label>
-                            <Field 
-                                type="text" 
-                                name="training" 
-                                className="text-sm w-full p-2 border rounded-lg"
-                                placeholder={t('trainingNeeds')}
-                            />
-                            <ErrorMessage name="training" component="div" />
-                        </div>
+                            <div className="mb-3">
+                                <label htmlFor="surplus_use" className="font-bold block text-base text-black-bold mb-1">
+                                    {t('surplusUse')}
+                                </label>
+                                <Field 
+                                    type="text" 
+                                    name="surplus_use" 
+                                    className="text-sm w-full p-2 border rounded-lg"
+                                    placeholder={t('surplusUse')}
+                                />
+                                <ErrorMessage name="surplus_use" component="div" />
+                            </div>
 
-                        <div className="mb-3">
-                            <label htmlFor="lessons" className="font-bold block text-base text-black-bold mb-1">
-                                {t('lessonsLearned')}
-                            </label>
-                            <Field 
-                                type="text" 
-                                name="lessons" 
-                                className="text-sm w-full p-2 border rounded-lg"
-                                placeholder={t('lessonsLearned')}
-                            />
-                            <ErrorMessage name="lessons" component="div" />
-                        </div>
+                            <div className="mb-3">
+                                <label htmlFor="training" className="font-bold block text-base text-black-bold mb-1">
+                                    {t('trainingNeeds')}
+                                </label>
+                                <Field 
+                                    type="text" 
+                                    name="training" 
+                                    className="text-sm w-full p-2 border rounded-lg"
+                                    placeholder={t('trainingNeeds')}
+                                />
+                                <ErrorMessage name="training" component="div" />
+                            </div>
 
-                        <div className="mb-3">
-                            <label htmlFor="total_expenses" className="font-bold block text-base text-black-bold mb-1">
-                                {t('totalExpenses')}
-                            </label>
-                            <Field type="number" name="total_expenses" className="text-sm w-full p-2 border rounded-lg"/>
-                            <ErrorMessage name="total_expenses" component="div" />
-                        </div>
+                            <div className="mb-3">
+                                <label htmlFor="lessons" className="font-bold block text-base text-black-bold mb-1">
+                                    {t('lessonsLearned')}
+                                </label>
+                                <Field 
+                                    type="text" 
+                                    name="lessons" 
+                                    className="text-sm w-full p-2 border rounded-lg"
+                                    placeholder={t('lessonsLearned')}
+                                />
+                                <ErrorMessage name="lessons" component="div" />
+                            </div>
 
-                        <div className="mb-10">
-                            <Button 
-                                text= {t('submitReport')} 
-                                disabled={isSubmitting}
-                                onClick={async () =>
-                                    await submitEntireForm(values, reportId, project, setIsFormSubmitted)
-                                }  
-                            />
-                        </div>
-                    </Form>
-                )}
+                            <div className="mb-3">
+                                <label htmlFor="total_expenses" className="font-bold block text-base text-black-bold mb-1">
+                                    {t('totalExpenses')}
+                                </label>
+                                <Field
+                                    name="total_expenses"
+                                    type="number"
+                                    className="text-sm w-full p-2 border rounded-lg bg-gray-100"
+                                    disabled={true}  // Make it read-only
+                                />
+                                <ErrorMessage name="total_expenses" component="div" />
+                            </div>
+
+                            <div className="mb-10">
+                                <Button 
+                                    text= {t('submitReport')} 
+                                    disabled={isSubmitting}
+                                    onClick={async () =>
+                                        await submitEntireForm(values, reportId, project, setIsFormSubmitted)
+                                    }  
+                                />
+                            </div>
+                        </Form>
+                    );
+                }}
             </Formik>
         </FormBubble>
     )}
@@ -211,18 +230,29 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
 };
 
 
-async function populateCategories(setCategories) {
+async function populateCategories(setCategories, language) {
+    // Fetch categories in both languages
     const { data, error } = await supabase
         .from(TABLE_NAME_EXPENSE_CATEGORIES)
         .select('id, name, language')
-        .eq('language', 'en');
+        .or(`language.eq.${language},language.eq.en`); // Fetch both current language and English as fallback
 
-        if (!error) {
-           setCategories(data);
-        }
-        else {
-            alert(error)
-        }
+    if (!error && data) {
+        // Group by ID and prioritize current language
+        const categoriesMap = data.reduce((acc, cat) => {
+            if (!acc[cat.id] || cat.language === language) {
+                acc[cat.id] = cat;
+            }
+            return acc;
+        }, {});
+
+        // Convert back to array
+        const uniqueCategories = Object.values(categoriesMap);
+        setCategories(uniqueCategories);
+    } else {
+        console.error('Error fetching categories:', error);
+        alert(error);
+    }
 }
 
 async function populateExpenses(project: Project) {

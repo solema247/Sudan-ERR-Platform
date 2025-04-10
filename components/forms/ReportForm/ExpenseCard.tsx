@@ -33,6 +33,15 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories, projectId, repo
         setFieldValue(`expenses.${index}.receiptFile`, fileWithProgress);
     };
 
+    // Function to get activity name from ID and translate it
+    const getActivityName = (activityId: string) => {
+        const activity = categories?.find(cat => cat.id === activityId);
+        if (!activity) return activityId;
+        
+        // Use the translation from fill-form.json categories
+        return t(`categories.${activity.name}`);
+    };
+
     return (
             <div className="p-4 bg-gray-100 rounded-lg shadow-md mt-3 mb-3">
             {!isCollapsed ? (
@@ -46,9 +55,10 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories, projectId, repo
                             as="select"
                             className="text-sm w-full p-2 border rounded-lg mb-3"
                         >
+                            <option value="">{t('pleaseSelect')}</option>
                             {categories?.map((activityOption) => (
                                 <option key={activityOption.id} value={activityOption.id}>
-                                    {activityOption.name}
+                                    {t(`categories.${activityOption.name}`)}
                                 </option>
                             ))}
                         </Field>
@@ -62,7 +72,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories, projectId, repo
                         <Field
                             name={`expenses[${index}].description`}
                             type="text"
-                            placeholder="Description"
+                            placeholder={t('description')}
                             className="text-sm w-full p-2 border rounded-lg"
                         />
                         <ErrorMessage name={`expenses[${index}].description`} component="div" />
@@ -87,7 +97,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories, projectId, repo
                         <Field
                             name={`expenses[${index}].seller`}
                             type="text"
-                            placeholder="Seller"
+                            placeholder={t('seller')}
                             className="text-sm w-full p-2 border rounded-lg"
                         />
                         <ErrorMessage name={`expenses[${index}].seller`} component="div" />
@@ -100,10 +110,11 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories, projectId, repo
                         <Field
                             name={`expenses[${index}].payment_method`}
                             as="select"
+                            className="text-sm w-full p-2 border rounded-lg"
                         >
+                            <option value="">{t('pleaseSelect')}</option>
                             <option value="cash">{t('cash')}</option>
-                            <option value="credit">{t('credit')}</option>
-                            <option value="debit">{t('debit')}</option>
+                            <option value="bank_transfer">{t('bankApp')}</option>
                         </Field>
                         <ErrorMessage name={`expenses[${index}].payment_method`} component="div" />
                     </div>
@@ -115,7 +126,7 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories, projectId, repo
                         <Field
                             name={`expenses[${index}].receipt_no`}
                             type="text"
-                            placeholder="Receipt No."
+                            placeholder={t('receiptNo')}
                             className="text-sm w-full p-2 border rounded-lg"
                         />
                         <ErrorMessage name={`expenses[${index}].receipt_no`} component="div" />
@@ -129,6 +140,8 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories, projectId, repo
                             name={`expenses[${index}].amount`}
                             type="number"
                             className="text-sm w-full p-2 border rounded-lg"
+                            min="0"
+                            step="any"
                         />
                         <ErrorMessage name={`expenses[${index}].amount`} component="div" />
                     </div>
@@ -168,11 +181,11 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories, projectId, repo
             ) : (
                 <div className="flex flex-row justify-between">
                     <span>
-                        <p><span className="font-bold">Activity:&nbsp;</span>
-                        {expense.activity}</p>
+                        <p><span className="font-bold">{t('activity')}:&nbsp;</span>
+                        {getActivityName(expense.activity)}</p>
 
-                        <p><span className="font-bold">Amount:&nbsp;</span>
-                        5000
+                        <p><span className="font-bold">{t('amount')}:&nbsp;</span>
+                        {expense.amount}
                         </p>
                     </span>
 

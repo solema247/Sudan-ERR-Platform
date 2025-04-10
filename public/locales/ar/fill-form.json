@@ -21,7 +21,7 @@
   "amount": "المبلغ",
   "totalGrant": "إجمالي المنحة",
   "totalOtherSources": "إجمالي المصادر الأخرى",
-  "excessExpenses": "كيف قمت بتغطية المصاريف الزائدة؟",
+  "excessExpenses": "كيف غطيت النفقات الزائدة؟",
   "surplusUse": "كيف ستنفق المبالغ المتبقية؟",
   "trainingNeeds": "الاحتياجات التدريبية الإضافية",
   "lessonsLearned": "الدروس المستفادة في تخطيط الميزانية",
@@ -63,5 +63,6 @@
   "remove": "إزالة",
   "removeExpense": "إزالة هذه النفقات",
   "totalExpenses": "إجمالي النفقات",
-  "activitiesAndExpenses": "الأنشطة والنفقات"
+  "activitiesAndExpenses": "الأنشطة والنفقات",
+  "chooseFiles": "اختر الملفات"
 }

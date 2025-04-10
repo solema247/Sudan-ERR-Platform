@@ -6,6 +6,16 @@ export default function getValidationScheme() {
     const ERROR_MESSAGE_FIELD_REQUIRED = "هذه الخانة مطلوبه.";
     const ERROR_MESSAGE_INVALID_NUMBER = "هذا الرقم غير صالح.";
 
+    const expenseSchema = Yup.object().shape({
+        activity: Yup.string().required(t('errorMessages.required')),
+        description: Yup.string().required(t('errorMessages.required')),
+        payment_date: Yup.string().required(t('errorMessages.required')),
+        seller: Yup.string().required(t('errorMessages.required')),
+        payment_method: Yup.string().required(t('errorMessages.required')),
+        receipt_no: Yup.string().required(t('errorMessages.required')),
+        amount: Yup.number().required(t('errorMessages.required')).min(0, t('errorMessages.invalidNumber')),
+    });
+
     return Yup.object({
         err_id: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
         date: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
@@ -19,19 +29,7 @@ export default function getValidationScheme() {
         surplus_use: Yup.string(),
         training: Yup.string(),
         expenses: Yup.array()
-            .of(
-                Yup.object({
-                    activity: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
-                    description: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
-                    payment_date: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
-                    seller: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
-                    payment_method: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
-                    receipt_no: Yup.string().required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED),
-                    amount: Yup.number()
-                        .required(t('errorMessages.required') || ERROR_MESSAGE_FIELD_REQUIRED)
-                        .min(0, t('errorMessages.invalidNumber') || ERROR_MESSAGE_INVALID_NUMBER),
-                })
-            )
+            .of(expenseSchema)
             .min(1, t('errorMessages.minExpenses')),
         })
 }
