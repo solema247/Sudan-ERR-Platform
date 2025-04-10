@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '../../services/supabaseClient';
+import { newSupabase } from '../../services/newSupabaseClient';
 import { validateJWT } from '../../services/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -20,23 +20,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (recommendation === 'No') recommendationValue = false;
         // 'Maybe' will remain null
 
-        const { error } = await supabase
-            .from('app_feedback')
-            .insert([
-                {
-                    room_id: err_id,
-                    task_usability_rating: taskUsabilityRating,
-                    main_challenges: mainChallenges,
-                    recommendation: recommendationValue,
-                },
-            ]);
+        try {
+            const { error } = await newSupabase
+                .from('app_feedback')
+                .insert([
+                    {
+                        room_id: err_id,
+                        task_usability_rating: taskUsabilityRating,
+                        main_challenges: mainChallenges,
+                        recommendation: recommendationValue,
+                        created_at: new Date().toISOString()
+                    },
+                ]);
 
-        if (error) {
+            if (error) throw error;
+
+            return res.status(200).json({ success: true });
+        } catch (error) {
             console.error('Supabase error:', error);
-            return res.status(500).json({ success: false, message: 'Failed to submit feedback', error: error.message });
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Failed to submit feedback', 
+                error: error.message 
+            });
         }
-
-        return res.status(200).json({ success: true });
     } else {
         res.setHeader('Allow', ['POST']);
         return res.status(405).json({ message: 'Method not allowed' });

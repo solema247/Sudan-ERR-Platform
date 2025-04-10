@@ -104,14 +104,16 @@ const Menu = () => {
 
     // Menu selection handler
     const handleMenuSelection = (menu: CurrentMenu) => {
+        console.log('Changing menu to:', menu);  // Debug log
         setCurrentMenu(menu);
+        // Reset all other states
         setShowFillForm(false);
         setShowScanForm(false);
         setShowScanCustomForm(false);
         setShowProjectApplication(false);
         setShowProjectStatus(false);
         setShowScanPrefillForm(false);
-        setSelectedProject(null); // Reset selected project when navigating away
+        setSelectedProject(null);
     };
 
     // Workflow selection handler
@@ -252,13 +254,23 @@ const Menu = () => {
                             onClick={() => handleWorkflowSelection(Workflow.SCAN_FORM)}
                             className="w-full"
                         />
+                        {/* Temporarily hide Scan Custom Form
                         <Button
                             text={t('reportScanCustomForm')}
                             onClick={() => handleWorkflowSelection(Workflow.SCAN_CUSTOM_FORM)}
                             className="w-full"
                         />
-                        <Button text={t('selectDifferentProject')} onClick={() => setSelectedProject(null)} className="w-full" />
-                        <Button text={t('returnToMainMenu')} onClick={() => handleMenuSelection(CurrentMenu.MAIN)} className="w-full" />
+                        */}
+                        <Button 
+                            text={t('selectDifferentProject')} 
+                            onClick={() => setSelectedProject(null)} 
+                            className="w-full" 
+                        />
+                        <Button 
+                            text={t('returnToMainMenu')} 
+                            onClick={() => handleMenuSelection(CurrentMenu.MAIN)} 
+                            className="w-full" 
+                        />
                     </div>
                 </>
             )}
@@ -337,7 +349,10 @@ const Menu = () => {
             {/* Feedback Form */}
             {currentMenu === CurrentMenu.FEEDBACK && (
                 <MessageBubble>
-                    <FeedbackForm onReturnToMenu={() => handleMenuSelection(CurrentMenu.FEEDBACK)} />
+                    <FeedbackForm onReturnToMenu={() => {
+                        console.log('Menu component: Returning to main menu');  // Debug log
+                        handleMenuSelection(CurrentMenu.MAIN);  // Make sure we're using this
+                    }} />
                 </MessageBubble>
             )}
 
