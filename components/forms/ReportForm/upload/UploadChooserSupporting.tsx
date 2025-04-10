@@ -17,7 +17,7 @@ export interface UploadChooserProps {
   uploadType: reportUploadType;
   projectId: string;
   reportId: string;
-  expenseId?: string;
+  expenseIndex?: number;
   onChange?: (fileWithProgress: FileWithProgress) => void;
 }
 
@@ -25,7 +25,7 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
   id,
   projectId,
   reportId,
-  expenseId,
+  expenseIndex,
   onChange,
 }: UploadChooserProps) => {
 
@@ -44,7 +44,7 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
     setFilesWithProgress((prev) => [...prev, ...newFiles]);
 
     for (const fileWithProgress of newFiles) {
-      const path = getPath(fileWithProgress.file, projectId, reportId);
+      const path = `projects/${projectId}/reports/${reportId}/expense-${expenseIndex}/${fileWithProgress.file.name}`;
       
       try {
         await performUpload(fileWithProgress.file, path, {
@@ -56,7 +56,8 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
             );
           },
           onSuccess: async (url) => {
-            console.log('Upload successful, got URL:', url);
+            console.log('Upload successful for expense index:', expenseIndex);
+            console.log('Got URL:', url);
             
             setFilesWithProgress((prev) =>
               prev.map((f) =>
@@ -64,7 +65,6 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
               )
             );
 
-            // Store the URL in the form data
             if (onChange) {
               onChange({
                 id: fileWithProgress.id,
@@ -102,6 +102,7 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
         <UploadBox
           uploadType={reportUploadType.SUPPORTING}
           onFileChange={handleFileChange}
+          uploadId={id}
         />
         <UploadedList files={filesWithProgress} removeFile={removeFile} />
       </div>
@@ -112,22 +113,24 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
 interface UploadBoxProps {
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   uploadType: reportUploadType;
+  uploadId: string;
 }
 
-const UploadBox: React.FC<UploadBoxProps> = ({ onFileChange, uploadType }) => {
+const UploadBox: React.FC<UploadBoxProps> = ({ onFileChange, uploadType, uploadId }) => {
   const { t } = useTranslation("fillForm");
+  const inputId = `file-upload-${uploadId}`;
 
   return (
     <div className="border-dashed border-2 border-gray-300 p-4 rounded-md">
       <input
         type="file"
         multiple
-        id="file-upload"
+        id={inputId}
         className="hidden"
         onChange={onFileChange}
       />
       <label
-        htmlFor="file-upload"
+        htmlFor={inputId}
         className="flex items-center justify-center p-4 border rounded-md cursor-pointer hover:bg-gray-50"
       >
         <UploadIcon className="mr-2" />

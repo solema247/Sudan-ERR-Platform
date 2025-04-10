@@ -10,11 +10,8 @@ import getValidationSchema from './values/validation';
 import onSubmit from './upload/onSubmit';
 import Project from '../NewProjectForm/Project'
 import expenseValues from './values/expenseValues';
-import { UploadChooser, reportUploadType } from './upload/UploadChooserReceipts';
-import { UploadChooserSupporting } from './upload/UploadChooserSupporting';
 import { v4 as uuidv4 } from 'uuid';
 import { newSupabase } from '../../../services/newSupabaseClient';
-import { uploadImages } from '../../../services/uploadImages';
 
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.           // TODO: Do compression.
@@ -193,16 +190,6 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                             </label>
                             <Field type="number" name="total_expenses" className="text-sm w-full p-2 border rounded-lg"/>
                             <ErrorMessage name="total_expenses" component="div" />
-                        </div>
-
-                        <div className="mb-3">                            
-                            <UploadChooserSupporting
-                                id="UPLOAD_SUPPORTING_FILES"
-                                key={reportUploadType.SUPPORTING.toString()}
-                                uploadType= {reportUploadType.SUPPORTING}
-                                projectId = {project.id}
-                                reportId = {reportId}
-                            />
                         </div>
 
                         <div className="mb-10">

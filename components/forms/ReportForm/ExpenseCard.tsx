@@ -26,7 +26,10 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories, projectId, repo
     const { values, setFieldValue } = useFormikContext();
 
     const handleFileUpload = (fileWithProgress: FileWithProgress) => {
-        console.log('Setting file value:', fileWithProgress);
+        console.log('Setting file value for expense index:', index);
+        console.log('File value:', fileWithProgress);
+        
+        // Update the specific expense's receiptFile
         setFieldValue(`expenses.${index}.receiptFile`, fileWithProgress);
     };
 
@@ -131,11 +134,12 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories, projectId, repo
                     </div>
 
                     <UploadChooserSupporting
-                        id={expense.id}
+                        id={`expense-${index}-${expense.id}`}
                         uploadType={reportUploadType.RECEIPT}
                         projectId={projectId}
                         reportId={reportId}
                         onChange={handleFileUpload}
+                        expenseIndex={index}
                     />
 
                     <div className="flex justify-between content-center">
