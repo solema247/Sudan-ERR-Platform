@@ -1,6 +1,6 @@
 // components/PrefilledForm.tsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next"; // Import i18n
 import Button from "../ui/Button";
 // import ReceiptUploader from '../uploads/ReceiptUploader';  // Comment this out
@@ -97,11 +97,52 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
     );
   }
 
+  // Add this near the top of the component, with other hooks
+  useEffect(() => {
+    // Calculate total from all expense amounts
+    const total = formData.expenses.reduce((sum, expense) => {
+      const amount = parseFloat(expense.amount) || 0;
+      return sum + amount;
+    }, 0);
+
+    // Update the financial summary with the calculated total
+    setFormData(prev => ({
+      ...prev,
+      financial_summary: {
+        ...prev.financial_summary,
+        total_expenses: total
+      }
+    }));
+  }, [formData.expenses]); // Recalculate whenever expenses change
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    
+    // Handle nested fields
+    if (name.includes('financial_summary.')) {
+      const field = name.split('.')[1];
+      setFormData({
+        ...formData,
+        financial_summary: {
+          ...formData.financial_summary,
+          [field]: value
+        }
+      });
+    } else if (name.includes('additional_questions.')) {
+      const field = name.split('.')[1];
+      setFormData({
+        ...formData,
+        additional_questions: {
+          ...formData.additional_questions,
+          [field]: value
+        }
+      });
+    } else {
+      // Handle top-level fields
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleExpenseChange = (
@@ -494,20 +535,20 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
         <label>
           <RequiredLabel text={t("field_labels.total_expenses")} />
           <input
-            type="text"
-            name="total_expenses"
-            value={formData.financial_summary.total_expenses.toString()}
-            onChange={handleInputChange}
-            className="form-input w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
+            type="number"
+            name="financial_summary.total_expenses"
+            value={formData.financial_summary.total_expenses}
+            readOnly
+            className="form-input w-full border-2 border-gray-300 rounded-md bg-gray-50"
           />
         </label>
 
         <label>
           <RequiredLabel text={t("field_labels.total_grant")} />
           <input
-            type="text"
-            name="total_grant"
-            value={formData.financial_summary.total_grant_received.toString()}
+            type="number"
+            name="financial_summary.total_grant_received"
+            value={formData.financial_summary.total_grant_received}
             onChange={handleInputChange}
             className="form-input w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
           />
@@ -517,7 +558,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
           <RequiredLabel text={t("field_labels.total_other_sources")} />
           <input
             type="text"
-            name="total_other_sources"
+            name="financial_summary.total_other_sources"
             value={formData.financial_summary.total_other_sources.toString()}
             onChange={handleInputChange}
             className="form-input w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
@@ -528,7 +569,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
           <RequiredLabel text={t("field_labels.remainder")} />
           <input
             type="text"
-            name="remainder"
+            name="financial_summary.remainder"
             value={formData.financial_summary.remainder.toString()}
             onChange={handleInputChange}
             className="form-input w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
@@ -543,7 +584,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
         <label>
           <RequiredLabel text={t("field_labels.excess_expenses_q")} />
           <textarea
-            name="excess_expenses"
+            name="additional_questions.excess_expenses"
             value={formData.additional_questions.excess_expenses}
             onChange={handleInputChange}
             className="form-textarea w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
@@ -553,7 +594,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
         <label>
           <RequiredLabel text={t("field_labels.surplus_use_q")} />
           <textarea
-            name="surplus_use"
+            name="additional_questions.surplus_use"
             value={formData.additional_questions.surplus_use}
             onChange={handleInputChange}
             className="form-textarea w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
@@ -563,7 +604,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
         <label>
           <RequiredLabel text={t("field_labels.lessons_learned_q")} />
           <textarea
-            name="lessons_learned"
+            name="additional_questions.lessons_learned"
             value={formData.additional_questions.lessons_learned}
             onChange={handleInputChange}
             className="form-textarea w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"
@@ -573,7 +614,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
         <label>
           <RequiredLabel text={t("field_labels.training_needs_q")} />
           <textarea
-            name="training_needs"
+            name="additional_questions.training_needs"
             value={formData.additional_questions.training_needs}
             onChange={handleInputChange}
             className="form-textarea w-full border-2 border-gray-300 rounded-md focus:border-green-500 focus:ring-2 focus:ring-green-200"

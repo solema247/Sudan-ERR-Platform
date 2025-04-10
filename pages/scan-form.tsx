@@ -80,9 +80,8 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
   };
 
   const handleFormSubmit = (formData: any) => {
-    // Remove the FileUploader step
-    setChatSteps((prevSteps) => [
-      ...prevSteps,
+    // Replace all chat steps with just the success message
+    setChatSteps([
       <ScanBubble key="uploadSuccess">
         <div>
           <p>{t("form_success")}</p>
@@ -106,6 +105,9 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
         </div>
       </ScanBubble>
     ]);
+    
+    // Clear the structured data so the form disappears
+    setStructuredData(null);
   };
 
   const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
