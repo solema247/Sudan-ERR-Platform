@@ -21,7 +21,6 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [structuredData, setStructuredData] = useState<any>(null);
-  const [showFileUploader, setShowFileUploader] = useState(false);
   const [chatSteps, setChatSteps] = useState<JSX.Element[]>([]);
   const [uploadType, setUploadType] = useState<'image' | 'pdf' | 'bulk-pdf'>('image');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -80,32 +79,8 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     }
   };
 
-  const handleFormSubmit = (formData: any, isBulkProcessing?: boolean) => {
-    if (!isBulkProcessing) {
-      // Single form processing - show FileUploader
-      setShowFileUploader(true);
-      setChatSteps((prevSteps) => [
-        ...prevSteps,
-        <ScanBubble key="fileUploader">
-          <div className="space-y-4">
-            <p className="text-gray-600">
-              {t("upload_instructions")}
-            </p>
-            <FileUploader projectId={project.id} onUploadComplete={handleUploadComplete} />
-          </div>
-        </ScanBubble>
-      ]);
-    } else {
-      // For bulk processing, don't add chat steps until all forms are processed
-      return Promise.resolve(); // Just resolve immediately for bulk processing
-    }
-  };
-
-  const handleUploadComplete = () => {
-    setShowFileUploader(false);
-    setStructuredData(null);
-
-    // Append the success message and options to the chatSteps
+  const handleFormSubmit = (formData: any) => {
+    // Remove the FileUploader step
     setChatSteps((prevSteps) => [
       ...prevSteps,
       <ScanBubble key="uploadSuccess">
@@ -117,7 +92,6 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
               onClick={() => {
                 setFile(null);
                 setStructuredData(null);
-                setShowFileUploader(false);
                 setChatSteps([]); // Reset chat steps to restart scan form flow
                 if (onSubmitAnotherForm) {
                   onSubmitAnotherForm();
@@ -126,7 +100,7 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
             />
             <Button
               text={t("return_to_menu")}
-              onClick={onReturnToMenu} // Use the callback prop here
+              onClick={onReturnToMenu}
             />
           </div>
         </div>
@@ -272,7 +246,7 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
 
   return (
     <>
-      {!structuredData && !showFileUploader && chatSteps.length === 0 && (
+      {!structuredData && chatSteps.length === 0 && (
         <ScanBubble>
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">{t("title")}</h2>

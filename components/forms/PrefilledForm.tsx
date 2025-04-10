@@ -7,6 +7,9 @@ import Button from "../ui/Button";
 import { v4 as uuidv4 } from 'uuid';
 import { cleanFormData } from '../../utils/numberFormatting';
 import { newSupabase } from '../../services/newSupabaseClient';
+import { Pencil, Trash2, Check } from "lucide-react";
+import { UploadChooserSupporting } from '../forms/ReportForm/upload/UploadChooserSupporting';
+import { FileWithProgress } from '../forms/ReportForm/upload/UploadInterfaces';
 
 interface ExpenseEntry {
   activity: string;
@@ -55,6 +58,8 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
   const [receiptUploads, setReceiptUploads] = useState<{ [key: number]: string }>({});
   const [receiptFiles, setReceiptFiles] = useState<{ [key: number]: File }>({});
   const [errors, setErrors] = useState<any>({});
+  const [collapsedExpenses, setCollapsedExpenses] = useState<{ [key: number]: boolean }>({});
+  const [fileUploads, setFileUploads] = useState<{ [key: number]: FileWithProgress }>({});
 
   // Initialize form data with default values
   const [formData, setFormData] = useState({
@@ -117,20 +122,25 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
     alert(error);
   };
 
-  const addNewExpense = () => {
-    const newExpense: ExpenseEntry = {
-      activity: '',
-      description: '',
-      payment_date: '',
-      seller: '',
-      payment_method: 'cash',
-      receipt_no: '',
-      amount: 0,
-    };
+  const toggleExpenseCollapse = (index: number) => {
+    setCollapsedExpenses(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
 
+  const addNewExpense = () => {
     setFormData(prev => ({
       ...prev,
-      expenses: [...prev.expenses, newExpense]
+      expenses: [...prev.expenses, {
+        activity: '',
+        description: '',
+        payment_date: '',
+        seller: '',
+        payment_method: '',
+        receipt_no: '',
+        amount: 0,
+      }]
     }));
   };
 
@@ -152,6 +162,14 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
       delete newUploads[indexToRemove];
       return newUploads;
     });
+  };
+
+  const handleFileUpload = (index: number, fileWithProgress: FileWithProgress) => {
+    console.log('Setting file value for expense index:', index);
+    setFileUploads(prev => ({
+      ...prev,
+      [index]: fileWithProgress
+    }));
   };
 
   const validateForm = () => {
@@ -249,9 +267,9 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
 
       if (summaryError) throw summaryError;
 
-      // Structure and submit expenses
-      const expensePromises = formData.expenses.map(async (expense: any) => {
-        const expenseData = {
+      // Submit expenses with their associated files
+      const expensePromises = formData.expenses.map(async (expense: any, index: number) => {
+        const expenseToInsert = {
           project_id: project.id,
           expense_activity: expense.activity,
           expense_description: expense.description,
@@ -263,11 +281,27 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
           language: formData.language || 'en'
         };
 
-        const { error: expenseError } = await newSupabase
+        // Insert expense record
+        const { data: expenseData, error: expenseError } = await newSupabase
           .from('err_expense')
-          .insert([expenseData]);
+          .insert([expenseToInsert])
+          .select()
+          .single();
 
         if (expenseError) throw expenseError;
+
+        // If there's a file upload for this expense, create receipt record
+        if (fileUploads[index]?.uploadedUrl) {
+          const { error: receiptError } = await newSupabase
+            .from('receipts')
+            .insert([{
+              expense_id: expenseData.expense_id,
+              image_url: fileUploads[index].uploadedUrl,
+              created_at: new Date().toISOString()
+            }]);
+
+          if (receiptError) throw receiptError;
+        }
       });
 
       await Promise.all(expensePromises);
@@ -310,100 +344,147 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
       <div className="space-y-2">
         {(formData.expenses || []).map((expense, index) => (
           <div key={index} className={`border p-2 rounded ${errors.expenses?.[index] ? 'border-red-500 bg-red-50' : 'bg-gray-100'}`}>
-            {errors.expenses?.[index] && (
-              <p className="text-red-500 text-sm mb-2">
-                {t('validation.expense_errors', { index: index + 1 })}
-              </p>
+            {!collapsedExpenses[index] ? (
+              <div>
+                {errors.expenses?.[index] && (
+                  <p className="text-red-500 text-sm mb-2">
+                    {t('validation.expense_errors', { index: index + 1 })}
+                  </p>
+                )}
+                <div className="flex justify-between items-center mb-2">
+                  <h4>{t("expense_entry", { index: index + 1 })}</h4>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => toggleExpenseCollapse(index)}
+                      className="text-blue-600 hover:text-blue-800 p-1"
+                      title={t("buttons.collapse")}
+                    >
+                      <Check />
+                    </button>
+                    <button
+                      onClick={() => removeExpense(index)}
+                      className="text-red-600 hover:text-red-800 p-1"
+                      title={t("buttons.remove_expense")}
+                    >
+                      <Trash2 />
+                    </button>
+                  </div>
+                </div>
+                <label>
+                  <RequiredLabel text={t("field_labels.payment_date")} />
+                  <input
+                    type="date"
+                    name="payment_date"
+                    value={expense.payment_date}
+                    onChange={(e) => handleExpenseChange(index, e)}
+                    className={`w-full p-2 border rounded ${errors.expenses?.[index]?.payment_date ? 'border-red-500' : ''}`}
+                  />
+                </label>
+                <label>
+                  <RequiredLabel text={t("field_labels.activity")} />
+                  <input
+                    type="text"
+                    name="activity"
+                    value={expense.activity}
+                    onChange={(e) => handleExpenseChange(index, e)}
+                    className={`w-full p-2 border rounded ${errors.expenses?.[index]?.activity ? 'border-red-500' : ''}`}
+                  />
+                </label>
+                <label>
+                  <RequiredLabel text={t("field_labels.description")} />
+                  <input
+                    type="text"
+                    name="description"
+                    value={expense.description}
+                    onChange={(e) => handleExpenseChange(index, e)}
+                    className={`w-full p-2 border rounded ${errors.expenses?.[index]?.description ? 'border-red-500' : ''}`}
+                  />
+                </label>
+                <label>
+                  <RequiredLabel text={t("field_labels.seller")} />
+                  <input
+                    type="text"
+                    name="seller"
+                    value={expense.seller}
+                    onChange={(e) => handleExpenseChange(index, e)}
+                    className={`w-full p-2 border rounded ${errors.expenses?.[index]?.seller ? 'border-red-500' : ''}`}
+                  />
+                </label>
+                <label>
+                  <RequiredLabel text={t("field_labels.payment_method")} />
+                  <input
+                    type="text"
+                    name="payment_method"
+                    value={expense.payment_method}
+                    onChange={(e) => handleExpenseChange(index, e)}
+                    className={`w-full p-2 border rounded ${errors.expenses?.[index]?.payment_method ? 'border-red-500' : ''}`}
+                  />
+                </label>
+                <label>
+                  <RequiredLabel text={t("field_labels.receipt_no")} />
+                  <input
+                    type="text"
+                    name="receipt_no"
+                    value={expense.receipt_no}
+                    onChange={(e) => handleExpenseChange(index, e)}
+                    className={`w-full p-2 border rounded ${errors.expenses?.[index]?.receipt_no ? 'border-red-500' : ''}`}
+                  />
+                </label>
+                <label>
+                  <RequiredLabel text={t("field_labels.amount")} />
+                  <input
+                    type="text"
+                    name="amount"
+                    value={expense.amount.toString()}
+                    onChange={(e) => handleExpenseChange(index, e)}
+                    className={`w-full p-2 border rounded ${errors.expenses?.[index]?.amount ? 'border-red-500' : ''}`}
+                  />
+                </label>
+                <div className="mt-4">
+                  <p className="font-medium mb-2">{t("field_labels.receipt_upload")}</p>
+                  <UploadChooserSupporting
+                    id={`expense-${index}-${expense.id || index}`}
+                    uploadType="receipt"
+                    projectId={project.id}
+                    reportId={formData.err_id}
+                    onChange={(file) => handleFileUpload(index, file)}
+                    expenseIndex={index}
+                  />
+                  {fileUploads[index]?.uploadedUrl && (
+                    <p className="text-green-600 text-sm mt-1">
+                      {t("upload.file_uploaded")}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-row justify-between items-center p-2">
+                <div>
+                  <p><span className="font-bold">{t('activity')}:&nbsp;</span>{expense.activity}</p>
+                  <p><span className="font-bold">{t('amount')}:&nbsp;</span>{expense.amount}</p>
+                  {fileUploads[index]?.uploadedUrl && (
+                    <p><span className="font-bold">{t('receipt')}:&nbsp;</span>✓</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => toggleExpenseCollapse(index)}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  <Pencil />
+                </button>
+              </div>
             )}
-            <div className="flex justify-between items-center mb-2">
-              <h4>{t("expense_entry", { index: index + 1 })}</h4>
-              <button
-                onClick={() => removeExpense(index)}
-                className="text-red-600 hover:text-red-800 p-1"
-                title={t("buttons.remove_expense")}
-              >
-                ✕
-              </button>
-            </div>
-            <label>
-              <RequiredLabel text={t("field_labels.payment_date")} />
-              <input
-                type="date"
-                name="payment_date"
-                value={expense.payment_date}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className={`w-full p-2 border rounded ${errors.expenses?.[index]?.payment_date ? 'border-red-500' : ''}`}
-              />
-            </label>
-            <label>
-              <RequiredLabel text={t("field_labels.activity")} />
-              <input
-                type="text"
-                name="activity"
-                value={expense.activity}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className={`w-full p-2 border rounded ${errors.expenses?.[index]?.activity ? 'border-red-500' : ''}`}
-              />
-            </label>
-            <label>
-              <RequiredLabel text={t("field_labels.description")} />
-              <input
-                type="text"
-                name="description"
-                value={expense.description}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className={`w-full p-2 border rounded ${errors.expenses?.[index]?.description ? 'border-red-500' : ''}`}
-              />
-            </label>
-            <label>
-              <RequiredLabel text={t("field_labels.seller")} />
-              <input
-                type="text"
-                name="seller"
-                value={expense.seller}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className={`w-full p-2 border rounded ${errors.expenses?.[index]?.seller ? 'border-red-500' : ''}`}
-              />
-            </label>
-            <label>
-              <RequiredLabel text={t("field_labels.payment_method")} />
-              <input
-                type="text"
-                name="payment_method"
-                value={expense.payment_method}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className={`w-full p-2 border rounded ${errors.expenses?.[index]?.payment_method ? 'border-red-500' : ''}`}
-              />
-            </label>
-            <label>
-              <RequiredLabel text={t("field_labels.receipt_no")} />
-              <input
-                type="text"
-                name="receipt_no"
-                value={expense.receipt_no}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className={`w-full p-2 border rounded ${errors.expenses?.[index]?.receipt_no ? 'border-red-500' : ''}`}
-              />
-            </label>
-            <label>
-              <RequiredLabel text={t("field_labels.amount")} />
-              <input
-                type="text"
-                name="amount"
-                value={expense.amount.toString()}
-                onChange={(e) => handleExpenseChange(index, e)}
-                className={`w-full p-2 border rounded ${errors.expenses?.[index]?.amount ? 'border-red-500' : ''}`}
-              />
-            </label>
-            {/* <ReceiptUploader
-              expenseId={uuidv4()}
-              projectId={project.id}
-              reportId={formData.err_id}
-              onFileSelect={(file) => handleReceiptUpload(index, file)}
-              onError={(error) => setErrors({ ...errors, [`receipt_${index}`]: error })}
-            /> */}
           </div>
         ))}
+
+        {/* Add New Expense Button */}
+        <button
+          type="button"
+          onClick={addNewExpense}
+          className="w-full mt-4 py-2 px-4 bg-green-100 text-primaryGreen rounded-lg hover:bg-green-200 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>+</span> {t("buttons.add_expense")}
+        </button>
       </div>
 
       {/* Financial Summary Section */}
