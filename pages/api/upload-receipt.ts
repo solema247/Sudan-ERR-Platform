@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '../../services/supabaseClient';
-import { ImageCategory } from '../../services/uploadImages';
+import { newSupabase } from '../../services/newSupabaseClient';
 import formidable, { Fields, Files } from 'formidable';
 import fs from 'fs';
 import { promisify } from 'util';
@@ -17,10 +16,7 @@ export const config = {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
-        return res.status(405).json({ 
-            success: false, 
-            message: 'Method not allowed' 
-        });
+        return res.status(405).json({ success: false, message: 'Method not allowed' });
     }
 
     const form = formidable({
@@ -28,7 +24,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     try {
-        // Parse the form using Promise with proper typing
         const [fields, files] = await new Promise<[Fields, Files]>((resolve, reject) => {
             form.parse(req, (err, fields, files) => {
                 if (err) reject(err);
@@ -39,79 +34,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const file = files.file?.[0];
         const expenseId = fields.expenseId?.[0];
         const projectId = fields.projectId?.[0];
-        const reportId = fields.reportId?.[0];
 
-        if (!file || !expenseId || !projectId || !reportId) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Missing required fields' 
-            });
+        if (!file || !expenseId || !projectId) {
+            return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
 
-        // Validate file type
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-        if (!allowedTypes.includes(file.mimetype)) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Invalid file type. Only JPEG and PNG are allowed.' 
-            });
-        }
-
-        const filename = `${crypto.randomUUID()}.${file.originalFilename?.split('.').pop()}`;
+        const filename = `${Date.now()}_${file.originalFilename}`;
         const filePath = `receipts/${projectId}/${expenseId}/${filename}`;
-
         const fileBuffer = await fs.promises.readFile(file.filepath);
 
-        const { error: uploadError } = await supabase.storage
+        // Upload to new Supabase storage
+        const { data: uploadData, error: uploadError } = await newSupabase.storage
             .from('images')
             .upload(filePath, fileBuffer, {
                 contentType: file.mimetype || 'application/octet-stream',
                 cacheControl: '3600'
             });
 
-        if (uploadError) {
-            throw new Error(`Upload failed: ${uploadError.message}`);
-        }
+        if (uploadError) throw uploadError;
 
-        // Clean up the temp file
-        await unlinkFile(file.filepath).catch(console.error);
-
-        // Create record in images table
-        const { data: imageRecord, error: imageError } = await supabase
+        // Get public URL
+        const { data: { publicUrl } } = newSupabase.storage
             .from('images')
-            .insert([{
-                filename,
-                path: filePath,
-                category: ImageCategory.REPORT_EXPENSES_RECEIPT,
-                project_id: projectId,
-                notes: `Receipt for expense ${expenseId}`,
-                created_at: new Date().toISOString(),
-            }])
-            .select()
-            .single();
+            .getPublicUrl(filePath);
 
-        if (imageError) {
-            throw new Error(`Failed to create image record: ${imageError.message}`);
-        }
-
-        // Create record in expense_receipts table
-        const { error: receiptError } = await supabase
-            .from('expense_receipts')
+        // Insert into receipts table
+        const { error: receiptError } = await newSupabase
+            .from('receipts')
             .insert([{
                 expense_id: expenseId,
-                image_id: imageRecord.id,
-                report_id: reportId,
+                image_url: publicUrl,
                 created_at: new Date().toISOString(),
             }]);
 
-        if (receiptError) {
-            throw new Error(`Failed to create receipt record: ${receiptError.message}`);
-        }
+        if (receiptError) throw receiptError;
+
+        // Clean up temp file
+        await unlinkFile(file.filepath);
 
         res.status(200).json({ 
             success: true, 
             filename,
-            message: 'Receipt uploaded successfully' 
+            url: publicUrl
         });
     } catch (error) {
         console.error('Error handling receipt upload:', error);

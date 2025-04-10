@@ -1,28 +1,17 @@
+const getInitialValues = (errId: string) => ({
+    err_id: errId,
+    date: '',
+    total_grant: '',
+    total_other_sources: '',
+    total_expenses: '',
+    remainder: '',
+    excess_expenses: '',
+    surplus_use: '',
+    lessons: '',
+    training: '',
+    beneficiaries: '',
+    expenses: [],
+    currentLanguage: 'en'
+});
 
-export default function getInitialValues(errId:string) {
-    return {
-        err_id: errId,      
-        date: '',
-        total_grant: 0,
-        total_other_sources: 0,
-        expenses: [
-            {
-                activity: '',
-                description: '',
-                payment_date: '',
-                seller: '',
-                payment_method: 'cash',
-                receipt_no: '',
-                amount: 0,
-                receiptFiles: null,
-            },
-        ],
-        excess_expenses: '',
-        supporting_files: '',
-        surplus_use: '',
-        training: '',
-        lessons: '',
-        total_expenses: 0,
-        supportingFiles: null
-    };
-}
+export default getInitialValues;

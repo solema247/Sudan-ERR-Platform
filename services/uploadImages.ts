@@ -1,4 +1,4 @@
-import { supabase } from "./supabaseClient";
+import { newSupabase } from "./newSupabaseClient";
 
 /**
  * Upload to private bucket
@@ -24,61 +24,50 @@ export interface UploadResult {
 const BUCKET_NAME = "images";
 
 export async function uploadImages(
-  files: File[], 
-  category: ImageCategory, 
-  projectId: string, 
-  t: (key: string, options?: any) => string, 
-  notes?: string
-): Promise<UploadResult[]> {
+  files: File[],
+  projectId: string,
+  expenseId: string
+): Promise<{ url: string; success: boolean; error?: string }[]> {
+    const results = [];
 
-  const results: UploadResult[] = [];
+    for (const file of files) {
+        try {
+            const filename = `${Date.now()}_${file.name}`;
+            const path = `receipts/${projectId}/${expenseId}/${filename}`;
 
-  for (const file of files) {
-    try {
-      const filename = getNewFilename(file);
-      const newPath = getPath(filename, category);
+            const { error: uploadError } = await newSupabase.storage
+                .from('images')
+                .upload(path, file);
 
-      // 1. Upload file to the Supabase storage bucket
-      const { error: uploadError } = await supabase
-        .storage
-        .from(BUCKET_NAME)
-        .upload(newPath, file);
+            if (uploadError) throw uploadError;
 
-      if (uploadError) throw uploadError;
+            const { data: { publicUrl } } = newSupabase.storage
+                .from('images')
+                .getPublicUrl(path);
 
-      // 2. Store a record of the file in Supabase's image table
-      const { error: insertError } = await supabase
-        .from('images')
-        .insert([
-          {
-            created_at: new Date().toISOString(),
-            project_id: projectId ?? "none",
-            filename: filename,
-            path: newPath,
-            category: ImageCategory[category],
-            notes: notes,
-          },
-        ]);
+            const { error: receiptError } = await newSupabase
+                .from('receipts')
+                .insert([{
+                    expense_id: expenseId,
+                    image_url: publicUrl,
+                    created_at: new Date().toISOString(),
+                }]);
 
-      if (insertError) throw insertError;
+            if (receiptError) throw receiptError;
 
-      // If no error, add success result to the array
-      results.push({
-        success: true,
-        filename: filename,
-      });
-    } catch (error) {
-      console.error('Error uploading file:', error);
-
-      // Add failure result to the array
-      results.push({
-        success: false,
-        errorMessage: t('fileUploadError'),
-      });
+            results.push({
+                url: publicUrl,
+                success: true
+            });
+        } catch (error) {
+            results.push({
+                success: false,
+                error: error.message
+            });
+        }
     }
-  }
 
-  return results;
+    return results;
 }
 
 

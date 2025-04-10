@@ -13,6 +13,7 @@ import expenseValues from './values/expenseValues';
 import { UploadChooser, reportUploadType } from './upload/UploadChooserReceipts';
 import { UploadChooserSupporting } from './upload/UploadChooserSupporting';
 import { v4 as uuidv4 } from 'uuid';
+import { newSupabase } from '../../../services/newSupabaseClient';
 
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.           // TODO: Do compression.
@@ -133,17 +134,17 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                             )}
                         />
 
-                        <div className="mb-3 mt-9">
+                        <div className="mb-3">
                             <label htmlFor="excess_expenses" className="font-bold block text-base text-black-bold mb-1">
                                 {t('excessExpenses')}
                             </label>
-                            <Field 
-                                type="text" 
-                                name="excessExpenses" 
+                            <Field
+                                name="excess_expenses"
+                                type="text"
                                 className="text-sm w-full p-2 border rounded-lg"
-                                placeholder={t('excessExpenses')}
+                                placeholder={t('enterExcessExpenses')}
                             />
-                            <ErrorMessage name="excessExpenses" component="div" />
+                            <ErrorMessage name="excess_expenses" component="div" className="text-red-500" />
                         </div>
 
                         <div className="mb-3">
@@ -245,10 +246,9 @@ async function populateExpenses(project: Project) {
 
 const submitEntireForm = async (values, reportId: string, project: Project, setIsFormSubmitted) => {
     try {
-        const json = JSON.stringify(values);
-        await submitSummary(json, reportId, project);
-        await submitExpenses(json['expenses'], reportId, project.id);
-        setIsFormSubmitted(true)        
+        await submitSummary(values, reportId, project);
+        await submitExpenses(values.expenses, reportId, project.id);
+        setIsFormSubmitted(true);
     }
     catch(e) {
         alert("Something went wrong while submitting the form.");
@@ -257,82 +257,81 @@ const submitEntireForm = async (values, reportId: string, project: Project, setI
 }
 
 
-// TODO: id
-const submitSummary = async (json, reportId:string, project: Project) => {
-    const { id, err_id, date, total_grant, total_other_sources, excess_expenses, surplus_use, training, lessons, total_expenses, supporting_file, remainder, beneficiaries } = json
-    const reportDate = new Date().toISOString();
-
-    const summaryJson = {
-        "id": reportId,
-        "err_id": err_id,
-        "project_id": project.id,
-        "report_date": reportDate,
-        "total_expenses": total_expenses,
-        "total_grant": total_grant,
-        "excess_expenses": excess_expenses,
-        "surplus_use": surplus_use,
-        "lessons": lessons,
-        "training": training,
-        "total_other_sources": total_other_sources,
-        "language": "en",       // TODO: Right?
-        "remainder": remainder,
-        "beneficiaries": beneficiaries,
-        "project_name": project.id      // TODO: Projects should have names.
-    }
-
+const submitSummary = async (values, reportId: string, project: Project) => {
     try {
-        const { data, error } = await supabase
-            .from(TABLE_NAME_REPORTS)  // Name of the table you're inserting into
-            .insert([summaryJson]);  // Insert the summaryJson object
+        // First get the project's planned activities
+        const { data: projectData, error: projectError } = await newSupabase
+            .from('err_projects')
+            .select('planned_activities')
+            .eq('id', project.id)
+            .single();
 
-        if (error) {
-            console.error('Error inserting summary:', error.message);
-        } else {
-            console.log('Summary inserted successfully:', data);
-        }
+        if (projectError) throw projectError;
+
+        // Convert empty strings to null and strings to numbers for numeric fields
+        const summaryJson = {
+            err_id: values.err_id,
+            project_id: project.id,
+            report_date: new Date().toISOString(),
+            total_expenses: values.total_expenses === '' ? null : Number(values.total_expenses),
+            total_grant: values.total_grant === '' ? null : Number(values.total_grant),
+            excess_expenses: values.excess_expenses || null,
+            surplus_use: values.surplus_use || null,
+            lessons: values.lessons || null,
+            training: values.training || null,
+            total_other_sources: values.total_other_sources === '' ? null : Number(values.total_other_sources),
+            language: values.currentLanguage || 'en',
+            remainder: values.remainder === '' ? null : Number(values.remainder),
+            beneficiaries: values.beneficiaries === '' ? null : Number(values.beneficiaries),
+            project_objectives: project.project_objectives,
+            project_name: projectData?.planned_activities || null // Add planned activities as project name
+        };
+
+        const { data, error } = await newSupabase
+            .from('err_summary')
+            .insert([summaryJson])
+            .select('id')
+            .single();
+
+        if (error) throw error;
         return data;
     } catch (err) {
         console.error('Error submitting report:', err.message);
+        throw err;
     }
 };
 
 
 const submitExpenses = async (expenses, reportId: string, projectId: string) => {
-        const expensePromises = expenses.map(async (expense) => {
-            const { activity, description, payment_date, seller, payment_method, cash, receipt_no, amount, receiptFiles } = expense;
-    
-            const expenseId = uuidv4(); // Generate a new expense ID
-    
-            const expenseJson = {
-                expenseId: expenseId,
-                project_id: projectId,
-                created_at: new Date().toISOString(),
-                expense_activity: activity,
-                expense_description: description,
-                expense_amount: amount,
-                payment_method: payment_method,
-                receipt_no: receipt_no,
-                seller: seller,
-                language: "en" // TODO: Adjust language if necessary
-            };
-    
-            try {
-                const { data, error } = await supabase
-                    .from(TABLE_NAME_EXPENSES)
-                    .insert([expenseJson]);
-    
-                if (error) {
-                    alert('Error posting expenses.');
-                    throw error;
-                }
-            } catch (err) {
-                console.error('Error posting expenses:', err.message);
-                throw err;
-            }
-        });
-    
-        await Promise.all(expensePromises); // Wait for all expenses to be submitted
-}
+    const expensePromises = expenses.map(async (expense) => {
+        try {
+            const { data, error } = await newSupabase
+                .from('err_expense')
+                .insert([{
+                    project_id: projectId,
+                    created_at: new Date().toISOString(),
+                    expense_activity: expense.activity,
+                    expense_description: expense.description,
+                    expense_amount: expense.amount,
+                    payment_method: expense.payment_method,
+                    receipt_no: expense.receipt_no,
+                    seller: expense.seller,
+                    payment_date: expense.payment_date,
+                    language: "en"
+                }])
+                .select('expense_id')
+                .single();
+
+            if (error) throw error;
+            return data.expense_id;
+        } catch (err) {
+            console.error('Error posting expense:', err.message);
+            throw err;
+        }
+    });
+
+    return Promise.all(expensePromises);
+};
 
 interface AfterFormSubmittedProps {
     onReturnToMenu: any
