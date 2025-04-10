@@ -6,8 +6,8 @@ import Button from '../../ui/Button';
 import { supabase } from '../../../services/supabaseClient';
 import ExpenseCard from './ExpenseCard';
 import getInitialValues from './values/values';
-import getValidationSchema from './values/validation';
-import onSubmit from './upload/onSubmit';
+import { createValidationScheme } from './values/validation';
+import { createOnSubmit } from './upload/onSubmit';
 import Project from '../NewProjectForm/Project'
 import expenseValues from './values/expenseValues';
 import { v4 as uuidv4 } from 'uuid';
@@ -48,16 +48,24 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
             populateExpenses(project)    
         }
         fetchData();
-    }, [i18n.language]);
+    }, [i18n.language, project]);
 
     const initialValues = getInitialValues(errId);
-    const validationSchema = getValidationSchema();
+    const validationSchema = createValidationScheme(t);
     const newExpense = expenseValues;
 
     const getNewExpense = () => ({
         ...newExpense,
         id: uuidv4(),
     });
+
+    // Calculate total expenses function
+    const calculateTotalExpenses = (expenses) => {
+        return expenses.reduce((sum, expense) => {
+            const amount = parseFloat(expense.amount) || 0;
+            return sum + amount;
+        }, 0);
+    };
 
     return (
         <>
@@ -68,17 +76,14 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
             <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
-                onSubmit={onSubmit} >
+                onSubmit={createOnSubmit(t)} >
                 {({ isSubmitting, values, setFieldValue }) => {
-                    // Calculate total whenever expenses change
-                    React.useEffect(() => {
-                        const total = values.expenses.reduce((sum, expense) => {
-                            const amount = parseFloat(expense.amount) || 0;
-                            return sum + amount;
-                        }, 0);
-                        
+                    // Use normal function instead of useEffect
+                    // Update total whenever expenses change
+                    const total = calculateTotalExpenses(values.expenses);
+                    if (values.total_expenses !== total) {
                         setFieldValue('total_expenses', total);
-                    }, [values.expenses, setFieldValue]);
+                    }
 
                     return (
                         <Form className="prose flex flex-col">

@@ -8,17 +8,18 @@ import { v4 as uuidv4 } from 'uuid';
 import { cleanFormData } from '../../utils/numberFormatting';
 import { newSupabase } from '../../services/newSupabaseClient';
 import { Pencil, Trash2, Check } from "lucide-react";
-import { UploadChooserSupporting } from '../forms/ReportForm/upload/UploadChooserSupporting';
+import { UploadChooserSupporting, reportUploadType } from '../forms/ReportForm/upload/UploadChooserSupporting';
 import { FileWithProgress } from '../forms/ReportForm/upload/UploadInterfaces';
 
 interface ExpenseEntry {
+  id?: string;  // Make it optional since some existing data might not have it
   activity: string;
   description: string;
   payment_date: string;
   seller: string;
   payment_method: string;
   receipt_no: string;
-  amount: number;
+  amount: string | number;
   receipt_upload?: string;
 }
 
@@ -66,6 +67,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
     err_id: data?.err_id || '',
     date: data?.date || '',
     expenses: data?.expenses?.map(expense => ({
+      id: uuidv4(), // Add unique id for each expense
       activity: expense?.activity || '',
       description: expense?.description || '',
       payment_date: expense?.payment_date || '',
@@ -88,24 +90,15 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
     }
   });
 
-  // Add check at the start of component
-  if (!project?.id) {
-    return (
-      <div className="text-red-500">
-        {t("errors.missing_project")}
-      </div>
-    );
-  }
-
-  // Add this near the top of the component, with other hooks
+  // Move useEffect before any conditionals
   useEffect(() => {
     // Calculate total from all expense amounts
     const total = formData.expenses.reduce((sum, expense) => {
-      const amount = parseFloat(expense.amount) || 0;
+      // Convert amount to string before parsing
+      const amount = parseFloat(expense.amount.toString()) || 0;
       return sum + amount;
     }, 0);
 
-    // Update the financial summary with the calculated total
     setFormData(prev => ({
       ...prev,
       financial_summary: {
@@ -113,7 +106,16 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
         total_expenses: total
       }
     }));
-  }, [formData.expenses]); // Recalculate whenever expenses change
+  }, [formData.expenses]);
+
+  // Project check can come after hooks
+  if (!project?.id) {
+    return (
+      <div className="text-red-500">
+        {t("errors.missing_project")}
+      </div>
+    );
+  }
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -174,6 +176,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
     setFormData(prev => ({
       ...prev,
       expenses: [...prev.expenses, {
+        id: uuidv4(), // Add unique id for new expenses
         activity: '',
         description: '',
         payment_date: '',
@@ -485,7 +488,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
                   <p className="font-medium mb-2">{t("field_labels.receipt_upload")}</p>
                   <UploadChooserSupporting
                     id={`expense-${index}-${expense.id || index}`}
-                    uploadType="receipt"
+                    uploadType={reportUploadType.RECEIPT}
                     projectId={project.id}
                     reportId={formData.err_id}
                     onChange={(file) => handleFileUpload(index, file)}

@@ -144,12 +144,13 @@ const Login = () => {
         <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-gray-50">
             {/* Logo and Title */}
             <div className="flex flex-col items-center mb-6">
-                <img
-                    src={LogoImage} 
-                    alt={t('logoAlt')} 
+                <Image
+                    src={LogoImage}
+                    alt={t('logoAlt')}
                     width={100}
                     height={100}
                     className="mb-2"
+                    priority
                 />
 
                 <h1 className="text-xl font-bold text-center">{t('welcomeMessage')}</h1>

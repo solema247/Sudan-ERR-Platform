@@ -68,6 +68,7 @@ const OfflineMode: React.FC = () => {
   };
 
   const handleReturnToHome = () => {
+    sessionStorage.setItem('fromInternalPage', 'true');
     router.push('/');
   };
 

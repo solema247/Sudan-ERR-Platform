@@ -1,8 +1,6 @@
 import * as Yup from 'yup';
-import { useTranslation } from 'react-i18next';
 
-export default function getValidationScheme() {
-    const { t } = useTranslation('fillForm');
+export const createValidationScheme = (t: (key: string) => string) => {
     const ERROR_MESSAGE_FIELD_REQUIRED = "هذه الخانة مطلوبه.";
     const ERROR_MESSAGE_INVALID_NUMBER = "هذا الرقم غير صالح.";
 

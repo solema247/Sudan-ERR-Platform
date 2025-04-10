@@ -92,8 +92,8 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
   };
 
   useEffect(() => {
-    setCompletionPercentage(calculateCompletion());
-  }, [formData]);
+    calculateCompletion();
+  }, [calculateCompletion]);
 
   // Handle general field changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

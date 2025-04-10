@@ -14,7 +14,7 @@ Emergency Response Rooms (ERR) are a community-led initiative that has played a 
 A structured process used by ERRs to ensure effective planning, approval, and documentation for ERR partners.
 
 ### Purpose
-- Helping the ERR’s to prioritise, learn and improve the response.
+- Helping the ERR's to prioritise, learn and improve the response.
 - Document streamlined workflows of transparent financial management.
 - Community engagement and accountability.
 ### Components
@@ -158,5 +158,16 @@ This project is currently licensed under a private license for use by the Sudan 
 ## Contact
 
 For questions or collaboration requests, please contact Santiago at santi.lema.247@gmail.com.
+
+## Environment Setup
+
+1. Copy `.env.template` to `.env.local`
+2. Fill in your credentials in `.env.local`
+3. Never commit `.env.local` or any credential files to the repository
+
+Required environment variables:
+- `GOOGLE_CLOUD_PROJECT`: Your Google Cloud project ID
+- `OPENAI_API_KEY`: Your OpenAI API key
+- ... (list all required variables)
 
 

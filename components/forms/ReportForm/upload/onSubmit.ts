@@ -1,27 +1,45 @@
-import { uploadImages } from '../../../../services/uploadImages';
-import { useTranslation } from 'react-i18next';
+import { uploadImages, ImageCategory } from '../../../../services/uploadImages';
+
+interface FormValues {
+    err_id: string;
+    date: string;
+    total_grant: string;
+    total_other_sources: string;
+    total_expenses: string;
+    remainder: string;
+    excess_expenses: string;
+    surplus_use: string;
+    lessons: string;
+    training: string;
+    beneficiaries: string;
+    currentLanguage: string;
+    expenses: Array<{
+        receiptFile?: File;
+        // Add other expense properties if needed
+    }>;
+}
 
 // Old way of submitting expense images.
 
-export default async function onSubmit(values, { setSubmitting }) {
-    const { t } = useTranslation('fillForm');
-    
-    const { project, expense_id } = values;
-
+export const createOnSubmit = (t: (key: string) => string) => async (values: FormValues, formikHelpers: any) => {
     try {
         const completedExpenses = values.expenses.filter((expense) => expense.receiptFile);
 
-        const uploadedFiles = await Promise.all(
-            completedExpenses.map((expense) =>
-                uploadImages([expense.receiptFile], project.id, expense_id)
-            )
-        );
+        if (completedExpenses.length > 0) {
+            const uploadedFiles = await Promise.all(
+                completedExpenses.map((expense) =>
+                    uploadImages(
+                        [expense.receiptFile], 
+                        ImageCategory.REPORT_EXPENSES_RECEIPT,
+                        values.err_id
+                    )
+                )
+            );
+        }
 
         // onSubmitAnotherForm();           // TODO: Find out what this was for.
     } catch (error) {
         console.error('Error submitting form:', error);
         throw error;
-    } finally {
-        setSubmitting(false);
     }
-}
+};

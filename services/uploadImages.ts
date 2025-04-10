@@ -23,17 +23,21 @@ export interface UploadResult {
 
 const BUCKET_NAME = "images";
 
-export async function uploadImages(
-  files: File[],
-  projectId: string,
-  expenseId: string
-): Promise<{ url: string; success: boolean; error?: string }[]> {
+export const uploadImages = async (
+    files: File[],
+    category: ImageCategory,
+    projectId: string,
+    options?: {
+        t?: (key: string) => string,
+        description?: string
+    }
+) => {
     const results = [];
 
     for (const file of files) {
         try {
             const filename = `${Date.now()}_${file.name}`;
-            const path = `receipts/${projectId}/${expenseId}/${filename}`;
+            const path = `receipts/${projectId}/${filename}`;
 
             // Get public URL after successful upload
             const { data: { publicUrl } } = newSupabase.storage
@@ -44,7 +48,7 @@ export async function uploadImages(
             const { error: receiptError } = await newSupabase
                 .from('receipts')
                 .insert([{
-                    expense_id: expenseId,
+                    expense_id: projectId,
                     image_url: publicUrl,
                     created_at: new Date().toISOString()
                 }]);

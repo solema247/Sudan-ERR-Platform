@@ -5,4 +5,9 @@ export interface FileWithProgress {
     progress: number;
     uploadedUrl?: string;
     error?: any;
+}
+
+export enum reportUploadType {
+    RECEIPT = 'RECEIPT',
+    // ... other types if any
 } 

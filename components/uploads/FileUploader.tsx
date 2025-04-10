@@ -42,9 +42,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ projectId, onUploadComplete
           let result = await uploadImages(
             files, 
             ImageCategory.FORM_SCANNED, 
-            projectId,
-            t,
-            "Scanned report",
+            projectId
           );
           if (result[0].errorMessage) { 
             throw new Error(result[0].errorMessage);

@@ -1,6 +1,6 @@
 {
-  "welcomeMessage": "Welcome to the Sudan ERR Bot",
-  "introMessage": "The ERR bot will help you with project applications and reporting on ERR impact and sharing information with the community and donors.",
+  "welcomeMessage": "Welcome to the Sudan ERR App",
+  "introMessage": "The ERR App will help you with project applications and reporting on ERR impact and sharing information with the community and donors.",
   "startButton": "Start",
   "chooseMainMenu": "Choose <strong> Projects </strong> to apply for projects and review status. Choose <strong> Reporting </strong> to report on your existing projects. Choose <strong> Feedback </strong> to share your experience.",
   "projects": "Projects",

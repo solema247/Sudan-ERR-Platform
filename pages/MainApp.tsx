@@ -10,7 +10,7 @@ import 'react-pdf/dist/esm/Page/TextLayer.css';
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
-const MainApp = () => {
+const MainApp = ({ onLogout }) => {
   const router = useRouter();
   const { t, i18n } = useTranslation('home');
   const [showPDFModal, setShowPDFModal] = useState(false);
@@ -44,15 +44,12 @@ const MainApp = () => {
   }
 
   const handleLogout = () => {
-    // Clear the JWT token cookie
-    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    
     // Clear both session storage items
-    sessionStorage.setItem('isUnlocked', 'false');
-    sessionStorage.setItem('fromInternalPage', 'false');
+    sessionStorage.removeItem('isUnlocked');
+    sessionStorage.removeItem('fromInternalPage');
     
-    // Use router to redirect to home
-    router.push('/');
+    // Call the onLogout prop to switch to Calculator
+    onLogout();
   };
 
   return (
