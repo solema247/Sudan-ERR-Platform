@@ -43,13 +43,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const filePath = `receipts/${projectId}/${expenseId}/${filename}`;
         const fileBuffer = await fs.promises.readFile(file.filepath);
 
-        // Upload to new Supabase storage
-        const { data: uploadData, error: uploadError } = await newSupabase.storage
+        // Upload to storage
+        const { error: uploadError } = await newSupabase.storage
             .from('images')
-            .upload(filePath, fileBuffer, {
-                contentType: file.mimetype || 'application/octet-stream',
-                cacheControl: '3600'
-            });
+            .upload(filePath, fileBuffer);
 
         if (uploadError) throw uploadError;
 
@@ -58,18 +55,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .from('images')
             .getPublicUrl(filePath);
 
-        // Insert into receipts table
+        // Store in receipts table
         const { error: receiptError } = await newSupabase
             .from('receipts')
             .insert([{
                 expense_id: expenseId,
                 image_url: publicUrl,
-                created_at: new Date().toISOString(),
+                created_at: new Date().toISOString()
             }]);
 
         if (receiptError) throw receiptError;
 
-        // Clean up temp file
         await unlinkFile(file.filepath);
 
         res.status(200).json({ 

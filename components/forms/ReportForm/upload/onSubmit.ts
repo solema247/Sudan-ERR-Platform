@@ -1,4 +1,4 @@
-import { uploadImages, ImageCategory } from '../../../../services/uploadImages';
+import { uploadImages } from '../../../../services/uploadImages';
 import { useTranslation } from 'react-i18next';
 
 // Old way of submitting expense images.
@@ -6,21 +6,21 @@ import { useTranslation } from 'react-i18next';
 export default async function onSubmit(values, { setSubmitting }) {
     const { t } = useTranslation('fillForm');
     
-    const { project } = values; // TODO: Make sure it comes through.
+    const { project, expense_id } = values;
 
     try {
         const completedExpenses = values.expenses.filter((expense) => expense.receiptFile);
 
         const uploadedFiles = await Promise.all(
             completedExpenses.map((expense) =>
-                uploadImages([expense.receiptFile], ImageCategory.REPORT_EXPENSES_SUPPORTING_IMAGE, project.id, t)
+                uploadImages([expense.receiptFile], project.id, expense_id)
             )
         );
 
         // onSubmitAnotherForm();           // TODO: Find out what this was for.
     } catch (error) {
         console.error('Error submitting form:', error);
-        alert(error.message);
+        throw error;
     } finally {
         setSubmitting(false);
     }

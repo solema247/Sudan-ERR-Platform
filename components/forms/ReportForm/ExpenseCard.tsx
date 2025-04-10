@@ -3,7 +3,8 @@ import { Field, ErrorMessage, useFormikContext } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Trash2, Check } from "lucide-react";
 import { UploadChooser, reportUploadType } from './upload/UploadChooserReceipts';
-
+import { UploadChooserSupporting } from './upload/UploadChooserSupporting';
+import { FileWithProgress } from './upload/UploadInterfaces';
 
 export interface ActivityOption {
     id: string,
@@ -15,12 +16,19 @@ interface ExpenseCardProps {
     index: number,
     arrayHelpers: any,
     categories: any,
+    projectId: string,
+    reportId: string,
 }
 
-const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardProps) => {
+const ExpenseCard = ({ expense, index, arrayHelpers, categories, projectId, reportId }: ExpenseCardProps) => {
     const { t } = useTranslation('fillForm');
     const [isCollapsed, setIsCollapsed] = useState(false);
     const { values, setFieldValue } = useFormikContext();
+
+    const handleFileUpload = (fileWithProgress: FileWithProgress) => {
+        console.log('Setting file value:', fileWithProgress);
+        setFieldValue(`expenses.${index}.receiptFile`, fileWithProgress);
+    };
 
     return (
             <div className="p-4 bg-gray-100 rounded-lg shadow-md mt-3 mb-3">
@@ -122,13 +130,13 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories }: ExpenseCardPr
                         <ErrorMessage name={`expenses[${index}].amount`} component="div" />
                     </div>
 
-                    {/* <UploadChooser
-                        key={expense.id}
-                        expense={expense}
-                        uploadType= {reportUploadType.RECEIPT}
-                        projectId = {expense.id}
-                        reportId = {expense.id}
-                    /> */}
+                    <UploadChooserSupporting
+                        id={expense.id}
+                        uploadType={reportUploadType.RECEIPT}
+                        projectId={projectId}
+                        reportId={reportId}
+                        onChange={handleFileUpload}
+                    />
 
                     <div className="flex justify-between content-center">
                         <button

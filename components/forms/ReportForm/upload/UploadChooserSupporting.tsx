@@ -7,7 +7,6 @@ import performUpload from './performUpload';
 import { v4 as uuidv4 } from 'uuid';
 import { postImageRecordToDb } from './postImageRecordToDb';
 
-
 export enum reportUploadType {
   RECEIPT,
   SUPPORTING,
@@ -19,58 +18,75 @@ export interface UploadChooserProps {
   projectId: string;
   reportId: string;
   expenseId?: string;
+  onChange?: (fileWithProgress: FileWithProgress) => void;
 }
 
 export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
   id,
   projectId,
   reportId,
+  expenseId,
+  onChange,
 }: UploadChooserProps) => {
 
   const [filesWithProgress, setFilesWithProgress] = useState<FileWithProgress[]>([]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
 
-    const selectedFiles: FileWithProgress[] = Array.from(e.target.files || []).map((file) => ({
+    const newFiles = Array.from(e.target.files).map((file) => ({
       id: uuidv4(),
       file,
       uploaded: false,
       progress: 0,
-      startedUploading: false,
-      error: null
     }));
 
-    setFilesWithProgress((prevState) => [...prevState, ...selectedFiles]);
+    setFilesWithProgress((prev) => [...prev, ...newFiles]);
 
-    selectedFiles.forEach((fileWithProgress, index) => {
-      let file = fileWithProgress.file;
-      const path = getPath(file, projectId, reportId)
-      performUpload(file, path, {
-        onProgress: (percentage) => {
-          setFilesWithProgress((prevFiles) =>
-              prevFiles.map((f) =>
-                f.id === fileWithProgress.id ? { ...f, progress: percentage } : f
-              )
-          );
-      },
-      onError: (error) => {
-          setFilesWithProgress((prevFiles) =>
-              prevFiles.map((f) =>
-                f.id === fileWithProgress.id ? { ...f, error } : f
+    for (const fileWithProgress of newFiles) {
+      const path = getPath(fileWithProgress.file, projectId, reportId);
+      
+      try {
+        await performUpload(fileWithProgress.file, path, {
+          onProgress: (progress) => {
+            setFilesWithProgress((prev) =>
+              prev.map((f) =>
+                f.id === fileWithProgress.id ? { ...f, progress } : f
               )
             );
-      },
-      onSuccess: (url) => {
-          setFilesWithProgress((prevFiles) =>
-              prevFiles.map((f) =>
+          },
+          onSuccess: async (url) => {
+            console.log('Upload successful, got URL:', url);
+            
+            setFilesWithProgress((prev) =>
+              prev.map((f) =>
                 f.id === fileWithProgress.id ? { ...f, uploaded: true } : f
               )
             );
-          postImageRecordToDb(id, reportId, "SUPPORTING");
+
+            // Store the URL in the form data
+            if (onChange) {
+              onChange({
+                id: fileWithProgress.id,
+                file: fileWithProgress.file,
+                uploaded: true,
+                progress: 100,
+                uploadedUrl: url
+              });
+            }
+          },
+          onError: (error) => {
+            setFilesWithProgress((prev) =>
+              prev.map((f) =>
+                f.id === fileWithProgress.id ? { ...f, error } : f
+              )
+            );
+          },
+        });
+      } catch (error) {
+        console.error("Upload failed:", error);
       }
-      })
-    })
-       
+    }
   };
 
   const getPath = (file: File, projectId: string, reportId: string) => `projects/${projectId}/reports/${reportId}/${file.name}`;

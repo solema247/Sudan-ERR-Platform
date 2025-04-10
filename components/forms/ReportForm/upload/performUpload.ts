@@ -1,11 +1,10 @@
-import { supabase } from "../../../../services/supabaseClient"
+import { newSupabase } from "../../../../services/newSupabaseClient"
 import * as tus from "tus-js-client";
 
-const supabaseProjectId = "inrddslmakqrezinnejh";
+// Use the correct project ID for the new Supabase instance
+const supabaseProjectId = "khavbdocjufkyhwpiniw";
 const bucketName = "images"
-const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-const { data: { session } } = await supabase.auth.getSession()
+const key = process.env.NEXT_PUBLIC_NEW_SUPABASE_ANON_KEY;
 
 interface UploadCallbacks {
     onProgress: any,
@@ -20,17 +19,17 @@ export default async function uploadFile(file: File, path: string, { onProgress,
             retryDelays: [0, 3000, 5000, 10000, 20000],
             headers: {
                 authorization: `Bearer ${key}`,
-                'x-upsert': 'true', // optionally set upsert to true to overwrite existing files
+                'x-upsert': 'true',
             },
             uploadDataDuringCreation: true,
-            removeFingerprintOnSuccess: true, // Important if you want to allow re-uploading the same file https://github.com/tus/tus-js-client/blob/main/docs/api.md#removefingerprintonsuccess
+            removeFingerprintOnSuccess: true,
             metadata: {
                 bucketName: bucketName,
-                objectName: path, // TODO: Or name?
-                contentType: 'image/png',   // TODO: Or non-PNG.
+                objectName: path,
+                contentType: file.type,
                 cacheControl: '3600'
             },
-            chunkSize: 6 * 1024 * 1024, // NOTE: it must be set to 6MB (for now) do not change it
+            chunkSize: 6 * 1024 * 1024,
             onError: function (error) {
                 console.log('Failed because: ' + error)
                 reject(error)
@@ -39,20 +38,22 @@ export default async function uploadFile(file: File, path: string, { onProgress,
                 var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
                 if (onProgress) onProgress(percentage)
             },
-            onSuccess: function () {
-                console.log("Uploaded: " + upload.url)
-                if (onSuccess) onSuccess(upload.url)
-                resolve(true)   // TODO: Check that this is the return resolution we want.
+            onSuccess: async function () {
+                // Get the public URL after successful upload
+                const { data: { publicUrl } } = newSupabase.storage
+                    .from('images')
+                    .getPublicUrl(path);
+                
+                console.log("Upload completed, URL:", publicUrl)
+                if (onSuccess) onSuccess(publicUrl)
+                resolve(publicUrl)
             },
         })
 
         return upload.findPreviousUploads().then(function (previousUploads) {
-            // Found previous uploads so we select the first one.
             if (previousUploads.length) {
                 upload.resumeFromPreviousUpload(previousUploads[0])
             }
-
-            // Start the upload
             upload.start()
         })
     })

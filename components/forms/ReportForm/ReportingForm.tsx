@@ -14,6 +14,7 @@ import { UploadChooser, reportUploadType } from './upload/UploadChooserReceipts'
 import { UploadChooserSupporting } from './upload/UploadChooserSupporting';
 import { v4 as uuidv4 } from 'uuid';
 import { newSupabase } from '../../../services/newSupabaseClient';
+import { uploadImages } from '../../../services/uploadImages';
 
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.           // TODO: Do compression.
@@ -303,8 +304,10 @@ const submitSummary = async (values, reportId: string, project: Project) => {
 
 
 const submitExpenses = async (expenses, reportId: string, projectId: string) => {
+    console.log('Submitting expenses:', expenses);
     const expensePromises = expenses.map(async (expense) => {
         try {
+            // First create the expense record
             const { data, error } = await newSupabase
                 .from('err_expense')
                 .insert([{
@@ -323,6 +326,20 @@ const submitExpenses = async (expenses, reportId: string, projectId: string) => 
                 .single();
 
             if (error) throw error;
+
+            // If there's a receipt file URL, create the receipt record
+            if (expense.receiptFile?.uploadedUrl) {
+                const { error: receiptError } = await newSupabase
+                    .from('receipts')
+                    .insert([{
+                        expense_id: data.expense_id,
+                        image_url: expense.receiptFile.uploadedUrl,
+                        created_at: new Date().toISOString()
+                    }]);
+
+                if (receiptError) throw receiptError;
+            }
+
             return data.expense_id;
         } catch (err) {
             console.error('Error posting expense:', err.message);

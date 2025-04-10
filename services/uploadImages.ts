@@ -35,22 +35,18 @@ export async function uploadImages(
             const filename = `${Date.now()}_${file.name}`;
             const path = `receipts/${projectId}/${expenseId}/${filename}`;
 
-            const { error: uploadError } = await newSupabase.storage
-                .from('images')
-                .upload(path, file);
-
-            if (uploadError) throw uploadError;
-
+            // Get public URL after successful upload
             const { data: { publicUrl } } = newSupabase.storage
                 .from('images')
                 .getPublicUrl(path);
 
+            // Store in receipts table
             const { error: receiptError } = await newSupabase
                 .from('receipts')
                 .insert([{
                     expense_id: expenseId,
                     image_url: publicUrl,
-                    created_at: new Date().toISOString(),
+                    created_at: new Date().toISOString()
                 }]);
 
             if (receiptError) throw receiptError;
@@ -60,6 +56,7 @@ export async function uploadImages(
                 success: true
             });
         } catch (error) {
+            console.error('Upload error:', error);
             results.push({
                 success: false,
                 error: error.message
