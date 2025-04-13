@@ -9,10 +9,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    // Get token from cookies
     const token = req.cookies.token;
+    
+    // Validate session
     const user = validateJWT(token);
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Unauthorized' });
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Unauthorized - Please log in again' 
+      });
     }
 
     const {

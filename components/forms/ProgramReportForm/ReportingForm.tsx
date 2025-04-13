@@ -30,6 +30,7 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     ...values,
                     project_id: project.id
@@ -363,8 +364,7 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                             )}
                         </FieldArray>
 
-                        <div className="flex justify-between mt-8">
-                            <Button text={t('returnToMenu')} onClick={onReturnToMenu} />
+                        <div className="flex justify-center mt-8">
                             <Button text={t('submit')} type="submit" />
                         </div>
                     </Form>
