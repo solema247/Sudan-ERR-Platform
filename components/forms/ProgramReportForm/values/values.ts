@@ -20,7 +20,8 @@ const getInitialValues = (errId: string) => ({
     female_count: 0,
     under18_male: 0,
     under18_female: 0
-  }]
+  }],
+  uploadedFiles: [] as UploadedFile[],
 });
 
 export default getInitialValues; 

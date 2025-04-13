@@ -7,6 +7,10 @@ import getInitialValues from './values/values';
 import { createValidationScheme } from './values/validation';
 import Project from '../NewProjectForm/Project';
 import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { UploadChooserSupporting } from './upload/UploadChooserSupporting';
+import { UploadedList } from './upload/UploadedList';
+import { FileWithProgress, UploadedFile } from './upload/UploadInterfaces';
+import { createOnSubmit } from './upload/onSubmit';
 
 interface ProgramReportFormProps {
     project: Project;
@@ -22,23 +26,33 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
     const { t } = useTranslation('program-report');
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [collapsedActivities, setCollapsedActivities] = useState<{[key: number]: boolean}>({});
+    const [uploadingFiles, setUploadingFiles] = useState<FileWithProgress[]>([]);
+    const [uploadProgress, setUploadProgress] = useState<{[key: number]: number}>({});
+
+    const handleFilesSelected = (files: FileWithProgress[]) => {
+        setUploadingFiles(prev => [...prev, ...files]);
+    };
+
+    const handleRemoveUploaded = (id: string) => {
+        // This will be handled in formik setFieldValue
+    };
+
+    const setFileProgress = (index: number, progress: number) => {
+        setUploadProgress(prev => ({
+            ...prev,
+            [index]: progress
+        }));
+    };
 
     const handleSubmit = async (values: any) => {
         try {
-            const response = await fetch('/api/program-report', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    ...values,
-                    project_id: project.id
-                }),
-            });
-
-            if (!response.ok) throw new Error('Submission failed');
-            
+            const submitHandler = createOnSubmit(t);
+            await submitHandler(
+                values,
+                project.id,
+                uploadingFiles,
+                setFileProgress
+            );
             setIsSubmitted(true);
         } catch (error) {
             console.error('Error submitting form:', error);
@@ -74,7 +88,7 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                 validationSchema={createValidationScheme(t)}
                 onSubmit={handleSubmit}
             >
-                {({ values }) => (
+                {({ values, setFieldValue }) => (
                     <Form className="prose flex flex-col">
                         <span className="text-3xl">{t('formTitle')}</span>
                         <span className="font-bold">{project.project_objectives}</span>
@@ -358,11 +372,30 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                     <Button
                                         text={t('activities.addActivity')}
                                         onClick={() => push(getInitialValues(project.id).activities[0])}
-                                        className="mt-2 mb-4"
+                                        className="mt-2 mb-1"
                                     />
                                 </div>
                             )}
                         </FieldArray>
+
+                        {/* Add file upload section before submit button */}
+                        <div className="mt-2">
+                            <h3 className="text-2xl font-bold mb-4">{t('upload.title')}</h3>
+                            <UploadChooserSupporting
+                                onFilesSelected={handleFilesSelected}
+                                disabled={isSubmitted}
+                            />
+                            <UploadedList
+                                uploadingFiles={uploadingFiles}
+                                uploadedFiles={values.uploadedFiles}
+                                onRemoveUploaded={(id) => {
+                                    setFieldValue(
+                                        'uploadedFiles',
+                                        values.uploadedFiles.filter((f: UploadedFile) => f.id !== id)
+                                    );
+                                }}
+                            />
+                        </div>
 
                         <div className="flex justify-center mt-8">
                             <Button text={t('submit')} type="submit" />
