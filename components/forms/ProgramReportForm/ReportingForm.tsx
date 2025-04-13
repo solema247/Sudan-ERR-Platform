@@ -6,6 +6,7 @@ import Button from '../../ui/Button';
 import getInitialValues from './values/values';
 import { createValidationScheme } from './values/validation';
 import Project from '../NewProjectForm/Project';
+import { Trash2 } from "lucide-react";
 
 interface ProgramReportFormProps {
     project: Project;
@@ -162,17 +163,17 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                         </div>
 
                         {/* Activities Section */}
-                        <h3 className="text-2xl font-bold mt-6 mb-3">{t('activities.title')}</h3>
+                        <h3 className="text-2xl font-bold mt-4 mb-2">{t('activities.title')}</h3>
                         <FieldArray name="activities">
                             {({ push, remove }) => (
                                 <div>
                                     {values.activities.map((_, index) => (
-                                        <div key={index} className="border p-3 rounded-lg mb-3 bg-gray-50">
-                                            <h4 className="font-bold mb-2">Activity {index + 1}</h4>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                        <div key={index} className="border pt-1 px-2 pb-2 rounded-lg mb-2 bg-gray-50">
+                                            <h4 className="font-bold mb-1">Activity {index + 1}</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
                                                 {/* Activity Fields */}
-                                                <div className="mb-2">
-                                                    <label className="font-bold block text-base text-black-bold mb-1">
+                                                <div className="mb-1">
+                                                    <label className="font-bold block text-base text-black-bold mb-0.5">
                                                         {t('activities.activityName')}
                                                     </label>
                                                     <Field
@@ -183,8 +184,8 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                                     <ErrorMessage name={`activities.${index}.activity_name`} component="div" className="text-red-500" />
                                                 </div>
 
-                                                <div className="mb-2">
-                                                    <label className="font-bold block text-base text-black-bold mb-1">
+                                                <div className="mb-1">
+                                                    <label className="font-bold block text-base text-black-bold mb-0.5">
                                                         {t('activities.activityGoal')}
                                                     </label>
                                                     <Field
@@ -195,8 +196,8 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                                     <ErrorMessage name={`activities.${index}.activity_goal`} component="div" className="text-red-500" />
                                                 </div>
 
-                                                <div className="mb-2">
-                                                    <label className="font-bold block text-base text-black-bold mb-1">
+                                                <div className="mb-1">
+                                                    <label className="font-bold block text-base text-black-bold mb-0.5">
                                                         {t('activities.location')}
                                                     </label>
                                                     <Field
@@ -207,8 +208,8 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                                     <ErrorMessage name={`activities.${index}.location`} component="div" className="text-red-500" />
                                                 </div>
 
-                                                <div className="mb-2">
-                                                    <label className="font-bold block text-base text-black-bold mb-1">
+                                                <div className="mb-1">
+                                                    <label className="font-bold block text-base text-black-bold mb-0.5">
                                                         {t('activities.startDate')}
                                                     </label>
                                                     <Field
@@ -219,8 +220,8 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                                     <ErrorMessage name={`activities.${index}.start_date`} component="div" className="text-red-500" />
                                                 </div>
 
-                                                <div className="mb-2">
-                                                    <label className="font-bold block text-base text-black-bold mb-1">
+                                                <div className="mb-1">
+                                                    <label className="font-bold block text-base text-black-bold mb-0.5">
                                                         {t('activities.endDate')}
                                                     </label>
                                                     <Field
@@ -232,11 +233,13 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                                 </div>
 
                                                 {/* Demographics */}
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <div className="mb-2">
-                                                        <label className="font-bold block text-base text-black-bold mb-1">
-                                                            {t('activities.individualCount')}
-                                                        </label>
+                                                <div className="grid grid-cols-2 gap-1">
+                                                    <div className="mb-1">
+                                                        <div className="h-14">
+                                                            <label className="font-bold block text-base text-black-bold mb-0.5">
+                                                                {t('activities.individualCount')}
+                                                            </label>
+                                                        </div>
                                                         <Field
                                                             type="number"
                                                             name={`activities.${index}.individual_count`}
@@ -245,10 +248,12 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                                         <ErrorMessage name={`activities.${index}.individual_count`} component="div" className="text-red-500" />
                                                     </div>
 
-                                                    <div className="mb-2">
-                                                        <label className="font-bold block text-base text-black-bold mb-1">
-                                                            {t('activities.householdCount')}
-                                                        </label>
+                                                    <div className="mb-1">
+                                                        <div className="h-14">
+                                                            <label className="font-bold block text-base text-black-bold mb-0.5">
+                                                                {t('activities.householdCount')}
+                                                            </label>
+                                                        </div>
                                                         <Field
                                                             type="number"
                                                             name={`activities.${index}.household_count`}
@@ -259,9 +264,9 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                                 </div>
 
                                                 {/* Males and Females in one row */}
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <div className="mb-2">
-                                                        <label className="font-bold block text-base text-black-bold mb-1">
+                                                <div className="grid grid-cols-2 gap-1">
+                                                    <div className="mb-1">
+                                                        <label className="font-bold block text-base text-black-bold mb-0.5">
                                                             {t('activities.maleCount')}
                                                         </label>
                                                         <Field
@@ -272,8 +277,8 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                                         <ErrorMessage name={`activities.${index}.male_count`} component="div" className="text-red-500" />
                                                     </div>
 
-                                                    <div className="mb-2">
-                                                        <label className="font-bold block text-base text-black-bold mb-1">
+                                                    <div className="mb-1">
+                                                        <label className="font-bold block text-base text-black-bold mb-0.5">
                                                             {t('activities.femaleCount')}
                                                         </label>
                                                         <Field
@@ -286,9 +291,9 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                                 </div>
 
                                                 {/* Under 18 Males and Females in one row */}
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <div className="mb-2">
-                                                        <label className="font-bold block text-base text-black-bold mb-1">
+                                                <div className="grid grid-cols-2 gap-1">
+                                                    <div className="mb-1">
+                                                        <label className="font-bold block text-base text-black-bold mb-0.5">
                                                             {t('activities.under18Male')}
                                                         </label>
                                                         <Field
@@ -299,8 +304,8 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                                         <ErrorMessage name={`activities.${index}.under18_male`} component="div" className="text-red-500" />
                                                     </div>
 
-                                                    <div className="mb-2">
-                                                        <label className="font-bold block text-base text-black-bold mb-1">
+                                                    <div className="mb-1">
+                                                        <label className="font-bold block text-base text-black-bold mb-0.5">
                                                             {t('activities.under18Female')}
                                                         </label>
                                                         <Field
@@ -314,18 +319,22 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                             </div>
 
                                             {values.activities.length > 1 && (
-                                                <Button
-                                                    text={t('activities.removeActivity')}
-                                                    onClick={() => remove(index)}
-                                                    className="mt-2 bg-red-500 text-white"
-                                                />
+                                                <div className="flex justify-end rtl:justify-start mt-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => remove(index)}
+                                                        className="text-red-500 hover:text-red-700"
+                                                    >
+                                                        <Trash2 size={24} />
+                                                    </button>
+                                                </div>
                                             )}
                                         </div>
                                     ))}
                                     <Button
                                         text={t('activities.addActivity')}
                                         onClick={() => push(getInitialValues(project.id).activities[0])}
-                                        className="mt-3 mb-6"
+                                        className="mt-2 mb-4"
                                     />
                                 </div>
                             )}
