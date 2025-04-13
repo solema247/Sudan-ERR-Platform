@@ -14,10 +14,6 @@ export default async function uploadFile(
     const { data, error } = await newSupabase.storage
         .from('images')
         .upload(filePath, file.file, {
-            onUploadProgress: (progress) => {
-                const percentage = (progress.loaded / progress.total) * 100;
-                onProgress(percentage);
-            },
             cacheControl: '3600',
             upsert: false
         });
@@ -27,6 +23,15 @@ export default async function uploadFile(
     const { data: urlData } = newSupabase.storage
         .from('images')
         .getPublicUrl(filePath);
+
+    // Add progress tracking separately using XMLHttpRequest
+    const xhr = new XMLHttpRequest();
+    xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+            const percentage = (event.loaded / event.total) * 100;
+            onProgress(percentage);
+        }
+    });
 
     return {
         id: data.path,

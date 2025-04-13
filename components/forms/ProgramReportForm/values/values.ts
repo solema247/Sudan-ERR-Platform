@@ -1,3 +1,5 @@
+import { UploadedFile } from '../upload/UploadInterfaces';
+
 // Initial values for the program report form
 const getInitialValues = (errId: string) => ({
   report_date: '',
