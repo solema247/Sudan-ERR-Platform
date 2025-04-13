@@ -1,0 +1,70 @@
+{
+  "form": {
+    "title": "Program Report",
+    "report_date": "Report Date",
+    "positive_changes": "Positive Changes",
+    "negative_results": "Negative Results",
+    "unexpected_results": "Unexpected Results",
+    "lessons_learned": "Lessons Learned",
+    "suggestions": "Suggestions",
+    "reporting_person": "Reporting Person",
+    "activities": {
+      "title": "Activities",
+      "activity_name": "Activity Name",
+      "activity_goal": "Activity Goal",
+      "location": "Location",
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "individual_count": "Number of Individuals",
+      "household_count": "Number of Households",
+      "male_count": "Number of Males",
+      "female_count": "Number of Females",
+      "under18_male": "Males Under 18",
+      "under18_female": "Females Under 18"
+    },
+    "files": {
+      "title": "Uploaded Files",
+      "upload": "Upload Files"
+    }
+  },
+  "formTitle": "F5 Program Report",
+  "requiredFields": "Required fields",
+  "errorMessages": {
+    "required": "This field is required",
+    "positiveNumber": "Must be a positive number",
+    "minimumOneActivity": "At least one activity is required",
+    "submitError": "Failed to submit form. Please try again."
+  },
+  "reportDate": "Report Date",
+  "positiveChanges": "What positive changes have you observed in the community?",
+  "negativeResults": "Were there any negative results?",
+  "unexpectedResults": "Were there any unexpected results?",
+  "lessonsLearned": "What lessons did you learn from implementing these activities?",
+  "suggestions": "What suggestions do you have for future activities?",
+  "reportingPerson": "Name of Person Reporting",
+  "activities": {
+    "title": "Program Activities and Reach",
+    "addActivity": "Add Another Activity",
+    "removeActivity": "Remove This Activity",
+    "activityName": "Activity Name",
+    "activityGoal": "What was the goal of this activity?",
+    "location": "Where did this activity take place?",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "individualCount": "Total Number of Individuals",
+    "householdCount": "Number of Households",
+    "maleCount": "Number of Males",
+    "femaleCount": "Number of Females",
+    "under18Male": "Males Under 18",
+    "under18Female": "Females Under 18"
+  },
+  "submit": "Submit Report",
+  "submitAnother": "Submit Another Report",
+  "returnToMenu": "Return to Menu",
+  "formSuccess": "Report submitted successfully!",
+  "upload": {
+    "title": "Supporting Documents",
+    "chooseFiles": "Choose Files",
+    "allowedTypes": "Supported files: PDF, JPG, PNG"
+  }
+} 

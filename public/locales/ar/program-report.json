@@ -1,0 +1,72 @@
+{
+  "form": {
+    "title": "تقرير البرنامج",
+    "report_date": "تاريخ التقرير",
+    "positive_changes": "التغييرات الإيجابية",
+    "negative_results": "النتائج السلبية",
+    "unexpected_results": "النتائج غير المتوقعة",
+    "lessons_learned": "الدروس المستفادة",
+    "suggestions": "الاقتراحات",
+    "reporting_person": "الشخص المقدم للتقرير",
+    "activities": {
+      "title": "الأنشطة",
+      "activity_name": "اسم النشاط",
+      "activity_goal": "هدف النشاط",
+      "location": "الموقع",
+      "start_date": "تاريخ البدء",
+      "end_date": "تاريخ الانتهاء",
+      "individual_count": "عدد الأفراد",
+      "household_count": "عدد الأسر",
+      "male_count": "عدد الذكور",
+      "female_count": "عدد الإناث",
+      "under18_male": "الذكور تحت 18",
+      "under18_female": "الإناث تحت 18",
+      "activity_label": "النشاط {{number}}"
+    },
+    "files": {
+      "title": "الملفات المرفوعة",
+      "upload": "رفع الملفات"
+    }
+  },
+  "formTitle": "تقرير البرنامج F5",
+  "requiredFields": "الحقول المطلوبة",
+  "errorMessages": {
+    "required": "هذا الحقل مطلوب",
+    "positiveNumber": "يجب أن يكون رقماً موجباً",
+    "minimumOneActivity": "مطلوب نشاط واحد على الأقل",
+    "submitError": "فشل في تقديم النموذج. يرجى المحاولة مرة أخرى."
+  },
+  "reportDate": "تاريخ التقرير",
+  "positiveChanges": "ما هي التغييرات الإيجابية التي لاحظتها في المجتمع؟",
+  "negativeResults": "هل كانت هناك أي نتائج سلبية؟",
+  "unexpectedResults": "هل كانت هناك أي نتائج غير متوقعة؟",
+  "lessonsLearned": "ما هي الدروس التي تعلمتها من تنفيذ هذه الأنشطة؟",
+  "suggestions": "ما هي اقتراحاتك للأنشطة المستقبلية؟",
+  "reportingPerson": "اسم الشخص المقدم للتقرير",
+  "activities": {
+    "title": "أنشطة البرنامج والوصول",
+    "addActivity": "إضافة نشاط آخر",
+    "removeActivity": "إزالة هذا النشاط",
+    "activityName": "اسم النشاط",
+    "activityGoal": "ما هو الهدف من هذا النشاط؟",
+    "location": "أين تم هذا النشاط؟",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "individualCount": "العدد الإجمالي للأفراد",
+    "householdCount": "عدد الأسر",
+    "maleCount": "عدد الذكور",
+    "femaleCount": "عدد الإناث",
+    "under18Male": "الذكور تحت 18 سنة",
+    "under18Female": "الإناث تحت 18 سنة",
+    "activity_label": "النشاط {{number}}"
+  },
+  "submit": "تقديم التقرير",
+  "submitAnother": "تقديم تقرير آخر",
+  "returnToMenu": "العودة إلى القائمة",
+  "formSuccess": "تم تقديم التقرير بنجاح!",
+  "upload": {
+    "title": "المستندات الداعمة",
+    "chooseFiles": "اختر الملفات",
+    "allowedTypes": "الملفات المدعومة: PDF, JPG, PNG"
+  }
+} 

@@ -86,6 +86,7 @@ web_modules/
 !package-lock.json
 !tsconfig.json
 !next.config.json
+!public/locales/**/*.json
 
 # Other sensitive files
 credentials/
