@@ -69,7 +69,7 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
 
     if (isSubmitted) {
         return (
-            <FormBubble>
+            <FormBubble removeBoxShadow>
                 <div className="prose flex flex-col">
                     <p className="mb-4">{t('formSuccess')}</p>
                     <div className="flex justify-between">
@@ -82,7 +82,7 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
     }
 
     return (
-        <FormBubble>
+        <FormBubble removeBoxShadow>
             <Formik
                 initialValues={getInitialValues(project.id)}
                 validationSchema={createValidationScheme(t)}

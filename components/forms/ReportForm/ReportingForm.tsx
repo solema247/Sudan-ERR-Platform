@@ -72,7 +72,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
         {isFormSubmitted ? (
             <AfterFormSubmitted onReturnToMenu={onReturnToMenu} />
           ) : (
-        <FormBubble>
+        <FormBubble removeBoxShadow>
             <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
