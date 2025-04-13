@@ -232,76 +232,84 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                                 </div>
 
                                                 {/* Demographics */}
-                                                <div className="mb-2">
-                                                    <label className="font-bold block text-base text-black-bold mb-1">
-                                                        {t('activities.individualCount')}
-                                                    </label>
-                                                    <Field
-                                                        type="number"
-                                                        name={`activities.${index}.individual_count`}
-                                                        className="text-sm w-full p-2 border rounded-lg"
-                                                    />
-                                                    <ErrorMessage name={`activities.${index}.individual_count`} component="div" className="text-red-500" />
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div className="mb-2">
+                                                        <label className="font-bold block text-base text-black-bold mb-1">
+                                                            {t('activities.individualCount')}
+                                                        </label>
+                                                        <Field
+                                                            type="number"
+                                                            name={`activities.${index}.individual_count`}
+                                                            className="text-sm w-full p-2 border rounded-lg"
+                                                        />
+                                                        <ErrorMessage name={`activities.${index}.individual_count`} component="div" className="text-red-500" />
+                                                    </div>
+
+                                                    <div className="mb-2">
+                                                        <label className="font-bold block text-base text-black-bold mb-1">
+                                                            {t('activities.householdCount')}
+                                                        </label>
+                                                        <Field
+                                                            type="number"
+                                                            name={`activities.${index}.household_count`}
+                                                            className="text-sm w-full p-2 border rounded-lg"
+                                                        />
+                                                        <ErrorMessage name={`activities.${index}.household_count`} component="div" className="text-red-500" />
+                                                    </div>
                                                 </div>
 
-                                                <div className="mb-2">
-                                                    <label className="font-bold block text-base text-black-bold mb-1">
-                                                        {t('activities.householdCount')}
-                                                    </label>
-                                                    <Field
-                                                        type="number"
-                                                        name={`activities.${index}.household_count`}
-                                                        className="text-sm w-full p-2 border rounded-lg"
-                                                    />
-                                                    <ErrorMessage name={`activities.${index}.household_count`} component="div" className="text-red-500" />
+                                                {/* Males and Females in one row */}
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div className="mb-2">
+                                                        <label className="font-bold block text-base text-black-bold mb-1">
+                                                            {t('activities.maleCount')}
+                                                        </label>
+                                                        <Field
+                                                            type="number"
+                                                            name={`activities.${index}.male_count`}
+                                                            className="text-sm w-full p-2 border rounded-lg"
+                                                        />
+                                                        <ErrorMessage name={`activities.${index}.male_count`} component="div" className="text-red-500" />
+                                                    </div>
+
+                                                    <div className="mb-2">
+                                                        <label className="font-bold block text-base text-black-bold mb-1">
+                                                            {t('activities.femaleCount')}
+                                                        </label>
+                                                        <Field
+                                                            type="number"
+                                                            name={`activities.${index}.female_count`}
+                                                            className="text-sm w-full p-2 border rounded-lg"
+                                                        />
+                                                        <ErrorMessage name={`activities.${index}.female_count`} component="div" className="text-red-500" />
+                                                    </div>
                                                 </div>
 
-                                                <div className="mb-2">
-                                                    <label className="font-bold block text-base text-black-bold mb-1">
-                                                        {t('activities.maleCount')}
-                                                    </label>
-                                                    <Field
-                                                        type="number"
-                                                        name={`activities.${index}.male_count`}
-                                                        className="text-sm w-full p-2 border rounded-lg"
-                                                    />
-                                                    <ErrorMessage name={`activities.${index}.male_count`} component="div" className="text-red-500" />
-                                                </div>
+                                                {/* Under 18 Males and Females in one row */}
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div className="mb-2">
+                                                        <label className="font-bold block text-base text-black-bold mb-1">
+                                                            {t('activities.under18Male')}
+                                                        </label>
+                                                        <Field
+                                                            type="number"
+                                                            name={`activities.${index}.under18_male`}
+                                                            className="text-sm w-full p-2 border rounded-lg"
+                                                        />
+                                                        <ErrorMessage name={`activities.${index}.under18_male`} component="div" className="text-red-500" />
+                                                    </div>
 
-                                                <div className="mb-2">
-                                                    <label className="font-bold block text-base text-black-bold mb-1">
-                                                        {t('activities.femaleCount')}
-                                                    </label>
-                                                    <Field
-                                                        type="number"
-                                                        name={`activities.${index}.female_count`}
-                                                        className="text-sm w-full p-2 border rounded-lg"
-                                                    />
-                                                    <ErrorMessage name={`activities.${index}.female_count`} component="div" className="text-red-500" />
-                                                </div>
-
-                                                <div className="mb-2">
-                                                    <label className="font-bold block text-base text-black-bold mb-1">
-                                                        {t('activities.under18Male')}
-                                                    </label>
-                                                    <Field
-                                                        type="number"
-                                                        name={`activities.${index}.under18_male`}
-                                                        className="text-sm w-full p-2 border rounded-lg"
-                                                    />
-                                                    <ErrorMessage name={`activities.${index}.under18_male`} component="div" className="text-red-500" />
-                                                </div>
-
-                                                <div className="mb-2">
-                                                    <label className="font-bold block text-base text-black-bold mb-1">
-                                                        {t('activities.under18Female')}
-                                                    </label>
-                                                    <Field
-                                                        type="number"
-                                                        name={`activities.${index}.under18_female`}
-                                                        className="text-sm w-full p-2 border rounded-lg"
-                                                    />
-                                                    <ErrorMessage name={`activities.${index}.under18_female`} component="div" className="text-red-500" />
+                                                    <div className="mb-2">
+                                                        <label className="font-bold block text-base text-black-bold mb-1">
+                                                            {t('activities.under18Female')}
+                                                        </label>
+                                                        <Field
+                                                            type="number"
+                                                            name={`activities.${index}.under18_female`}
+                                                            className="text-sm w-full p-2 border rounded-lg"
+                                                        />
+                                                        <ErrorMessage name={`activities.${index}.under18_female`} component="div" className="text-red-500" />
+                                                    </div>
                                                 </div>
                                             </div>
 
