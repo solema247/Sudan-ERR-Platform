@@ -24,7 +24,8 @@ enum Workflow {
     SCAN_FORM,
     SCAN_CUSTOM_FORM,
     PROJECT_APPLICATION,
-    PROJECT_STATUS
+    PROJECT_STATUS,
+    PROGRAM_FORM  // Add new workflow type
 }
 
 enum CurrentMenu {
@@ -48,6 +49,7 @@ const Menu = () => {
     const [showScanCustomForm, setShowScanCustomForm] = useState(false);
     const [showProjectApplication, setShowProjectApplication] = useState(false);
     const [showProjectStatus, setShowProjectStatus] = useState(false);
+    const [showProgramForm, setShowProgramForm] = useState(false);  // Add new state
     const [projects, setProjects] = useState<Project[]>([]); // Stores active projects
     const [selectedProject, setSelectedProject] = useState<Project | null>(null); // Stores selected project
     const [activeReportId, setActiveReportId] = useState(null)
@@ -113,6 +115,7 @@ const Menu = () => {
         setShowProjectApplication(false);
         setShowProjectStatus(false);
         setShowScanPrefillForm(false);
+        setShowProgramForm(false);  // Reset program form state
         setSelectedProject(null);
     };
 
@@ -125,6 +128,7 @@ const Menu = () => {
         setShowProjectApplication(false);
         setShowProjectStatus(false);
         setShowScanPrefillForm(false);
+        setShowProgramForm(false);  // Reset program form state
 
         if (workflow === Workflow.FILL_FORM) {
             createNewReportId();
@@ -134,6 +138,7 @@ const Menu = () => {
         if (workflow === Workflow.SCAN_CUSTOM_FORM) setShowScanCustomForm(true);
         if (workflow === Workflow.PROJECT_APPLICATION) setShowProjectApplication(true);
         if (workflow === Workflow.PROJECT_STATUS) setShowProjectStatus(true);
+        if (workflow === Workflow.PROGRAM_FORM) setShowProgramForm(true);  // Handle program form
     };
 
     return (
@@ -254,13 +259,11 @@ const Menu = () => {
                             onClick={() => handleWorkflowSelection(Workflow.SCAN_FORM)}
                             className="w-full"
                         />
-                        {/* Temporarily hide Scan Custom Form
                         <Button
-                            text={t('reportScanCustomForm')}
-                            onClick={() => handleWorkflowSelection(Workflow.SCAN_CUSTOM_FORM)}
+                            text={t('reportProgramForm')}
+                            onClick={() => handleWorkflowSelection(Workflow.PROGRAM_FORM)}
                             className="w-full"
                         />
-                        */}
                         <Button 
                             text={t('selectDifferentProject')} 
                             onClick={() => setSelectedProject(null)} 
@@ -320,6 +323,12 @@ const Menu = () => {
             {showProjectStatus && (
                 <MessageBubble>
                     <ProjectStatus onReturnToMenu={() => handleMenuSelection(CurrentMenu.MAIN)} />
+                </MessageBubble>
+            )}
+
+            {showProgramForm && (
+                <MessageBubble>
+                    {/* Program Report Form content */}
                 </MessageBubble>
             )}
 
