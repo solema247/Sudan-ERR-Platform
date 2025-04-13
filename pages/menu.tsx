@@ -13,6 +13,7 @@ import FeedbackForm from '../components/forms/FeedbackForm'; // Correct import p
 import ScanPrefillForm from '../pages/scan-prefill-form';
 const LogoImage = '/icons/icon-512x512.png'; 
 import Project from '../components/forms/NewProjectForm/Project';
+import ProgramReportForm from '../components/forms/ProgramReportForm/ReportingForm';
 
 /**
  * Chat-style menu.
@@ -328,7 +329,14 @@ const Menu = () => {
 
             {showProgramForm && (
                 <MessageBubble>
-                    {/* Program Report Form content */}
+                    <ProgramReportForm
+                        project={selectedProject}
+                        onReturnToMenu={() => handleMenuSelection(CurrentMenu.REPORTING)}
+                        onSubmitAnotherForm={() => {
+                            setShowProgramForm(false);
+                            setTimeout(() => setShowProgramForm(true), 0); // Reset workflow
+                        }}
+                    />
                 </MessageBubble>
             )}
 

@@ -17,6 +17,7 @@ i18n.use(initReactI18next).init({
       projectStatus: require("../public/locales/en/project-status.json"),
       home: require("../public/locales/en/home.json"),
       feedback: require("../public/locales/en/feedback.json"),
+      'program-report': require("../public/locales/en/program-report.json"),
     },
     ar: {
       login: require("../public/locales/ar/login.json"),
@@ -31,6 +32,7 @@ i18n.use(initReactI18next).init({
       projectStatus: require("../public/locales/ar/project-status.json"),
       home: require("../public/locales/ar/home.json"),
       feedback: require("../public/locales/ar/feedback.json"),
+      'program-report': require("../public/locales/ar/program-report.json"),
     },
     es: {
       login: require("../public/locales/es/login.json"),
