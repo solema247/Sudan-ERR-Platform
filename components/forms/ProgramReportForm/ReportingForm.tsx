@@ -6,7 +6,7 @@ import Button from '../../ui/Button';
 import getInitialValues from './values/values';
 import { createValidationScheme } from './values/validation';
 import Project from '../NewProjectForm/Project';
-import { Trash2 } from "lucide-react";
+import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
 
 interface ProgramReportFormProps {
     project: Project;
@@ -21,6 +21,7 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
 }) => {
     const { t } = useTranslation('program-report');
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [collapsedActivities, setCollapsedActivities] = useState<{[key: number]: boolean}>({});
 
     const handleSubmit = async (values: any) => {
         try {
@@ -42,6 +43,13 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
             console.error('Error submitting form:', error);
             alert(t('errorMessages.submitError'));
         }
+    };
+
+    const toggleActivity = (index: number) => {
+        setCollapsedActivities(prev => ({
+            ...prev,
+            [index]: !prev[index]
+        }));
     };
 
     if (isSubmitted) {
@@ -169,164 +177,179 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                 <div>
                                     {values.activities.map((_, index) => (
                                         <div key={index} className="border pt-1 px-2 pb-2 rounded-lg mb-2 bg-gray-50">
-                                            <h4 className="font-bold mb-1">Activity {index + 1}</h4>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
-                                                {/* Activity Fields */}
-                                                <div className="mb-1">
-                                                    <label className="font-bold block text-base text-black-bold mb-0.5">
-                                                        {t('activities.activityName')}
-                                                    </label>
-                                                    <Field
-                                                        type="text"
-                                                        name={`activities.${index}.activity_name`}
-                                                        className="text-sm w-full p-2 border rounded-lg"
-                                                    />
-                                                    <ErrorMessage name={`activities.${index}.activity_name`} component="div" className="text-red-500" />
-                                                </div>
-
-                                                <div className="mb-1">
-                                                    <label className="font-bold block text-base text-black-bold mb-0.5">
-                                                        {t('activities.activityGoal')}
-                                                    </label>
-                                                    <Field
-                                                        type="text"
-                                                        name={`activities.${index}.activity_goal`}
-                                                        className="text-sm w-full p-2 border rounded-lg"
-                                                    />
-                                                    <ErrorMessage name={`activities.${index}.activity_goal`} component="div" className="text-red-500" />
-                                                </div>
-
-                                                <div className="mb-1">
-                                                    <label className="font-bold block text-base text-black-bold mb-0.5">
-                                                        {t('activities.location')}
-                                                    </label>
-                                                    <Field
-                                                        type="text"
-                                                        name={`activities.${index}.location`}
-                                                        className="text-sm w-full p-2 border rounded-lg"
-                                                    />
-                                                    <ErrorMessage name={`activities.${index}.location`} component="div" className="text-red-500" />
-                                                </div>
-
-                                                <div className="mb-1">
-                                                    <label className="font-bold block text-base text-black-bold mb-0.5">
-                                                        {t('activities.startDate')}
-                                                    </label>
-                                                    <Field
-                                                        type="date"
-                                                        name={`activities.${index}.start_date`}
-                                                        className="text-sm w-full p-2 border rounded-lg"
-                                                    />
-                                                    <ErrorMessage name={`activities.${index}.start_date`} component="div" className="text-red-500" />
-                                                </div>
-
-                                                <div className="mb-1">
-                                                    <label className="font-bold block text-base text-black-bold mb-0.5">
-                                                        {t('activities.endDate')}
-                                                    </label>
-                                                    <Field
-                                                        type="date"
-                                                        name={`activities.${index}.end_date`}
-                                                        className="text-sm w-full p-2 border rounded-lg"
-                                                    />
-                                                    <ErrorMessage name={`activities.${index}.end_date`} component="div" className="text-red-500" />
-                                                </div>
-
-                                                {/* Demographics */}
-                                                <div className="grid grid-cols-2 gap-1">
-                                                    <div className="mb-1">
-                                                        <div className="h-14">
-                                                            <label className="font-bold block text-base text-black-bold mb-0.5">
-                                                                {t('activities.individualCount')}
-                                                            </label>
-                                                        </div>
-                                                        <Field
-                                                            type="number"
-                                                            name={`activities.${index}.individual_count`}
-                                                            className="text-sm w-full p-2 border rounded-lg"
-                                                        />
-                                                        <ErrorMessage name={`activities.${index}.individual_count`} component="div" className="text-red-500" />
-                                                    </div>
-
-                                                    <div className="mb-1">
-                                                        <div className="h-14">
-                                                            <label className="font-bold block text-base text-black-bold mb-0.5">
-                                                                {t('activities.householdCount')}
-                                                            </label>
-                                                        </div>
-                                                        <Field
-                                                            type="number"
-                                                            name={`activities.${index}.household_count`}
-                                                            className="text-sm w-full p-2 border rounded-lg"
-                                                        />
-                                                        <ErrorMessage name={`activities.${index}.household_count`} component="div" className="text-red-500" />
-                                                    </div>
-                                                </div>
-
-                                                {/* Males and Females in one row */}
-                                                <div className="grid grid-cols-2 gap-1">
-                                                    <div className="mb-1">
-                                                        <label className="font-bold block text-base text-black-bold mb-0.5">
-                                                            {t('activities.maleCount')}
-                                                        </label>
-                                                        <Field
-                                                            type="number"
-                                                            name={`activities.${index}.male_count`}
-                                                            className="text-sm w-full p-2 border rounded-lg"
-                                                        />
-                                                        <ErrorMessage name={`activities.${index}.male_count`} component="div" className="text-red-500" />
-                                                    </div>
-
-                                                    <div className="mb-1">
-                                                        <label className="font-bold block text-base text-black-bold mb-0.5">
-                                                            {t('activities.femaleCount')}
-                                                        </label>
-                                                        <Field
-                                                            type="number"
-                                                            name={`activities.${index}.female_count`}
-                                                            className="text-sm w-full p-2 border rounded-lg"
-                                                        />
-                                                        <ErrorMessage name={`activities.${index}.female_count`} component="div" className="text-red-500" />
-                                                    </div>
-                                                </div>
-
-                                                {/* Under 18 Males and Females in one row */}
-                                                <div className="grid grid-cols-2 gap-1">
-                                                    <div className="mb-1">
-                                                        <label className="font-bold block text-base text-black-bold mb-0.5">
-                                                            {t('activities.under18Male')}
-                                                        </label>
-                                                        <Field
-                                                            type="number"
-                                                            name={`activities.${index}.under18_male`}
-                                                            className="text-sm w-full p-2 border rounded-lg"
-                                                        />
-                                                        <ErrorMessage name={`activities.${index}.under18_male`} component="div" className="text-red-500" />
-                                                    </div>
-
-                                                    <div className="mb-1">
-                                                        <label className="font-bold block text-base text-black-bold mb-0.5">
-                                                            {t('activities.under18Female')}
-                                                        </label>
-                                                        <Field
-                                                            type="number"
-                                                            name={`activities.${index}.under18_female`}
-                                                            className="text-sm w-full p-2 border rounded-lg"
-                                                        />
-                                                        <ErrorMessage name={`activities.${index}.under18_female`} component="div" className="text-red-500" />
-                                                    </div>
+                                            <div className="flex justify-between items-center">
+                                                <h4 className="font-bold mb-1">Activity {index + 1}</h4>
+                                                <div className="flex items-center gap-2">
+                                                    {values.activities.length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => remove(index)}
+                                                            className="text-red-500 hover:text-red-700"
+                                                        >
+                                                            <Trash2 size={24} />
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => toggleActivity(index)}
+                                                        className="text-gray-500 hover:text-gray-700"
+                                                    >
+                                                        {collapsedActivities[index] ? (
+                                                            <ChevronDown size={24} />
+                                                        ) : (
+                                                            <ChevronUp size={24} />
+                                                        )}
+                                                    </button>
                                                 </div>
                                             </div>
 
-                                            {values.activities.length > 1 && (
-                                                <div className="flex justify-end rtl:justify-start mt-1">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => remove(index)}
-                                                        className="text-red-500 hover:text-red-700"
-                                                    >
-                                                        <Trash2 size={24} />
-                                                    </button>
+                                            {!collapsedActivities[index] && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
+                                                    {/* Activity Fields */}
+                                                    <div className="mb-1">
+                                                        <label className="font-bold block text-base text-black-bold mb-0.5">
+                                                            {t('activities.activityName')}
+                                                        </label>
+                                                        <Field
+                                                            type="text"
+                                                            name={`activities.${index}.activity_name`}
+                                                            className="text-sm w-full p-2 border rounded-lg"
+                                                        />
+                                                        <ErrorMessage name={`activities.${index}.activity_name`} component="div" className="text-red-500" />
+                                                    </div>
+
+                                                    <div className="mb-1">
+                                                        <label className="font-bold block text-base text-black-bold mb-0.5">
+                                                            {t('activities.activityGoal')}
+                                                        </label>
+                                                        <Field
+                                                            type="text"
+                                                            name={`activities.${index}.activity_goal`}
+                                                            className="text-sm w-full p-2 border rounded-lg"
+                                                        />
+                                                        <ErrorMessage name={`activities.${index}.activity_goal`} component="div" className="text-red-500" />
+                                                    </div>
+
+                                                    <div className="mb-1">
+                                                        <label className="font-bold block text-base text-black-bold mb-0.5">
+                                                            {t('activities.location')}
+                                                        </label>
+                                                        <Field
+                                                            type="text"
+                                                            name={`activities.${index}.location`}
+                                                            className="text-sm w-full p-2 border rounded-lg"
+                                                        />
+                                                        <ErrorMessage name={`activities.${index}.location`} component="div" className="text-red-500" />
+                                                    </div>
+
+                                                    <div className="mb-1">
+                                                        <label className="font-bold block text-base text-black-bold mb-0.5">
+                                                            {t('activities.startDate')}
+                                                        </label>
+                                                        <Field
+                                                            type="date"
+                                                            name={`activities.${index}.start_date`}
+                                                            className="text-sm w-full p-2 border rounded-lg"
+                                                        />
+                                                        <ErrorMessage name={`activities.${index}.start_date`} component="div" className="text-red-500" />
+                                                    </div>
+
+                                                    <div className="mb-1">
+                                                        <label className="font-bold block text-base text-black-bold mb-0.5">
+                                                            {t('activities.endDate')}
+                                                        </label>
+                                                        <Field
+                                                            type="date"
+                                                            name={`activities.${index}.end_date`}
+                                                            className="text-sm w-full p-2 border rounded-lg"
+                                                        />
+                                                        <ErrorMessage name={`activities.${index}.end_date`} component="div" className="text-red-500" />
+                                                    </div>
+
+                                                    {/* Demographics */}
+                                                    <div className="grid grid-cols-2 gap-1">
+                                                        <div className="mb-1">
+                                                            <div className="h-14">
+                                                                <label className="font-bold block text-base text-black-bold mb-0.5">
+                                                                    {t('activities.individualCount')}
+                                                                </label>
+                                                            </div>
+                                                            <Field
+                                                                type="number"
+                                                                name={`activities.${index}.individual_count`}
+                                                                className="text-sm w-full p-2 border rounded-lg"
+                                                            />
+                                                            <ErrorMessage name={`activities.${index}.individual_count`} component="div" className="text-red-500" />
+                                                        </div>
+
+                                                        <div className="mb-1">
+                                                            <div className="h-14">
+                                                                <label className="font-bold block text-base text-black-bold mb-0.5">
+                                                                    {t('activities.householdCount')}
+                                                                </label>
+                                                            </div>
+                                                            <Field
+                                                                type="number"
+                                                                name={`activities.${index}.household_count`}
+                                                                className="text-sm w-full p-2 border rounded-lg"
+                                                            />
+                                                            <ErrorMessage name={`activities.${index}.household_count`} component="div" className="text-red-500" />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Males and Females in one row */}
+                                                    <div className="grid grid-cols-2 gap-1">
+                                                        <div className="mb-1">
+                                                            <label className="font-bold block text-base text-black-bold mb-0.5">
+                                                                {t('activities.maleCount')}
+                                                            </label>
+                                                            <Field
+                                                                type="number"
+                                                                name={`activities.${index}.male_count`}
+                                                                className="text-sm w-full p-2 border rounded-lg"
+                                                            />
+                                                            <ErrorMessage name={`activities.${index}.male_count`} component="div" className="text-red-500" />
+                                                        </div>
+
+                                                        <div className="mb-1">
+                                                            <label className="font-bold block text-base text-black-bold mb-0.5">
+                                                                {t('activities.femaleCount')}
+                                                            </label>
+                                                            <Field
+                                                                type="number"
+                                                                name={`activities.${index}.female_count`}
+                                                                className="text-sm w-full p-2 border rounded-lg"
+                                                            />
+                                                            <ErrorMessage name={`activities.${index}.female_count`} component="div" className="text-red-500" />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Under 18 Males and Females in one row */}
+                                                    <div className="grid grid-cols-2 gap-1">
+                                                        <div className="mb-1">
+                                                            <label className="font-bold block text-base text-black-bold mb-0.5">
+                                                                {t('activities.under18Male')}
+                                                            </label>
+                                                            <Field
+                                                                type="number"
+                                                                name={`activities.${index}.under18_male`}
+                                                                className="text-sm w-full p-2 border rounded-lg"
+                                                            />
+                                                            <ErrorMessage name={`activities.${index}.under18_male`} component="div" className="text-red-500" />
+                                                        </div>
+
+                                                        <div className="mb-1">
+                                                            <label className="font-bold block text-base text-black-bold mb-0.5">
+                                                                {t('activities.under18Female')}
+                                                            </label>
+                                                            <Field
+                                                                type="number"
+                                                                name={`activities.${index}.under18_female`}
+                                                                className="text-sm w-full p-2 border rounded-lg"
+                                                            />
+                                                            <ErrorMessage name={`activities.${index}.under18_female`} component="div" className="text-red-500" />
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
