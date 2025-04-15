@@ -293,6 +293,12 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                                                 type="number"
                                                                 name={`activities.${index}.individual_count`}
                                                                 className="text-sm w-full p-2 border rounded-lg"
+                                                                onChange={(e) => {
+                                                                    const individualCount = parseInt(e.target.value) || 0;
+                                                                    const householdCount = Math.ceil(individualCount / 5);
+                                                                    setFieldValue(`activities.${index}.individual_count`, individualCount);
+                                                                    setFieldValue(`activities.${index}.household_count`, householdCount);
+                                                                }}
                                                             />
                                                             <ErrorMessage name={`activities.${index}.individual_count`} component="div" className="text-red-500" />
                                                         </div>
@@ -306,7 +312,8 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                                                             <Field
                                                                 type="number"
                                                                 name={`activities.${index}.household_count`}
-                                                                className="text-sm w-full p-2 border rounded-lg"
+                                                                className="text-sm w-full p-2 border rounded-lg bg-gray-100"
+                                                                disabled={true}
                                                             />
                                                             <ErrorMessage name={`activities.${index}.household_count`} component="div" className="text-red-500" />
                                                         </div>

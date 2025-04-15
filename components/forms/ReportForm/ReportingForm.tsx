@@ -94,7 +94,12 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                                 <label htmlFor="err_id" className="font-bold block text-base text-black-bold mb-1">
                                     {t('errId')}
                                 </label>
-                                <Field type="text" name="err_id" className="text-sm w-full p-2 border rounded-lg"/>
+                                <Field 
+                                    type="text" 
+                                    name="err_id" 
+                                    className="text-sm w-full p-2 border rounded-lg bg-gray-100" 
+                                    disabled={true}
+                                />
                                 <ErrorMessage name="err_id" component="div" />
                             </div>
 

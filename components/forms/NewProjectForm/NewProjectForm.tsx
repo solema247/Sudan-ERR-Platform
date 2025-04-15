@@ -64,9 +64,24 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
    const [isLoading, setLoading] = useState(false);
    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
    const [pendingSubmission, setPendingSubmission] = useState(null);
-
+   const [userErrId, setUserErrId] = useState('');
 
    useEffect(() => {
+     // Add this effect to fetch the user's ERR ID
+     const validateSession = async () => {
+       try {
+         const response = await fetch('/api/validate-session');
+         const data = await response.json();
+         if (data.success && data.user?.err_id) {
+           setUserErrId(data.user.err_id);
+         }
+       } catch (error) {
+         console.error('Error validating session:', error);
+       }
+     };
+
+     validateSession();
+
      /**
       * Fetches Select options for activities, expenses and localities (which are based on what state you have selected.)
       * 
@@ -224,7 +239,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
            <Formik
              initialValues={{
                date: '',
-               err: '',
+               err: userErrId,
                state: '',
                locality: '',
                project_objectives: '',
@@ -253,6 +268,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
                });
                setShowConfirmDialog(true);
              }}
+             enableReinitialize={true}
            >
              {({ isSubmitting, values, setFieldValue, errors, touched }) => (
                <Form className="space-y-3 bg-white p-3 rounded-lg">
@@ -270,10 +286,12 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
                  {/* ERR ID */}
                  <div className="mb-2">
                    <label className="font-bold block text-base text-black-bold mb-1">{t('errId')}</label>
-                   <Field name="err" type="text" className="text-sm w-full p-2 border rounded-lg" placeholder={t('enterErrId')} disabled={isLoading} />
-                   {touched.err && errors.err && (
-                     <div className="text-red-500 text-sm mt-1">{errors.err}</div>
-                   )}
+                   <Field
+                     name="err"
+                     type="text"
+                     className="text-sm w-full p-2 border rounded-lg bg-gray-100"
+                     disabled={true}
+                   />
                  </div>
 
                   {/* Objectives */}
