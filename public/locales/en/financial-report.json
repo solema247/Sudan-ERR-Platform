@@ -1,0 +1,17 @@
+{
+  "drafts": {
+    "title": "Financial Report Drafts",
+    "newReport": "Start New Report",
+    "noDrafts": "No draft reports found",
+    "reportDate": "Report Date",
+    "totalExpenses": "Total Expenses",
+    "totalGrant": "Total Grant",
+    "continue": "Continue",
+    "delete": "Delete",
+    "saveDraft": "Save Draft",
+    "draftSaved": "Draft saved successfully",
+    "saveError": "Failed to save draft",
+    "deleteError": "Failed to delete draft",
+    "confirmDelete": "Are you sure you want to delete this draft?"
+  }
+} 

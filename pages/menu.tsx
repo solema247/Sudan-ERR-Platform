@@ -15,6 +15,7 @@ const LogoImage = '/icons/icon-512x512.png';
 import Project from '../components/forms/NewProjectForm/Project';
 import ProgramReportForm from '../components/forms/ProgramReportForm/ReportingForm';
 import ProjectDrafts from '../components/forms/NewProjectForm/ProjectDrafts';
+import FinancialReportDrafts from '../components/forms/FinancialReportForm/FinancialReportDrafts';
 
 /**
  * Chat-style menu.
@@ -60,6 +61,8 @@ const Menu = () => {
     const [drafts, setDrafts] = useState<Project[]>([]);
     const [showDraftList, setShowDraftList] = useState(true);
     const [currentDraft, setCurrentDraft] = useState<Project | null>(null);
+    const [showFinancialDrafts, setShowFinancialDrafts] = useState(false);
+    const [financialDrafts, setFinancialDrafts] = useState([]);
 
     const router = useRouter();
     const errId = router.query.errId;
@@ -133,8 +136,11 @@ const Menu = () => {
 
     // Menu selection handler
     const handleMenuSelection = (menu: CurrentMenu) => {
-        console.log('Changing menu to:', menu);
         setCurrentMenu(menu);
+        // Reset draft-related states when menu changes
+        setShowFinancialDrafts(false);
+        setFinancialDrafts([]);
+        setCurrentDraft(null);
         setShowFillForm(false);
         setShowScanForm(false);
         setShowScanCustomForm(false);
@@ -167,6 +173,31 @@ const Menu = () => {
         if (workflow === Workflow.PROJECT_APPLICATION) setShowProjectApplication(true);
         if (workflow === Workflow.PROJECT_STATUS) setShowProjectStatus(true);
         if (workflow === Workflow.PROGRAM_FORM) setShowProgramForm(true);
+    };
+
+    // Add function to fetch drafts
+    const fetchFinancialDrafts = async (projectId: string) => {
+        try {
+            const response = await fetch(`/api/financial-report-drafts?project_id=${projectId}`, {
+                credentials: 'include'
+            });
+            
+            if (!response.ok) throw new Error('Failed to fetch drafts');
+            
+            const data = await response.json();
+            setFinancialDrafts(data.drafts);
+        } catch (error) {
+            console.error('Error fetching drafts:', error);
+        }
+    };
+
+    // Create a function to reset all form states
+    const resetFormStates = () => {
+        setShowFinancialDrafts(false);
+        setShowFillForm(false);
+        setShowScanForm(false);
+        setShowProgramForm(false);
+        setCurrentDraft(null);
     };
 
     return (
@@ -271,36 +302,51 @@ const Menu = () => {
             {/* Reporting Menu for Selected Project */}
             {currentMenu === CurrentMenu.REPORTING && selectedProject && (
                 <>
-                    <MessageBubble
-                        text={t('reportingInstructions', { project: selectedProject.project_objectives })}
-                        timestamp={getCurrentTimestamp()}
-                        fullWidth
-                    />
-                    <div className="grid grid-cols-1 space-y-2">
+                    <MessageBubble text={t('selectReportType')} />
+                    <div className="grid grid-cols-1 gap-2">
+                        <Button
+                            text={t('savedDrafts')}
+                            onClick={() => {
+                                resetFormStates();
+                                setShowFinancialDrafts(true);
+                                fetchFinancialDrafts(selectedProject.id);
+                            }}
+                            className="w-full"
+                        />
                         <Button
                             text={t('reportFillForm')}
-                            onClick={() => handleWorkflowSelection(Workflow.FILL_FORM)}
+                            onClick={() => {
+                                resetFormStates();
+                                createNewReportId();
+                                setShowFillForm(true);
+                            }}
                             className="w-full"
                         />
                         <Button
                             text={t('reportScanForm')}
-                            onClick={() => handleWorkflowSelection(Workflow.SCAN_FORM)}
+                            onClick={() => {
+                                resetFormStates();
+                                setShowScanForm(true);
+                            }}
                             className="w-full"
                         />
                         <Button
                             text={t('reportProgramForm')}
-                            onClick={() => handleWorkflowSelection(Workflow.PROGRAM_FORM)}
+                            onClick={() => {
+                                resetFormStates();
+                                setShowProgramForm(true);
+                            }}
                             className="w-full"
                         />
-                        <Button 
-                            text={t('selectDifferentProject')} 
-                            onClick={() => setSelectedProject(null)} 
-                            className="w-full" 
+                        <Button
+                            text={t('selectDifferentProject')}
+                            onClick={() => setSelectedProject(null)}
+                            className="w-full"
                         />
-                        <Button 
-                            text={t('returnToMainMenu')} 
-                            onClick={() => handleMenuSelection(CurrentMenu.MAIN)} 
-                            className="w-full" 
+                        <Button
+                            text={t('returnToMainMenu')}
+                            onClick={() => handleMenuSelection(CurrentMenu.MAIN)}
+                            className="w-full"
                         />
                     </div>
                 </>
@@ -317,8 +363,9 @@ const Menu = () => {
                         onSubmitAnotherForm={() => {
                             setShowFillForm(false);
                             createNewReportId();
-                            setTimeout(() => setShowFillForm(true), 0); // Reset workflow
+                            setTimeout(() => setShowFillForm(true), 0);
                         }}
+                        initialDraft={currentDraft}
                     />
                 </MessageBubble>
             )}
@@ -432,6 +479,45 @@ const Menu = () => {
             {showScanPrefillForm && (
                 <MessageBubble>
                     <ScanPrefillForm project={selectedProject} />
+                </MessageBubble>
+            )}
+
+            {/* Add drafts view section */}
+            {showFinancialDrafts && (
+                <MessageBubble>
+                    <FinancialReportDrafts
+                        drafts={financialDrafts}
+                        onEditDraft={async (draftId) => {
+                            try {
+                                const response = await fetch(`/api/financial-report-drafts?draft_id=${draftId}&project_id=${selectedProject.id}`, {
+                                    credentials: 'include'
+                                });
+                                
+                                if (!response.ok) throw new Error('Failed to fetch draft');
+                                
+                                const { draft } = await response.json();
+                                setCurrentDraft(draft);
+                                setShowFinancialDrafts(false);
+                                setShowFillForm(true);
+                            } catch (error) {
+                                console.error('Error loading draft:', error);
+                                alert(t('drafts.loadError'));
+                            }
+                        }}
+                        onDeleteDraft={(draftId) => {
+                            setFinancialDrafts(drafts => 
+                                drafts.filter(d => d.id !== draftId)
+                            );
+                        }}
+                        onNewReport={() => {
+                            setShowFinancialDrafts(false);
+                            setShowFillForm(true);
+                        }}
+                        onReturnToMenu={() => {
+                            setShowFinancialDrafts(false);
+                            handleMenuSelection(CurrentMenu.REPORTING);
+                        }}
+                    />
                 </MessageBubble>
             )}
         </ChatContainer>

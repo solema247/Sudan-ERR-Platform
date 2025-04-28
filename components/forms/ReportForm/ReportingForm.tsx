@@ -32,15 +32,17 @@ interface ReportingFormProps {
     errId: string;
     reportId: string;
     project: Project;
-    onReturnToMenu: ()=> void;
-    onSubmitAnotherForm: ()=> void; // TODO: Figure out if we still need this.
+    onReturnToMenu: () => void;
+    onSubmitAnotherForm: () => void;
+    initialDraft?: any;
 }
 
 
-const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project, onReturnToMenu, onSubmitAnotherForm }: ReportingFormProps) => {
+const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project, onReturnToMenu, onSubmitAnotherForm, initialDraft }: ReportingFormProps) => {
     const { t, i18n } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -50,7 +52,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
         fetchData();
     }, [i18n.language, project]);
 
-    const initialValues = getInitialValues(errId);
+    const initialValues = getInitialValues(errId, initialDraft);
     const validationSchema = createValidationScheme(t);
     const newExpense = expenseValues;
 
@@ -65,6 +67,44 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
             const amount = parseFloat(expense.amount) || 0;
             return sum + amount;
         }, 0);
+    };
+
+    const handleSaveDraft = async (values: any) => {
+        setIsSaving(true);
+        try {
+            const response = await fetch('/api/financial-report-drafts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    project_id: project.id,
+                    summary: {
+                        err_id: values.err_id,
+                        report_date: values.date,
+                        total_grant: values.total_grant,
+                        total_other_sources: values.total_other_sources,
+                        excess_expenses: values.excess_expenses,
+                        surplus_use: values.surplus_use,
+                        lessons: values.lessons,
+                        training: values.training,
+                        total_expenses: values.total_expenses
+                    },
+                    expenses: values.expenses
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save draft');
+            }
+
+            alert(t('drafts.draftSaved'));
+            onReturnToMenu(); // Return to menu after successful save
+        } catch (error) {
+            console.error('Error saving draft:', error);
+            alert(t('drafts.saveError'));
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -220,13 +260,19 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                                 <ErrorMessage name="total_expenses" component="div" />
                             </div>
 
-                            <div className="mb-10">
+                            <div className="flex justify-between mb-10">
                                 <Button 
-                                    text= {t('submitReport')} 
-                                    disabled={isSubmitting}
+                                    text={t('drafts.saveDraft')}
+                                    onClick={() => handleSaveDraft(values)}
+                                    disabled={isSaving}
+                                    variant="secondary"
+                                />
+                                <Button 
+                                    text={t('submitReport')}
                                     onClick={async () =>
                                         await submitEntireForm(values, reportId, project, setIsFormSubmitted)
                                     }  
+                                    disabled={isSubmitting}
                                 />
                             </div>
                         </Form>
@@ -274,6 +320,24 @@ async function populateExpenses(project: Project) {
 
 const submitEntireForm = async (values, reportId: string, project: Project, setIsFormSubmitted) => {
     try {
+        // First delete any existing draft records
+        const { error: expenseError } = await newSupabase
+            .from('err_expense')
+            .delete()
+            .eq('project_id', project.id)
+            .eq('is_draft', true);
+
+        if (expenseError) throw expenseError;
+
+        const { error: summaryError } = await newSupabase
+            .from('err_summary')
+            .delete()
+            .eq('project_id', project.id)
+            .eq('is_draft', true);
+
+        if (summaryError) throw summaryError;
+
+        // Then submit the new records
         await submitSummary(values, reportId, project);
         await submitExpenses(values.expenses, reportId, project.id);
         setIsFormSubmitted(true);
