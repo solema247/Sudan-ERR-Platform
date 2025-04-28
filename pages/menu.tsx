@@ -14,6 +14,7 @@ import ScanPrefillForm from '../pages/scan-prefill-form';
 const LogoImage = '/icons/icon-512x512.png'; 
 import Project from '../components/forms/NewProjectForm/Project';
 import ProgramReportForm from '../components/forms/ProgramReportForm/ReportingForm';
+import ProjectDrafts from '../components/forms/NewProjectForm/ProjectDrafts';
 
 /**
  * Chat-style menu.
@@ -26,7 +27,7 @@ enum Workflow {
     SCAN_CUSTOM_FORM,
     PROJECT_APPLICATION,
     PROJECT_STATUS,
-    PROGRAM_FORM  // Add new workflow type
+    PROGRAM_FORM
 }
 
 enum CurrentMenu {
@@ -55,6 +56,10 @@ const Menu = () => {
     const [selectedProject, setSelectedProject] = useState<Project | null>(null); // Stores selected project
     const [activeReportId, setActiveReportId] = useState(null)
     const [showScanPrefillForm, setShowScanPrefillForm] = useState(false);
+    const [showProjectDrafts, setShowProjectDrafts] = useState(false);
+    const [drafts, setDrafts] = useState<Project[]>([]);
+    const [showDraftList, setShowDraftList] = useState(true);
+    const [currentDraft, setCurrentDraft] = useState<Project | null>(null);
 
     const router = useRouter();
     const errId = router.query.errId;
@@ -93,6 +98,27 @@ const Menu = () => {
         }
     }, [currentMenu]);
 
+    // Add useEffect to fetch drafts
+    useEffect(() => {
+        const fetchDrafts = async () => {
+            if (showProjectApplication) {
+                try {
+                    const response = await fetch('/api/project-drafts', {
+                        credentials: 'include'
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        setDrafts(data.drafts);
+                    }
+                } catch (error) {
+                    console.error('Error fetching drafts:', error);
+                }
+            }
+        };
+
+        fetchDrafts();
+    }, [showProjectApplication]);
+
     const createNewReportId = () => {
         setActiveReportId(crypto.randomUUID());
     }
@@ -107,16 +133,16 @@ const Menu = () => {
 
     // Menu selection handler
     const handleMenuSelection = (menu: CurrentMenu) => {
-        console.log('Changing menu to:', menu);  // Debug log
+        console.log('Changing menu to:', menu);
         setCurrentMenu(menu);
-        // Reset all other states
         setShowFillForm(false);
         setShowScanForm(false);
         setShowScanCustomForm(false);
         setShowProjectApplication(false);
         setShowProjectStatus(false);
         setShowScanPrefillForm(false);
-        setShowProgramForm(false);  // Reset program form state
+        setShowProgramForm(false);
+        setShowDraftList(true); // Reset draft list view
         setSelectedProject(null);
     };
 
@@ -129,7 +155,8 @@ const Menu = () => {
         setShowProjectApplication(false);
         setShowProjectStatus(false);
         setShowScanPrefillForm(false);
-        setShowProgramForm(false);  // Reset program form state
+        setShowProgramForm(false);
+        setShowProjectDrafts(false);  // Reset draft view
 
         if (workflow === Workflow.FILL_FORM) {
             createNewReportId();
@@ -139,7 +166,7 @@ const Menu = () => {
         if (workflow === Workflow.SCAN_CUSTOM_FORM) setShowScanCustomForm(true);
         if (workflow === Workflow.PROJECT_APPLICATION) setShowProjectApplication(true);
         if (workflow === Workflow.PROJECT_STATUS) setShowProjectStatus(true);
-        if (workflow === Workflow.PROGRAM_FORM) setShowProgramForm(true);  // Handle program form
+        if (workflow === Workflow.PROGRAM_FORM) setShowProgramForm(true);
     };
 
     return (
@@ -317,7 +344,35 @@ const Menu = () => {
 
             {showProjectApplication && (
                 <MessageBubble>
-                    <ProjectApplication onReturnToMenu={() => handleMenuSelection(CurrentMenu.PROJECTS)} />
+                    {showDraftList ? (
+                        <ProjectDrafts
+                            drafts={drafts}
+                            onEditDraft={(draftId) => {
+                                const draftToEdit = drafts.find(d => d.id === draftId);
+                                setCurrentDraft(draftToEdit);
+                                setShowDraftList(false);
+                            }}
+                            onDeleteDraft={(draftId) => {
+                                setDrafts(drafts.filter(d => d.id !== draftId));
+                            }}
+                            onNewProject={() => {
+                                setCurrentDraft(null);
+                                setShowDraftList(false);
+                            }}
+                            onReturnToMenu={() => handleMenuSelection(CurrentMenu.PROJECTS)}
+                        />
+                    ) : (
+                        <ProjectApplication 
+                            onReturnToMenu={() => setShowDraftList(true)}
+                            initialValues={currentDraft}
+                            onDraftSubmitted={() => {
+                                if (currentDraft) {
+                                    setDrafts(drafts.filter(d => d.id !== currentDraft.id));
+                                }
+                                setShowDraftList(true);
+                            }}
+                        />
+                    )}
                 </MessageBubble>
             )}
 

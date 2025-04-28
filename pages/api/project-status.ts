@@ -24,7 +24,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 .select(
                     'id, state, locality, planned_activities, expenses, status, submitted_at'
                 )
-                .eq('err_id', user.err_id); // Changed from 'err' to 'err_id'
+                .eq('err_id', user.err_id)
+                .eq('is_draft', false); // Add condition to exclude drafts
 
             if (error) {
                 console.error('Error fetching project applications:', error);

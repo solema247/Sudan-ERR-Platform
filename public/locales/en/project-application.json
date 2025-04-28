@@ -105,5 +105,22 @@
   "validation": {
     "required": "This field is required",
     "pleaseFixErrors": "Please fix the highlighted errors before submitting"
+  },
+  "drafts": {
+    "title": "Project Drafts",
+    "newProject": "Start New Project",
+    "untitled": "Untitled Project",
+    "lastModified": "Last modified",
+    "continue": "Continue Editing",
+    "delete": "Delete Draft",
+    "saved": "Draft Saved",
+    "saving": "Saving...",
+    "confirmDelete": "Are you sure you want to delete this draft?",
+    "deleteError": "Error deleting draft",
+    "noDrafts": "No saved drafts found"
+  },
+  "actions": {
+    "saveDraft": "Save Draft",
+    "submit": "Submit Project"
   }
 }

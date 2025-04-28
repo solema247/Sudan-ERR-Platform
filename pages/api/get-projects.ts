@@ -15,26 +15,32 @@ export default async function handler(
     }
 
     try {
-        // Extract the token from the cookies
         const token = req.cookies.token;
-
-        // Validate the token
         const user = validateJWT(token);
+        
         if (!user) {
             return res
                 .status(401)
                 .json({ success: false, message: "Unauthorized" });
         }
 
-        // Extract user's ERR ID from the validated token
         const { err_id } = user;
+        const { includeDrafts } = req.query; // Optional query parameter
 
-        // Query new database for active projects for this ERR ID
-        const { data: projects, error } = await newSupabase
+        const query = newSupabase
             .from("err_projects")
             .select("id, project_objectives, state, locality")
-            .eq("err_id", err_id)
-            .eq("status", "active");
+            .eq("err_id", err_id);
+
+        // Only include non-draft projects unless specifically requested
+        if (!includeDrafts) {
+            query.eq("is_draft", false);
+        }
+
+        // Only get active projects
+        query.eq("status", "active");
+
+        const { data: projects, error } = await query;
 
         if (error) {
             console.error("Error fetching projects:", error.message);

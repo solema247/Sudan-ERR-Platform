@@ -17,6 +17,8 @@ import NewProjectActivities from './NewProjectActivities';
 
 interface NewProjectApplicationProps {
   onReturnToMenu: () => void;
+  initialValues?: Project | null;
+  onDraftSubmitted?: () => void;
 }
 
 interface ConfirmDialogProps {
@@ -53,7 +55,11 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ isOpen, onConfirm, onCanc
   );
 };
 
-const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu }) => {
+const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ 
+    onReturnToMenu,
+    initialValues,
+    onDraftSubmitted
+}) => {
    const { t, i18n } = useTranslation('projectApplication');
    const [availableRegions, setAvailableRegions] = useState([]);
    const [localitiesDict, setLocalitiesDict] = useState({});
@@ -170,7 +176,9 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
      setPendingSubmission({ 
        values: {
          ...values,
-         currentLanguage: i18n.language // Add current language to form data
+         id: initialValues?.id,
+         currentLanguage: i18n.language,
+         is_draft: false
        }, 
        setSubmitting 
      });
@@ -200,6 +208,9 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
          const responseData = await res.json();
          console.log("Submission successful:", responseData);
          setIsFormSubmitted(true);
+         if (onDraftSubmitted) {
+           onDraftSubmitted();
+         }
        } else {
          const errorData = await res.json();
          console.error('Submission failed with status:', res.status);
@@ -238,23 +249,23 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
          <FormBubble removeBoxShadow>
            <Formik
              initialValues={{
-               date: '',
+               date: initialValues?.date || '',
                err: userErrId,
-               state: '',
-               locality: '',
-               project_objectives: '',
-               intended_beneficiaries: '',
-               estimated_beneficiaries: '',
-               planned_activities: [],
-               estimated_timeframe: '',
-               additional_support: '',
-               banking_details: '',
-               programOfficerName: '',
-               programOfficerPhone: '',
-               reportingOfficerName: '',
-               reportingOfficerPhone: '',
-               financeOfficerName: '',
-               financeOfficerPhone: '',
+               state: initialValues?.state || '',
+               locality: initialValues?.locality || '',
+               project_objectives: initialValues?.project_objectives || '',
+               intended_beneficiaries: initialValues?.intended_beneficiaries || '',
+               estimated_beneficiaries: initialValues?.estimated_beneficiaries || '',
+               planned_activities: initialValues?.planned_activities || [],
+               estimated_timeframe: initialValues?.estimated_timeframe || '',
+               additional_support: initialValues?.additional_support || '',
+               banking_details: initialValues?.banking_details || '',
+               programOfficerName: initialValues?.program_officer_name || '',
+               programOfficerPhone: initialValues?.program_officer_phone || '',
+               reportingOfficerName: initialValues?.reporting_officer_name || '',
+               reportingOfficerPhone: initialValues?.reporting_officer_phone || '',
+               financeOfficerName: initialValues?.finance_officer_name || '',
+               financeOfficerPhone: initialValues?.finance_officer_phone || '',
              }}
              validationSchema={validationSchema}
              onSubmit={(values, { setSubmitting }) => {
@@ -262,7 +273,9 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
                setPendingSubmission({ 
                  values: {
                    ...values,
-                   currentLanguage: i18n.language
+                   id: initialValues?.id,
+                   currentLanguage: i18n.language,
+                   is_draft: false
                  }, 
                  setSubmitting 
                });
@@ -483,11 +496,56 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ onReturnToMenu })
                        {t('validation.pleaseFixErrors')}
                      </div>
                    )}
-                   <Button
-                     type="submit"
-                     text={isLoading ? t('button.processing') : t('button.submit')}
-                     disabled={isSubmitting || isLoading}
-                   />
+                   <div className="flex space-x-4">
+                     <Button
+                       type="button"
+                       text={t('actions.saveDraft')}
+                       onClick={async () => {
+                         const { 
+                             err,
+                             programOfficerName,
+                             programOfficerPhone,
+                             reportingOfficerName,
+                             reportingOfficerPhone,
+                             financeOfficerName,
+                             financeOfficerPhone,
+                             ...otherValues 
+                         } = values;  // Destructure all camelCase fields
+
+                         const draftData = {
+                             ...otherValues,
+                             err_id: err,
+                             program_officer_name: programOfficerName,
+                             program_officer_phone: programOfficerPhone,
+                             reporting_officer_name: reportingOfficerName,
+                             reporting_officer_phone: reportingOfficerPhone,
+                             finance_officer_name: financeOfficerName,
+                             finance_officer_phone: financeOfficerPhone,
+                             is_draft: true
+                         };
+
+                         try {
+                             const response = await fetch('/api/project-drafts', {
+                                 method: 'POST',
+                                 headers: { 'Content-Type': 'application/json' },
+                                 body: JSON.stringify(draftData),
+                                 credentials: 'include'
+                             });
+                             if (!response.ok) throw new Error('Failed to save draft');
+                             alert(t('drafts.saved'));
+                         } catch (error) {
+                             console.error('Error saving draft:', error);
+                             alert(t('drafts.saveError'));
+                         }
+                       }}
+                       disabled={isSubmitting || isLoading}
+                     />
+                     <Button
+                       type="submit"
+                       text={t('actions.submit')}
+                       disabled={isSubmitting || isLoading}
+                     />
+                   </div>
                  </div>
                </Form>
              )}

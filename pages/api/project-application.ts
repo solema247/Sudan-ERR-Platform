@@ -89,6 +89,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (req.method === 'POST') {
             const { 
+                id,
                 currentLanguage, 
                 err,
                 programOfficerName,
@@ -106,20 +107,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
 
             try {
-                const { data, error } = await newSupabase.from('err_projects').insert([
-                    {
-                        ...formData,
-                        err_id: err,
-                        program_officer_name: programOfficerName,
-                        program_officer_phone: programOfficerPhone,
-                        reporting_officer_name: reportingOfficerName,
-                        reporting_officer_phone: reportingOfficerPhone,
-                        finance_officer_name: financeOfficerName,
-                        finance_officer_phone: financeOfficerPhone,
-                        language: currentLanguage || 'en',
-                        status: 'pending'
-                    },
-                ]);
+                const projectData = {
+                    ...formData,
+                    err_id: err,
+                    program_officer_name: programOfficerName,
+                    program_officer_phone: programOfficerPhone,
+                    reporting_officer_name: reportingOfficerName,
+                    reporting_officer_phone: reportingOfficerPhone,
+                    finance_officer_name: financeOfficerName,
+                    finance_officer_phone: financeOfficerPhone,
+                    language: currentLanguage || 'en',
+                    status: 'pending',
+                    is_draft: false
+                };
+
+                const { data, error } = id 
+                    ? await newSupabase  // Update existing draft
+                        .from('err_projects')
+                        .update(projectData)
+                        .eq('id', id)
+                        .single()
+                    : await newSupabase  // Insert new project
+                        .from('err_projects')
+                        .insert([projectData])
+                        .single();
 
                 if (error) {
                     console.error('Error saving application:', error);
