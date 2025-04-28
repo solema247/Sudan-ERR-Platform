@@ -79,36 +79,37 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     }
   };
 
-  const handleFormSubmit = (formData: any, isBulkProcessing?: boolean) => {
-    if (isBulkProcessing) {
-      // For bulk processing, just let the BulkPdfProcessor handle the flow
-      return;
+  const handleFormSubmit = (formData: any, isDraft?: boolean) => {
+    if (isDraft) {
+        // For drafts, just return to menu
+        onReturnToMenu();
+        return;
     }
 
-    // For single form processing, show success message
+    // For normal submission, show success message
     setChatSteps([
-      <ScanBubble key="uploadSuccess">
-        <div>
-          <p>{t("form_success")}</p>
-          <div className="flex space-x-4 mt-2">
-            <Button
-              text={t("scan_another_form")}
-              onClick={() => {
-                setFile(null);
-                setStructuredData(null);
-                setChatSteps([]); 
-                if (onSubmitAnotherForm) {
-                  onSubmitAnotherForm();
-                }
-              }}
-            />
-            <Button
-              text={t("return_to_menu")}
-              onClick={onReturnToMenu}
-            />
-          </div>
-        </div>
-      </ScanBubble>
+        <ScanBubble key="uploadSuccess">
+            <div>
+                <p>{t("form_success")}</p>
+                <div className="flex space-x-4 mt-2">
+                    <Button
+                        text={t("scan_another_form")}
+                        onClick={() => {
+                            setFile(null);
+                            setStructuredData(null);
+                            setChatSteps([]);
+                            if (onSubmitAnotherForm) {
+                                onSubmitAnotherForm();
+                            }
+                        }}
+                    />
+                    <Button
+                        text={t("return_to_menu")}
+                        onClick={onReturnToMenu}
+                    />
+                </div>
+            </div>
+        </ScanBubble>
     ]);
     
     setStructuredData(null);

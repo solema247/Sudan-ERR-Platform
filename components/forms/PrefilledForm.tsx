@@ -41,7 +41,7 @@ interface PrefilledFormProps {
       training_needs: string;
     };
   };
-  onFormSubmit: (formData?: any) => void;
+  onFormSubmit: (formData?: any, isDraft?: boolean) => void;
   project?: any;
 }
 
@@ -356,6 +356,50 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
     }
   };
 
+  // Modify handleSaveDraft function
+  const handleSaveDraft = async (formData: any) => {
+    try {
+        const response = await fetch('/api/financial-report-drafts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                project_id: project.id,
+                summary: {
+                    err_id: formData.err_id,
+                    report_date: formData.date,
+                    total_grant: formData.financial_summary.total_grant_received,
+                    total_other_sources: formData.financial_summary.total_other_sources,
+                    excess_expenses: formData.additional_questions.excess_expenses,
+                    surplus_use: formData.additional_questions.surplus_use,
+                    lessons: formData.additional_questions.lessons_learned,
+                    training: formData.additional_questions.training_needs,
+                    total_expenses: formData.financial_summary.total_expenses
+                },
+                expenses: formData.expenses.map(expense => ({
+                    activity: expense.activity,
+                    description: expense.description,
+                    amount: expense.amount,
+                    payment_date: expense.payment_date,
+                    payment_method: expense.payment_method,
+                    receipt_no: expense.receipt_no,
+                    seller: expense.seller
+                }))
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to save draft');
+        }
+
+        alert(t('drafts.draftSaved'));
+        onFormSubmit(undefined, true); // Pass true to indicate this is a draft save
+    } catch (error) {
+        console.error('Error saving draft:', error);
+        alert(t('drafts.saveError'));
+    }
+  };
+
   return (
     <div className="space-y-6">
       <label>
@@ -625,15 +669,24 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
         </label>
       </div>
 
-      <Button
-        onClick={async (e) => {
-          e.preventDefault();
-          await handleFormSubmit(formData);
-        }}
-        disabled={isSubmitting}
-        text={isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
-        className="w-full py-2 px-4 bg-primaryGreen text-white rounded hover:bg-green-700"
-      />
+      <div className="flex justify-between gap-4 mt-6">
+        <Button
+            onClick={() => handleSaveDraft(formData)}
+            disabled={isSubmitting}
+            text={t("drafts.saveDraft")}
+            variant="secondary"
+            className="w-full"
+        />
+        <Button
+            onClick={async (e) => {
+                e.preventDefault();
+                await handleFormSubmit(formData);
+            }}
+            disabled={isSubmitting}
+            text={isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
+            className="w-full"
+        />
+      </div>
     </div>
   );
 };
