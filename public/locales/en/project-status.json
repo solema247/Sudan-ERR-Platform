@@ -8,6 +8,7 @@
   "pending": "Pending",
   "approved": "Approved",
   "declined": "Declined",
+  "active": "Active",
   "noProjectsFound": "No projects found.",
   "loading": "Loading...",
   "returnToMenu": "Return to Menu"

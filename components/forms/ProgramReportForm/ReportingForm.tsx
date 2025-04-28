@@ -404,8 +404,21 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
                             />
                         </div>
 
-                        <div className="flex justify-center mt-8">
-                            <Button text={t('submit')} type="submit" />
+                        <div className="flex justify-center gap-4 mt-8">
+                            <Button 
+                                text={t('saveDraft')} 
+                                type="button"
+                                className="bg-green-600 hover:bg-green-700" 
+                                onClick={() => {
+                                    // TODO: Implement draft saving functionality
+                                    console.log('Save draft clicked');
+                                }}
+                            />
+                            <Button 
+                                text={t('submit')} 
+                                type="submit"
+                                className="bg-green-600 hover:bg-green-700" 
+                            />
                         </div>
                     </Form>
                 )}

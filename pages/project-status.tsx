@@ -54,7 +54,13 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu }) => {
                                 {t('project')}: {project.title}
                             </h3>
                             <p>
-                                <strong>{t('status')}:</strong> {t(project.status)}
+                                <strong>{t('status')}:</strong>{' '}
+                                <span className={
+                                    project.status === 'active' ? 'text-green-600' : 
+                                    project.status === 'pending' ? 'text-orange-500' : ''
+                                }>
+                                    {t(project.status)}
+                                </span>
                             </p>
                             <p>
                                 <strong>{t('submittedAt')}:</strong>{' '}

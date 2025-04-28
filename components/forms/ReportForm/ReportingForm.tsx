@@ -262,10 +262,10 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
 
                             <div className="flex justify-between mb-10">
                                 <Button 
-                                    text={t('drafts.saveDraft')}
+                                    text={t('saveDraft')}
                                     onClick={() => handleSaveDraft(values)}
                                     disabled={isSaving}
-                                    variant="secondary"
+                                    className="bg-primaryGreen hover:bg-green-700"
                                 />
                                 <Button 
                                     text={t('submitReport')}
@@ -273,6 +273,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                                         await submitEntireForm(values, reportId, project, setIsFormSubmitted)
                                     }  
                                     disabled={isSubmitting}
+                                    className="bg-primaryGreen hover:bg-green-700"
                                 />
                             </div>
                         </Form>

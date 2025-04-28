@@ -20,5 +20,7 @@
   "selectDifferentProject": "اختر مشروعًا مختلفًا لمتابعة التقرير.",
   "feedback": "ملاحظات أو تعليقات",
   "feedbackInstructions": "يرجى اختيار خيار ملاحظات أو تعليقات",
-  "appFeedback": "ملاحظات أو تعليقات للتطبيق"
+  "appFeedback": "ملاحظات أو تعليقات للتطبيق",
+  "selectReportType": "اختر نوع التقرير",
+  "savedDrafts": "المسودات المحفوظة"
 }

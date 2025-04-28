@@ -118,19 +118,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     finance_officer_phone: financeOfficerPhone,
                     language: currentLanguage || 'en',
                     status: 'pending',
-                    is_draft: false
+                    is_draft: false,
+                    last_modified: new Date().toISOString(),
+                    submitted_at: new Date().toISOString(),
+                    created_by: user.err_id
                 };
 
-                const { data, error } = id 
-                    ? await newSupabase  // Update existing draft
+                // First check if a draft exists for this user
+                const { data: existingDraft } = await newSupabase
+                    .from('err_projects')
+                    .select('id')
+                    .eq('created_by', user.err_id)
+                    .eq('is_draft', true)
+                    .single();
+
+                let query;
+                if (id || existingDraft?.id) {
+                    // Update existing draft or project
+                    const projectId = id || existingDraft?.id;
+                    query = newSupabase
                         .from('err_projects')
                         .update(projectData)
-                        .eq('id', id)
-                        .single()
-                    : await newSupabase  // Insert new project
+                        .eq('id', projectId)
+                        .eq('created_by', user.err_id)
+                        .select()
+                        .single();
+                } else {
+                    // Create new project
+                    query = newSupabase
                         .from('err_projects')
                         .insert([projectData])
+                        .select()
                         .single();
+                }
+
+                const { data, error } = await query;
 
                 if (error) {
                     console.error('Error saving application:', error);

@@ -64,5 +64,6 @@
   "removeExpense": "إزالة هذه النفقات",
   "totalExpenses": "إجمالي النفقات",
   "activitiesAndExpenses": "الأنشطة والنفقات",
-  "chooseFiles": "اختر الملفات"
+  "chooseFiles": "اختر الملفات",
+  "saveDraft": "حفظ المسودة"
 }

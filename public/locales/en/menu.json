@@ -20,5 +20,7 @@
   "selectDifferentProject": "Select a Different Project",
   "feedback": "Feedback",
   "feedbackInstructions": "Please select an option for feedback.",
-  "appFeedback": "App Feedback"
+  "appFeedback": "App Feedback",
+  "selectReportType": "Select report type",
+  "savedDrafts": "Saved Drafts"
 }

@@ -305,15 +305,6 @@ const Menu = () => {
                     <MessageBubble text={t('selectReportType')} />
                     <div className="grid grid-cols-1 gap-2">
                         <Button
-                            text={t('savedDrafts')}
-                            onClick={() => {
-                                resetFormStates();
-                                setShowFinancialDrafts(true);
-                                fetchFinancialDrafts(selectedProject.id);
-                            }}
-                            className="w-full"
-                        />
-                        <Button
                             text={t('reportFillForm')}
                             onClick={() => {
                                 resetFormStates();
@@ -335,6 +326,15 @@ const Menu = () => {
                             onClick={() => {
                                 resetFormStates();
                                 setShowProgramForm(true);
+                            }}
+                            className="w-full"
+                        />
+                        <Button
+                            text={t('savedDrafts')}
+                            onClick={() => {
+                                resetFormStates();
+                                setShowFinancialDrafts(true);
+                                fetchFinancialDrafts(selectedProject.id);
                             }}
                             className="w-full"
                         />

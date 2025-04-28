@@ -61,5 +61,6 @@
   "phoneNumber": "Phone Number",
   "remove": "Remove",
   "totalExpenses": "Total expenses",
-  "activitiesAndExpenses": "Activities and expenses"
+  "activitiesAndExpenses": "Activities and expenses",
+  "saveDraft": "Save Draft"
 }
