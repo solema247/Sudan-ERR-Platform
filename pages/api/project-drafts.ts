@@ -47,6 +47,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (req.method === 'POST') {
             const { id, ...formData } = req.body;
             
+            console.log('Received draft save request with ID:', id);
+            
             const draftData = {
                 ...formData,
                 is_draft: true,
@@ -54,19 +56,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 last_modified: new Date().toISOString()
             };
 
-            const { data, error } = id 
-                ? await newSupabase
-                    .from('err_projects')
-                    .update(draftData)
-                    .eq('id', id)
-                    .eq('created_by', user.err_id)
-                    .single()
-                : await newSupabase
-                    .from('err_projects')
-                    .insert([draftData])
-                    .single();
+            try {
+                let result;
+                if (id) {
+                    console.log('Updating existing draft:', id);
+                    const { data, error } = await newSupabase
+                        .from('err_projects')
+                        .update(draftData)
+                        .eq('id', id)
+                        .eq('created_by', user.err_id)
+                        .select()
+                        .single();
+                        
+                    if (error) throw error;
+                    result = data;
+                } else {
+                    // Create new draft
+                    const { data, error } = await newSupabase
+                        .from('err_projects')
+                        .insert([draftData])
+                        .select()
+                        .single();
+                        
+                    if (error) throw error;
+                    result = data;
+                }
 
-            if (error) {
+                return res.status(200).json({
+                    success: true,
+                    draft: result
+                });
+            } catch (error) {
                 console.error('Error saving draft:', error);
                 return res.status(500).json({
                     success: false,
@@ -74,11 +94,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     error: error.message
                 });
             }
-
-            return res.status(200).json({
-                success: true,
-                draft: data
-            });
         }
 
         if (req.method === 'DELETE') {
