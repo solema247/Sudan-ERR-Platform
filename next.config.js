@@ -15,7 +15,11 @@ try {
 }
 
 const nextConfig = {
-    i18n,
+    i18n: {
+        ...i18n,
+        defaultLocale: 'ar',
+        locales: ['ar', 'en', 'es']
+    },
     webpack: (config) => {
         config.resolve.alias.canvas = false
         return config

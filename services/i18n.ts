@@ -50,8 +50,8 @@ i18n.use(initReactI18next).init({
       home: require("../public/locales/es/home.json"),
     },
   },
-  lng: "en", // Default language
-  fallbackLng: "en", // Fallback language
+  lng: "ar", // Changed from "en" to "ar"
+  fallbackLng: "ar", // Changed from "en" to "ar"
   interpolation: {
     escapeValue: false, // React already escapes values
   },
