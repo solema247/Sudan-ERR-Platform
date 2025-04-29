@@ -674,8 +674,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
             onClick={() => handleSaveDraft(formData)}
             disabled={isSubmitting}
             text={t("saveDraft")}
-            variant="secondary"
-            className="w-full"
+            className="w-full bg-gray-100 hover:bg-gray-200"
         />
         <Button
             onClick={async (e) => {

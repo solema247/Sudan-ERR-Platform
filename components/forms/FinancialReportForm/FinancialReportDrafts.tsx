@@ -71,9 +71,11 @@ const FinancialReportDrafts: React.FC<FinancialReportDraftsProps> = ({
 
                 <div className="mt-4 mb-4">
                     {drafts.length === 0 ? (
-                        <MessageBubble className="text-center">
-                            {tFinancial('drafts.noDrafts')}
-                        </MessageBubble>
+                        <div className="text-center">
+                            <MessageBubble>
+                                {tFinancial('drafts.noDrafts')}
+                            </MessageBubble>
+                        </div>
                     ) : (
                         <div className="space-y-4">
                             {drafts.map((draft) => (

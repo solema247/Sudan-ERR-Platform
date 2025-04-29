@@ -132,6 +132,29 @@ const Menu = () => {
         }
     }, [showFinancialDrafts, selectedProject]);
 
+    // Add this useEffect after the other useEffects
+    useEffect(() => {
+        const fetchProjectDrafts = async () => {
+            try {
+                const response = await fetch('/api/project-drafts', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    setDrafts(data.drafts || []);
+                } else {
+                    console.error('Error fetching project drafts:', data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching project drafts:', error);
+            }
+        };
+
+        if (showProjectDrafts) {
+            fetchProjectDrafts();
+        }
+    }, [showProjectDrafts]);
+
     const createNewReportId = () => {
         setActiveReportId(crypto.randomUUID());
     }
@@ -180,7 +203,11 @@ const Menu = () => {
         }
         if (workflow === Workflow.SCAN_FORM) setShowScanForm(true);
         if (workflow === Workflow.SCAN_CUSTOM_FORM) setShowScanCustomForm(true);
-        if (workflow === Workflow.PROJECT_APPLICATION) setShowProjectApplication(true);
+        if (workflow === Workflow.PROJECT_APPLICATION) {
+            setShowProjectApplication(true);
+            setShowProjectDrafts(true);
+            setShowDraftList(true);
+        }
         if (workflow === Workflow.PROJECT_STATUS) setShowProjectStatus(true);
         if (workflow === Workflow.PROGRAM_FORM) setShowProgramForm(true);
     };
@@ -390,7 +417,10 @@ const Menu = () => {
                 <MessageBubble>
                     {showDraftList ? (
                         <ProjectDrafts
-                            drafts={drafts}
+                            drafts={drafts.map(draft => ({
+                                ...draft,
+                                last_modified: draft.last_modified || new Date().toISOString()
+                            }))}
                             onEditDraft={(draftId) => {
                                 const draftToEdit = drafts.find(d => d.id === draftId);
                                 setCurrentDraft(draftToEdit);
@@ -428,7 +458,6 @@ const Menu = () => {
 
             {showProgramForm && (
                 <MessageBubble>
-                    {console.log('Rendering ProgramReportForm with draft:', currentDraft)}
                     <ProgramReportForm
                         project={selectedProject}
                         onReturnToMenu={() => handleMenuSelection(CurrentMenu.REPORTING)}
@@ -552,7 +581,7 @@ const Menu = () => {
                                         suggestions: draft.suggestions || '',
                                         reporting_person: draft.reporting_person || '',
                                         activities: draft.err_program_reach?.map(activity => ({
-                                            id: activity.id,  // Include activity ID
+                                            id: activity.id,
                                             activity_name: activity.activity_name || '',
                                             activity_goal: activity.activity_goal || '',
                                             location: activity.location || '',
@@ -564,8 +593,12 @@ const Menu = () => {
                                             female_count: activity.female_count || 0,
                                             under18_male: activity.under18_male || 0,
                                             under18_female: activity.under18_female || 0
-                                        })) || []
-                                    };
+                                        })) || [],
+                                        // Add required Project properties
+                                        project_objectives: draft.project_objectives || '',
+                                        state: draft.state || '',
+                                        locality: draft.locality || ''
+                                    } as Project; // Type assertion to Project
 
                                     console.log('Formatted draft:', formattedDraft);
                                     setCurrentDraft(formattedDraft);

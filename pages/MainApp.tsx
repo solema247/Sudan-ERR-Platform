@@ -52,6 +52,10 @@ const MainApp = ({ onLogout }) => {
     onLogout();
   };
 
+  const handleLCCWebsite = () => {
+    window.open('https://lccsudan.org/', '_blank');
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
       <div className="text-center mb-8">
@@ -66,6 +70,11 @@ const MainApp = ({ onLogout }) => {
         <Button 
           text={t('downloadGuide')}
           onClick={handleDownload}
+        />
+        <Button 
+          text={t('lccWebsite')}
+          onClick={handleLCCWebsite}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
         />
         <Button 
           text={t('logout')} 
