@@ -14,15 +14,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         let { draft_id } = req.body;
         
         try {
+            // Ensure required fields have at least empty string values
+            const sanitizedSummary = {
+                report_date: summary.report_date || null, // Allow null for date fields
+                positive_changes: summary.positive_changes || '',
+                negative_results: summary.negative_results || '',
+                unexpected_results: summary.unexpected_results || '',
+                lessons_learned: summary.lessons_learned || '',
+                suggestions: summary.suggestions || '',
+                reporting_person: summary.reporting_person || '',
+                is_draft: true,
+                project_id
+            };
+
             if (draft_id) {
                 // Update existing draft
                 const { error: summaryError } = await newSupabase
                     .from('err_program_report')
-                    .update({
-                        ...summary,
-                        project_id,
-                        is_draft: true
-                    })
+                    .update(sanitizedSummary)
                     .eq('id', draft_id);
 
                 if (summaryError) throw summaryError;
@@ -39,11 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 // Create new draft
                 const { data: reportData, error: reportError } = await newSupabase
                     .from('err_program_report')
-                    .insert({
-                        ...summary,
-                        project_id,
-                        is_draft: true
-                    })
+                    .insert(sanitizedSummary)
                     .select()
                     .single();
 
@@ -51,17 +56,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 draft_id = reportData.id;
             }
 
-            // Insert new activities
+            // Insert new activities if they exist
             if (activities?.length > 0) {
-                const activitiesWithDraft = activities.map(activity => ({
-                    ...activity,
+                const sanitizedActivities = activities.map(activity => ({
                     report_id: draft_id,
+                    activity_name: activity.activity_name || '',
+                    activity_goal: activity.activity_goal || '',
+                    location: activity.location || '',
+                    start_date: activity.start_date || null,
+                    end_date: activity.end_date || null,
+                    individual_count: activity.individual_count || 0,
+                    household_count: activity.household_count || 0,
+                    male_count: activity.male_count || 0,
+                    female_count: activity.female_count || 0,
+                    under18_male: activity.under18_male || 0,
+                    under18_female: activity.under18_female || 0,
                     is_draft: true
                 }));
 
                 const { error: activitiesError } = await newSupabase
                     .from('err_program_reach')
-                    .insert(activitiesWithDraft);
+                    .insert(sanitizedActivities);
 
                 if (activitiesError) throw activitiesError;
             }

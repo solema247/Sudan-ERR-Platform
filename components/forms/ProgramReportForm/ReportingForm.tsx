@@ -32,8 +32,6 @@ const ProgramReportForm: React.FC<ReportingFormProps> = ({
     const [uploadProgress, setUploadProgress] = useState<{[key: number]: number}>({});
     const [isSaving, setIsSaving] = useState(false);
 
-    console.log('ReportingForm received initialDraft:', initialDraft);
-
     const handleFilesSelected = (files: FileWithProgress[]) => {
         setUploadingFiles(prev => [...prev, ...files]);
     };
@@ -124,8 +122,6 @@ const ProgramReportForm: React.FC<ReportingFormProps> = ({
         activities: initialDraft.activities || [getInitialValues(project.id).activities[0]],
         uploadedFiles: []
     } : getInitialValues(project.id);
-
-    console.log('Form initialValues:', initialFormValues);
 
     if (isSubmitted) {
         return (

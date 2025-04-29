@@ -17,7 +17,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const user = validateJWT(token);
 
         if (!user) {
-            console.error('Unauthorized: Invalid JWT');
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
 
@@ -30,7 +29,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 .order('last_modified', { ascending: false });
 
             if (error) {
-                console.error('Error fetching drafts:', error);
                 return res.status(500).json({ 
                     success: false, 
                     message: 'Error fetching drafts',
@@ -47,8 +45,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (req.method === 'POST') {
             const { id, ...formData } = req.body;
             
-            console.log('Received draft save request with ID:', id);
-            
             const draftData = {
                 ...formData,
                 is_draft: true,
@@ -59,7 +55,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             try {
                 let result;
                 if (id) {
-                    console.log('Updating existing draft:', id);
                     const { data, error } = await newSupabase
                         .from('err_projects')
                         .update(draftData)
@@ -87,7 +82,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     draft: result
                 });
             } catch (error) {
-                console.error('Error saving draft:', error);
                 return res.status(500).json({
                     success: false,
                     message: 'Error saving draft',
@@ -107,7 +101,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 .eq('is_draft', true);
 
             if (error) {
-                console.error('Error deleting draft:', error);
                 return res.status(500).json({
                     success: false,
                     message: 'Error deleting draft',
@@ -122,7 +115,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(405).json({ success: false, message: 'Method not allowed' });
 
     } catch (error) {
-        console.error('Unexpected error in project-drafts API:', error);
         return res.status(500).json({
             success: false,
             message: 'Unexpected server error',

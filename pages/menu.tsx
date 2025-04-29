@@ -119,7 +119,6 @@ const Menu = () => {
                 });
                 const programData = await programResponse.json();
 
-                console.log('Program drafts:', programData); // Add this for debugging
                 setFinancialDrafts(financialData.drafts || []);
                 setProgramDrafts(programData.drafts || []);
             } catch (error) {
@@ -555,7 +554,6 @@ const Menu = () => {
                             drafts={programDrafts}
                             onEditDraft={async (draftId) => {
                                 try {
-                                    console.log('Fetching draft with ID:', draftId);
                                     const response = await fetch(`/api/program-report-drafts?draft_id=${draftId}&project_id=${selectedProject.id}`, {
                                         credentials: 'include'
                                     });
@@ -563,13 +561,9 @@ const Menu = () => {
                                     if (!response.ok) throw new Error('Failed to fetch draft');
                                     
                                     const data = await response.json();
-                                    console.log('Raw API response:', data);
-                                    
                                     const { draft } = data;
                                     if (!draft) throw new Error('No draft data received');
 
-                                    console.log('Draft data:', draft);
-                                    
                                     // Transform the draft data to match the form structure
                                     const formattedDraft = {
                                         id: draft.id,
@@ -594,18 +588,15 @@ const Menu = () => {
                                             under18_male: activity.under18_male || 0,
                                             under18_female: activity.under18_female || 0
                                         })) || [],
-                                        // Add required Project properties
                                         project_objectives: draft.project_objectives || '',
                                         state: draft.state || '',
                                         locality: draft.locality || ''
-                                    } as Project; // Type assertion to Project
+                                    } as Project;
 
-                                    console.log('Formatted draft:', formattedDraft);
                                     setCurrentDraft(formattedDraft);
                                     setShowFinancialDrafts(false);
                                     setShowProgramForm(true);
                                 } catch (error) {
-                                    console.error('Error loading draft:', error);
                                     alert(t('drafts.loadError'));
                                 }
                             }}
