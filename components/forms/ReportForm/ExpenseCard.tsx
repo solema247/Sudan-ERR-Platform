@@ -26,9 +26,6 @@ const ExpenseCard = ({ expense, index, arrayHelpers, categories, projectId, repo
     const { values, setFieldValue } = useFormikContext();
 
     const handleFileUpload = (fileWithProgress: FileWithProgress) => {
-        console.log('Setting file value for expense index:', index);
-        console.log('File value:', fileWithProgress);
-        
         // Update the specific expense's receiptFile
         setFieldValue(`expenses.${index}.receiptFile`, fileWithProgress);
     };

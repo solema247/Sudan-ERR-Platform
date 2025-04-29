@@ -32,7 +32,6 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
-      console.log(t("file_selected", { fileName: e.target.files[0].name }));
     }
   };
 
@@ -42,7 +41,7 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     setIsLoading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("language", i18n.language); // Add app language for backend processing
+    formData.append("language", i18n.language);
 
     try {
       const response = await fetch("/api/scan-form", {
@@ -52,14 +51,11 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(t("errors.scan_failed"), errorText);
         throw new Error(t("errors.server_error", { status: response.status }));
       }
 
       const data = await response.json();
-      console.log(t("scan_success"), data);
 
-      // Add PrefilledForm as a new chat step
       setStructuredData(data.data);
       setChatSteps((prevSteps) => [
         ...prevSteps,
@@ -72,7 +68,6 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
         </ScanBubble>
       ]);
     } catch (error) {
-      console.error(t("errors.scan_failed"), error);
       alert(t("errors.scan_failed"));
     } finally {
       setIsLoading(false);
@@ -124,7 +119,6 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
       }
       if (file.type === 'application/pdf') {
         setPdfFile(file);
-        console.log(t("pdf_selected", { fileName: file.name }));
       } else {
         alert(t("errors.invalid_file_type"));
       }
@@ -161,12 +155,9 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
         body: JSON.stringify({ fileUrl: publicUrl }),
       });
 
-      console.log('Response received:', response.status);
       const result = await response.json();
-      console.log('Parsed result:', result);
 
       if (result.data) {
-        console.log('Setting form data:', result.data);
         setStructuredData(result.data);
         
         const newChatStep = (
@@ -205,7 +196,6 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
       }
       if (file.type === 'application/pdf') {
         setBulkPdfFile(file);
-        console.log(t("pdf_selected", { fileName: file.name }));
       } else {
         alert(t("errors.invalid_file_type"));
       }
