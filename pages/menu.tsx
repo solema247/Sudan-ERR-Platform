@@ -340,7 +340,10 @@ const Menu = () => {
                         />
                         <Button
                             text={t('selectDifferentProject')}
-                            onClick={() => setSelectedProject(null)}
+                            onClick={() => {
+                                resetFormStates();
+                                setSelectedProject(null);
+                            }}
                             className="w-full"
                         />
                         <Button
@@ -514,7 +517,8 @@ const Menu = () => {
                             setShowFillForm(true);
                         }}
                         onReturnToMenu={() => {
-                            setShowFinancialDrafts(false);
+                            resetFormStates();
+                            setSelectedProject(null);
                             handleMenuSelection(CurrentMenu.REPORTING);
                         }}
                     />

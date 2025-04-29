@@ -62,5 +62,19 @@
   "remove": "Remove",
   "totalExpenses": "Total expenses",
   "activitiesAndExpenses": "Activities and expenses",
-  "saveDraft": "Save Draft"
+  "saveDraft": "Save Draft",
+  "formSubmitted": "Your financial report has been submitted successfully!",
+  "drafts": {
+    "title": "Saved Drafts",
+    "newReport": "Start New Report",
+    "continue": "Continue Draft",
+    "delete": "Delete Draft",
+    "confirmDelete": "Are you sure you want to delete this draft?",
+    "deleteError": "Failed to delete draft",
+    "loadError": "Failed to load draft",
+    "draftSaved": "Draft saved successfully",
+    "saveError": "Failed to save draft",
+    "returnToMenu": "Return to Menu",
+    "noDrafts": "No saved drafts found"
+  }
 }

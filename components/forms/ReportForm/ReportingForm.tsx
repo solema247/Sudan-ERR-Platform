@@ -47,7 +47,9 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
     useEffect(() => {
         const fetchData = async () => {
             populateCategories(setCategories, i18n.language)
-            populateExpenses(project)    
+            if (project) {
+                populateExpenses(project)    
+            }
         }
         fetchData();
     }, [i18n.language, project]);
@@ -128,7 +130,9 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                     return (
                         <Form className="prose flex flex-col">
                             <span className="text-3xl">{t('formTitle')}</span>
-                            <span className="font-bold">{project.project_objectives}</span>
+                            {project && (
+                                <span className="font-bold">{project.project_objectives}</span>
+                            )}
 
                             <div className="mt-6 mb-3">
                                 <label htmlFor="err_id" className="font-bold block text-base text-black-bold mb-1">
@@ -313,6 +317,8 @@ async function populateCategories(setCategories, language) {
 }
 
 async function populateExpenses(project: Project) {
+    if (!project) return;
+    
     const { data, error } = await supabase
         .from(TABLE_NAME_NEW_PROJECT_APPLICATIONS)
         .select('planned_activities')

@@ -28,7 +28,7 @@ const FinancialReportDrafts: React.FC<FinancialReportDraftsProps> = ({
     onNewReport,
     onReturnToMenu
 }) => {
-    const { t } = useTranslation('financial-report');
+    const { t } = useTranslation('fillForm');
     const [isLoading, setIsLoading] = useState(false);
 
     const handleDeleteDraft = async (draft: FinancialReportDraft) => {
@@ -103,7 +103,7 @@ const FinancialReportDrafts: React.FC<FinancialReportDraftsProps> = ({
                 )}
 
                 <Button
-                    text={t('returnToMenu')}
+                    text={t('drafts.returnToMenu')}
                     onClick={onReturnToMenu}
                     className="w-full mt-4"
                 />
