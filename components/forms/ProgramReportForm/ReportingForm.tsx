@@ -12,22 +12,27 @@ import { UploadedList } from './upload/UploadedList';
 import { FileWithProgress, UploadedFile } from './upload/UploadInterfaces';
 import { createOnSubmit } from './upload/onSubmit';
 
-interface ProgramReportFormProps {
+interface ReportingFormProps {
     project: Project;
     onReturnToMenu: () => void;
     onSubmitAnotherForm: () => void;
+    initialDraft?: any; // Add this prop for editing existing drafts
 }
 
-const ProgramReportForm: React.FC<ProgramReportFormProps> = ({ 
+const ProgramReportForm: React.FC<ReportingFormProps> = ({ 
     project, 
     onReturnToMenu,
-    onSubmitAnotherForm 
+    onSubmitAnotherForm,
+    initialDraft 
 }) => {
     const { t } = useTranslation('program-report');
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [collapsedActivities, setCollapsedActivities] = useState<{[key: number]: boolean}>({});
     const [uploadingFiles, setUploadingFiles] = useState<FileWithProgress[]>([]);
     const [uploadProgress, setUploadProgress] = useState<{[key: number]: number}>({});
+    const [isSaving, setIsSaving] = useState(false);
+
+    console.log('ReportingForm received initialDraft:', initialDraft);
 
     const handleFilesSelected = (files: FileWithProgress[]) => {
         setUploadingFiles(prev => [...prev, ...files]);
@@ -48,7 +53,10 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
         try {
             const submitHandler = createOnSubmit(t);
             await submitHandler(
-                values,
+                {
+                    ...values,
+                    draft_id: initialDraft?.id
+                },
                 project.id,
                 uploadingFiles,
                 setFileProgress
@@ -60,12 +68,64 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
         }
     };
 
+    const handleSaveDraft = async (values: any) => {
+        setIsSaving(true);
+        try {
+            const response = await fetch('/api/program-report-drafts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    project_id: project.id,
+                    draft_id: initialDraft?.id,
+                    summary: {
+                        report_date: values.report_date,
+                        positive_changes: values.positive_changes,
+                        negative_results: values.negative_results,
+                        unexpected_results: values.unexpected_results,
+                        lessons_learned: values.lessons_learned,
+                        suggestions: values.suggestions,
+                        reporting_person: values.reporting_person
+                    },
+                    activities: values.activities
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save draft');
+            }
+
+            alert(t('drafts.draftSaved'));
+            onReturnToMenu();
+        } catch (error) {
+            console.error('Error saving draft:', error);
+            alert(t('drafts.saveError'));
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const toggleActivity = (index: number) => {
         setCollapsedActivities(prev => ({
             ...prev,
             [index]: !prev[index]
         }));
     };
+
+    // Update the initial values to include draft data if it exists
+    const initialFormValues = initialDraft ? {
+        report_date: initialDraft.report_date || '',
+        positive_changes: initialDraft.positive_changes || '',
+        negative_results: initialDraft.negative_results || '',
+        unexpected_results: initialDraft.unexpected_results || '',
+        lessons_learned: initialDraft.lessons_learned || '',
+        suggestions: initialDraft.suggestions || '',
+        reporting_person: initialDraft.reporting_person || '',
+        activities: initialDraft.activities || [getInitialValues(project.id).activities[0]],
+        uploadedFiles: []
+    } : getInitialValues(project.id);
+
+    console.log('Form initialValues:', initialFormValues);
 
     if (isSubmitted) {
         return (
@@ -84,9 +144,10 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
     return (
         <FormBubble removeBoxShadow>
             <Formik
-                initialValues={getInitialValues(project.id)}
+                initialValues={initialFormValues}
                 validationSchema={createValidationScheme(t)}
                 onSubmit={handleSubmit}
+                enableReinitialize={true}
             >
                 {({ values, setFieldValue }) => (
                     <Form className="prose flex flex-col">
@@ -406,18 +467,18 @@ const ProgramReportForm: React.FC<ProgramReportFormProps> = ({
 
                         <div className="flex justify-center gap-4 mt-8">
                             <Button 
-                                text={t('saveDraft')} 
+                                text={t('drafts.saveDraft')} 
                                 type="button"
-                                className="bg-green-600 hover:bg-green-700" 
-                                onClick={() => {
-                                    // TODO: Implement draft saving functionality
-                                    console.log('Save draft clicked');
-                                }}
+                                onClick={() => handleSaveDraft(values)}
+                                disabled={isSaving}
+                                variant="primary"
+                                className="w-full"
                             />
                             <Button 
                                 text={t('submit')} 
                                 type="submit"
-                                className="bg-green-600 hover:bg-green-700" 
+                                disabled={isSaving}
+                                className="w-full"
                             />
                         </div>
                     </Form>

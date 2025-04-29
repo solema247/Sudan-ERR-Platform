@@ -68,5 +68,22 @@
     "title": "المستندات الداعمة",
     "chooseFiles": "اختر الملفات",
     "allowedTypes": "الملفات المدعومة: PDF, JPG, PNG"
+  },
+  "drafts": {
+    "title": "المسودات المحفوظة",
+    "newReport": "بدء تقرير جديد",
+    "continue": "متابعة المسودة",
+    "delete": "حذف المسودة",
+    "confirmDelete": "هل أنت متأكد من حذف هذه المسودة؟",
+    "deleteError": "فشل في حذف المسودة",
+    "loadError": "فشل في تحميل المسودة",
+    "draftSaved": "تم حفظ المسودة بنجاح",
+    "saveError": "فشل في حفظ المسودة",
+    "returnToMenu": "العودة إلى القائمة",
+    "noDrafts": "لا توجد مسودات محفوظة",
+    "reportDate": "تاريخ التقرير",
+    "reportingPerson": "الشخص المقدم للتقرير",
+    "activitiesCount": "عدد الأنشطة",
+    "saveDraft": "حفظ المسودة"
   }
 } 

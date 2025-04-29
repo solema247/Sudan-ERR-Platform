@@ -66,5 +66,22 @@
     "title": "Supporting Documents",
     "chooseFiles": "Choose Files",
     "allowedTypes": "Supported files: PDF, JPG, PNG"
+  },
+  "drafts": {
+    "title": "Saved Drafts",
+    "newReport": "Start New Report",
+    "continue": "Continue Draft",
+    "delete": "Delete Draft",
+    "confirmDelete": "Are you sure you want to delete this draft?",
+    "deleteError": "Failed to delete draft",
+    "loadError": "Failed to load draft",
+    "draftSaved": "Draft saved successfully",
+    "saveError": "Failed to save draft",
+    "returnToMenu": "Return to Menu",
+    "noDrafts": "No saved drafts found",
+    "reportDate": "Report Date",
+    "reportingPerson": "Reporting Person",
+    "activitiesCount": "Number of Activities",
+    "saveDraft": "Save Draft"
   }
 } 

@@ -4,43 +4,44 @@ import Button from '../../ui/Button';
 import FormBubble from '../../ui/FormBubble';
 import MessageBubble from '../../ui/MessageBubble';
 
-interface FinancialReportDraft {
+interface ProgramReportDraft {
     id: string;
     project_id: string;
     created_at: string;
     report_date: string;
-    total_expenses: number;
-    total_grant: number;
+    positive_changes: string;
+    reporting_person: string;
+    err_program_reach: any[];
 }
 
-interface FinancialReportDraftsProps {
-    drafts: FinancialReportDraft[];
+interface ProgramReportDraftsProps {
+    drafts: ProgramReportDraft[];
     onEditDraft: (draftId: string) => void;
     onDeleteDraft: (draftId: string) => void;
     onNewReport: () => void;
     onReturnToMenu: () => void;
 }
 
-const FinancialReportDrafts: React.FC<FinancialReportDraftsProps> = ({
+const ProgramReportDrafts: React.FC<ProgramReportDraftsProps> = ({
     drafts,
     onEditDraft,
     onDeleteDraft,
     onNewReport,
     onReturnToMenu
 }) => {
-    const { t: tFinancial } = useTranslation('financial-report');
+    const { t: tProgram } = useTranslation('program-report');
     const { t: tMenu } = useTranslation('menu');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleDeleteDraft = async (draft: FinancialReportDraft) => {
-        if (!confirm(tFinancial('drafts.confirmDelete'))) {
+    const handleDeleteDraft = async (draft: ProgramReportDraft) => {
+        if (!confirm(tProgram('drafts.confirmDelete'))) {
             return;
         }
 
         setIsLoading(true);
         try {
             const response = await fetch(
-                `/api/financial-report-drafts?draft_id=${draft.id}&project_id=${draft.project_id}`,
+                `/api/program-report-drafts?draft_id=${draft.id}&project_id=${draft.project_id}`,
                 {
                     method: 'DELETE',
                     credentials: 'include'
@@ -54,7 +55,7 @@ const FinancialReportDrafts: React.FC<FinancialReportDraftsProps> = ({
             onDeleteDraft(draft.id);
         } catch (err) {
             console.error('Error deleting draft:', err);
-            alert(tFinancial('drafts.deleteError'));
+            alert(tProgram('drafts.deleteError'));
         } finally {
             setIsLoading(false);
         }
@@ -64,7 +65,7 @@ const FinancialReportDrafts: React.FC<FinancialReportDraftsProps> = ({
         <FormBubble>
             <div className="space-y-4">
                 <Button 
-                    text={tMenu('financial.newReport')}
+                    text={tMenu('program.newReport')}
                     onClick={onNewReport}
                     className="w-full"
                 />
@@ -72,28 +73,28 @@ const FinancialReportDrafts: React.FC<FinancialReportDraftsProps> = ({
                 <div className="mt-4 mb-4">
                     {drafts.length === 0 ? (
                         <MessageBubble className="text-center">
-                            {tFinancial('drafts.noDrafts')}
+                            {tProgram('drafts.noDrafts')}
                         </MessageBubble>
                     ) : (
                         <div className="space-y-4">
                             {drafts.map((draft) => (
                                 <div key={draft.id} className="p-4 border rounded-lg bg-white">
                                     <h3 className="font-bold">
-                                        {tFinancial('drafts.reportDate')}: {new Date(draft.report_date).toLocaleDateString()}
+                                        {tProgram('drafts.reportDate')}: {new Date(draft.report_date).toLocaleDateString()}
                                     </h3>
                                     <p className="text-sm text-gray-600">
-                                        {tFinancial('drafts.totalExpenses')}: {draft.total_expenses}
+                                        {tProgram('drafts.reportingPerson')}: {draft.reporting_person}
                                     </p>
                                     <p className="text-sm text-gray-600">
-                                        {tFinancial('drafts.totalGrant')}: {draft.total_grant}
+                                        {tProgram('drafts.activitiesCount')}: {draft.err_program_reach?.length || 0}
                                     </p>
                                     <div className="flex space-x-2 mt-2">
                                         <Button 
-                                            text={tFinancial('drafts.continue')}
+                                            text={tProgram('drafts.continue')}
                                             onClick={() => onEditDraft(draft.id)}
                                         />
                                         <Button 
-                                            text={tFinancial('drafts.delete')}
+                                            text={tProgram('drafts.delete')}
                                             onClick={() => handleDeleteDraft(draft)}
                                             variant="danger"
                                             disabled={isLoading}
@@ -109,4 +110,4 @@ const FinancialReportDrafts: React.FC<FinancialReportDraftsProps> = ({
     );
 };
 
-export default FinancialReportDrafts; 
+export default ProgramReportDrafts; 

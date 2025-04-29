@@ -16,6 +16,7 @@ import Project from '../components/forms/NewProjectForm/Project';
 import ProgramReportForm from '../components/forms/ProgramReportForm/ReportingForm';
 import ProjectDrafts from '../components/forms/NewProjectForm/ProjectDrafts';
 import FinancialReportDrafts from '../components/forms/FinancialReportForm/FinancialReportDrafts';
+import ProgramReportDrafts from '../components/forms/ProgramReportForm/ProgramReportDrafts';
 
 /**
  * Chat-style menu.
@@ -63,6 +64,7 @@ const Menu = () => {
     const [currentDraft, setCurrentDraft] = useState<Project | null>(null);
     const [showFinancialDrafts, setShowFinancialDrafts] = useState(false);
     const [financialDrafts, setFinancialDrafts] = useState([]);
+    const [programDrafts, setProgramDrafts] = useState([]);
 
     const router = useRouter();
     const errId = router.query.errId;
@@ -104,23 +106,31 @@ const Menu = () => {
     // Add useEffect to fetch drafts
     useEffect(() => {
         const fetchDrafts = async () => {
-            if (showProjectApplication) {
-                try {
-                    const response = await fetch('/api/project-drafts', {
-                        credentials: 'include'
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        setDrafts(data.drafts);
-                    }
-                } catch (error) {
-                    console.error('Error fetching drafts:', error);
-                }
+            try {
+                // Fetch financial report drafts
+                const financialResponse = await fetch(`/api/financial-report-drafts?project_id=${selectedProject.id}`, {
+                    credentials: 'include'
+                });
+                const financialData = await financialResponse.json();
+
+                // Fetch program report drafts
+                const programResponse = await fetch(`/api/program-report-drafts?project_id=${selectedProject.id}`, {
+                    credentials: 'include'
+                });
+                const programData = await programResponse.json();
+
+                console.log('Program drafts:', programData); // Add this for debugging
+                setFinancialDrafts(financialData.drafts || []);
+                setProgramDrafts(programData.drafts || []);
+            } catch (error) {
+                console.error('Error fetching drafts:', error);
             }
         };
 
-        fetchDrafts();
-    }, [showProjectApplication]);
+        if (showFinancialDrafts && selectedProject) {
+            fetchDrafts();
+        }
+    }, [showFinancialDrafts, selectedProject]);
 
     const createNewReportId = () => {
         setActiveReportId(crypto.randomUUID());
@@ -175,28 +185,12 @@ const Menu = () => {
         if (workflow === Workflow.PROGRAM_FORM) setShowProgramForm(true);
     };
 
-    // Add function to fetch drafts
-    const fetchFinancialDrafts = async (projectId: string) => {
-        try {
-            const response = await fetch(`/api/financial-report-drafts?project_id=${projectId}`, {
-                credentials: 'include'
-            });
-            
-            if (!response.ok) throw new Error('Failed to fetch drafts');
-            
-            const data = await response.json();
-            setFinancialDrafts(data.drafts);
-        } catch (error) {
-            console.error('Error fetching drafts:', error);
-        }
-    };
-
     // Create a function to reset all form states
     const resetFormStates = () => {
-        setShowFinancialDrafts(false);
         setShowFillForm(false);
-        setShowScanForm(false);
         setShowProgramForm(false);
+        setShowFinancialDrafts(false);
+        setShowProjectApplication(false);
         setCurrentDraft(null);
     };
 
@@ -330,11 +324,11 @@ const Menu = () => {
                             className="w-full"
                         />
                         <Button
-                            text={t('savedDrafts')}
+                            text={t('viewDrafts')}
                             onClick={() => {
                                 resetFormStates();
                                 setShowFinancialDrafts(true);
-                                fetchFinancialDrafts(selectedProject.id);
+                                setCurrentDraft(null);
                             }}
                             className="w-full"
                         />
@@ -434,13 +428,15 @@ const Menu = () => {
 
             {showProgramForm && (
                 <MessageBubble>
+                    {console.log('Rendering ProgramReportForm with draft:', currentDraft)}
                     <ProgramReportForm
                         project={selectedProject}
                         onReturnToMenu={() => handleMenuSelection(CurrentMenu.REPORTING)}
                         onSubmitAnotherForm={() => {
                             setShowProgramForm(false);
-                            setTimeout(() => setShowProgramForm(true), 0); // Reset workflow
+                            setTimeout(() => setShowProgramForm(true), 0);
                         }}
+                        initialDraft={currentDraft}
                     />
                 </MessageBubble>
             )}
@@ -487,42 +483,123 @@ const Menu = () => {
 
             {/* Add drafts view section */}
             {showFinancialDrafts && (
-                <MessageBubble>
-                    <FinancialReportDrafts
-                        drafts={financialDrafts}
-                        onEditDraft={async (draftId) => {
-                            try {
-                                const response = await fetch(`/api/financial-report-drafts?draft_id=${draftId}&project_id=${selectedProject.id}`, {
-                                    credentials: 'include'
-                                });
-                                
-                                if (!response.ok) throw new Error('Failed to fetch draft');
-                                
-                                const { draft } = await response.json();
-                                setCurrentDraft(draft);
+                <div className="space-y-4">
+                    {/* Financial Report Drafts */}
+                    <div className="mb-6">
+                        <h3 className="text-xl font-bold mb-4">{t('financial.draftsTitle')}</h3>
+                        <FinancialReportDrafts
+                            drafts={financialDrafts}
+                            onEditDraft={async (draftId) => {
+                                try {
+                                    const response = await fetch(`/api/financial-report-drafts?draft_id=${draftId}&project_id=${selectedProject.id}`, {
+                                        credentials: 'include'
+                                    });
+                                    
+                                    if (!response.ok) throw new Error('Failed to fetch draft');
+                                    
+                                    const { draft } = await response.json();
+                                    setCurrentDraft(draft);
+                                    setShowFinancialDrafts(false);
+                                    setShowFillForm(true);
+                                } catch (error) {
+                                    console.error('Error loading draft:', error);
+                                    alert(t('drafts.loadError'));
+                                }
+                            }}
+                            onDeleteDraft={(draftId) => {
+                                setFinancialDrafts(drafts => 
+                                    drafts.filter(d => d.id !== draftId)
+                                );
+                            }}
+                            onNewReport={() => {
                                 setShowFinancialDrafts(false);
                                 setShowFillForm(true);
-                            } catch (error) {
-                                console.error('Error loading draft:', error);
-                                alert(t('drafts.loadError'));
-                            }
-                        }}
-                        onDeleteDraft={(draftId) => {
-                            setFinancialDrafts(drafts => 
-                                drafts.filter(d => d.id !== draftId)
-                            );
-                        }}
-                        onNewReport={() => {
-                            setShowFinancialDrafts(false);
-                            setShowFillForm(true);
-                        }}
-                        onReturnToMenu={() => {
+                            }}
+                            onReturnToMenu={() => {}} // Empty function since we'll use single return button
+                        />
+                    </div>
+
+                    {/* Program Report Drafts */}
+                    <div className="mb-6">
+                        <h3 className="text-xl font-bold mb-4">{t('program.draftsTitle')}</h3>
+                        <ProgramReportDrafts
+                            drafts={programDrafts}
+                            onEditDraft={async (draftId) => {
+                                try {
+                                    console.log('Fetching draft with ID:', draftId);
+                                    const response = await fetch(`/api/program-report-drafts?draft_id=${draftId}&project_id=${selectedProject.id}`, {
+                                        credentials: 'include'
+                                    });
+                                    
+                                    if (!response.ok) throw new Error('Failed to fetch draft');
+                                    
+                                    const data = await response.json();
+                                    console.log('Raw API response:', data);
+                                    
+                                    const { draft } = data;
+                                    if (!draft) throw new Error('No draft data received');
+
+                                    console.log('Draft data:', draft);
+                                    
+                                    // Transform the draft data to match the form structure
+                                    const formattedDraft = {
+                                        id: draft.id,
+                                        report_date: draft.report_date || '',
+                                        positive_changes: draft.positive_changes || '',
+                                        negative_results: draft.negative_results || '',
+                                        unexpected_results: draft.unexpected_results || '',
+                                        lessons_learned: draft.lessons_learned || '',
+                                        suggestions: draft.suggestions || '',
+                                        reporting_person: draft.reporting_person || '',
+                                        activities: draft.err_program_reach?.map(activity => ({
+                                            id: activity.id,  // Include activity ID
+                                            activity_name: activity.activity_name || '',
+                                            activity_goal: activity.activity_goal || '',
+                                            location: activity.location || '',
+                                            start_date: activity.start_date || '',
+                                            end_date: activity.end_date || '',
+                                            individual_count: activity.individual_count || 0,
+                                            household_count: activity.household_count || 0,
+                                            male_count: activity.male_count || 0,
+                                            female_count: activity.female_count || 0,
+                                            under18_male: activity.under18_male || 0,
+                                            under18_female: activity.under18_female || 0
+                                        })) || []
+                                    };
+
+                                    console.log('Formatted draft:', formattedDraft);
+                                    setCurrentDraft(formattedDraft);
+                                    setShowFinancialDrafts(false);
+                                    setShowProgramForm(true);
+                                } catch (error) {
+                                    console.error('Error loading draft:', error);
+                                    alert(t('drafts.loadError'));
+                                }
+                            }}
+                            onDeleteDraft={(draftId) => {
+                                setProgramDrafts(drafts => 
+                                    drafts.filter(d => d.id !== draftId)
+                                );
+                            }}
+                            onNewReport={() => {
+                                setShowFinancialDrafts(false);
+                                setShowProgramForm(true);
+                            }}
+                            onReturnToMenu={() => {}} // Empty function since we'll use single return button
+                        />
+                    </div>
+
+                    {/* Single Return to Menu button */}
+                    <Button
+                        text={t('returnToMenu')}
+                        onClick={() => {
                             resetFormStates();
                             setSelectedProject(null);
                             handleMenuSelection(CurrentMenu.REPORTING);
                         }}
+                        className="w-full mt-4"
                     />
-                </MessageBubble>
+                </div>
             )}
         </ChatContainer>
     );

@@ -22,5 +22,14 @@
   "feedbackInstructions": "Please select an option for feedback.",
   "appFeedback": "App Feedback",
   "selectReportType": "Select report type",
-  "savedDrafts": "Saved Drafts"
+  "viewDrafts": "Saved Drafts",
+  "financial": {
+    "draftsTitle": "Financial Report Drafts",
+    "newReport": "Start New Financial Report"
+  },
+  "program": {
+    "draftsTitle": "Program Report Drafts",
+    "newReport": "Start New Program Report"
+  },
+  "returnToMenu": "Return to Menu"
 }

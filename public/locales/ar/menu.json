@@ -22,5 +22,14 @@
   "feedbackInstructions": "يرجى اختيار خيار ملاحظات أو تعليقات",
   "appFeedback": "ملاحظات أو تعليقات للتطبيق",
   "selectReportType": "اختر نوع التقرير",
-  "savedDrafts": "المسودات المحفوظة"
+  "viewDrafts": "المسودات المحفوظة",
+  "financial": {
+    "draftsTitle": "مسودات التقارير المالية",
+    "newReport": "بدء تقرير مالي جديد"
+  },
+  "program": {
+    "draftsTitle": "مسودات تقارير البرنامج",
+    "newReport": "بدء تقرير برنامج جديد"
+  },
+  "returnToMenu": "العودة إلى القائمة"
 }
