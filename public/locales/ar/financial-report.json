@@ -1,17 +1,18 @@
 {
   "drafts": {
-    "title": "مسودات التقارير المالية",
+    "title": "المسودات المحفوظة",
     "newReport": "بدء تقرير جديد",
-    "noDrafts": "لا توجد مسودات تقارير",
-    "reportDate": "تاريخ التقرير",
-    "totalExpenses": "إجمالي النفقات",
-    "totalGrant": "إجمالي المنحة",
-    "continue": "متابعة",
-    "delete": "حذف",
-    "saveDraft": "حفظ المسودة",
+    "continue": "متابعة المسودة",
+    "delete": "حذف المسودة",
+    "confirmDelete": "هل أنت متأكد من حذف هذه المسودة؟",
+    "deleteError": "فشل في حذف المسودة",
+    "loadError": "فشل في تحميل المسودة",
     "draftSaved": "تم حفظ المسودة بنجاح",
     "saveError": "فشل في حفظ المسودة",
-    "deleteError": "فشل في حذف المسودة",
-    "confirmDelete": "هل أنت متأكد أنك تريد حذف هذه المسودة؟"
+    "returnToMenu": "العودة إلى القائمة",
+    "noDrafts": "لا توجد مسودات محفوظة",
+    "reportDate": "تاريخ التقرير",
+    "totalExpenses": "إجمالي النفقات",
+    "totalGrant": "إجمالي المنحة"
   }
 } 

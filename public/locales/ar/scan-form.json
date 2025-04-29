@@ -31,7 +31,8 @@
     "lessons_learned": "الدروس المستفادة في تخطيط الميزانية",
     "additional_training_needs": "احتياجات التدريب الإضافية",
     "financial_summary": "الملخص المالي",
-    "additional_questions": "أسئلة إضافية"
+    "additional_questions": "أسئلة إضافية",
+    "receipt_upload": "تحميل الإيصال"
   },
   "button_text": {
     "submit": "إرسال",

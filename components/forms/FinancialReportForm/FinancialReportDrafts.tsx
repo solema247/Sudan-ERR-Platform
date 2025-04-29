@@ -28,7 +28,7 @@ const FinancialReportDrafts: React.FC<FinancialReportDraftsProps> = ({
     onNewReport,
     onReturnToMenu
 }) => {
-    const { t } = useTranslation('fillForm');
+    const { t } = useTranslation('financial-report');
     const [isLoading, setIsLoading] = useState(false);
 
     const handleDeleteDraft = async (draft: FinancialReportDraft) => {

@@ -37,7 +37,8 @@
     "excess_expenses_q": "How did you cover excess expenses?",
     "surplus_use_q": "How would you spend the surplus?",
     "lessons_learned_q": "Lessons learned in budget planning",
-    "training_needs_q": "Additional training needs"
+    "training_needs_q": "Additional training needs",
+    "receipt_upload": "Upload Receipt"
   },
   "button_text": {
     "submit": "Submit",

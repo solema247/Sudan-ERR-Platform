@@ -1,17 +1,18 @@
 {
   "drafts": {
-    "title": "Financial Report Drafts",
+    "title": "Saved Drafts",
     "newReport": "Start New Report",
-    "noDrafts": "No draft reports found",
-    "reportDate": "Report Date",
-    "totalExpenses": "Total Expenses",
-    "totalGrant": "Total Grant",
-    "continue": "Continue",
-    "delete": "Delete",
-    "saveDraft": "Save Draft",
+    "continue": "Continue Draft",
+    "delete": "Delete Draft",
+    "confirmDelete": "Are you sure you want to delete this draft?",
+    "deleteError": "Failed to delete draft",
+    "loadError": "Failed to load draft",
     "draftSaved": "Draft saved successfully",
     "saveError": "Failed to save draft",
-    "deleteError": "Failed to delete draft",
-    "confirmDelete": "Are you sure you want to delete this draft?"
+    "returnToMenu": "Return to Menu",
+    "noDrafts": "No saved drafts found",
+    "reportDate": "Report Date",
+    "totalExpenses": "Total Expenses",
+    "totalGrant": "Total Grant"
   }
 } 
