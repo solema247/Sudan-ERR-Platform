@@ -99,5 +99,6 @@
     "processing_form": "معالجة النموذج {{current}} من {{total}}",
     "form_submitted": "تم إرسال النموذج بنجاح!",
     "all_forms_processed": "تمت معالجة جميع النماذج المحددة"
-  }
+  },
+  "saveDraft": "حفظ المسودة"
 }

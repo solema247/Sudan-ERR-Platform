@@ -105,5 +105,6 @@
     "processing_form": "Processing Form {{current}} of {{total}}",
     "form_submitted": "Form submitted successfully!",
     "all_forms_processed": "All selected forms have been processed"
-  }
+  },
+  "saveDraft": "Save Draft"
 }

@@ -673,7 +673,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
         <Button
             onClick={() => handleSaveDraft(formData)}
             disabled={isSubmitting}
-            text={t("drafts.saveDraft")}
+            text={t("saveDraft")}
             variant="secondary"
             className="w-full"
         />

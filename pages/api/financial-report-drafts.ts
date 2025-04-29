@@ -66,47 +66,78 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         if (req.method === 'POST') {
-            const { summary, expenses, project_id } = req.body;
+            const { summary, expenses, project_id, draft_id } = req.body;
             
-            // Save summary draft
-            const { data: summaryData, error: summaryError } = await newSupabase
-                .from('err_summary')
-                .insert({
-                    ...summary,
-                    project_id,
-                    is_draft: true
-                })
-                .select()
-                .single();
+            try {
+                // If we have a draft_id, update existing draft
+                if (draft_id) {
+                    // Update summary without updated_at field
+                    const { error: summaryError } = await newSupabase
+                        .from('err_summary')
+                        .update({
+                            ...summary,
+                            project_id,
+                            is_draft: true
+                        })
+                        .eq('id', draft_id);
 
-            if (summaryError) throw summaryError;
+                    if (summaryError) throw summaryError;
 
-            // Save expense drafts
-            if (expenses?.length > 0) {
-                // Map the expense fields to match database columns
-                const expensesWithDraft = expenses.map(expense => ({
-                    project_id,
-                    expense_activity: expense.activity,         // Map activity to expense_activity
-                    expense_description: expense.description,   // Map description to expense_description
-                    expense_amount: expense.amount,             // Map amount to expense_amount
-                    payment_date: expense.payment_date,
-                    payment_method: expense.payment_method,
-                    receipt_no: expense.receipt_no,
-                    seller: expense.seller,
-                    is_draft: true
-                }));
+                    // Delete old expenses
+                    const { error: deleteError } = await newSupabase
+                        .from('err_expense')
+                        .delete()
+                        .eq('project_id', project_id)
+                        .eq('is_draft', true);
 
-                const { error: expensesError } = await newSupabase
-                    .from('err_expense')
-                    .insert(expensesWithDraft);
+                    if (deleteError) throw deleteError;
+                } else {
+                    // Create new draft
+                    const { data: summaryData, error: summaryError } = await newSupabase
+                        .from('err_summary')
+                        .insert({
+                            ...summary,
+                            project_id,
+                            is_draft: true
+                        })
+                        .select()
+                        .single();
 
-                if (expensesError) throw expensesError;
+                    if (summaryError) throw summaryError;
+                }
+
+                // Insert new expenses
+                if (expenses?.length > 0) {
+                    const expensesWithDraft = expenses.map(expense => ({
+                        project_id,
+                        expense_activity: expense.activity,
+                        expense_description: expense.description,
+                        expense_amount: expense.amount,
+                        payment_date: expense.payment_date,
+                        payment_method: expense.payment_method,
+                        receipt_no: expense.receipt_no,
+                        seller: expense.seller,
+                        is_draft: true
+                    }));
+
+                    const { error: expensesError } = await newSupabase
+                        .from('err_expense')
+                        .insert(expensesWithDraft);
+
+                    if (expensesError) throw expensesError;
+                }
+
+                return res.status(200).json({ 
+                    success: true, 
+                    message: 'Draft saved successfully'
+                });
+            } catch (error) {
+                console.error('Error in draft save:', error);
+                return res.status(500).json({
+                    success: false,
+                    message: error.message || 'Failed to save draft'
+                });
             }
-
-            return res.status(200).json({ 
-                success: true, 
-                message: 'Draft saved successfully'
-            });
         }
 
         if (req.method === 'DELETE') {

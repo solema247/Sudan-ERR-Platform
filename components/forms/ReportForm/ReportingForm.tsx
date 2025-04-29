@@ -74,12 +74,14 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
     const handleSaveDraft = async (values: any) => {
         setIsSaving(true);
         try {
+            // First check if a draft already exists
             const response = await fetch('/api/financial-report-drafts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({
                     project_id: project.id,
+                    draft_id: initialDraft?.id, // Pass the draft ID if we're editing an existing draft
                     summary: {
                         err_id: values.err_id,
                         report_date: values.date,
