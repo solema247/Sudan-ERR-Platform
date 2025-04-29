@@ -95,7 +95,6 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
    const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(initialValues?.id);
 
    useEffect(() => {
-     // Add this effect to fetch the user's ERR ID
      const validateSession = async () => {
        try {
          const response = await fetch('/api/validate-session');
@@ -104,7 +103,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
            setUserErrId(data.user.err_id);
          }
        } catch (error) {
-         console.error('Error validating session:', error);
+         // Remove this log
        }
      };
 
@@ -147,7 +146,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
            throw new Error('Failed to fetch options');
          }
        } catch (error) {
-         console.error('Error fetching options:', error);
+         // Remove this log
        } finally {
          setLoading(false);
        }
@@ -215,7 +214,6 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
      setLoading(true);
      
      try {
-       // Remove non-database fields
        const { dirty, currentLanguage, ...cleanValues } = values;
        
        const res = await fetch('/api/project-application', {
@@ -224,24 +222,16 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
          body: JSON.stringify(cleanValues),
        });
        
-       // Log the response status
-       console.log("Response status:", res.status);
-       
        if (res.ok) {
-         const responseData = await res.json();
-         console.log("Submission successful:", responseData);
          setIsFormSubmitted(true);
          if (onDraftSubmitted) {
            onDraftSubmitted();
          }
        } else {
          const errorData = await res.json();
-         console.error('Submission failed with status:', res.status);
-         console.error('Error details:', errorData);
          alert(t('submissionFailed') + ': ' + (errorData.message || 'Unknown error'));
        }
      } catch (error) {
-       console.error('Error during submission:', error);
        alert(t('submissionFailed') + ': ' + error.message);
      } finally {
        setLoading(false);
