@@ -1,12 +1,26 @@
-Temporary Private License
+MIT License
 
-This software is intended for private use by Sudan Localization Coordination Council, Gisa Group and Local Humanitarian. You are granted permission to view and modify this software solely for the purposes of developing and testing Sudan ERR Chatbot. Distribution, sublicensing, or further sharing of this software is not permitted without explicit permission from the partners on this project. 
+Copyright (c) 2024 Localization Coordination Council, Gisa Group, and Collaborative Futures
 
-This software is provided "as is" without any warranties of any kind, either expressed or implied, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-Upon a future public release, this software may be distributed under a recognized open-source license, such as the MIT License.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE. 
 
 For more information or permissions, please contact: Santiago Lema at santi.lema.247@gmail.com
 
 Santiago Lema 
-Date: 07.11.2024
+Date: 01.05.2025
