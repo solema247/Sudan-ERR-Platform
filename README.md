@@ -45,7 +45,7 @@ F-System Presentation https://docs.google.com/presentation/d/1ha-dEdcCJd8byRGN0-
 ### AI-Powered Processing
 - Image preprocessing 
 - OCR Model
-- Integration with ChatGPT
+- Integration with Open Source AI models
 - Form validation and structured data output
 
 ### Security & Authentication
