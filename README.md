@@ -152,21 +152,11 @@ npm run start
 
 ## License
 
-This project is currently licensed under a private license for use by the Sudan Localization Coordination Council, Gisa and Local Humanitarian organizations. Unauthorized distribution or modification is prohibited. Developing plan to make project open source in Q1 2025.
+MIT License
 
-## Contact
+Copyright (c) 2024 Localization Coordination Council, Gisa Group, and Collaborative Futures
 
-For questions or collaboration requests, please contact Santiago at santi.lema.247@gmail.com.
+For more information or permissions, please contact: Santiago Lema at santi.lema.247@gmail.com
 
-## Environment Setup
-
-1. Copy `.env.template` to `.env.local`
-2. Fill in your credentials in `.env.local`
-3. Never commit `.env.local` or any credential files to the repository
-
-Required environment variables:
-- `GOOGLE_CLOUD_PROJECT`: Your Google Cloud project ID
-- `OPENAI_API_KEY`: Your OpenAI API key
-- ... (list all required variables)
 
 
