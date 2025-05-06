@@ -1,6 +1,5 @@
 // pages/api/project-application.ts
 import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '../../services/supabaseClient';
 import { newSupabase } from '../../services/newSupabaseClient';
 import { validateJWT } from '../../services/auth';
 
@@ -25,22 +24,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (req.method === 'GET') {
             try {
                 const [plannedActivitiesResult, expenseCategoriesResult, statesResultRaw] = await Promise.all([
-                    supabase.from('planned_activities').select('id, name'),
-                    supabase.from('expense_categories').select('id, name'),
-                    supabase
+                    // Activities - only fetch English as translations are in JSON
+                    newSupabase
+                        .from('planned_activities')
+                        .select('id, activity_name')
+                        .eq('language', 'en'),
+                    // Expenses - only fetch English as translations are in JSON
+                    newSupabase
+                        .from('expense_categories')
+                        .select('id, expense_name')
+                        .eq('language', 'en'),
+                    // States - includes both English and Arabic in the table
+                    newSupabase
                         .from('states')
                         .select('state_name, state_name_ar, locality, locality_ar')
                         .neq('state_name', null)
-                        .order('state_name', { ascending: true }),
+                        .order('state_name', { ascending: true })
                 ]);
 
-                // Log the results to check for errors
-                console.log('Supabase Results:', {
-                    plannedActivities: plannedActivitiesResult,
-                    expenseCategories: expenseCategoriesResult,
-                    states: statesResultRaw
-                });
-
+                // Error handling
                 if (plannedActivitiesResult.error) {
                     throw new Error(`Planned Activities Error: ${plannedActivitiesResult.error.message}`);
                 }
@@ -51,9 +53,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     throw new Error(`States Error: ${statesResultRaw.error.message}`);
                 }
 
-                // Group localities by state_name, using Arabic names if language is Arabic
+                // Format activities to match what frontend expects
+                const formattedActivities = plannedActivitiesResult.data.map(item => ({
+                    id: item.id,
+                    name: item.activity_name // Frontend will handle translation via i18n
+                }));
+
+                // Format expenses to match what frontend expects
+                const formattedExpenses = expenseCategoriesResult.data.map(item => ({
+                    id: item.id,
+                    name: item.expense_name // Frontend will handle translation via i18n
+                }));
+
+                // Group localities by state
                 const groupedStates = statesResultRaw.data.reduce((acc: any[], item: any) => {
-                    // Get language from query params
                     const language = req.query.language as string;
                     const isArabic = language === 'ar';
                     
@@ -69,11 +82,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return acc;
                 }, []);
 
-                // Send the dropdown options in the response
                 return res.status(200).json({
                     success: true,
-                    plannedActivities: plannedActivitiesResult.data || [],
-                    expenseCategories: expenseCategoriesResult.data || [],
+                    plannedActivities: formattedActivities,
+                    expenseCategories: formattedExpenses,
                     states: groupedStates,
                 });
             } catch (error) {
@@ -81,8 +93,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return res.status(500).json({
                     success: false,
                     message: 'Error fetching dropdown options',
-                    error: error.message,
-                    stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+                    error: error.message
                 });
             }
         }
