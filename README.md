@@ -45,7 +45,7 @@ F-System Presentation https://docs.google.com/presentation/d/1ha-dEdcCJd8byRGN0-
 ### AI-Powered Processing
 - Image preprocessing 
 - OCR Model
-- Integration with ChatGPT
+- Integration with Open Source AI models
 - Form validation and structured data output
 
 ### Security & Authentication
@@ -77,7 +77,7 @@ Our comprehensive user guide is available:
   - OpenCV Python for preprocessing
 - **AI/ML**:
   - Google Cloud Vision OCR
-  - OpenAI GPT
+  - Testing with various AI models to generate the best results
 - **Database**: Supabase
 - **Authentication**: Custom session-based
 
@@ -104,7 +104,6 @@ npm install
 
 3. Configure environment variables:
 ```
-OPENAI_API_KEY=your_key
 SUPABASE_URL=your_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
 ```
