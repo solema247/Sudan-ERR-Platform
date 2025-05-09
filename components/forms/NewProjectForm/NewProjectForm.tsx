@@ -186,17 +186,17 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
    }, [i18n.language, t, router]);
 
    const validationSchema = Yup.object({
-     date: Yup.string(),
-     err: Yup.string(),
-     state: Yup.string(),
-     locality: Yup.string(),
-     project_objectives: Yup.string(),
-     intended_beneficiaries: Yup.string(),
-     estimated_beneficiaries: Yup.number(),
-     planned_activities: Yup.array(),
-     estimated_timeframe: Yup.string(),
-     additional_support: Yup.string(),
-     banking_details: Yup.string()
+     date: Yup.string().nullable(),
+     err: Yup.string().nullable(),
+     state: Yup.string().nullable(),
+     locality: Yup.string().nullable(),
+     project_objectives: Yup.string().nullable(),
+     intended_beneficiaries: Yup.string().nullable(),
+     estimated_beneficiaries: Yup.number().nullable(),
+     planned_activities: Yup.array().nullable(),
+     estimated_timeframe: Yup.string().nullable(),
+     additional_support: Yup.string().nullable(),
+     banking_details: Yup.string().nullable()
    });
 
  const getAvailableStates = (localitiesData) => {
@@ -245,12 +245,50 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
      setLoading(true);
      
      try {
-       const { dirty, currentLanguage, ...cleanValues } = values;
+       const { data: { session } } = await newSupabase.auth.getSession();
+       
+       if (!session) {
+         throw new Error('No active session');
+       }
+
+       const { 
+         dirty, 
+         currentLanguage, 
+         err,
+         programOfficerName,
+         programOfficerPhone,
+         reportingOfficerName,
+         reportingOfficerPhone,
+         financeOfficerName,
+         financeOfficerPhone,
+         ...otherValues 
+       } = values;
+       
+       // Format data to match database schema
+       const projectData = {
+         ...otherValues,
+         err_id: err,
+         program_officer_name: programOfficerName,
+         program_officer_phone: programOfficerPhone,
+         reporting_officer_name: reportingOfficerName,
+         reporting_officer_phone: reportingOfficerPhone,
+         finance_officer_name: financeOfficerName,
+         finance_officer_phone: financeOfficerPhone,
+         is_draft: false,
+         status: 'pending',
+         submitted_at: new Date().toISOString(),
+         last_modified: new Date().toISOString(),
+         created_by: userErrId
+       };
        
        const res = await fetch('/api/project-application', {
          method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify(cleanValues),
+         headers: { 
+           'Content-Type': 'application/json',
+           'Authorization': `Bearer ${session.access_token}`
+         },
+         body: JSON.stringify(projectData),
+         credentials: 'include'
        });
        
        if (res.ok) {
@@ -263,6 +301,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
          alert(t('submissionFailed') + ': ' + (errorData.message || 'Unknown error'));
        }
      } catch (error) {
+       console.error('Error submitting project:', error);
        alert(t('submissionFailed') + ': ' + error.message);
      } finally {
        setLoading(false);
@@ -533,38 +572,55 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                        type="button"
                        text={!dirty ? t('drafts.saved') : t('actions.saveDraft')}
                        onClick={async () => {
-                         const { 
-                             err,
-                             programOfficerName,
-                             programOfficerPhone,
-                             reportingOfficerName,
-                             reportingOfficerPhone,
-                             financeOfficerName,
-                             financeOfficerPhone,
-                             ...otherValues 
-                         } = values;
-
-                         const draftData = {
-                             ...otherValues,
-                             id: currentDraftId,
-                             err_id: err,
-                             program_officer_name: programOfficerName,
-                             program_officer_phone: programOfficerPhone,
-                             reporting_officer_name: reportingOfficerName,
-                             reporting_officer_phone: reportingOfficerPhone,
-                             finance_officer_name: financeOfficerName,
-                             finance_officer_phone: financeOfficerPhone,
-                             is_draft: true
-                         };
-
                          try {
+                             const { data: { session } } = await newSupabase.auth.getSession();
+                             
+                             if (!session) {
+                                 throw new Error('No active session');
+                             }
+
+                             const { 
+                                 err,
+                                 programOfficerName,
+                                 programOfficerPhone,
+                                 reportingOfficerName,
+                                 reportingOfficerPhone,
+                                 financeOfficerName,
+                                 financeOfficerPhone,
+                                 ...otherValues 
+                             } = values;
+
+                             const draftData = {
+                                 ...Object.entries(otherValues).reduce((acc, [key, value]) => {
+                                     if (value !== undefined && value !== null && value !== '') {
+                                         acc[key] = value;
+                                     }
+                                     return acc;
+                                 }, {}),
+                                 id: currentDraftId,
+                                 err_id: err,
+                                 program_officer_name: programOfficerName || null,
+                                 program_officer_phone: programOfficerPhone || null,
+                                 reporting_officer_name: reportingOfficerName || null,
+                                 reporting_officer_phone: reportingOfficerPhone || null,
+                                 finance_officer_name: financeOfficerName || null,
+                                 finance_officer_phone: financeOfficerPhone || null,
+                                 is_draft: true,
+                                 created_by: userErrId
+                             };
+
                              const response = await fetch('/api/project-drafts', {
                                  method: 'POST',
-                                 headers: { 'Content-Type': 'application/json' },
+                                 headers: { 
+                                     'Content-Type': 'application/json',
+                                     'Authorization': `Bearer ${session.access_token}`
+                                 },
                                  body: JSON.stringify(draftData),
                                  credentials: 'include'
                              });
+
                              if (!response.ok) throw new Error('Failed to save draft');
+                             
                              const data = await response.json();
                              if (data.success && data.draft) {
                                  setCurrentDraftId(data.draft.id);

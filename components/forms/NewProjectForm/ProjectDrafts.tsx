@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Button from '../../ui/Button';
 import FormBubble from '../../ui/FormBubble';
 import MessageBubble from '../../ui/MessageBubble';
+import { newSupabase } from '../../../services/newSupabaseClient';
 
 interface ProjectDraft {
     id: string;
@@ -40,9 +41,20 @@ const ProjectDrafts: React.FC<ProjectDraftsProps> = ({
         setError(null);
 
         try {
+            // Get current session
+            const { data: { session } } = await newSupabase.auth.getSession();
+            
+            if (!session) {
+                throw new Error('No active session');
+            }
+
             const response = await fetch(`/api/project-drafts?id=${draftId}`, {
                 method: 'DELETE',
-                credentials: 'include'
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                }
             });
 
             if (!response.ok) {

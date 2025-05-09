@@ -38,6 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .from('err_projects')
             .select('*')
             .eq('err_id', userData.err_id)
+            .eq('is_draft', false)
             .order('last_modified', { ascending: false });
 
         if (projectsError) {

@@ -50,8 +50,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (req.method === 'POST') {
             const { id, ...formData } = req.body;
             
+            // Only include fields that have values
+            const cleanedData = Object.entries(formData).reduce((acc, [key, value]) => {
+                if (value !== undefined && value !== null && value !== '') {
+                    acc[key] = value;
+                }
+                return acc;
+            }, {});
+
             const draftData = {
-                ...formData,
+                ...cleanedData,
                 is_draft: true,
                 created_by: user.err_id,
                 last_modified: new Date().toISOString()
@@ -87,6 +95,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     draft: result
                 });
             } catch (error) {
+                console.error('Error saving draft:', error);
                 return res.status(500).json({
                     success: false,
                     message: 'Error saving draft',
