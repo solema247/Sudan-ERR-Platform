@@ -115,7 +115,25 @@ const Menu = () => {
         if (currentMenu === CurrentMenu.REPORTING) {
             const fetchProjects = async () => {
                 try {
-                    const response = await fetch('/api/get-projects', { credentials: 'include' });
+                    // Get current session
+                    const { data: { session } } = await newSupabase.auth.getSession();
+                    
+                    if (!session) {
+                        throw new Error('No session found');
+                    }
+
+                    const response = await fetch('/api/get-projects', {
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${session.access_token}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch projects');
+                    }
+
                     const data = await response.json();
                     if (data.success) {
                         setProjects(data.projects);
@@ -123,7 +141,7 @@ const Menu = () => {
                         console.error('Error fetching projects:', data.message);
                     }
                 } catch (error) {
-                    console.error('Unexpected error fetching projects:', error);
+                    console.error('Error fetching projects:', error);
                 }
             };
 
