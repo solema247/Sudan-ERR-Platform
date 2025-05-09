@@ -17,6 +17,7 @@ import ProgramReportForm from '../components/forms/ProgramReportForm/ReportingFo
 import ProjectDrafts from '../components/forms/NewProjectForm/ProjectDrafts';
 import FinancialReportDrafts from '../components/forms/FinancialReportForm/FinancialReportDrafts';
 import ProgramReportDrafts from '../components/forms/ProgramReportForm/ProgramReportDrafts';
+import { newSupabase } from '../services/newSupabaseClient';
 
 /**
  * Chat-style menu.
@@ -73,9 +74,36 @@ const Menu = () => {
     // Validate session on load
     useEffect(() => {
         const checkAuth = async () => {
-            const response = await fetch('/api/validate-session', { credentials: 'include' });
-            if (!response.ok) {
-                router.push('/login'); // Redirect to login if session is invalid
+            try {
+                const { data: { session } } = await newSupabase.auth.getSession();
+                
+                if (!session) {
+                    router.push('/login');
+                    return;
+                }
+
+                const response = await fetch('/api/validate-session', { 
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.log('Auth check failed:', await response.text());
+                    router.push('/login');
+                    return;
+                }
+
+                const data = await response.json();
+                if (!data.success) {
+                    console.log('Auth check failed:', data.message);
+                    router.push('/login');
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+                router.push('/login');
             }
         };
 

@@ -77,6 +77,7 @@ const Login = () => {
         }
 
         try {
+            console.log('Attempting login...');
             // Sign in with Supabase Auth
             const { data: authData, error: signInError } = await newSupabase.auth.signInWithPassword({
                 email,
@@ -84,11 +85,25 @@ const Login = () => {
             });
 
             if (signInError) {
+                console.error('Auth error:', signInError);
                 setError(t('loginError'));
                 setIsLoading(false);
                 return;
             }
 
+            if (!authData.user) {
+                console.error('No user data returned');
+                setError(t('loginError'));
+                setIsLoading(false);
+                return;
+            }
+
+            // Store the session
+            if (authData.session) {
+                localStorage.setItem('supabase.auth.token', JSON.stringify(authData.session));
+            }
+
+            console.log('Auth successful, fetching user data...');
             // Fetch user's role and status from our users table
             const { data: userData, error: userError } = await newSupabase
                 .from('users')
