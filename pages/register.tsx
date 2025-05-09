@@ -20,9 +20,10 @@ const Register = () => {
     const [selectedType, setSelectedType] = useState<'state' | 'base' | ''>('');
     const [selectedErr, setSelectedErr] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const router = useRouter();
-    const { t } = useTranslation('register');
+    const { t, i18n } = useTranslation('register');
 
     // Fetch ERRs when type is selected
     useEffect(() => {
@@ -61,6 +62,15 @@ const Register = () => {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-gray-50">
+            <div className="flex justify-center mb-4">
+                <button onClick={() => i18n.changeLanguage('en')} className="mx-2 text-blue-500 hover:underline">
+                    English
+                </button>
+                <button onClick={() => i18n.changeLanguage('ar')} className="mx-2 text-blue-500 hover:underline">
+                    العربية
+                </button>
+            </div>
+
             <div className="flex flex-col items-center mb-6">
                 <Image
                     src={LogoImage}
@@ -107,12 +117,14 @@ const Register = () => {
 
                 {error && <p className="text-red-500 text-sm">{error}</p>}
 
+                {/* Continue Button */}
                 <Button
                     text={t('continueWithSelected')}
                     onClick={handleContinue}
                     disabled={!selectedErr}
                 />
 
+                {/* Can't find room link */}
                 <div className="text-center">
                     <Link 
                         href="/register/new-room"
@@ -122,10 +134,13 @@ const Register = () => {
                     </Link>
                 </div>
 
-                <Button
-                    text={t('backToLogin')}
-                    onClick={() => router.push('/login')}
-                />
+                {/* Back to Login link */}
+                <Link 
+                    href="/login"
+                    className="text-blue-500 hover:text-blue-700 text-center"
+                >
+                    {t('backToLogin')}
+                </Link>
             </div>
         </div>
     );

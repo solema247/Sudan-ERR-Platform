@@ -217,9 +217,8 @@ const Login = () => {
             {/* Error Message */}
             {error && <p className="text-red-500 mt-2">{error}</p>}
 
-            {/* Registration Link - New Addition */}
+            {/* Registration Link - Remove the redundant text and keep just the link */}
             <div className="mt-4 text-center">
-                <p className="text-sm text-gray-600 mb-2">{t('newUser')}</p>
                 <Link 
                     href="/register" 
                     className="text-blue-500 hover:text-blue-700 font-medium"

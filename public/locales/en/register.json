@@ -31,5 +31,6 @@
     "roomCreationSuccess": "Room created successfully!",
     "roomPendingApproval": "Your room will be reviewed by an administrator. You will be notified once approved.",
     "registerHere": "Register Here",
-    "selectLocality": "Select Locality"
+    "selectLocality": "Select Locality",
+    "backToRegister": "Back to Register"
 } 

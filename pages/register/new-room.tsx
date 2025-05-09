@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import Link from 'next/link';
 import { newSupabase } from '../../services/newSupabaseClient';
 
 const LogoImage = '/icons/icon-512x512.png';
@@ -109,6 +110,16 @@ const NewRoom = () => {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-gray-50">
+            {/* Language Switcher - Add this block near the top */}
+            <div className="flex justify-center mb-4">
+                <button onClick={() => i18n.changeLanguage('en')} className="mx-2 text-blue-500 hover:underline">
+                    English
+                </button>
+                <button onClick={() => i18n.changeLanguage('ar')} className="mx-2 text-blue-500 hover:underline">
+                    العربية
+                </button>
+            </div>
+
             <div className="flex flex-col items-center mb-6">
                 <Image
                     src={LogoImage}
@@ -184,11 +195,12 @@ const NewRoom = () => {
                             type="submit"
                             disabled={isLoading}
                         />
-                        <Button
-                            text={t('backToRegister')}
-                            onClick={() => router.push('/register')}
-                            type="button"
-                        />
+                        <Link 
+                            href="/register"
+                            className="text-blue-500 hover:text-blue-700 text-center mt-4"
+                        >
+                            {t('backToRegister')}
+                        </Link>
                     </div>
                 </form>
             )}

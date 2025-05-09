@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import Link from 'next/link';
 import { newSupabase } from '../../services/newSupabaseClient';
 
 const LogoImage = '/icons/icon-512x512.png';
@@ -138,13 +139,14 @@ const UserRegistration = () => {
                     <Button
                         text={isLoading ? t('registering') : t('registerButton')}
                         type="submit"
-                        disabled={isLoading || !selectedRoom}
+                        disabled={isLoading}
                     />
-                    <Button
-                        text={t('backToRoomSelection')}
-                        onClick={() => router.push('/register')}
-                        type="button"
-                    />
+                    <Link 
+                        href="/register"
+                        className="text-blue-500 hover:text-blue-700 text-center mt-4"
+                    >
+                        {t('backToRoomSelection')}
+                    </Link>
                 </div>
             </form>
         </div>
