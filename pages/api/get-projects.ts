@@ -1,56 +1,59 @@
 // /pages/api/get-projects.ts
 import { NextApiRequest, NextApiResponse } from "next";
 import { newSupabase } from "../../services/newSupabaseClient";
+import { validateJWT } from "../../services/auth";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+    req: NextApiRequest,
+    res: NextApiResponse,
+) {
     if (req.method !== "GET") {
         res.setHeader("Allow", ["GET"]);
-        return res.status(405).json({ success: false, message: "Method not allowed" });
+        return res
+            .status(405)
+            .json({ success: false, message: "Method not allowed" });
     }
 
     try {
-        // Get the session from the Authorization header
-        const authHeader = req.headers.authorization;
-        if (!authHeader) {
-            return res.status(401).json({ success: false, message: 'No authorization header' });
+        const token = req.cookies.token;
+        const user = validateJWT(token);
+        
+        if (!user) {
+            return res
+                .status(401)
+                .json({ success: false, message: "Unauthorized" });
         }
 
-        // Get session
-        const { data: { user }, error: sessionError } = await newSupabase.auth.getUser(authHeader.replace('Bearer ', ''));
+        const { err_id } = user;
+        const { includeDrafts } = req.query; // Optional query parameter
 
-        if (sessionError || !user) {
-            return res.status(401).json({ success: false, message: 'Unauthorized' });
+        const query = newSupabase
+            .from("err_projects")
+            .select("id, project_objectives, state, locality")
+            .eq("err_id", err_id);
+
+        // Only include non-draft projects unless specifically requested
+        if (!includeDrafts) {
+            query.eq("is_draft", false);
         }
 
-        // Get the user's err_id from the users table
-        const { data: userData, error: userError } = await newSupabase
-            .from('users')
-            .select('err_id')
-            .eq('id', user.id)
-            .single();
+        // Only get active projects
+        query.eq("status", "active");
 
-        if (userError || !userData) {
-            console.error('Error fetching user data:', userError);
-            return res.status(500).json({ success: false, message: 'Failed to fetch user data' });
-        }
+        const { data: projects, error } = await query;
 
-        // Get active projects for the ERR
-        const { data: projects, error: projectsError } = await newSupabase
-            .from('err_projects')
-            .select('id, project_objectives, state, locality')
-            .eq('err_id', userData.err_id)
-            .eq('status', 'active')
-            .eq('is_draft', false)
-            .order('last_modified', { ascending: false });
-
-        if (projectsError) {
-            console.error('Error fetching projects:', projectsError);
-            return res.status(500).json({ success: false, message: 'Failed to fetch projects' });
+        if (error) {
+            console.error("Error fetching projects:", error.message);
+            return res
+                .status(500)
+                .json({ success: false, message: "Failed to fetch projects" });
         }
 
         return res.status(200).json({ success: true, projects });
-    } catch (error) {
-        console.error('Unexpected error in get-projects:', error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+    } catch (error: any) {
+        console.error("Unexpected error in get-projects:", error.message);
+        return res
+            .status(500)
+            .json({ success: false, message: "Internal server error" });
     }
 }
