@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { newSupabase } from '../../services/newSupabaseClient';
-import { validateJWT } from '../../services/auth';
+import { validateSession } from '../../services/auth';
 
 /**
  * Project Drafts API
@@ -13,9 +13,14 @@ import { validateJWT } from '../../services/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        const token = req.cookies.token;
-        const user = validateJWT(token);
+        // Get the session from the Authorization header
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(401).json({ success: false, message: 'No authorization header' });
+        }
 
+        // Validate session and get user data
+        const user = await validateSession(authHeader.replace('Bearer ', ''));
         if (!user) {
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }

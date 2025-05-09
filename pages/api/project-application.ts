@@ -1,7 +1,7 @@
 // pages/api/project-application.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { newSupabase } from '../../services/newSupabaseClient';
-import { validateJWT } from '../../services/auth';
+import { validateSession } from '../../services/auth';
 
 /**
  * F1 Project Application
@@ -13,11 +13,15 @@ import { validateJWT } from '../../services/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        const token = req.cookies.token;
-        const user = validateJWT(token);
+        // Get the session from the Authorization header
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(401).json({ success: false, message: 'No authorization header' });
+        }
 
+        // Validate session and get user data
+        const user = await validateSession(authHeader.replace('Bearer ', ''));
         if (!user) {
-            console.error('Unauthorized: Invalid JWT');
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
 
@@ -102,31 +106,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const { 
                 id,
                 currentLanguage, 
-                err,
-                programOfficerName,
-                programOfficerPhone,
-                reportingOfficerName,
-                reportingOfficerPhone,
-                financeOfficerName,
-                financeOfficerPhone,
                 ...formData 
             } = req.body;
-
-            console.log('Received POST data:', {
-                currentLanguage,
-                ...formData
-            });
 
             try {
                 const projectData = {
                     ...formData,
-                    err_id: err,
-                    program_officer_name: programOfficerName,
-                    program_officer_phone: programOfficerPhone,
-                    reporting_officer_name: reportingOfficerName,
-                    reporting_officer_phone: reportingOfficerPhone,
-                    finance_officer_name: financeOfficerName,
-                    finance_officer_phone: financeOfficerPhone,
+                    err_id: user.err_id, // Use err_id from validated session
                     language: currentLanguage || 'en',
                     status: 'pending',
                     is_draft: false,

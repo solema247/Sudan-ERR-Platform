@@ -5,6 +5,8 @@ import * as Yup from 'yup';
 import Button from '../../ui/Button';
 import FormBubble from '../../ui/FormBubble';
 import NewProjectActivities from './NewProjectActivities';
+import { newSupabase } from '../../../services/newSupabaseClient';
+import { useRouter } from 'next/router';
 
 /**
  * F1 Form
@@ -93,17 +95,33 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
    const [pendingSubmission, setPendingSubmission] = useState(null);
    const [userErrId, setUserErrId] = useState('');
    const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(initialValues?.id);
+   const router = useRouter();
 
    useEffect(() => {
      const validateSession = async () => {
        try {
-         const response = await fetch('/api/validate-session');
-         const data = await response.json();
-         if (data.success && data.user?.err_id) {
-           setUserErrId(data.user.err_id);
+         const { data: { session } } = await newSupabase.auth.getSession();
+         
+         if (!session) {
+           router.push('/login');
+           return;
          }
+
+         // Get user data directly from the users table
+         const { data: userData, error: userError } = await newSupabase
+           .from('users')
+           .select('err_id')
+           .eq('id', session.user.id)
+           .single();
+
+         if (userError || !userData) {
+           console.error('Error fetching user data:', userError);
+           return;
+         }
+
+         setUserErrId(userData.err_id);
        } catch (error) {
-         // Remove this log
+         console.error('Session validation error:', error);
        }
      };
 
@@ -119,7 +137,20 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
      const fetchOptions = async () => {
        setLoading(true);
        try {
-         const res = await fetch(`/api/project-application?language=${i18n.language}`);
+         const { data: { session } } = await newSupabase.auth.getSession();
+         
+         if (!session) {
+           throw new Error('No active session');
+         }
+
+         const res = await fetch(`/api/project-application?language=${i18n.language}`, {
+           credentials: 'include',
+           headers: {
+             'Content-Type': 'application/json',
+             'Authorization': `Bearer ${session.access_token}`
+           }
+         });
+
          if (res.ok) {
            const data = await res.json();
 
@@ -146,13 +177,13 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
            throw new Error('Failed to fetch options');
          }
        } catch (error) {
-         // Remove this log
+         console.error('Error fetching options:', error);
        } finally {
          setLoading(false);
        }
      };
      fetchOptions();
-   }, [i18n.language, t]);
+   }, [i18n.language, t, router]);
 
    const validationSchema = Yup.object({
      date: Yup.string(),

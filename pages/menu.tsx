@@ -163,9 +163,27 @@ const Menu = () => {
     useEffect(() => {
         const fetchProjectDrafts = async () => {
             try {
+                // Get current session
+                const { data: { session } } = await newSupabase.auth.getSession();
+                
+                if (!session) {
+                    console.error('No active session');
+                    router.push('/login');
+                    return;
+                }
+
                 const response = await fetch('/api/project-drafts', {
-                    credentials: 'include'
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
                 if (data.success) {
                     setDrafts(data.drafts || []);
@@ -180,7 +198,7 @@ const Menu = () => {
         if (showProjectDrafts) {
             fetchProjectDrafts();
         }
-    }, [showProjectDrafts]);
+    }, [showProjectDrafts, router]);
 
     const createNewReportId = () => {
         setActiveReportId(crypto.randomUUID());
