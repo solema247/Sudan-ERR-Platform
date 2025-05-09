@@ -1,0 +1,16 @@
+{
+    "registerTitle": "Register New Account",
+    "emailPlaceholder": "Enter Email",
+    "passwordPlaceholder": "Enter Password",
+    "displayNamePlaceholder": "Enter Display Name",
+    "selectErrType": "Select ERR Type",
+    "stateErr": "State ERR",
+    "baseErr": "Base ERR",
+    "selectErr": "Select Emergency Response Room",
+    "registerButton": "Register",
+    "registering": "Registering...",
+    "backToLogin": "Back to Login",
+    "registrationError": "Registration failed. Please try again.",
+    "errFetchError": "Failed to fetch Emergency Response Rooms",
+    "logoAlt": "Sudan Emergency Response Rooms Logo"
+} 

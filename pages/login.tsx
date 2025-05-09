@@ -8,6 +8,7 @@ import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import OfflineForm from '../components/forms/OfflineForm';
 import { newSupabase } from '../services/newSupabaseClient';
+import Link from 'next/link';
 const LogoImage = '/icons/icon-512x512.png';
 import i18n from '../services/i18n'; 
 
@@ -216,8 +217,19 @@ const Login = () => {
             {/* Error Message */}
             {error && <p className="text-red-500 mt-2">{error}</p>}
 
+            {/* Registration Link - New Addition */}
+            <div className="mt-4 text-center">
+                <p className="text-sm text-gray-600 mb-2">{t('newUser')}</p>
+                <Link 
+                    href="/register" 
+                    className="text-blue-500 hover:text-blue-700 font-medium"
+                >
+                    {t('registerLink')}
+                </Link>
+            </div>
+
             {/* Back to Home Button */}
-            <div className="mt-2">
+            <div className="mt-4">
                 <button
                     onClick={handleBackToHome}
                     className="text-blue-500 hover:underline"

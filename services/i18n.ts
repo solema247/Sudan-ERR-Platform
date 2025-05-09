@@ -19,6 +19,7 @@ i18n.use(initReactI18next).init({
       feedback: require("../public/locales/en/feedback.json"),
       'program-report': require("../public/locales/en/program-report.json"),
       'financial-report': require("../public/locales/en/financial-report.json"),
+      register: require("../public/locales/en/register.json"),
     },
     ar: {
       login: require("../public/locales/ar/login.json"),
@@ -35,6 +36,7 @@ i18n.use(initReactI18next).init({
       feedback: require("../public/locales/ar/feedback.json"),
       'program-report': require("../public/locales/ar/program-report.json"),
       'financial-report': require("../public/locales/ar/financial-report.json"),
+      register: require("../public/locales/ar/register.json"),
     },
     es: {
       login: require("../public/locales/es/login.json"),
@@ -50,10 +52,10 @@ i18n.use(initReactI18next).init({
       home: require("../public/locales/es/home.json"),
     },
   },
-  lng: "ar", // Changed from "en" to "ar"
-  fallbackLng: "ar", // Changed from "en" to "ar"
+  lng: "ar",
+  fallbackLng: "ar",
   interpolation: {
-    escapeValue: false, // React already escapes values
+    escapeValue: false,
   },
 });
 

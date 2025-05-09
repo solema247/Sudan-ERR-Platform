@@ -1,0 +1,16 @@
+{
+    "registerTitle": "تسجيل حساب جديد",
+    "emailPlaceholder": "أدخل البريد الإلكتروني",
+    "passwordPlaceholder": "أدخل كلمة المرور",
+    "displayNamePlaceholder": "أدخل اسم العرض",
+    "selectErrType": "اختر نوع غرفة الطوارئ",
+    "stateErr": "غرفة طوارئ الولاية",
+    "baseErr": "غرفة طوارئ القاعدة",
+    "selectErr": "اختر غرفة الطوارئ",
+    "registerButton": "تسجيل",
+    "registering": "جاري التسجيل...",
+    "backToLogin": "العودة إلى تسجيل الدخول",
+    "registrationError": "فشل التسجيل. يرجى المحاولة مرة أخرى.",
+    "errFetchError": "فشل في جلب غرف الطوارئ",
+    "logoAlt": "شعار غرف الطوارئ في السودان"
+} 
