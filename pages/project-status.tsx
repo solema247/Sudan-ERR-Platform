@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import MessageBubble from '../components/ui/MessageBubble';
 import Button from '../components/ui/Button';
+import { newSupabase } from '../services/newSupabaseClient';
 
 interface ProjectStatusProps {
     onReturnToMenu: () => void;
@@ -12,27 +13,47 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu }) => {
     const { t, i18n } = useTranslation('projectStatus'); // Use translations for the "project-status" namespace
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         const fetchProjectStatuses = async () => {
             setLoading(true);
             try {
-                const res = await fetch('/api/project-status', { credentials: 'include' });
-                if (res.ok) {
-                    const data = await res.json();
+                // Get current session
+                const { data: { session } } = await newSupabase.auth.getSession();
+                
+                if (!session) {
+                    throw new Error('No session found');
+                }
+
+                const res = await fetch('/api/project-status', {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+
+                const data = await res.json();
+                if (data.success) {
                     setProjects(data.projects);
                 } else {
-                    console.error('Failed to fetch project statuses');
+                    setError(data.message || 'Failed to fetch projects');
                 }
             } catch (error) {
                 console.error('Error fetching project statuses:', error);
+                setError(t('fetchError'));
             } finally {
                 setLoading(false);
             }
         };
 
         fetchProjectStatuses();
-    }, []);
+    }, [t]);
 
     return (
         <div className="space-y-4 p-4">
