@@ -23,6 +23,36 @@ const nextConfig = {
     webpack: (config) => {
         config.resolve.alias.canvas = false
         return config
+    },
+    // Add rewrites to handle service worker
+    async rewrites() {
+        return [
+            {
+                source: '/sw.js',
+                destination: '/_next/static/sw.js'
+            }
+        ];
+    },
+    async headers() {
+        return [
+            {
+                source: '/sw.js',
+                headers: [
+                    {
+                        key: 'Cache-Control',
+                        value: 'no-cache, no-store, max-age=0'
+                    },
+                    {
+                        key: 'Service-Worker-Allowed',
+                        value: '/'
+                    },
+                    {
+                        key: 'Content-Type',
+                        value: 'application/javascript; charset=utf-8'
+                    }
+                ]
+            }
+        ];
     }
 };
 

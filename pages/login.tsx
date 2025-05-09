@@ -7,10 +7,9 @@ import Image from 'next/image';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import OfflineForm from '../components/forms/OfflineForm';
+import { newSupabase } from '../services/newSupabaseClient';
 const LogoImage = '/icons/icon-512x512.png';
 import i18n from '../services/i18n'; 
-import { supabase } from '../services/supabaseClient';
-
 
 /**
  * Login.tsx
@@ -23,12 +22,13 @@ export interface User {
 }
 
 const Login = () => {
-    const [errId, setErrId] = useState('');
-    const [pin, setPin] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [showOfflineForm, setShowOfflineForm] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-    const [isOffline, setIsOffline] = useState(false); 
+    const [isOffline, setIsOffline] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const router = useRouter();
     const { t } = useTranslation('login'); // Load translations for the "login" namespace
@@ -68,59 +68,55 @@ const Login = () => {
     const handleLogin = async (event: React.FormEvent) => {
         event.preventDefault();
         setError('');
+        setIsLoading(true);
 
         if (isOffline) { // Prevent login while offline
             setError(t('offlineLoginError'));
+            setIsLoading(false);
             return;
         }
 
         try {
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ err_id: errId, pin }),
+            // Sign in with Supabase Auth
+            const { data: authData, error: signInError } = await newSupabase.auth.signInWithPassword({
+                email,
+                password
             });
 
-            const data = await response.json();
-
-            /**
-             * 
-             * This Supabase login is so that we can get a session token for image buckets.
-             * 
-             * TODO: Replace this with better Supabase auth for the users who sign up.
-             * 
-             * */
-
-            if (data.success) {
-                router.push({
-                    pathname: '/menu',
-                    query: { errId: errId }
-                }); 
-
-                const demo_login = process.env.NEXT_PUBLIC_BUCKET_LOGIN;
-                const demo_password = process.env.NEXT_PUBLIC_BUCKET_PASSWORD;
-
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: demo_login,
-                    password: demo_password
-                })
-
-                console.log("Logging in, we get:");
-                console.log(data);
-
-                if (error) {
-                    console.log(error);
-                    console.log('loginError');
-                }
-
-            // End demo login.
-
-
-            } else {
-                setError(data.message || t('loginError')); // Use translated error message
+            if (signInError) {
+                setError(t('loginError'));
+                setIsLoading(false);
+                return;
             }
-        } catch {
+
+            // Fetch user's role and status from our users table
+            const { data: userData, error: userError } = await newSupabase
+                .from('users')
+                .select('role, status, display_name')
+                .eq('id', authData.user.id)
+                .single();
+
+            if (userError) {
+                setError(t('userDataError'));
+                setIsLoading(false);
+                return;
+            }
+
+            // Check if user is approved
+            if (userData.status !== 'active') {
+                setError(t('accountPending'));
+                setIsLoading(false);
+                return;
+            }
+
+            // Successful login
+            router.push('/menu');
+
+        } catch (error) {
+            console.error('Login error:', error);
             setError(t('unexpectedError')); // Use translated fallback error message
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -184,30 +180,34 @@ const Login = () => {
             {/* Login Form */}
             <form onSubmit={handleLogin} className="flex flex-col items-center space-y-4 w-full max-w-xs">
                 <Input
-                    type="text"
-                    placeholder={t('errIdPlaceholder')} // Translate placeholder
-                    value={errId}
-                    onChange={(e) => setErrId(e.target.value)}
+                    type="email"
+                    placeholder={t('emailPlaceholder')}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                 />
                 <Input
                     type="password"
-                    placeholder={t('pinPlaceholder')} // Translate placeholder
-                    value={pin}
-                    onChange={(e) => setPin(e.target.value)}
+                    placeholder={t('passwordPlaceholder')}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                 />
-                <Button text={t('loginButton')} type="submit" /> {/* Translate button text */}
+                <Button 
+                    text={isLoading ? t('loggingIn') : t('loginButton')} 
+                    type="submit"
+                    disabled={isLoading}
+                />
             </form>
 
             {/* Error Message */}
             {error && <p className="text-red-500 mt-2">{error}</p>}
 
             {/* Back to Home Button */}
-            <div className="mt-2 mb-4">
+            <div className="mt-2">
                 <button
                     onClick={handleBackToHome}
-                    className="text-blue-500 underline"
+                    className="text-blue-500 hover:underline"
                 >
-                    {t('backToHome')} {/* Translate "Back to Home" */}
+                    {t('backToHome')}
                 </button>
             </div>
 
@@ -219,7 +219,7 @@ const Login = () => {
                             onClick={closeOfflineForm}
                             className="text-red-500 float-right mb-2"
                         >
-                            {t('closeButton')} {/* Translate close button */}
+                            {t('closeButton')}
                         </button>
                         <OfflineForm
                             onClose={closeOfflineForm}

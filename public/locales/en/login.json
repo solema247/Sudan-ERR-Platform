@@ -1,11 +1,17 @@
 {
   "welcomeMessage": "Welcome to the Sudan Emergency Response Rooms App",
-  "errIdPlaceholder": "Enter ERR ID",
-  "pinPlaceholder": "Enter PIN",
+  "emailPlaceholder": "Enter Email",
+  "passwordPlaceholder": "Enter Password",
   "loginButton": "Login",
+  "loggingIn": "Logging in...",
   "loginError": "Login failed. Please check your credentials.",
-  "offlineModeButton": "Offline Mode: Upload Form",
-  "closeButton": "Close",
+  "userDataError": "Could not fetch user data. Please try again.",
+  "unexpectedError": "An unexpected error occurred. Please try again.",
+  "offlineWarning": "You are currently offline",
+  "offlineLoginError": "Cannot login while offline",
+  "accountPending": "Your account is pending approval. Please try again later.",
+  "registerLink": "New user? Register here",
   "logoAlt": "Sudan Emergency Response Rooms Logo",
-  "backToHome": "Back to Home"
+  "backToHome": "Back to Home",
+  "closeButton": "Close"
 }
