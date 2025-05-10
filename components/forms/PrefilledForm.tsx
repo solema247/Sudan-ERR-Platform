@@ -359,9 +359,19 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
   // Modify handleSaveDraft function
   const handleSaveDraft = async (formData: any) => {
     try {
+        // Get current session
+        const { data: { session } } = await newSupabase.auth.getSession();
+        
+        if (!session) {
+            throw new Error('No active session');
+        }
+
         const response = await fetch('/api/financial-report-drafts', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`
+            },
             credentials: 'include',
             body: JSON.stringify({
                 project_id: project.id,
