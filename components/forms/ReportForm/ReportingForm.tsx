@@ -105,10 +105,20 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
     const handleSaveDraft = async (values: any) => {
         setIsSaving(true);
         try {
-            // First check if a draft already exists
+            // Get the current session
+            const { data: { session } } = await newSupabase.auth.getSession();
+            
+            if (!session) {
+                throw new Error('No active session');
+            }
+
+            // Make the request with the authorization header
             const response = await fetch('/api/financial-report-drafts', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
                 credentials: 'include',
                 body: JSON.stringify({
                     project_id: project.id,

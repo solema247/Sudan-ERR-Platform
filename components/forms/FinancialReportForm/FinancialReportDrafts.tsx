@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Button from '../../ui/Button';
 import FormBubble from '../../ui/FormBubble';
 import MessageBubble from '../../ui/MessageBubble';
+import { newSupabase } from '../../../services/newSupabaseClient';
 
 interface FinancialReportDraft {
     id: string;
@@ -60,6 +61,10 @@ const FinancialReportDrafts: React.FC<FinancialReportDraftsProps> = ({
         }
     };
 
+    const handleEditDraft = (draft: FinancialReportDraft) => {
+        onEditDraft(draft.id);
+    };
+
     return (
         <FormBubble>
             <div className="space-y-4">
@@ -92,7 +97,7 @@ const FinancialReportDrafts: React.FC<FinancialReportDraftsProps> = ({
                                     <div className="flex space-x-2 mt-2">
                                         <Button 
                                             text={tFinancial('drafts.continue')}
-                                            onClick={() => onEditDraft(draft.id)}
+                                            onClick={() => handleEditDraft(draft)}
                                         />
                                         <Button 
                                             text={tFinancial('drafts.delete')}

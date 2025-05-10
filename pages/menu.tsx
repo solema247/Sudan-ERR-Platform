@@ -148,16 +148,46 @@ const Menu = () => {
     useEffect(() => {
         const fetchDrafts = async () => {
             try {
+                // Get current session
+                const { data: { session } } = await newSupabase.auth.getSession();
+                
+                if (!session) {
+                    console.error('No active session');
+                    return;
+                }
+
                 // Fetch financial report drafts
-                const financialResponse = await fetch(`/api/financial-report-drafts?project_id=${selectedProject.id}`, {
-                    credentials: 'include'
-                });
+                const financialResponse = await fetch(
+                    `/api/financial-report-drafts?project_id=${selectedProject.id}`, 
+                    {
+                        credentials: 'include',
+                        headers: {
+                            'Authorization': `Bearer ${session.access_token}`
+                        }
+                    }
+                );
+
+                if (!financialResponse.ok) {
+                    throw new Error('Failed to fetch financial drafts');
+                }
+
                 const financialData = await financialResponse.json();
 
                 // Fetch program report drafts
-                const programResponse = await fetch(`/api/program-report-drafts?project_id=${selectedProject.id}`, {
-                    credentials: 'include'
-                });
+                const programResponse = await fetch(
+                    `/api/program-report-drafts?project_id=${selectedProject.id}`, 
+                    {
+                        credentials: 'include',
+                        headers: {
+                            'Authorization': `Bearer ${session.access_token}`
+                        }
+                    }
+                );
+
+                if (!programResponse.ok) {
+                    throw new Error('Failed to fetch program drafts');
+                }
+
                 const programData = await programResponse.json();
 
                 setFinancialDrafts(financialData.drafts || []);
@@ -277,6 +307,39 @@ const Menu = () => {
         setShowFinancialDrafts(false);
         setShowProjectApplication(false);
         setCurrentDraft(null);
+    };
+
+    const onEditDraft = async (draftId) => {
+        try {
+            // Get current session
+            const { data: { session } } = await newSupabase.auth.getSession();
+            
+            if (!session) {
+                throw new Error('No active session');
+            }
+
+            const response = await fetch(
+                `/api/financial-report-drafts?draft_id=${draftId}&project_id=${selectedProject.id}`,
+                {
+                    credentials: 'include',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch draft');
+            }
+
+            const { draft } = await response.json();
+            setCurrentDraft(draft);
+            setShowFinancialDrafts(false);
+            setShowFillForm(true);
+        } catch (error) {
+            console.error('Error loading draft:', error);
+            alert(t('drafts.loadError'));
+        }
     };
 
     return (
@@ -576,23 +639,7 @@ const Menu = () => {
                         <h3 className="text-xl font-bold mb-4">{t('financial.draftsTitle')}</h3>
                         <FinancialReportDrafts
                             drafts={financialDrafts}
-                            onEditDraft={async (draftId) => {
-                                try {
-                                    const response = await fetch(`/api/financial-report-drafts?draft_id=${draftId}&project_id=${selectedProject.id}`, {
-                                        credentials: 'include'
-                                    });
-                                    
-                                    if (!response.ok) throw new Error('Failed to fetch draft');
-                                    
-                                    const { draft } = await response.json();
-                                    setCurrentDraft(draft);
-                                    setShowFinancialDrafts(false);
-                                    setShowFillForm(true);
-                                } catch (error) {
-                                    console.error('Error loading draft:', error);
-                                    alert(t('drafts.loadError'));
-                                }
-                            }}
+                            onEditDraft={onEditDraft}
                             onDeleteDraft={(draftId) => {
                                 setFinancialDrafts(drafts => 
                                     drafts.filter(d => d.id !== draftId)
