@@ -36,7 +36,9 @@ export default async function handler(
         const query = newSupabase
             .from("err_projects")
             .select("id, project_objectives, state, locality")
-            .eq("created_by", user.err_id);  // Use created_by instead of err_id
+            .eq("err_id", user.err_id)
+            .eq("is_draft", false)
+            .eq("status", "active");
 
         // Only include non-draft projects unless specifically requested
         if (!includeDrafts) {
