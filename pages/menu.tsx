@@ -40,6 +40,31 @@ enum CurrentMenu {
     PROJECTS
 }
 
+// Add this interface near the top of the file with other interfaces
+interface ProgramReportDraft {
+    id: string;
+    report_date: string;
+    positive_changes: string;
+    negative_results: string;
+    unexpected_results: string;
+    lessons_learned: string;
+    suggestions: string;
+    reporting_person: string;
+    activities: Array<{
+        id: string;
+        activity_name: string;
+        activity_goal: string;
+        location: string;
+        start_date: string;
+        end_date: string;
+        individual_count: number;
+        household_count: number;
+        male_count: number;
+        female_count: number;
+        under18_male: number;
+        under18_female: number;
+    }>;
+}
 
 const getCurrentTimestamp = () => {
     const now = new Date();
@@ -62,7 +87,8 @@ const Menu = () => {
     const [showProjectDrafts, setShowProjectDrafts] = useState(false);
     const [drafts, setDrafts] = useState<Project[]>([]);
     const [showDraftList, setShowDraftList] = useState(true);
-    const [currentDraft, setCurrentDraft] = useState<Project | null>(null);
+    const [currentProjectDraft, setCurrentProjectDraft] = useState<Project | null>(null);
+    const [currentProgramDraft, setCurrentProgramDraft] = useState<ProgramReportDraft | null>(null);
     const [showFinancialDrafts, setShowFinancialDrafts] = useState(false);
     const [financialDrafts, setFinancialDrafts] = useState([]);
     const [programDrafts, setProgramDrafts] = useState([]);
@@ -261,7 +287,8 @@ const Menu = () => {
         // Reset draft-related states when menu changes
         setShowFinancialDrafts(false);
         setFinancialDrafts([]);
-        setCurrentDraft(null);
+        setCurrentProgramDraft(null);
+        setCurrentProjectDraft(null);
         setShowFillForm(false);
         setShowScanForm(false);
         setShowScanCustomForm(false);
@@ -306,7 +333,8 @@ const Menu = () => {
         setShowProgramForm(false);
         setShowFinancialDrafts(false);
         setShowProjectApplication(false);
-        setCurrentDraft(null);
+        setCurrentProgramDraft(null);
+        setCurrentProjectDraft(null);
     };
 
     const onEditDraft = async (draftId) => {
@@ -333,7 +361,7 @@ const Menu = () => {
             }
 
             const { draft } = await response.json();
-            setCurrentDraft(draft);
+            setCurrentProjectDraft(draft);
             setShowFinancialDrafts(false);
             setShowFillForm(true);
         } catch (error) {
@@ -476,7 +504,7 @@ const Menu = () => {
                             onClick={() => {
                                 resetFormStates();
                                 setShowFinancialDrafts(true);
-                                setCurrentDraft(null);
+                                setCurrentProgramDraft(null);
                             }}
                             className="w-full"
                         />
@@ -510,7 +538,7 @@ const Menu = () => {
                             createNewReportId();
                             setTimeout(() => setShowFillForm(true), 0);
                         }}
-                        initialDraft={currentDraft}
+                        initialDraft={currentProjectDraft}
                     />
                 </MessageBubble>
             )}
@@ -544,14 +572,14 @@ const Menu = () => {
                             }))}
                             onEditDraft={(draftId) => {
                                 const draftToEdit = drafts.find(d => d.id === draftId);
-                                setCurrentDraft(draftToEdit);
+                                setCurrentProjectDraft(draftToEdit);
                                 setShowDraftList(false);
                             }}
                             onDeleteDraft={(draftId) => {
                                 setDrafts(drafts.filter(d => d.id !== draftId));
                             }}
                             onNewProject={() => {
-                                setCurrentDraft(null);
+                                setCurrentProjectDraft(null);
                                 setShowDraftList(false);
                             }}
                             onReturnToMenu={() => handleMenuSelection(CurrentMenu.PROJECTS)}
@@ -559,10 +587,10 @@ const Menu = () => {
                     ) : (
                         <ProjectApplication 
                             onReturnToMenu={() => setShowDraftList(true)}
-                            initialValues={currentDraft}
+                            initialValues={currentProjectDraft}
                             onDraftSubmitted={() => {
-                                if (currentDraft) {
-                                    setDrafts(drafts.filter(d => d.id !== currentDraft.id));
+                                if (currentProjectDraft) {
+                                    setDrafts(drafts.filter(d => d.id !== currentProjectDraft.id));
                                 }
                                 setShowDraftList(true);
                             }}
@@ -586,7 +614,7 @@ const Menu = () => {
                             setShowProgramForm(false);
                             setTimeout(() => setShowProgramForm(true), 0);
                         }}
-                        initialDraft={currentDraft}
+                        initialDraft={currentProgramDraft}
                     />
                 </MessageBubble>
             )}
@@ -660,9 +688,22 @@ const Menu = () => {
                             drafts={programDrafts}
                             onEditDraft={async (draftId) => {
                                 try {
-                                    const response = await fetch(`/api/program-report-drafts?draft_id=${draftId}&project_id=${selectedProject.id}`, {
-                                        credentials: 'include'
-                                    });
+                                    // Get current session
+                                    const { data: { session } } = await newSupabase.auth.getSession();
+                                    
+                                    if (!session) {
+                                        throw new Error('No active session');
+                                    }
+
+                                    const response = await fetch(
+                                        `/api/program-report-drafts?draft_id=${draftId}&project_id=${selectedProject.id}`,
+                                        {
+                                            credentials: 'include',
+                                            headers: {
+                                                'Authorization': `Bearer ${session.access_token}`
+                                            }
+                                        }
+                                    );
                                     
                                     if (!response.ok) throw new Error('Failed to fetch draft');
                                     
@@ -671,7 +712,7 @@ const Menu = () => {
                                     if (!draft) throw new Error('No draft data received');
 
                                     // Transform the draft data to match the form structure
-                                    const formattedDraft = {
+                                    const formattedDraft: ProgramReportDraft = {
                                         id: draft.id,
                                         report_date: draft.report_date || '',
                                         positive_changes: draft.positive_changes || '',
@@ -693,16 +734,14 @@ const Menu = () => {
                                             female_count: activity.female_count || 0,
                                             under18_male: activity.under18_male || 0,
                                             under18_female: activity.under18_female || 0
-                                        })) || [],
-                                        project_objectives: draft.project_objectives || '',
-                                        state: draft.state || '',
-                                        locality: draft.locality || ''
-                                    } as Project;
+                                        })) || []
+                                    };
 
-                                    setCurrentDraft(formattedDraft);
+                                    setCurrentProgramDraft(formattedDraft);
                                     setShowFinancialDrafts(false);
                                     setShowProgramForm(true);
                                 } catch (error) {
+                                    console.error('Error loading draft:', error);
                                     alert(t('drafts.loadError'));
                                 }
                             }}

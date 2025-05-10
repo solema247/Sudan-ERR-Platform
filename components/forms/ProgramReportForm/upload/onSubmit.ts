@@ -1,3 +1,4 @@
+import { newSupabase } from '../../../../services/newSupabaseClient';
 import { FileWithProgress, UploadedFile } from './UploadInterfaces';
 import uploadFile from './performUpload';
 
@@ -34,11 +35,19 @@ export const createOnSubmit = (t: (key: string) => string) =>
         setUploadProgress: (index: number, progress: number) => void
     ) => {
         try {
+            // Get current session
+            const { data: { session } } = await newSupabase.auth.getSession();
+            
+            if (!session) {
+                throw new Error(t('errorMessages.noSession'));
+            }
+
             // First submit form to get report_id
             const response = await fetch('/api/program-report', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
                 },
                 credentials: 'include',
                 body: JSON.stringify({
@@ -53,34 +62,41 @@ export const createOnSubmit = (t: (key: string) => string) =>
 
             const { report_id } = await response.json();
 
-            // Then upload all files with the correct path structure
-            const uploadedFiles = await Promise.all(
-                uploadingFiles.map((file, index) =>
-                    uploadFile(
-                        file,
-                        projectId,
-                        report_id,
-                        (progress) => setUploadProgress(index, progress)
-                    )
-                )
-            );
+            // Only attempt to upload files if there are any
+            if (uploadingFiles.length > 0) {
+                try {
+                    const uploadedFiles = await Promise.all(
+                        uploadingFiles.map((file, index) =>
+                            uploadFile(
+                                file,
+                                projectId,
+                                report_id,
+                                (progress) => setUploadProgress(index, progress)
+                            )
+                        )
+                    );
 
-            // Finally, update the report with file metadata
-            if (uploadedFiles.length > 0) {
-                const fileUpdateResponse = await fetch('/api/program-report/files', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        report_id,
-                        files: uploadedFiles
-                    }),
-                });
+                    const fileUpdateResponse = await fetch('/api/program-report/files', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${session.access_token}`
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            report_id,
+                            files: uploadedFiles
+                        }),
+                    });
 
-                if (!fileUpdateResponse.ok) {
-                    throw new Error(t('errorMessages.fileUploadError'));
+                    if (!fileUpdateResponse.ok) {
+                        const errorData = await fileUpdateResponse.json();
+                        throw new Error(errorData.message || t('errorMessages.fileUploadError'));
+                    }
+                } catch (fileError) {
+                    console.error('File upload error:', fileError);
+                    // Continue with form submission even if file upload fails
+                    // but log the error for debugging
                 }
             }
 

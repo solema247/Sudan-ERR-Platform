@@ -11,6 +11,7 @@ import { UploadChooserSupporting } from './upload/UploadChooserSupporting';
 import { UploadedList } from './upload/UploadedList';
 import { FileWithProgress, UploadedFile } from './upload/UploadInterfaces';
 import { createOnSubmit } from './upload/onSubmit';
+import { newSupabase } from '../../../services/newSupabaseClient';
 
 interface ReportingFormProps {
     project: Project;
@@ -69,9 +70,19 @@ const ProgramReportForm: React.FC<ReportingFormProps> = ({
     const handleSaveDraft = async (values: any) => {
         setIsSaving(true);
         try {
+            // Get current session
+            const { data: { session } } = await newSupabase.auth.getSession();
+            
+            if (!session) {
+                throw new Error('No active session');
+            }
+
             const response = await fetch('/api/program-report-drafts', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
                 credentials: 'include',
                 body: JSON.stringify({
                     project_id: project.id,

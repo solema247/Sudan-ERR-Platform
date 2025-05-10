@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { newSupabase } from '../../../services/newSupabaseClient';
-import { validateJWT } from '../../../services/auth';
+import { validateSession } from '../../../services/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
@@ -8,22 +8,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        const token = req.cookies.token;
-        const user = validateJWT(token);
+        // Get the session from the Authorization header
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(401).json({ success: false, message: 'No authorization header' });
+        }
+
+        // Validate session and get user data
+        const user = await validateSession(authHeader.replace('Bearer ', ''));
         if (!user) {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Unauthorized - Please log in again' 
-            });
+            return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
 
         const { report_id, files } = req.body;
 
-        // Insert file metadata into err_program_files table
+        if (!report_id || !files) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields'
+            });
+        }
+
+        // Insert file metadata into the database
         const { error: filesError } = await newSupabase
-            .from('err_program_files')
+            .from('err_program_report_files')
             .insert(
-                files.map((file: any) => ({
+                files.map(file => ({
                     report_id,
                     file_name: file.file_name,
                     file_url: file.file_url,
@@ -32,18 +42,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }))
             );
 
-        if (filesError) throw filesError;
+        if (filesError) {
+            console.error('Error saving file metadata:', filesError);
+            throw filesError;
+        }
 
-        res.status(200).json({ 
-            success: true, 
-            message: 'Files metadata saved successfully' 
+        return res.status(200).json({
+            success: true,
+            message: 'Files metadata saved successfully'
         });
 
     } catch (error) {
-        console.error('Error saving file metadata:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: error.message || 'Error saving file metadata' 
+        console.error('Error handling file metadata:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Error saving file metadata'
         });
     }
 } 
