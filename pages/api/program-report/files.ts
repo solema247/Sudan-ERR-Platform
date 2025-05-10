@@ -29,22 +29,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
         }
 
-        // Insert file metadata into the database
+        // Insert file metadata into the database with correct table name
         const { error: filesError } = await newSupabase
-            .from('err_program_report_files')
+            .from('err_program_files')
             .insert(
                 files.map(file => ({
                     report_id,
                     file_name: file.file_name,
                     file_url: file.file_url,
                     file_type: file.file_type,
-                    file_size: file.file_size
+                    file_size: file.file_size,
+                    uploaded_by: user.id
                 }))
             );
 
         if (filesError) {
             console.error('Error saving file metadata:', filesError);
-            throw filesError;
+            return res.status(500).json({
+                success: false,
+                message: `Database error: ${filesError.message}`
+            });
         }
 
         return res.status(200).json({
