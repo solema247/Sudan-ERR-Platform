@@ -1,7 +1,7 @@
 // /pages/api/get-projects.ts
 import { NextApiRequest, NextApiResponse } from "next";
 import { newSupabase } from "../../services/newSupabaseClient";
-import { validateJWT } from "../../services/auth";
+import { validateSession } from "../../services/auth";
 
 export default async function handler(
     req: NextApiRequest,
@@ -15,22 +15,28 @@ export default async function handler(
     }
 
     try {
-        const token = req.cookies.token;
-        const user = validateJWT(token);
-        
+        // Get the session from the Authorization header
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res
+                .status(401)
+                .json({ success: false, message: 'No authorization header' });
+        }
+
+        // Validate session and get user data
+        const user = await validateSession(authHeader.replace('Bearer ', ''));
         if (!user) {
             return res
                 .status(401)
-                .json({ success: false, message: "Unauthorized" });
+                .json({ success: false, message: 'Unauthorized' });
         }
 
-        const { err_id } = user;
         const { includeDrafts } = req.query; // Optional query parameter
 
         const query = newSupabase
             .from("err_projects")
             .select("id, project_objectives, state, locality")
-            .eq("err_id", err_id);
+            .eq("created_by", user.err_id);  // Use created_by instead of err_id
 
         // Only include non-draft projects unless specifically requested
         if (!includeDrafts) {

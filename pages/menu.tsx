@@ -115,7 +115,20 @@ const Menu = () => {
         if (currentMenu === CurrentMenu.REPORTING) {
             const fetchProjects = async () => {
                 try {
-                    const response = await fetch('/api/get-projects', { credentials: 'include' });
+                    // Get current session
+                    const { data: { session } } = await newSupabase.auth.getSession();
+                    
+                    if (!session) {
+                        throw new Error('No active session');
+                    }
+
+                    const response = await fetch('/api/get-projects', {
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${session.access_token}`
+                        }
+                    });
                     const data = await response.json();
                     if (data.success) {
                         setProjects(data.projects);
