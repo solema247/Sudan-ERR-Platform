@@ -72,4 +72,6 @@ export const UploadedList: React.FC<Props> = ({
             ))}
         </div>
     );
-}; 
+};
+
+export default UploadedList; 

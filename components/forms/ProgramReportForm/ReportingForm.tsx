@@ -7,8 +7,8 @@ import getInitialValues from './values/values';
 import { createValidationScheme } from './values/validation';
 import Project from '../NewProjectForm/Project';
 import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
-import { UploadChooserSupporting } from './upload/UploadChooserSupporting';
-import { UploadedList } from './upload/UploadedList';
+import UploadChooserSupporting from './upload/UploadChooserSupporting';
+import UploadedList from './upload/UploadedList';
 import { FileWithProgress, UploadedFile } from './upload/UploadInterfaces';
 import { createOnSubmit } from './upload/onSubmit';
 import { newSupabase } from '../../../services/newSupabaseClient';
@@ -154,7 +154,7 @@ const ProgramReportForm: React.FC<ReportingFormProps> = ({
                 initialValues={initialFormValues}
                 validationSchema={createValidationScheme(t)}
                 onSubmit={handleSubmit}
-                enableReinitialize={true}
+                enableReinitialize={false}
             >
                 {({ values, setFieldValue }) => (
                     <Form className="prose flex flex-col">
@@ -453,11 +453,14 @@ const ProgramReportForm: React.FC<ReportingFormProps> = ({
                             )}
                         </FieldArray>
 
-                        {/* Add file upload section before submit button */}
+                        {/* File Upload Section */}
                         <div className="mt-2">
                             <h3 className="text-2xl font-bold mb-4">{t('upload.title')}</h3>
                             <UploadChooserSupporting
-                                onFilesSelected={handleFilesSelected}
+                                onFilesSelected={(files) => {
+                                    handleFilesSelected(files);
+                                    setFieldValue('uploadedFiles', values.uploadedFiles || []);
+                                }}
                                 disabled={isSubmitted}
                             />
                             <UploadedList

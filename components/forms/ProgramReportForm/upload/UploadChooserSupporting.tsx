@@ -1,57 +1,51 @@
-import React, { useRef, DragEvent } from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileWithProgress } from './UploadInterfaces';
 
-interface Props {
+interface UploadChooserSupportingProps {
     onFilesSelected: (files: FileWithProgress[]) => void;
     disabled?: boolean;
 }
 
-export const UploadChooserSupporting: React.FC<Props> = ({ onFilesSelected, disabled }) => {
+const UploadChooserSupporting: React.FC<UploadChooserSupportingProps> = React.memo(({ 
+    onFilesSelected, 
+    disabled 
+}) => {
     const { t } = useTranslation('program-report');
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    
-    const handleFiles = (files: FileList | null) => {
-        if (files) {
-            const filesWithProgress: FileWithProgress[] = Array.from(files).map(file => ({
-                file,
-                progress: 0
-            }));
-            onFilesSelected(filesWithProgress);
-        }
-    };
+    const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        const fileList = event.target.files;
+        if (!fileList) return;
 
-    const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        handleFiles(e.dataTransfer.files);
-    };
+        const files: FileWithProgress[] = Array.from(fileList).map(file => ({
+            file,
+            progress: 0
+        }));
 
-    const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-    };
+        onFilesSelected(files);
+        
+        // Reset the input value so the same file can be selected again if needed
+        event.target.value = '';
+    }, [onFilesSelected]);
 
     return (
-        <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors"
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-        >
-            <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={disabled}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-                <span>{t('upload.chooseFiles')}</span>
-            </button>
+        <div className="mb-4">
             <input
                 type="file"
-                ref={fileInputRef}
-                onChange={(e) => handleFiles(e.target.files)}
-                className="hidden"
+                onChange={handleFileChange}
+                disabled={disabled}
                 multiple
-                accept=".pdf,.jpg,.jpeg,.png"
+                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100"
             />
         </div>
     );
-}; 
+});
+
+UploadChooserSupporting.displayName = 'UploadChooserSupporting';
+
+export default UploadChooserSupporting; 
