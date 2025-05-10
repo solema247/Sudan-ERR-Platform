@@ -12,6 +12,7 @@ import Project from '../NewProjectForm/Project'
 import expenseValues from './values/expenseValues';
 import { v4 as uuidv4 } from 'uuid';
 import { newSupabase } from '../../../services/newSupabaseClient';
+import { validateSession } from '../../../services/auth';
 
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes.           // TODO: Do compression.
@@ -43,6 +44,37 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
     const [categories, setCategories] = useState([]);
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [userErrId, setUserErrId] = useState('');
+    const [formInitialValues, setFormInitialValues] = useState(() => getInitialValues(errId, initialDraft));
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const { data: { session } } = await newSupabase.auth.getSession();
+                
+                if (!session) {
+                    throw new Error('No active session');
+                }
+
+                const { data: userData, error } = await newSupabase
+                    .from('users')
+                    .select('err_id')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (error || !userData) {
+                    throw new Error('No user data found');
+                }
+
+                setUserErrId(userData.err_id);
+                setFormInitialValues(getInitialValues(userData.err_id, initialDraft));
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
+
+        fetchUserData();
+    }, [initialDraft]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -54,7 +86,6 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
         fetchData();
     }, [i18n.language, project]);
 
-    const initialValues = getInitialValues(errId, initialDraft);
     const validationSchema = createValidationScheme(t);
     const newExpense = expenseValues;
 
@@ -118,9 +149,10 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
           ) : (
         <FormBubble removeBoxShadow>
             <Formik
-                initialValues={initialValues}
+                initialValues={formInitialValues}
                 validationSchema={validationSchema}
-                onSubmit={createOnSubmit(t)} >
+                onSubmit={createOnSubmit(t)}
+                enableReinitialize={true} >
                 {({ isSubmitting, values, setFieldValue }) => {
                     // Use normal function instead of useEffect
                     // Update total whenever expenses change
