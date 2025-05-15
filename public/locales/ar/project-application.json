@@ -4,30 +4,30 @@
   "date": "التاريخ",
   "enterDate": "أدخل تاريخ المشروع",
   "state": "الولاية",
-  "selectState": "اختر ولاية",
+  "selectState": "اختر الولاية",
   "locality": "المحلية",
-  "selectLocality": "اختر محلية",
-  "errId": "رقم الغرفة",
+  "selectLocality": "اختر المحلية",
+  "errId": "معرف ERR",
   "enterErrId": "أدخل رقم الغرفة ",
   "projectObjectives": "أهداف المشروع",
   "enterProjectObjectives": "أشرح المشروع بوضوح وقم بتحديد الأهداف",
   "intendedBeneficiaries": "المستفيدون المستهدفون",
   "enterIntendedBeneficiaries": "من هم المستفيدون المستهدفون من هذا المشروع في منطقتك؟",
-  "estimatedBeneficiaries": "عدد المستفيدين المتوقع",
+  "estimatedBeneficiaries": "العدد المتوقع للمستفيدين",
   "enterEstimatedBeneficiaries": "كم عدد المستفيدين المتوقعين من المشروع؟",
   "plannedActivities": "الأنشطة المخطط لها",
   "selectActivity": "اختر نشاطاً",
   "expenses": "المصروفات",
   "selectExpense": "اختر فئة المصروفات",
-  "estimatedTimeframe": "الفترة الزمنية المتوقعة",
-  "enterEstimatedTimeframe": " الفترة الزمنية لإكمال الأنشطة والتقارير",
+  "estimatedTimeframe": "الإطار الزمني المتوقع",
+  "enterEstimatedTimeframe": "أدخل الإطار الزمني المتوقع",
   "additionalSupport": "الدعم الإضافي",
-  "enterAdditionalSupport": "هل تحتاج إلى دعم إضافي للمشروع؟",
+  "enterAdditionalSupport": "أدخل الدعم الإضافي المطلوب",
   "officerName": "اسم مسؤول البرامج",
   "enterOfficerName": "أدخل اسم مسؤول البرامج",
   "submit": "إرسال",
-  "formSubmitted": "تم تقديم طلبك بنجاح.",
-  "submissionFailed": "فشل التقديم. يرجى المحاولة مرة أخرى لاحقًا.",
+  "formSubmitted": "تم تقديم طلب مشروعك بنجاح.",
+  "submissionFailed": "فشل في تقديم المشروع",
   "Supporting hospitals": "دعم المستشفيات",
   "Operating the health center in the neighborhood": "تشغيل مركز صحي في الحي",
   "Services (electricity, water, public transportation)": "الخدمات (الكهرباء، المياه، النقل العام)",
@@ -59,7 +59,7 @@
   "button.submit": "أرسل هذا المشروع",
   "button.processing": "جاري المعالجة...",
   "activities": {
-    "header": "الأنشطة والنفقات",
+    "header": "الأنشطة",
     "add": "إضافة نشاط",
     "remove": "إزالة النشاط",
     "info": "معلومات النشاط",
@@ -68,69 +68,70 @@
       "label": "الكمية",
       "placeholder": "أدخل الكمية"
     },
-    "duration": "مدة النشاط",
-    "location": "مكان التنفيذ",
+    "duration": "المدة (بالأيام)",
+    "location": "الموقع",
     "expenses": {
-      "add": "إضافة نفقات",
-      "remove": "إزالة النفقات",
+      "add": "إضافة مصروف",
+      "remove": "إزالة المصروفات",
       "label": "المصروفات",
-      "selectExpense": "اختر المصروفات",
-      "description": "وصف المصروفات",
+      "selectExpense": "اختر نوع المصروف",
+      "description": "الوصف",
       "amount": "المبلغ"
     }
   },
   "enterPhoneNumber": "أدخل رقم هاتفك",
   "phoneNumber": "رقم التليفون",
-  "bankDetails": "تفاصيل البنك لغرفة الطوارئ",
-  "enterBankDetails": "أدخل تفاصيل البنك لغرفة الطوارئ",
+  "bankDetails": "التفاصيل المصرفية",
+  "enterBankDetails": "أدخل التفاصيل المصرفية",
   "confirmDialog": {
-    "title": "تأكيد التقديم",
-    "message": "يرجى مراجعة طلبك بعناية قبل التقديم. بمجرد التقديم، لا يمكنك إجراء تغييرات إلا إذا طُلب منك ذلك.",
-    "confirm": "تقديم الطلب",
-    "review": "متابعة المراجعة"
+    "title": "موافقة أصحاب المصلحة",
+    "message": "هل ناقشت هذا المشروع مع جميع أصحاب المصلحة المعنيين في ERR في منطقتك؟ هذا مهم لضمان دعم المجتمع ونجاح المشروع.",
+    "confirm": "نعم، لقد تمت الموافقة مع أصحاب المصلحة",
+    "review": "لا، أحتاج إلى المراجعة أولاً"
   },
   "Womens Activities": "أنشطة النساء",
   "Childrens Activities": "أنشطة الأطفال",
   "programOfficer": {
-    "name": "اسم مسؤول البرامج",
-    "phone": "رقم هاتف مسؤول البرامج"
+    "name": "اسم مسؤول البرنامج",
+    "phone": "هاتف مسؤول البرنامج"
   },
   "reportingOfficer": {
     "name": "اسم مسؤول التقارير",
-    "phone": "رقم هاتف مسؤول التقارير"
+    "phone": "هاتف مسؤول التقارير"
   },
   "financeOfficer": {
     "name": "اسم المسؤول المالي",
-    "phone": "رقم هاتف المسؤول المالي"
+    "phone": "هاتف المسؤول المالي"
   },
-  "errMembers": "أعضاء غرفة الطوارئ",
+  "errMembers": "أعضاء ERR",
   "validation": {
     "required": "هذا الحقل مطلوب",
-    "pleaseFixErrors": "يرجى تصحيح الأخطاء المحددة قبل الإرسال"
+    "pleaseFixErrors": "يرجى تصحيح الأخطاء قبل التقديم."
   },
   "drafts": {
-    "title": "مسودات المشروع",
+    "title": "مسودات المشاريع",
     "newProject": "بدء مشروع جديد",
+    "noDrafts": "لا توجد مسودات",
     "untitled": "مشروع بدون عنوان",
     "lastModified": "آخر تعديل",
-    "continue": "متابعة التحرير",
-    "delete": "حذف المسودة",
-    "saved": "تم حفظ المسودة",
-    "saving": "جاري الحفظ...",
+    "continue": "متابعة",
+    "delete": "حذف",
     "confirmDelete": "هل أنت متأكد من حذف هذه المسودة؟",
-    "deleteError": "خطأ في حذف المسودة",
-    "noDrafts": "لا توجد مسودات محفوظة"
+    "deleteError": "فشل في حذف المسودة",
+    "saved": "تم حفظ المسودة",
+    "saveError": "فشل في حفظ المسودة"
   },
   "actions": {
     "saveDraft": "حفظ كمسودة",
-    "submit": "تقديم المشروع"
+    "submit": "تقديم"
   },
   "feedback": {
-    "title": "ملاحظات من المشرف",
-    "providedBy": "قدمت من قبل",
-    "makeChanges": "يرجى إجراء التغييرات المطلوبة وإعادة التقديم"
+    "title": "آخر ملاحظات",
+    "providedBy": "الملاحظات مقدمة من",
+    "makeChanges": "يرجى إجراء التغييرات المطلوبة وإعادة تقديم مشروعك."
   },
   "errors": {
     "fetchProjectError": "فشل في جلب تفاصيل المشروع"
-  }
+  },
+  "troubleGettingLocalities": "مشكلة في الحصول على المحليات"
 }

@@ -4,9 +4,10 @@
   "date": "Date",
   "enterDate": "Enter the project date",
   "state": "State",
-  "selectState": "Select a state",
+  "selectState": "Select State",
   "locality": "Locality",
-  "selectLocality": "Select a locality",
+  "selectLocality": "Select Locality",
+  "troubleGettingLocalities": "Trouble getting localities",
   "errId": "ERR ID",
   "enterErrId": "Enter your ERR ID",
   "projectObjectives": "Project Objectives",
@@ -20,14 +21,14 @@
   "expenses": "Expenses",
   "selectExpense": "Select an Expense Category",
   "estimatedTimeframe": "Estimated Timeframe",
-  "enterEstimatedTimeframe": "Timeframe to complete activities and submit reports",
+  "enterEstimatedTimeframe": "Enter estimated timeframe",
   "additionalSupport": "Additional Support",
-  "enterAdditionalSupport": "Do you need additional support for this project?",
+  "enterAdditionalSupport": "Enter additional support needed",
   "officerName": "Program Officer Name",
   "enterOfficerName": "Enter the Program Officer's name",
   "submit": "Submit this project",
-  "formSubmitted": "Your application has been successfully submitted.",
-  "submissionFailed": "Submission failed. Please try again later.",
+  "formSubmitted": "Your project application has been submitted successfully.",
+  "submissionFailed": "Failed to submit project",
   "Supporting hospitals": "Supporting hospitals",
   "Operating the health center in the neighborhood": "Operating the health center in the neighborhood",
   "Services (electricity, water, public transportation)": "Services (electricity, water, public transportation)",
@@ -59,35 +60,28 @@
   "button.submit": "Submit",
   "button.processing": "Processing...",
   "activities": {
-    "header": "Activities and Expenses",
+    "header": "Activities",
+    "info": "Activity Information",
+    "placeholder": "Select an activity",
+    "duration": "Duration (days)",
+    "location": "Location",
     "add": "Add Activity",
-    "remove": "Remove Activity",
-    "info": "Activity Info",
-    "placeholder": "Select Activity",
-    "quantity": {
-      "label": "Quantity",
-      "placeholder": "Enter quantity"
-    },
-    "duration": "Activity Duration",
-    "location": "Place of Operation",
     "expenses": {
-      "add": "Add Expense",
-      "remove": "Remove Expense",
       "label": "Expenses",
-      "selectExpense": "Select Expense",
-      "description": "Expense Description",
-      "amount": "Amount"
+      "selectExpense": "Select expense type",
+      "description": "Description",
+      "add": "Add Expense"
     }
   },
   "enterPhoneNumber": "Enter your phone number",
   "phoneNumber": "Phone Number",
-  "enterBankDetails": "Enter ERR banking details",
-  "bankDetails": "ERR Banking Details",
+  "enterBankDetails": "Enter bank details",
+  "bankDetails": "Bank Details",
   "confirmDialog": {
-    "title": "Confirm Submission",
-    "message": "Please review your application carefully before submitting. Once submitted, you cannot make changes unless requested.",
-    "confirm": "Submit Application",
-    "review": "Continue Reviewing"
+    "title": "Stakeholder Alignment",
+    "message": "Have you discussed this project with all relevant ERR stakeholders in your area? This is important to ensure community support and project success.",
+    "confirm": "Yes, I have aligned with stakeholders",
+    "review": "No, I need to review first"
   },
   "programOfficer": {
     "name": "Program Officer Name",
@@ -104,29 +98,29 @@
   "errMembers": "ERR Members",
   "validation": {
     "required": "This field is required",
-    "pleaseFixErrors": "Please fix the highlighted errors before submitting"
+    "pleaseFixErrors": "Please fix the errors before submitting."
   },
   "drafts": {
     "title": "Project Drafts",
     "newProject": "Start New Project",
+    "noDrafts": "No drafts found",
     "untitled": "Untitled Project",
-    "lastModified": "Last modified",
-    "continue": "Continue Editing",
-    "delete": "Delete Draft",
-    "saved": "Draft Saved",
-    "saving": "Saving...",
+    "lastModified": "Last Modified",
+    "continue": "Continue",
+    "delete": "Delete",
     "confirmDelete": "Are you sure you want to delete this draft?",
-    "deleteError": "Error deleting draft",
-    "noDrafts": "No saved drafts found"
+    "deleteError": "Failed to delete draft",
+    "saved": "Draft Saved",
+    "saveError": "Failed to save draft"
   },
   "actions": {
-    "saveDraft": "Save Draft",
-    "submit": "Submit Project"
+    "submit": "Submit",
+    "saveDraft": "Save Draft"
   },
   "feedback": {
-    "title": "Feedback from Admin",
-    "providedBy": "Provided by",
-    "makeChanges": "Please make the requested changes and resubmit"
+    "title": "Latest Feedback",
+    "providedBy": "Feedback provided by",
+    "makeChanges": "Please make the requested changes and resubmit your project."
   },
   "errors": {
     "fetchProjectError": "Failed to fetch project details"

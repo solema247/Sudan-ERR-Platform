@@ -304,7 +304,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
      setPendingSubmission({ 
        values: {
          ...values,
-         id: initialValues?.id,
+         id: projectToEdit || initialValues?.id,
          currentLanguage: i18n.language,
          is_draft: false
        }, 
@@ -356,9 +356,12 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
          last_modified: new Date().toISOString(),
          created_by: userErrId
        };
+
+       // If we're editing an existing project, use PUT method
+       const method = projectToEdit ? 'PUT' : 'POST';
        
        const res = await fetch('/api/project-application', {
-         method: 'POST',
+         method,
          headers: { 
            'Content-Type': 'application/json',
            'Authorization': `Bearer ${session.access_token}`

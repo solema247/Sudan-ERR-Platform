@@ -102,7 +102,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         }
 
-        if (req.method === 'POST') {
+        if (req.method === 'POST' || req.method === 'PUT') {
             const { 
                 id,
                 currentLanguage, 
@@ -218,7 +218,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Step 4: Handle unsupported HTTP methods
-        res.setHeader('Allow', ['GET', 'POST']);
+        res.setHeader('Allow', ['GET', 'POST', 'PUT']);
         return res.status(405).json({ success: false, message: 'Method not allowed' });
     } catch (error) {
         console.error('Unexpected server error:', error);
