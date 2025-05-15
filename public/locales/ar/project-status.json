@@ -8,8 +8,18 @@
   "pending": "قيد الانتظار",
   "approved": "موافق عليه",
   "declined": "مرفوض",
+  "active": "نشط",
+  "feedbackStatus": "مطلوب تعديلات",
   "noProjectsFound": "لم يتم العثور على مشاريع.",
   "loading": "جاري التحميل...",
   "returnToMenu": "العودة إلى القائمة",
-  "active": "نشط"
+  "version": "النسخة",
+  "feedback": {
+    "latest": "آخر ملاحظات",
+    "by": "الملاحظات من",
+    "at": "تاريخ الملاحظات",
+    "editProject": "تعديل المشروع",
+    "viewHistory": "عرض سجل الملاحظات"
+  },
+  "feedbackFetchError": "فشل في جلب الملاحظات"
 }

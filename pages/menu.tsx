@@ -92,6 +92,7 @@ const Menu = () => {
     const [showFinancialDrafts, setShowFinancialDrafts] = useState(false);
     const [financialDrafts, setFinancialDrafts] = useState([]);
     const [programDrafts, setProgramDrafts] = useState([]);
+    const [projectToEdit, setProjectToEdit] = useState(null);
 
     const router = useRouter();
     const errId = router.query.errId;
@@ -323,7 +324,10 @@ const Menu = () => {
             setShowProjectDrafts(true);
             setShowDraftList(true);
         }
-        if (workflow === Workflow.PROJECT_STATUS) setShowProjectStatus(true);
+        if (workflow === Workflow.PROJECT_STATUS) {
+            setShowProjectStatus(true);
+            setProjectToEdit(null);
+        }
         if (workflow === Workflow.PROGRAM_FORM) setShowProgramForm(true);
     };
 
@@ -564,7 +568,7 @@ const Menu = () => {
 
             {showProjectApplication && (
                 <MessageBubble>
-                    {showDraftList ? (
+                    {showDraftList && !projectToEdit ? (
                         <ProjectDrafts
                             drafts={drafts.map(draft => ({
                                 ...draft,
@@ -586,13 +590,23 @@ const Menu = () => {
                         />
                     ) : (
                         <ProjectApplication 
-                            onReturnToMenu={() => setShowDraftList(true)}
+                            onReturnToMenu={() => {
+                                if (projectToEdit) {
+                                    setShowProjectApplication(false);
+                                    setShowProjectStatus(true);
+                                    setProjectToEdit(null);
+                                } else {
+                                    setShowDraftList(true);
+                                }
+                            }}
                             initialValues={currentProjectDraft}
+                            projectToEdit={projectToEdit}
                             onDraftSubmitted={() => {
                                 if (currentProjectDraft) {
                                     setDrafts(drafts.filter(d => d.id !== currentProjectDraft.id));
                                 }
                                 setShowDraftList(true);
+                                setProjectToEdit(null);
                             }}
                         />
                     )}
@@ -601,7 +615,15 @@ const Menu = () => {
 
             {showProjectStatus && (
                 <MessageBubble>
-                    <ProjectStatus onReturnToMenu={() => handleMenuSelection(CurrentMenu.MAIN)} />
+                    <ProjectStatus 
+                        onReturnToMenu={() => handleMenuSelection(CurrentMenu.MAIN)} 
+                        onEditProject={(projectId) => {
+                            setProjectToEdit(projectId);
+                            setShowProjectStatus(false);
+                            setShowProjectApplication(true);
+                            setShowDraftList(false); // Skip the drafts list
+                        }}
+                    />
                 </MessageBubble>
             )}
 

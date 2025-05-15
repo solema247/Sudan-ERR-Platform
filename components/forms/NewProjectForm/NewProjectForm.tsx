@@ -36,11 +36,18 @@ interface Project {
     reporting_officer_phone?: string;
     finance_officer_name?: string;
     finance_officer_phone?: string;
+    feedback?: {
+        feedback_text: string;
+        created_by: {
+            full_name: string;
+        };
+    };
 }
 
 interface NewProjectApplicationProps {
     onReturnToMenu: () => void;
     initialValues?: Project | null;
+    projectToEdit?: string;
     onDraftSubmitted?: () => void;
 }
 
@@ -81,6 +88,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ isOpen, onConfirm, onCanc
 const NewProjectForm:React.FC<NewProjectApplicationProps> = ({ 
     onReturnToMenu,
     initialValues,
+    projectToEdit,
     onDraftSubmitted
 }) => {
    const { t, i18n } = useTranslation('projectApplication');
@@ -95,6 +103,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
    const [pendingSubmission, setPendingSubmission] = useState(null);
    const [userErrId, setUserErrId] = useState('');
    const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(initialValues?.id);
+   const [editingProject, setEditingProject] = useState<Project | null>(null);
    const router = useRouter();
 
    useEffect(() => {
@@ -184,6 +193,73 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
      };
      fetchOptions();
    }, [i18n.language, t, router]);
+
+   useEffect(() => {
+     const fetchProjectDetails = async () => {
+       if (!projectToEdit) return;
+
+       try {
+         const { data: { session } } = await newSupabase.auth.getSession();
+         
+         if (!session) {
+           throw new Error('No active session');
+         }
+
+         // Fetch project details
+         const { data: project, error: projectError } = await newSupabase
+           .from('err_projects')
+           .select('*')
+           .eq('id', projectToEdit)
+           .single();
+
+         if (projectError) throw projectError;
+
+         // Fetch latest feedback
+         const res = await fetch(`/api/project-feedback?project_id=${projectToEdit}`, {
+           credentials: 'include',
+           headers: {
+             'Content-Type': 'application/json',
+             'Authorization': `Bearer ${session.access_token}`
+           }
+         });
+
+         if (!res.ok) throw new Error('Failed to fetch feedback');
+
+         const { feedback } = await res.json();
+         
+         // Format the project data to match the form structure
+         const formattedProject = {
+           ...project,
+           date: project.date || '',
+           err: project.err_id || '',
+           state: project.state || '',
+           locality: project.locality || '',
+           project_objectives: project.project_objectives || '',
+           intended_beneficiaries: project.intended_beneficiaries || '',
+           estimated_beneficiaries: project.estimated_beneficiaries || '',
+           planned_activities: project.planned_activities || [],
+           estimated_timeframe: project.estimated_timeframe || '',
+           additional_support: project.additional_support || '',
+           banking_details: project.banking_details || '',
+           programOfficerName: project.program_officer_name || '',
+           programOfficerPhone: project.program_officer_phone || '',
+           reportingOfficerName: project.reporting_officer_name || '',
+           reportingOfficerPhone: project.reporting_officer_phone || '',
+           financeOfficerName: project.finance_officer_name || '',
+           financeOfficerPhone: project.finance_officer_phone || '',
+           feedback: feedback[0]
+         };
+
+         setEditingProject(formattedProject);
+
+       } catch (error) {
+         console.error('Error fetching project details:', error);
+         alert(t('errors.fetchProjectError'));
+       }
+     };
+
+     fetchProjectDetails();
+   }, [projectToEdit, t]);
 
    const validationSchema = Yup.object({
      date: Yup.string().nullable(),
@@ -330,25 +406,34 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
          </div>
        ) : (
          <FormBubble removeBoxShadow>
+           {editingProject?.feedback && (
+             <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+               <h3 className="text-lg font-semibold mb-2">{t('feedback.title')}</h3>
+               <p className="mb-2">{editingProject.feedback.feedback_text}</p>
+               <p className="text-sm text-gray-600">
+                 {t('feedback.providedBy')}: {editingProject.feedback.created_by.full_name}
+               </p>
+             </div>
+           )}
            <Formik
              initialValues={{
-               date: initialValues?.date || '',
+               date: editingProject?.date || initialValues?.date || '',
                err: userErrId,
-               state: initialValues?.state || '',
-               locality: initialValues?.locality || '',
-               project_objectives: initialValues?.project_objectives || '',
-               intended_beneficiaries: initialValues?.intended_beneficiaries || '',
-               estimated_beneficiaries: initialValues?.estimated_beneficiaries || '',
-               planned_activities: initialValues?.planned_activities || [],
-               estimated_timeframe: initialValues?.estimated_timeframe || '',
-               additional_support: initialValues?.additional_support || '',
-               banking_details: initialValues?.banking_details || '',
-               programOfficerName: initialValues?.program_officer_name || '',
-               programOfficerPhone: initialValues?.program_officer_phone || '',
-               reportingOfficerName: initialValues?.reporting_officer_name || '',
-               reportingOfficerPhone: initialValues?.reporting_officer_phone || '',
-               financeOfficerName: initialValues?.finance_officer_name || '',
-               financeOfficerPhone: initialValues?.finance_officer_phone || '',
+               state: editingProject?.state || initialValues?.state || '',
+               locality: editingProject?.locality || initialValues?.locality || '',
+               project_objectives: editingProject?.project_objectives || initialValues?.project_objectives || '',
+               intended_beneficiaries: editingProject?.intended_beneficiaries || initialValues?.intended_beneficiaries || '',
+               estimated_beneficiaries: editingProject?.estimated_beneficiaries || initialValues?.estimated_beneficiaries || '',
+               planned_activities: editingProject?.planned_activities || initialValues?.planned_activities || [],
+               estimated_timeframe: editingProject?.estimated_timeframe || initialValues?.estimated_timeframe || '',
+               additional_support: editingProject?.additional_support || initialValues?.additional_support || '',
+               banking_details: editingProject?.banking_details || initialValues?.banking_details || '',
+               programOfficerName: editingProject?.program_officer_name || initialValues?.program_officer_name || '',
+               programOfficerPhone: editingProject?.program_officer_phone || initialValues?.program_officer_phone || '',
+               reportingOfficerName: editingProject?.reporting_officer_name || initialValues?.reporting_officer_name || '',
+               reportingOfficerPhone: editingProject?.reporting_officer_phone || initialValues?.reporting_officer_phone || '',
+               financeOfficerName: editingProject?.finance_officer_name || initialValues?.finance_officer_name || '',
+               financeOfficerPhone: editingProject?.finance_officer_phone || initialValues?.finance_officer_phone || '',
              }}
              validationSchema={validationSchema}
              onSubmit={handleSubmit}

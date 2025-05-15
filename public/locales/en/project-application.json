@@ -84,10 +84,10 @@
   "enterBankDetails": "Enter ERR banking details",
   "bankDetails": "ERR Banking Details",
   "confirmDialog": {
-    "title": "Stakeholder Alignment",
-    "message": "Have you discussed this project with all relevant ERR stakeholders in your area? This is important to ensure community support and project success.",
-    "confirm": "Yes, I have aligned with stakeholders",
-    "review": "No, I need to review first"
+    "title": "Confirm Submission",
+    "message": "Please review your application carefully before submitting. Once submitted, you cannot make changes unless requested.",
+    "confirm": "Submit Application",
+    "review": "Continue Reviewing"
   },
   "programOfficer": {
     "name": "Program Officer Name",
@@ -122,5 +122,13 @@
   "actions": {
     "saveDraft": "Save Draft",
     "submit": "Submit Project"
+  },
+  "feedback": {
+    "title": "Feedback from Admin",
+    "providedBy": "Provided by",
+    "makeChanges": "Please make the requested changes and resubmit"
+  },
+  "errors": {
+    "fetchProjectError": "Failed to fetch project details"
   }
 }

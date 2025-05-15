@@ -112,7 +112,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             try {
                 const projectData = {
                     ...formData,
-                    err_id: user.err_id, // Use err_id from validated session
+                    err_id: user.err_id,
                     language: currentLanguage || 'en',
                     status: 'pending',
                     is_draft: false,
@@ -121,50 +121,91 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     created_by: user.err_id
                 };
 
-                // First check if a draft exists for this user
-                const { data: existingDraft } = await newSupabase
-                    .from('err_projects')
-                    .select('id')
-                    .eq('created_by', user.err_id)
-                    .eq('is_draft', true)
-                    .single();
+                // First check if this is a resubmission
+                if (id) {
+                    // Get current project version
+                    const { data: currentProject, error: versionError } = await newSupabase
+                        .from('err_projects')
+                        .select('version, current_feedback_id')
+                        .eq('id', id)
+                        .single();
 
-                let query;
-                if (id || existingDraft?.id) {
-                    // Update existing draft or project
-                    const projectId = id || existingDraft?.id;
-                    query = newSupabase
+                    if (versionError) {
+                        console.error('Error fetching project version:', versionError);
+                        return res.status(500).json({
+                            success: false,
+                            message: 'Error fetching project version',
+                            error: versionError.message
+                        });
+                    }
+
+                    // Update version and clear feedback
+                    projectData.version = (currentProject.version || 1) + 1;
+                    
+                    // Update feedback status if exists
+                    if (currentProject.current_feedback_id) {
+                        const { error: feedbackError } = await newSupabase
+                            .from('project_feedback')
+                            .update({ feedback_status: 'changes_submitted' })
+                            .eq('id', currentProject.current_feedback_id);
+
+                        if (feedbackError) {
+                            console.error('Error updating feedback status:', feedbackError);
+                            return res.status(500).json({
+                                success: false,
+                                message: 'Error updating feedback status',
+                                error: feedbackError.message
+                            });
+                        }
+                    }
+
+                    // Update project
+                    const { data, error } = await newSupabase
                         .from('err_projects')
                         .update(projectData)
-                        .eq('id', projectId)
-                        .eq('created_by', user.err_id)
+                        .eq('id', id)
                         .select()
                         .single();
-                } else {
-                    // Create new project
-                    query = newSupabase
-                        .from('err_projects')
-                        .insert([projectData])
-                        .select()
-                        .single();
-                }
 
-                const { data, error } = await query;
+                    if (error) {
+                        console.error('Error updating project:', error);
+                        return res.status(500).json({
+                            success: false,
+                            message: 'Error updating project',
+                            error: error.message
+                        });
+                    }
 
-                if (error) {
-                    console.error('Error saving application:', error);
-                    return res.status(500).json({
-                        success: false,
-                        message: 'Error saving application',
-                        error: error.message,
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Project updated successfully',
+                        data
                     });
                 }
 
-                console.log('Application submitted successfully:', data);
+                // Create new project
+                const { data, error } = await newSupabase
+                    .from('err_projects')
+                    .insert([{
+                        ...projectData,
+                        version: 1
+                    }])
+                    .select()
+                    .single();
+
+                if (error) {
+                    console.error('Error creating project:', error);
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Error creating project',
+                        error: error.message
+                    });
+                }
+
                 return res.status(200).json({
                     success: true,
-                    message: 'Application submitted successfully',
-                    data,
+                    message: 'Project created successfully',
+                    data
                 });
             } catch (error) {
                 console.error('Server error during application submission:', error);

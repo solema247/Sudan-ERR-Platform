@@ -9,8 +9,18 @@
   "approved": "Approved",
   "declined": "Declined",
   "active": "Active",
+  "feedbackStatus": "Changes Requested",
   "noProjectsFound": "No projects found.",
   "loading": "Loading...",
-  "returnToMenu": "Return to Menu"
+  "returnToMenu": "Return to Menu",
+  "version": "Version",
+  "feedback": {
+    "latest": "Latest Feedback",
+    "by": "Feedback by",
+    "at": "Provided at",
+    "editProject": "Edit Project",
+    "viewHistory": "View Feedback History"
+  },
+  "feedbackFetchError": "Failed to fetch feedback"
 }
 
