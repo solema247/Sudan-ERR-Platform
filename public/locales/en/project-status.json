@@ -21,6 +21,26 @@
     "editProject": "Edit Project",
     "viewHistory": "View Feedback History"
   },
+  "details": {
+    "basicInfo": "Basic Information",
+    "date": "Date",
+    "location": "Location",
+    "intendedBeneficiaries": "Intended Beneficiaries",
+    "estimatedBeneficiaries": "Estimated Beneficiaries",
+    "timeframe": "Estimated Timeframe",
+    "contacts": "Contact Information",
+    "programOfficer": "Program Officer",
+    "reportingOfficer": "Reporting Officer",
+    "financeOfficer": "Finance Officer",
+    "plannedActivities": "Planned Activities",
+    "activity": "Activity",
+    "location": "Location",
+    "quantity": "Quantity",
+    "duration": "Duration",
+    "additional": "Additional Information",
+    "additionalSupport": "Additional Support",
+    "bankingDetails": "Banking Details"
+  },
   "feedbackFetchError": "Failed to fetch feedback"
 }
 

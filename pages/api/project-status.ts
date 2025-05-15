@@ -33,10 +33,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(500).json({ success: false, message: 'Failed to fetch user data' });
         }
 
-        // Get user's projects using err_id
+        // Get user's projects using err_id with all fields
         const { data: projects, error: projectsError } = await newSupabase
             .from('err_projects')
-            .select('*')
+            .select(`
+                id,
+                date,
+                state,
+                locality,
+                status,
+                project_objectives,
+                intended_beneficiaries,
+                estimated_beneficiaries,
+                estimated_timeframe,
+                additional_support,
+                banking_details,
+                submitted_at,
+                program_officer_name,
+                program_officer_phone,
+                reporting_officer_name,
+                reporting_officer_phone,
+                finance_officer_name,
+                finance_officer_phone,
+                planned_activities,
+                version,
+                last_modified
+            `)
             .eq('err_id', userData.err_id)
             .eq('is_draft', false)
             .order('last_modified', { ascending: false });
@@ -46,14 +68,49 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(500).json({ success: false, message: 'Failed to fetch projects' });
         }
 
+        // Fetch all planned activities
+        const { data: activities, error: activitiesError } = await newSupabase
+            .from('planned_activities')
+            .select('id, activity_name')
+            .eq('language', req.query.language || 'en');
+
+        if (activitiesError) {
+            console.error('Error fetching activities:', activitiesError);
+            return res.status(500).json({ success: false, message: 'Failed to fetch activities' });
+        }
+
+        // Create a map of activity IDs to names
+        const activityMap = activities.reduce((map, activity) => {
+            map[activity.id] = activity.activity_name;
+            return map;
+        }, {});
+
+        // Process projects to include activity names
+        const processedProjects = projects.map(project => {
+            let planned_activities = [];
+            
+            if (project.planned_activities) {
+                // Parse if string
+                const activities = typeof project.planned_activities === 'string' 
+                    ? JSON.parse(project.planned_activities)
+                    : project.planned_activities;
+
+                // Map activity IDs to names
+                planned_activities = activities.map(activity => ({
+                    ...activity,
+                    activityName: activityMap[activity.selectedActivity] || activity.selectedActivity
+                }));
+            }
+
+            return {
+                ...project,
+                planned_activities
+            };
+        });
+
         return res.status(200).json({
             success: true,
-            projects: projects.map(project => ({
-                id: project.id,
-                title: project.project_objectives,
-                status: project.status,
-                submitted_at: project.submitted_at || project.last_modified
-            }))
+            projects: processedProjects
         });
     } catch (error) {
         console.error('Project status error:', error);

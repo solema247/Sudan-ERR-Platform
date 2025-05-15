@@ -21,5 +21,25 @@
     "editProject": "تعديل المشروع",
     "viewHistory": "عرض سجل الملاحظات"
   },
+  "details": {
+    "basicInfo": "معلومات أساسية",
+    "date": "التاريخ",
+    "location": "الموقع",
+    "intendedBeneficiaries": "المستفيدون المستهدفون",
+    "estimatedBeneficiaries": "العدد المتوقع للمستفيدين",
+    "timeframe": "الإطار الزمني المتوقع",
+    "contacts": "معلومات الاتصال",
+    "programOfficer": "مسؤول البرنامج",
+    "reportingOfficer": "مسؤول التقارير",
+    "financeOfficer": "المسؤول المالي",
+    "plannedActivities": "الأنشطة المخططة",
+    "activity": "النشاط",
+    "location": "الموقع",
+    "quantity": "الكمية",
+    "duration": "المدة",
+    "additional": "معلومات إضافية",
+    "additionalSupport": "الدعم الإضافي",
+    "bankingDetails": "التفاصيل المصرفية"
+  },
   "feedbackFetchError": "فشل في جلب الملاحظات"
 }
