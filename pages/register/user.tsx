@@ -13,7 +13,6 @@ interface EmergencyRoom {
     id: string;
     name: string;
     type: 'state' | 'base';
-    legacy_err_id: string;
 }
 
 const UserRegistration = () => {
@@ -35,7 +34,7 @@ const UserRegistration = () => {
                 try {
                     const { data, error } = await newSupabase
                         .from('emergency_rooms')
-                        .select('id, name, type, legacy_err_id')
+                        .select('id, name, type')
                         .eq('id', roomId)
                         .single();
 
@@ -72,7 +71,7 @@ const UserRegistration = () => {
                 .from('users')
                 .insert([{
                     id: authData.user?.id,
-                    err_id: selectedRoom.legacy_err_id,
+                    err_id: selectedRoom.id,
                     display_name: displayName,
                     role: selectedRoom.type === 'state' ? 'state_err' : 'base_err',
                     status: 'pending'

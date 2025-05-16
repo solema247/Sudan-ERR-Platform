@@ -12,7 +12,6 @@ interface EmergencyRoom {
     id: string;
     name: string;
     type: 'state' | 'base';
-    legacy_err_id: string;
 }
 
 const Register = () => {
@@ -32,7 +31,7 @@ const Register = () => {
                 try {
                     const { data, error } = await newSupabase
                         .from('emergency_rooms')
-                        .select('id, name, type, legacy_err_id')
+                        .select('id, name, type')
                         .eq('type', selectedType)
                         .eq('status', 'active')
                         .order('name');
