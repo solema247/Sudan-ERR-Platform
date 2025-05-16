@@ -13,8 +13,8 @@ interface State {
     id: string;
     state_name: string;
     state_name_ar: string;
-    locality: string;
-    locality_ar: string;
+    locality?: string;
+    locality_ar?: string;
 }
 
 const NewRoom = () => {
