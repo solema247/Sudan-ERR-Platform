@@ -182,6 +182,11 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
            setAvailableRegions(availableStates);
            setLocalitiesDict(localitiesDict);
 
+           // If we have a state from editingProject or initialValues, set the relevant localities
+           const projectState = editingProject?.state || initialValues?.state;
+           if (projectState && localitiesDict[projectState]) {
+             setRelevantLocalities(localitiesDict[projectState]);
+           }
          } else {
            throw new Error('Failed to fetch options');
          }
@@ -192,7 +197,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
        }
      };
      fetchOptions();
-   }, [i18n.language, t, router]);
+   }, [i18n.language, t, router, editingProject?.state, initialValues?.state]);
 
    useEffect(() => {
      const fetchProjectDetails = async () => {
@@ -447,299 +452,311 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
              onSubmit={handleSubmit}
              enableReinitialize={true}
            >
-             {({ isSubmitting, values, setFieldValue, errors, touched, dirty }) => (
-               <Form className="space-y-3 bg-white p-3 rounded-lg">
-                 <p className="text-3xl">{t('newProjectApplication')}</p>
+             {({ isSubmitting, values, setFieldValue, errors, touched, dirty }) => {
+               // Set relevant localities when state changes or on initial load
+               useEffect(() => {
+                 if (values.state && localitiesDict[values.state]) {
+                   setRelevantLocalities(localitiesDict[values.state]);
+                 }
+               }, [values.state, localitiesDict]);
 
-                 {/* Date */}
-                 <div className="mb-2">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('date')}</label>
-                   <Field name="date" type="date" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
-                   {touched.date && errors.date && (
-                     <div className="text-red-500 text-sm mt-1">{String(errors.date)}</div>
-                   )}
-                 </div>
+               return (
+                 <Form className="space-y-3 bg-white p-3 rounded-lg">
+                   <p className="text-3xl">{t('newProjectApplication')}</p>
 
-                 {/* ERR ID */}
-                 <div className="mb-2">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('errId')}</label>
-                   <Field
-                     name="err"
-                     type="text"
-                     className="text-sm w-full p-2 border rounded-lg bg-gray-100"
-                     disabled={true}
-                   />
-                 </div>
-
-                  {/* Objectives */}
-                  <div className="mb-2">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('projectObjectives')}</label>
-                   <Field 
-                     name="project_objectives"
-                     type="text" 
-                     className="text-sm w-full p-2 border rounded-lg" 
-                     disabled={isLoading} 
-                   />
-                   {touched.project_objectives && errors.project_objectives && (
-                     <div className="text-red-500 text-sm mt-1">{String(errors.project_objectives)}</div>
-                   )}
-                 </div>
-
-                 {/* Intended beneficiaries */}
-                  <div className="mb-2">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('intendedBeneficiaries')}</label>
-                   <Field 
-                     name="intended_beneficiaries"
-                     type="text" 
-                     className="text-sm w-full p-2 border rounded-lg" 
-                     disabled={isLoading} 
-                   />
-                 </div>
-
-                 {/* Estimated beneficiaries*/}
-                  <div className="mb-2">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('estimatedBeneficiaries')}</label>
-                   <Field 
-                     name="estimated_beneficiaries"
-                     type="number" 
-                     min="0"
-                     className="text-sm w-full p-2 border rounded-lg" 
-                     disabled={isLoading} 
-                   />
-                 </div>
-
-                 {/* State or region */}
-                 <div className="mb-2">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('state')}</label>
-                   <Field
-                     name="state"
-                     as="select"
-                     className="text-sm w-full p-2 border rounded-lg"
-                     disabled={isLoading}
-                     onChange={(e) => {
-                       const selectedState = e.target.value;
-                       setFieldValue('state', selectedState);
-                       setFieldValue('locality', ''); // Reset locality when state changes
-                       setRelevantLocalities(localitiesDict[selectedState]);
-                     }}
-                   >
-                     <option value="">{t('selectState')}</option>
-                     {availableRegions.map((state_name) => (
-                       <option key={state_name} value={state_name}>
-                         {state_name}
-                       </option>
-                     ))}
-                   </Field>
-                 </div>
-
-                 {/* Locality*/}
-
-                 <div className="mb-2">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('locality')}</label>
-                   <Field
-                     name="locality"
-                     as="select"
-                     className="text-sm w-full p-2 border rounded-lg"
-                     disabled={!values.state || isLoading}
-                     >
-                     <option value="">{t('selectLocality')}</option>
-                     {relevantLocalities && relevantLocalities.length > 0 ? (
-                         relevantLocalities.map((locality) => (
-                         <option key={locality} value={locality}>
-                             {locality}
-                         </option>
-                         ))
-                     ) : (
-                         <option key="no" value="Trouble getting localities">
-                         {t('troubleGettingLocalities')}
-                         </option>
+                   {/* Date */}
+                   <div className="mb-2">
+                     <label className="font-bold block text-base text-black-bold mb-1">{t('date')}</label>
+                     <Field name="date" type="date" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
+                     {touched.date && errors.date && (
+                       <div className="text-red-500 text-sm mt-1">{String(errors.date)}</div>
                      )}
-                     </Field>
-                 </div>
-
-                 {/* Add/remove activities and their expenses */}
-
-                 <NewProjectActivities optionsActivities={optionsActivities} optionsExpenses={optionsExpenses} />
-
-                 {/* Estimated timeframe */}
-
-                 <div className="mb-2">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('estimatedTimeframe')}</label>
-                   <Field
-                     as="textarea"
-                     name="estimated_timeframe"
-                     className="text-sm w-full p-2 border rounded-lg"
-                     placeholder={t('enterEstimatedTimeframe')}
-                     disabled={isLoading}
-                   />
-                 </div>
-
-                 {/* Additional support */}
-
-                 <div className="mb-2">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('additionalSupport')}</label>
-                   <Field
-                     as="textarea"
-                     name="additional_support"
-                     className="text-sm w-full p-2 border rounded-lg"
-                     placeholder={t('enterAdditionalSupport')}
-                     disabled={isLoading}
-                   />
-                 </div>
-
-                 {/* Banking details */}
-                 <div className="mb-2">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('bankDetails')}</label>
-                   <Field
-                     name="banking_details"
-                     type="text"
-                     className="text-sm w-full p-2 border rounded-lg"
-                     placeholder={t('enterBankDetails')}
-                     disabled={isLoading}
-                   />
-                 </div>
-
-                 {/* Add label and update the new fields section */}
-                 <div className="mb-2">
-                   <label className="font-bold block text-base text-black-bold mb-1">{t('errMembers')}</label>
-                   <div className="space-y-4">
-                     {/* Program Officer */}
-                     <div className="grid grid-cols-2 gap-4">
-                       <Field
-                         name="programOfficerName"
-                         type="text"
-                         placeholder={t('programOfficer.name')}
-                         className="text-sm w-full p-2 border rounded-lg"
-                       />
-                       <Field
-                         name="programOfficerPhone"
-                         type="tel"
-                         placeholder={t('programOfficer.phone')}
-                         className="text-sm w-full p-2 border rounded-lg"
-                       />
-                     </div>
-
-                     {/* Reporting Officer */}
-                     <div className="grid grid-cols-2 gap-4">
-                       <Field
-                         name="reportingOfficerName"
-                         type="text"
-                         placeholder={t('reportingOfficer.name')}
-                         className="text-sm w-full p-2 border rounded-lg"
-                       />
-                       <Field
-                         name="reportingOfficerPhone"
-                         type="tel"
-                         placeholder={t('reportingOfficer.phone')}
-                         className="text-sm w-full p-2 border rounded-lg"
-                       />
-                     </div>
-
-                     {/* Finance Officer */}
-                     <div className="grid grid-cols-2 gap-4">
-                       <Field
-                         name="financeOfficerName"
-                         type="text"
-                         placeholder={t('financeOfficer.name')}
-                         className="text-sm w-full p-2 border rounded-lg"
-                       />
-                       <Field
-                         name="financeOfficerPhone"
-                         type="tel"
-                         placeholder={t('financeOfficer.phone')}
-                         className="text-sm w-full p-2 border rounded-lg"
-                       />
-                     </div>
                    </div>
-                 </div>
 
-                 <div className="container py-4 px-4 mx-0 min-w-full flex flex-col items-center">
-                   {/* Add error summary above the submit button */}
-                   {Object.keys(errors).length > 0 && Object.keys(touched).length > 0 && (
-                     <div className="text-red-500 text-sm mb-4">
-                       {t('validation.pleaseFixErrors')}
-                     </div>
-                   )}
-                   <div className="flex space-x-4">
-                     <Button
-                       type="button"
-                       text={!dirty ? t('drafts.saved') : t('actions.saveDraft')}
-                       onClick={async () => {
-                         try {
-                             const { data: { session } } = await newSupabase.auth.getSession();
-                             
-                             if (!session) {
-                                 throw new Error('No active session');
-                             }
+                   {/* ERR ID */}
+                   <div className="mb-2">
+                     <label className="font-bold block text-base text-black-bold mb-1">{t('errId')}</label>
+                     <Field
+                       name="err"
+                       type="text"
+                       className="text-sm w-full p-2 border rounded-lg bg-gray-100"
+                       disabled={true}
+                     />
+                   </div>
 
-                             const { 
-                                 err,
-                                 programOfficerName,
-                                 programOfficerPhone,
-                                 reportingOfficerName,
-                                 reportingOfficerPhone,
-                                 financeOfficerName,
-                                 financeOfficerPhone,
-                                 ...otherValues 
-                             } = values;
+                    {/* Objectives */}
+                    <div className="mb-2">
+                     <label className="font-bold block text-base text-black-bold mb-1">{t('projectObjectives')}</label>
+                     <Field 
+                       name="project_objectives"
+                       type="text" 
+                       className="text-sm w-full p-2 border rounded-lg" 
+                       disabled={isLoading} 
+                     />
+                     {touched.project_objectives && errors.project_objectives && (
+                       <div className="text-red-500 text-sm mt-1">{String(errors.project_objectives)}</div>
+                     )}
+                   </div>
 
-                             const draftData = {
-                                 ...Object.entries(otherValues).reduce((acc, [key, value]) => {
-                                     if (value !== undefined && value !== null && value !== '') {
-                                         acc[key] = value;
-                                     }
-                                     return acc;
-                                 }, {}),
-                                 id: projectToEdit || currentDraftId,
-                                 err_id: err,
-                                 program_officer_name: programOfficerName || null,
-                                 program_officer_phone: programOfficerPhone || null,
-                                 reporting_officer_name: reportingOfficerName || null,
-                                 reporting_officer_phone: reportingOfficerPhone || null,
-                                 finance_officer_name: financeOfficerName || null,
-                                 finance_officer_phone: financeOfficerPhone || null,
-                                 is_draft: true,
-                                 status: 'draft',
-                                 created_by: userErrId
-                             };
+                   {/* Intended beneficiaries */}
+                    <div className="mb-2">
+                     <label className="font-bold block text-base text-black-bold mb-1">{t('intendedBeneficiaries')}</label>
+                     <Field 
+                       name="intended_beneficiaries"
+                       type="text" 
+                       className="text-sm w-full p-2 border rounded-lg" 
+                       disabled={isLoading} 
+                     />
+                   </div>
 
-                             const response = await fetch('/api/project-drafts', {
-                                 method: 'POST',
-                                 headers: { 
-                                     'Content-Type': 'application/json',
-                                     'Authorization': `Bearer ${session.access_token}`
-                                 },
-                                 body: JSON.stringify(draftData),
-                                 credentials: 'include'
-                             });
+                   {/* Estimated beneficiaries*/}
+                    <div className="mb-2">
+                     <label className="font-bold block text-base text-black-bold mb-1">{t('estimatedBeneficiaries')}</label>
+                     <Field 
+                       name="estimated_beneficiaries"
+                       type="number" 
+                       min="0"
+                       className="text-sm w-full p-2 border rounded-lg" 
+                       disabled={isLoading} 
+                     />
+                   </div>
 
-                             if (!response.ok) throw new Error('Failed to save draft');
-                             
-                             const data = await response.json();
-                             if (data.success && data.draft) {
-                                 setCurrentDraftId(data.draft.id);
-                                 setFieldValue('dirty', false);
-                                 alert(t('drafts.saved'));
-                             } else {
-                                 throw new Error('Invalid response format');
-                             }
-                         } catch (error) {
-                             console.error('Error saving draft:', error);
-                             alert(t('drafts.saveError'));
-                         }
+                   {/* State or region */}
+                   <div className="mb-2">
+                     <label className="font-bold block text-base text-black-bold mb-1">{t('state')}</label>
+                     <Field
+                       name="state"
+                       as="select"
+                       className="text-sm w-full p-2 border rounded-lg"
+                       disabled={isLoading}
+                       onChange={(e) => {
+                         const selectedState = e.target.value;
+                         setFieldValue('state', selectedState);
+                         setFieldValue('locality', ''); // Reset locality when state changes
+                         setRelevantLocalities(localitiesDict[selectedState]);
                        }}
-                       disabled={isSubmitting || isLoading || !dirty}
-                       className={!dirty ? 'opacity-50 cursor-not-allowed' : ''}
-                     />
-                     <Button
-                       type="submit"
-                       text={t('actions.submit')}
-                       disabled={isSubmitting || isLoading}
+                     >
+                       <option value="">{t('selectState')}</option>
+                       {availableRegions.map((state_name) => (
+                         <option key={state_name} value={state_name}>
+                           {state_name}
+                         </option>
+                       ))}
+                     </Field>
+                   </div>
+
+                   {/* Locality*/}
+
+                   <div className="mb-2">
+                     <label className="font-bold block text-base text-black-bold mb-1">{t('locality')}</label>
+                     <Field
+                       name="locality"
+                       as="select"
+                       className="text-sm w-full p-2 border rounded-lg"
+                       disabled={!values.state || isLoading}
+                       >
+                       <option value="">{t('selectLocality')}</option>
+                       {relevantLocalities && relevantLocalities.length > 0 ? (
+                           relevantLocalities.map((locality) => (
+                           <option key={locality} value={locality}>
+                               {locality}
+                           </option>
+                           ))
+                       ) : (
+                           <option key="no" value="Trouble getting localities">
+                           {t('troubleGettingLocalities')}
+                           </option>
+                       )}
+                       </Field>
+                   </div>
+
+                   {/* Add/remove activities and their expenses */}
+
+                   <NewProjectActivities optionsActivities={optionsActivities} optionsExpenses={optionsExpenses} />
+
+                   {/* Estimated timeframe */}
+
+                   <div className="mb-2">
+                     <label className="font-bold block text-base text-black-bold mb-1">{t('estimatedTimeframe')}</label>
+                     <Field
+                       as="textarea"
+                       name="estimated_timeframe"
+                       className="text-sm w-full p-2 border rounded-lg"
+                       placeholder={t('enterEstimatedTimeframe')}
+                       disabled={isLoading}
                      />
                    </div>
-                 </div>
-               </Form>
-             )}
+
+                   {/* Additional support */}
+
+                   <div className="mb-2">
+                     <label className="font-bold block text-base text-black-bold mb-1">{t('additionalSupport')}</label>
+                     <Field
+                       as="textarea"
+                       name="additional_support"
+                       className="text-sm w-full p-2 border rounded-lg"
+                       placeholder={t('enterAdditionalSupport')}
+                       disabled={isLoading}
+                     />
+                   </div>
+
+                   {/* Banking details */}
+                   <div className="mb-2">
+                     <label className="font-bold block text-base text-black-bold mb-1">{t('bankDetails')}</label>
+                     <Field
+                       name="banking_details"
+                       type="text"
+                       className="text-sm w-full p-2 border rounded-lg"
+                       placeholder={t('enterBankDetails')}
+                       disabled={isLoading}
+                     />
+                   </div>
+
+                   {/* Add label and update the new fields section */}
+                   <div className="mb-2">
+                     <label className="font-bold block text-base text-black-bold mb-1">{t('errMembers')}</label>
+                     <div className="space-y-4">
+                       {/* Program Officer */}
+                       <div className="grid grid-cols-2 gap-4">
+                         <Field
+                           name="programOfficerName"
+                           type="text"
+                           placeholder={t('programOfficer.name')}
+                           className="text-sm w-full p-2 border rounded-lg"
+                         />
+                         <Field
+                           name="programOfficerPhone"
+                           type="tel"
+                           placeholder={t('programOfficer.phone')}
+                           className="text-sm w-full p-2 border rounded-lg"
+                         />
+                       </div>
+
+                       {/* Reporting Officer */}
+                       <div className="grid grid-cols-2 gap-4">
+                         <Field
+                           name="reportingOfficerName"
+                           type="text"
+                           placeholder={t('reportingOfficer.name')}
+                           className="text-sm w-full p-2 border rounded-lg"
+                         />
+                         <Field
+                           name="reportingOfficerPhone"
+                           type="tel"
+                           placeholder={t('reportingOfficer.phone')}
+                           className="text-sm w-full p-2 border rounded-lg"
+                         />
+                       </div>
+
+                       {/* Finance Officer */}
+                       <div className="grid grid-cols-2 gap-4">
+                         <Field
+                           name="financeOfficerName"
+                           type="text"
+                           placeholder={t('financeOfficer.name')}
+                           className="text-sm w-full p-2 border rounded-lg"
+                         />
+                         <Field
+                           name="financeOfficerPhone"
+                           type="tel"
+                           placeholder={t('financeOfficer.phone')}
+                           className="text-sm w-full p-2 border rounded-lg"
+                         />
+                       </div>
+                     </div>
+                   </div>
+
+                   <div className="container py-4 px-4 mx-0 min-w-full flex flex-col items-center">
+                     {/* Add error summary above the submit button */}
+                     {Object.keys(errors).length > 0 && Object.keys(touched).length > 0 && (
+                       <div className="text-red-500 text-sm mb-4">
+                         {t('validation.pleaseFixErrors')}
+                       </div>
+                     )}
+                     <div className="flex space-x-4">
+                       <Button
+                         type="button"
+                         text={!dirty ? t('drafts.saved') : t('actions.saveDraft')}
+                         onClick={async () => {
+                           try {
+                               const { data: { session } } = await newSupabase.auth.getSession();
+                               
+                               if (!session) {
+                                   throw new Error('No active session');
+                               }
+
+                               const { 
+                                   err,
+                                   programOfficerName,
+                                   programOfficerPhone,
+                                   reportingOfficerName,
+                                   reportingOfficerPhone,
+                                   financeOfficerName,
+                                   financeOfficerPhone,
+                                   ...otherValues 
+                               } = values;
+
+                               const draftData = {
+                                   ...Object.entries(otherValues).reduce((acc, [key, value]) => {
+                                       if (value !== undefined && value !== null && value !== '') {
+                                           acc[key] = value;
+                                       }
+                                       return acc;
+                                   }, {}),
+                                   id: projectToEdit || currentDraftId,
+                                   err_id: err,
+                                   program_officer_name: programOfficerName || null,
+                                   program_officer_phone: programOfficerPhone || null,
+                                   reporting_officer_name: reportingOfficerName || null,
+                                   reporting_officer_phone: reportingOfficerPhone || null,
+                                   finance_officer_name: financeOfficerName || null,
+                                   finance_officer_phone: financeOfficerPhone || null,
+                                   is_draft: true,
+                                   status: 'draft',
+                                   created_by: userErrId
+                               };
+
+                               const response = await fetch('/api/project-drafts', {
+                                   method: 'POST',
+                                   headers: { 
+                                       'Content-Type': 'application/json',
+                                       'Authorization': `Bearer ${session.access_token}`
+                                   },
+                                   body: JSON.stringify(draftData),
+                                   credentials: 'include'
+                               });
+
+                               if (!response.ok) throw new Error('Failed to save draft');
+                               
+                               const data = await response.json();
+                               if (data.success && data.draft) {
+                                   setCurrentDraftId(data.draft.id);
+                                   setFieldValue('dirty', false);
+                                   alert(t('drafts.saved'));
+                                   if (onDraftSubmitted) {
+                                       onDraftSubmitted();
+                                   }
+                               } else {
+                                   throw new Error('Invalid response format');
+                               }
+                           } catch (error) {
+                               console.error('Error saving draft:', error);
+                               alert(t('drafts.saveError'));
+                           }
+                         }}
+                         disabled={isSubmitting || isLoading || !dirty}
+                         className={!dirty ? 'opacity-50 cursor-not-allowed' : ''}
+                       />
+                       <Button
+                         type="submit"
+                         text={t('actions.submit')}
+                         disabled={isSubmitting || isLoading}
+                       />
+                     </div>
+                   </div>
+                 </Form>
+               );
+             }}
            </Formik>
          </FormBubble>
        )}
@@ -751,6 +768,6 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
        />
      </>
    );
- };
+};
 
- export default NewProjectForm;
+export default NewProjectForm;

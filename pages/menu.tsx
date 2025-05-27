@@ -230,41 +230,41 @@ const Menu = () => {
     }, [showFinancialDrafts, selectedProject]);
 
     // Add this useEffect after the other useEffects
-    useEffect(() => {
-        const fetchProjectDrafts = async () => {
-            try {
-                // Get current session
-                const { data: { session } } = await newSupabase.auth.getSession();
-                
-                if (!session) {
-                    console.error('No active session');
-                    router.push('/login');
-                    return;
-                }
-
-                const response = await fetch('/api/project-drafts', {
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session.access_token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data.success) {
-                    setDrafts(data.drafts || []);
-                } else {
-                    console.error('Error fetching project drafts:', data.message);
-                }
-            } catch (error) {
-                console.error('Error fetching project drafts:', error);
+    const fetchProjectDrafts = async () => {
+        try {
+            // Get current session
+            const { data: { session } } = await newSupabase.auth.getSession();
+            
+            if (!session) {
+                console.error('No active session');
+                router.push('/login');
+                return;
             }
-        };
 
+            const response = await fetch('/api/project-drafts', {
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                setDrafts(data.drafts || []);
+            } else {
+                console.error('Error fetching project drafts:', data.message);
+            }
+        } catch (error) {
+            console.error('Error fetching project drafts:', error);
+        }
+    };
+
+    useEffect(() => {
         if (showProjectDrafts) {
             fetchProjectDrafts();
         }
@@ -607,6 +607,8 @@ const Menu = () => {
                                 }
                                 setShowDraftList(true);
                                 setProjectToEdit(null);
+                                // Refresh drafts list
+                                fetchProjectDrafts();
                             }}
                         />
                     )}
