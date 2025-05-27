@@ -354,11 +354,13 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
          status: 'pending',
          submitted_at: new Date().toISOString(),
          last_modified: new Date().toISOString(),
-         created_by: userErrId
+         created_by: userErrId,
+         language: currentLanguage || 'en'
        };
 
-       // If we're editing an existing project, use PUT method
-       const method = projectToEdit ? 'PUT' : 'POST';
+       // If we have a draft ID or editing an existing project, use PUT
+       const method = currentDraftId || projectToEdit ? 'PUT' : 'POST';
+       const id = currentDraftId || projectToEdit;
        
        const res = await fetch('/api/project-application', {
          method,
@@ -366,7 +368,10 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
            'Content-Type': 'application/json',
            'Authorization': `Bearer ${session.access_token}`
          },
-         body: JSON.stringify(projectData),
+         body: JSON.stringify({
+           ...projectData,
+           id
+         }),
          credentials: 'include'
        });
        
@@ -685,7 +690,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                                      }
                                      return acc;
                                  }, {}),
-                                 id: currentDraftId,
+                                 id: projectToEdit || currentDraftId,
                                  err_id: err,
                                  program_officer_name: programOfficerName || null,
                                  program_officer_phone: programOfficerPhone || null,
@@ -694,6 +699,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                                  finance_officer_name: financeOfficerName || null,
                                  finance_officer_phone: financeOfficerPhone || null,
                                  is_draft: true,
+                                 status: 'draft',
                                  created_by: userErrId
                              };
 

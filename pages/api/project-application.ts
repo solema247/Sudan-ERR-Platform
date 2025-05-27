@@ -121,7 +121,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     created_by: user.err_id
                 };
 
-                // First check if this is a resubmission
+                let result;
                 if (id) {
                     // Get current project version
                     const { data: currentProject, error: versionError } = await newSupabase
@@ -139,11 +139,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         });
                     }
 
-                    // Update version and clear feedback
-                    projectData.version = (currentProject.version || 1) + 1;
-                    
-                    // Update feedback status if exists
+                    // Update version if this is a resubmission after feedback
                     if (currentProject.current_feedback_id) {
+                        projectData.version = (currentProject.version || 1) + 1;
+                        
+                        // Update feedback status
                         const { error: feedbackError } = await newSupabase
                             .from('project_feedback')
                             .update({ feedback_status: 'changes_submitted' })
@@ -159,11 +159,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         }
                     }
 
-                    // Update project
+                    // Update existing project
                     const { data, error } = await newSupabase
                         .from('err_projects')
                         .update(projectData)
                         .eq('id', id)
+                        .eq('created_by', user.err_id)
                         .select()
                         .single();
 
@@ -175,37 +176,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             error: error.message
                         });
                     }
+                    result = data;
+                } else {
+                    // Create new project
+                    const { data, error } = await newSupabase
+                        .from('err_projects')
+                        .insert([{
+                            ...projectData,
+                            version: 1
+                        }])
+                        .select()
+                        .single();
 
-                    return res.status(200).json({
-                        success: true,
-                        message: 'Project updated successfully',
-                        data
-                    });
-                }
-
-                // Create new project
-                const { data, error } = await newSupabase
-                    .from('err_projects')
-                    .insert([{
-                        ...projectData,
-                        version: 1
-                    }])
-                    .select()
-                    .single();
-
-                if (error) {
-                    console.error('Error creating project:', error);
-                    return res.status(500).json({
-                        success: false,
-                        message: 'Error creating project',
-                        error: error.message
-                    });
+                    if (error) {
+                        console.error('Error creating project:', error);
+                        return res.status(500).json({
+                            success: false,
+                            message: 'Error creating project',
+                            error: error.message
+                        });
+                    }
+                    result = data;
                 }
 
                 return res.status(200).json({
                     success: true,
-                    message: 'Project created successfully',
-                    data
+                    message: id ? 'Project updated successfully' : 'Project created successfully',
+                    data: result
                 });
             } catch (error) {
                 console.error('Server error during application submission:', error);

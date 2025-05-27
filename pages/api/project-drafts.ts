@@ -58,14 +58,54 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return acc;
             }, {});
 
-            const draftData = {
-                ...cleanedData,
-                is_draft: true,
-                created_by: user.err_id,
-                last_modified: new Date().toISOString()
-            };
-
             try {
+                // First check if this is a project with feedback
+                if (id) {
+                    const { data: existingProject, error: checkError } = await newSupabase
+                        .from('err_projects')
+                        .select('status, version, current_feedback_id')
+                        .eq('id', id)
+                        .single();
+
+                    if (checkError) throw checkError;
+
+                    // If this is a project with feedback, update it directly
+                    if (existingProject?.status === 'feedback') {
+                        const draftData = {
+                            ...cleanedData,
+                            is_draft: true,
+                            status: 'draft',
+                            created_by: user.err_id,
+                            last_modified: new Date().toISOString(),
+                            version: existingProject.version,
+                            current_feedback_id: existingProject.current_feedback_id
+                        };
+
+                        const { data, error } = await newSupabase
+                            .from('err_projects')
+                            .update(draftData)
+                            .eq('id', id)
+                            .eq('created_by', user.err_id)
+                            .select()
+                            .single();
+                            
+                        if (error) throw error;
+                        return res.status(200).json({
+                            success: true,
+                            draft: data
+                        });
+                    }
+                }
+
+                // Regular draft handling
+                const draftData = {
+                    ...cleanedData,
+                    is_draft: true,
+                    status: 'draft',
+                    created_by: user.err_id,
+                    last_modified: new Date().toISOString()
+                };
+
                 let result;
                 if (id) {
                     const { data, error } = await newSupabase
