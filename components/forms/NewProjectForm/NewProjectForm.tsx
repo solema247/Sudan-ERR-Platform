@@ -408,6 +408,16 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
      setPendingSubmission(null);
    };
 
+   // Add this effect outside of Formik
+   useEffect(() => {
+     if (editingProject?.state || initialValues?.state) {
+       const state = editingProject?.state || initialValues?.state;
+       if (state && localitiesDict[state]) {
+         setRelevantLocalities(localitiesDict[state]);
+       }
+     }
+   }, [editingProject?.state, initialValues?.state, localitiesDict]);
+
    return (
      <>
        {isFormSubmitted ? (
@@ -453,13 +463,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
              enableReinitialize={true}
            >
              {({ isSubmitting, values, setFieldValue, errors, touched, dirty }) => {
-               // Set relevant localities when state changes or on initial load
-               useEffect(() => {
-                 if (values.state && localitiesDict[values.state]) {
-                   setRelevantLocalities(localitiesDict[values.state]);
-                 }
-               }, [values.state, localitiesDict]);
-
+               // Remove the useEffect here and handle state changes in onChange
                return (
                  <Form className="space-y-3 bg-white p-3 rounded-lg">
                    <p className="text-3xl">{t('newProjectApplication')}</p>
@@ -533,7 +537,11 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                          const selectedState = e.target.value;
                          setFieldValue('state', selectedState);
                          setFieldValue('locality', ''); // Reset locality when state changes
-                         setRelevantLocalities(localitiesDict[selectedState]);
+                         if (selectedState && localitiesDict[selectedState]) {
+                           setRelevantLocalities(localitiesDict[selectedState]);
+                         } else {
+                           setRelevantLocalities([]);
+                         }
                        }}
                      >
                        <option value="">{t('selectState')}</option>
