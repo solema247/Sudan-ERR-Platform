@@ -14,25 +14,60 @@ interface EmergencyRoom {
     type: 'state' | 'base';
 }
 
+interface State {
+    id: string;
+    state_name: string;
+    state_name_ar: string;
+}
+
 const Register = () => {
     const [emergencyRooms, setEmergencyRooms] = useState<EmergencyRoom[]>([]);
     const [selectedType, setSelectedType] = useState<'state' | 'base' | ''>('');
     const [selectedErr, setSelectedErr] = useState('');
+    const [states, setStates] = useState<State[]>([]);
+    const [selectedState, setSelectedState] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const router = useRouter();
     const { t, i18n } = useTranslation('register');
 
-    // Fetch ERRs when type is selected
+    // Fetch states on component mount
     useEffect(() => {
-        if (selectedType) {
+        const fetchStates = async () => {
+            try {
+                const { data, error } = await newSupabase
+                    .from('states')
+                    .select('id, state_name, state_name_ar')
+                    .order('state_name');
+
+                if (error) throw error;
+                
+                // Remove duplicates based on state_name
+                const uniqueStates = data?.filter((state, index, self) =>
+                    index === self.findIndex((s) => s.state_name === state.state_name)
+                );
+                
+                setStates(uniqueStates || []);
+            } catch (err) {
+                console.error('Error fetching states:', err);
+                setError(t('stateFetchError'));
+            }
+        };
+
+        fetchStates();
+    }, [t]);
+
+    // Fetch ERRs when state and type are selected
+    useEffect(() => {
+        if (selectedState && selectedType) {
             const fetchERRs = async () => {
                 try {
                     const { data, error } = await newSupabase
                         .from('emergency_rooms')
                         .select('id, name, type')
                         .eq('type', selectedType)
+                        .eq('state_reference', selectedState)
                         .eq('status', 'active')
                         .order('name');
 
@@ -46,12 +81,13 @@ const Register = () => {
 
             fetchERRs();
         }
-    }, [selectedType, t]);
+    }, [selectedState, selectedType, t]);
 
-    // Reset selected ERR when type changes
+    // Reset selected ERR and type when state changes
     useEffect(() => {
         setSelectedErr('');
-    }, [selectedType]);
+        setSelectedType('');
+    }, [selectedState]);
 
     const handleContinue = () => {
         if (selectedErr) {
@@ -83,21 +119,39 @@ const Register = () => {
             </div>
 
             <div className="flex flex-col space-y-4 w-full max-w-xs">
-                {/* ERR Type Selection */}
+                {/* State Selection */}
                 <div className="w-full">
                     <select
                         className="w-full p-2 border rounded"
-                        value={selectedType}
-                        onChange={(e) => setSelectedType(e.target.value as 'state' | 'base')}
+                        value={selectedState}
+                        onChange={(e) => setSelectedState(e.target.value)}
                     >
-                        <option value="">{t('selectRoomType')}</option>
-                        <option value="state">{t('stateErr')}</option>
-                        <option value="base">{t('baseErr')}</option>
+                        <option value="">{t('selectState')}</option>
+                        {states.map((state) => (
+                            <option key={state.id} value={state.id}>
+                                {i18n.language === 'ar' ? state.state_name_ar : state.state_name}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
+                {/* ERR Type Selection - Only shown after state is selected */}
+                {selectedState && (
+                    <div className="w-full">
+                        <select
+                            className="w-full p-2 border rounded"
+                            value={selectedType}
+                            onChange={(e) => setSelectedType(e.target.value as 'state' | 'base')}
+                        >
+                            <option value="">{t('selectRoomType')}</option>
+                            <option value="state">{t('stateErr')}</option>
+                            <option value="base">{t('baseErr')}</option>
+                        </select>
+                    </div>
+                )}
+
                 {/* ERR Selection - Only shown after type is selected */}
-                {selectedType && (
+                {selectedState && selectedType && (
                     <div className="w-full">
                         <select
                             className="w-full p-2 border rounded"
