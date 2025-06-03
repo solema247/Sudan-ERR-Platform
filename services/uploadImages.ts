@@ -1,4 +1,5 @@
 import { newSupabase } from "./newSupabaseClient";
+import { constructUploadPath, getErrName, getProjectName } from "./uploadPaths";
 
 /**
  * Upload to private bucket
@@ -19,53 +20,69 @@ export interface UploadResult {
   filename?: string;
   success: boolean;
   errorMessage?: string;
+  url?: string;
 }
 
 const BUCKET_NAME = "images";
 
 export const uploadImages = async (
     files: File[],
-    category: ImageCategory,
     projectId: string,
-    options?: {
-        t?: (key: string) => string,
-        description?: string
-    }
+    reportType: 'financial' | 'program'
 ) => {
-    const results = [];
+    const results: UploadResult[] = [];
 
-    for (const file of files) {
-        try {
-            const filename = `${Date.now()}_${file.name}`;
-            const path = `receipts/${projectId}/${filename}`;
+    try {
+        // Get ERR name and project name once for all files
+        const errName = await getErrName();
+        const projectName = await getProjectName(projectId);
 
-            // Get public URL after successful upload
-            const { data: { publicUrl } } = newSupabase.storage
-                .from('images')
-                .getPublicUrl(path);
+        for (const file of files) {
+            try {
+                // Construct the new path
+                const path = await constructUploadPath({
+                    errName,
+                    projectName,
+                    fileName: file.name,
+                    reportType
+                });
 
-            // Store in receipts table
-            const { error: receiptError } = await newSupabase
-                .from('receipts')
-                .insert([{
-                    expense_id: projectId,
-                    image_url: publicUrl,
-                    created_at: new Date().toISOString()
-                }]);
+                // Upload the file
+                const { data, error } = await newSupabase.storage
+                    .from(BUCKET_NAME)
+                    .upload(path, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
 
-            if (receiptError) throw receiptError;
+                if (error) throw error;
 
-            results.push({
-                url: publicUrl,
-                success: true
-            });
-        } catch (error) {
-            console.error('Upload error:', error);
-            results.push({
-                success: false,
-                error: error.message
-            });
+                // Get public URL
+                const { data: { publicUrl } } = newSupabase.storage
+                    .from(BUCKET_NAME)
+                    .getPublicUrl(path);
+
+                results.push({
+                    filename: file.name,
+                    success: true,
+                    url: publicUrl
+                });
+            } catch (error) {
+                console.error('Upload error:', error);
+                results.push({
+                    filename: file.name,
+                    success: false,
+                    errorMessage: error.message
+                });
+            }
         }
+    } catch (error) {
+        console.error('Error getting project/ERR info:', error);
+        return files.map(file => ({
+            filename: file.name,
+            success: false,
+            errorMessage: 'Failed to get project information'
+        }));
     }
 
     return results;

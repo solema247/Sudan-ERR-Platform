@@ -44,10 +44,13 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
     setFilesWithProgress((prev) => [...prev, ...newFiles]);
 
     for (const fileWithProgress of newFiles) {
-      const path = `projects/${projectId}/reports/${reportId}/expense-${expenseIndex}/${fileWithProgress.file.name}`;
-      
       try {
-        await performUpload(fileWithProgress.file, path, {
+        // Extract actual project ID if it's a path
+        const actualProjectId = projectId.includes('/') 
+          ? projectId.split('/')[1] // Get the UUID after 'projects/'
+          : projectId;
+
+        await performUpload(fileWithProgress.file, actualProjectId, {
           onProgress: (progress) => {
             setFilesWithProgress((prev) =>
               prev.map((f) =>
@@ -76,6 +79,7 @@ export const UploadChooserSupporting: React.FC<UploadChooserProps> = ({
             }
           },
           onError: (error) => {
+            console.error('Upload failed:', error);
             setFilesWithProgress((prev) =>
               prev.map((f) =>
                 f.id === fileWithProgress.id ? { ...f, error } : f

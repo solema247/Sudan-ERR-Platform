@@ -1,43 +1,57 @@
 // File upload handling for program report
 import { newSupabase } from '../../../../services/newSupabaseClient';
 import { FileWithProgress, FileUploadResponse } from './UploadInterfaces';
+import { constructUploadPath, getErrName, getProjectName } from '../../../../services/uploadPaths';
 
 export default async function uploadFile(
     file: FileWithProgress,
     projectId: string,
-    reportId: string,
     onProgress: (progress: number) => void
 ): Promise<FileUploadResponse> {
-    const fileName = `${Date.now()}-${file.file.name}`;
-    const filePath = `projects/${projectId}/program-reports/${reportId}/${fileName}`;
+    try {
+        // Get ERR name and project name
+        const errName = await getErrName();
+        const projectName = await getProjectName(projectId);
 
-    const { data, error } = await newSupabase.storage
-        .from('images')
-        .upload(filePath, file.file, {
-            cacheControl: '3600',
-            upsert: false
+        // Construct the new path
+        const path = await constructUploadPath({
+            errName,
+            projectName,
+            fileName: file.file.name,
+            reportType: 'program'
         });
 
-    if (error) throw error;
+        const { data, error } = await newSupabase.storage
+            .from('images')
+            .upload(path, file.file, {
+                cacheControl: '3600',
+                upsert: false
+            });
 
-    const { data: urlData } = newSupabase.storage
-        .from('images')
-        .getPublicUrl(filePath);
+        if (error) throw error;
 
-    // Add progress tracking separately using XMLHttpRequest
-    const xhr = new XMLHttpRequest();
-    xhr.upload.addEventListener('progress', (event) => {
-        if (event.lengthComputable) {
-            const percentage = (event.loaded / event.total) * 100;
-            onProgress(percentage);
-        }
-    });
+        const { data: urlData } = newSupabase.storage
+            .from('images')
+            .getPublicUrl(path);
 
-    return {
-        id: data.path,
-        file_name: file.file.name,
-        file_url: urlData.publicUrl,
-        file_type: file.file.type,
-        file_size: file.file.size
-    };
+        // Add progress tracking separately using XMLHttpRequest
+        const xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener('progress', (event) => {
+            if (event.lengthComputable) {
+                const percentage = (event.loaded / event.total) * 100;
+                onProgress(percentage);
+            }
+        });
+
+        return {
+            id: data.path,
+            file_name: file.file.name,
+            file_url: urlData.publicUrl,
+            file_type: file.file.type,
+            file_size: file.file.size
+        };
+    } catch (error) {
+        console.error('Upload failed:', error);
+        throw error;
+    }
 } 
