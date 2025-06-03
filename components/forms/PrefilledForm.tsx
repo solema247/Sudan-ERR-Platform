@@ -53,10 +53,7 @@ const RequiredLabel: React.FC<{ text: string }> = ({ text }) => (
 );
 
 const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, project }) => {
-  console.log('Project data received:', project);
-  console.log('Project ERR ID:', project?.err_id);
-  
-  const { t } = useTranslation("scanForm");  // Access translations
+  const { t } = useTranslation("scanForm");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [receiptUploads, setReceiptUploads] = useState<{ [key: number]: string }>({});
