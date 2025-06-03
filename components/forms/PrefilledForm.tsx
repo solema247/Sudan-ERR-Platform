@@ -53,6 +53,9 @@ const RequiredLabel: React.FC<{ text: string }> = ({ text }) => (
 );
 
 const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, project }) => {
+  console.log('Project data received:', project);
+  console.log('Project ERR ID:', project?.err_id);
+  
   const { t } = useTranslation("scanForm");  // Access translations
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -64,7 +67,7 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
 
   // Initialize form data with default values
   const [formData, setFormData] = useState({
-    err_id: data?.err_id || '',
+    err_id: project?.err_id || '',  // Use project's err_id field
     date: data?.date || '',
     expenses: data?.expenses?.map(expense => ({
       id: uuidv4(), // Add unique id for each expense

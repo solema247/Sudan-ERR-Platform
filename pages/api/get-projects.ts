@@ -35,7 +35,7 @@ export default async function handler(
 
         const query = newSupabase
             .from("err_projects")
-            .select("id, project_objectives, state, locality")
+            .select("id, project_objectives, state, locality, err_id")
             .eq("err_id", user.err_id)
             .eq("is_draft", false)
             .eq("status", "active");
