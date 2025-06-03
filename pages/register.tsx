@@ -11,6 +11,7 @@ const LogoImage = '/icons/icon-512x512.png';
 interface EmergencyRoom {
     id: string;
     name: string;
+    name_ar: string | null;
     type: 'state' | 'base';
 }
 
@@ -65,7 +66,7 @@ const Register = () => {
                 try {
                     const { data, error } = await newSupabase
                         .from('emergency_rooms')
-                        .select('id, name, type')
+                        .select('id, name, name_ar, type')
                         .eq('type', selectedType)
                         .eq('state_reference', selectedState)
                         .eq('status', 'active')
@@ -161,7 +162,7 @@ const Register = () => {
                             <option value="">{t('selectRoom')}</option>
                             {emergencyRooms.map((room) => (
                                 <option key={room.id} value={room.id}>
-                                    {room.name}
+                                    {i18n.language === 'ar' && room.name_ar ? room.name_ar : room.name}
                                 </option>
                             ))}
                         </select>

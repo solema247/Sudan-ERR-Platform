@@ -12,6 +12,7 @@ const LogoImage = '/icons/icon-512x512.png';
 interface EmergencyRoom {
     id: string;
     name: string;
+    name_ar: string | null;
     type: 'state' | 'base';
 }
 
@@ -24,7 +25,7 @@ const UserRegistration = () => {
     const [error, setError] = useState('');
 
     const router = useRouter();
-    const { t } = useTranslation('register');
+    const { t, i18n } = useTranslation('register');
     const { err: roomId } = router.query;
 
     // Fetch selected room details
@@ -34,7 +35,7 @@ const UserRegistration = () => {
                 try {
                     const { data, error } = await newSupabase
                         .from('emergency_rooms')
-                        .select('id, name, type')
+                        .select('id, name, name_ar, type')
                         .eq('id', roomId)
                         .single();
 
@@ -104,7 +105,7 @@ const UserRegistration = () => {
                 <h1 className="text-xl font-bold text-center">{t('userRegistrationTitle')}</h1>
                 {selectedRoom && (
                     <p className="text-gray-600 mt-2">
-                        {t('registeringFor')} {selectedRoom.name}
+                        {t('registeringFor')} {i18n.language === 'ar' && selectedRoom.name_ar ? selectedRoom.name_ar : selectedRoom.name}
                     </p>
                 )}
             </div>
