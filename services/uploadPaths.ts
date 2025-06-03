@@ -5,6 +5,7 @@ interface PathOptions {
     projectName: string;
     fileName: string;
     reportType: 'financial' | 'program';
+    reportId?: string;
 }
 
 /**
@@ -39,7 +40,8 @@ export async function constructUploadPath({
     errName,
     projectName,
     fileName,
-    reportType
+    reportType,
+    reportId
 }: PathOptions): Promise<string> {
     const sanitizedErrName = sanitizeName(errName);
     const sanitizedProjectName = sanitizeName(projectName);
@@ -47,7 +49,8 @@ export async function constructUploadPath({
     const timestamp = Date.now();
     const finalFileName = `${timestamp}-${fileName}`;
 
-    return `projects/${sanitizedErrName}/${sanitizedProjectName}/${reportType}/${monthFolder}/${finalFileName}`;
+    const basePath = `projects/${sanitizedErrName}/${sanitizedProjectName}/${reportType}/${monthFolder}`;
+    return reportId ? `${basePath}/${reportId}/${finalFileName}` : `${basePath}/${finalFileName}`;
 }
 
 /**

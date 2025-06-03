@@ -1,4 +1,4 @@
-import { uploadImages, ImageCategory } from '../../../../services/uploadImages';
+import { uploadImages } from '../../../../services/uploadImages';
 
 interface FormValues {
     err_id: string;
@@ -29,9 +29,9 @@ export const createOnSubmit = (t: (key: string) => string) => async (values: For
             const uploadedFiles = await Promise.all(
                 completedExpenses.map((expense) =>
                     uploadImages(
-                        [expense.receiptFile], 
-                        ImageCategory.REPORT_EXPENSES_RECEIPT,
-                        values.err_id
+                        [expense.receiptFile],
+                        values.err_id,
+                        'financial'
                     )
                 )
             );

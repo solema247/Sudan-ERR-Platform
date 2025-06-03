@@ -1,7 +1,7 @@
 // Components/FileUploader.tsx
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { uploadImages, ImageCategory } from "../../services/uploadImages";
+import { uploadImages } from "../../services/uploadImages";
 
 interface FileUploaderProps {
   projectId: string;
@@ -41,8 +41,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ projectId, onUploadComplete
         for (const file of selectedFiles) {
           let result = await uploadImages(
             files, 
-            ImageCategory.FORM_SCANNED, 
-            projectId
+            projectId,
+            'financial'  // Since this is used for expense reports
           );
           if (result[0].errorMessage) { 
             throw new Error(result[0].errorMessage);

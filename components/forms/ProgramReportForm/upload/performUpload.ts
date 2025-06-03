@@ -6,6 +6,7 @@ import { constructUploadPath, getErrName, getProjectName } from '../../../../ser
 export default async function uploadFile(
     file: FileWithProgress,
     projectId: string,
+    report_id: string,
     onProgress: (progress: number) => void
 ): Promise<FileUploadResponse> {
     try {
@@ -18,7 +19,8 @@ export default async function uploadFile(
             errName,
             projectName,
             fileName: file.file.name,
-            reportType: 'program'
+            reportType: 'program',
+            reportId: report_id
         });
 
         const { data, error } = await newSupabase.storage
