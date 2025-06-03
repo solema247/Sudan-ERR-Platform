@@ -72,6 +72,7 @@ const UserRegistration = () => {
                 .from('users')
                 .insert([{
                     id: authData.user?.id,
+                    auth_user_id: authData.user?.id,
                     err_id: selectedRoom.id,
                     display_name: displayName,
                     role: selectedRoom.type === 'state' ? 'state_err' : 'base_err',

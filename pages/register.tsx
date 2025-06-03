@@ -64,11 +64,26 @@ const Register = () => {
         if (selectedState && selectedType) {
             const fetchERRs = async () => {
                 try {
+                    // First get all localities for the selected state
+                    const { data: localities, error: localitiesError } = await newSupabase
+                        .from('states')
+                        .select('id')
+                        .eq('state_name', states.find(s => s.id === selectedState)?.state_name);
+
+                    if (localitiesError) throw localitiesError;
+
+                    if (!localities || localities.length === 0) {
+                        setEmergencyRooms([]);
+                        return;
+                    }
+
+                    // Then get all rooms that reference these localities
+                    const localityIds = localities.map(l => l.id);
                     const { data, error } = await newSupabase
                         .from('emergency_rooms')
                         .select('id, name, name_ar, type')
                         .eq('type', selectedType)
-                        .eq('state_reference', selectedState)
+                        .in('state_reference', localityIds)
                         .eq('status', 'active')
                         .order('name');
 
@@ -82,7 +97,7 @@ const Register = () => {
 
             fetchERRs();
         }
-    }, [selectedState, selectedType, t]);
+    }, [selectedState, selectedType, t, states]);
 
     // Reset selected ERR and type when state changes
     useEffect(() => {
