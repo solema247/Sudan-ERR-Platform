@@ -282,36 +282,32 @@ const Menu = () => {
         document.documentElement.setAttribute('lang', i18n.language);
     }, [i18n.language]);
 
-    // Menu selection handler
-    const handleMenuSelection = (menu: CurrentMenu) => {
-        setCurrentMenu(menu);
-        // Reset draft-related states when menu changes
-        setShowFinancialDrafts(false);
-        setFinancialDrafts([]);
-        setCurrentProgramDraft(null);
-        setCurrentProjectDraft(null);
+    // Create a function to reset all form states
+    const resetFormStates = () => {
         setShowFillForm(false);
         setShowScanForm(false);
         setShowScanCustomForm(false);
         setShowProjectApplication(false);
         setShowProjectStatus(false);
-        setShowScanPrefillForm(false);
         setShowProgramForm(false);
+        setShowScanPrefillForm(false);
+        setShowFinancialDrafts(false);
+        setShowProjectDrafts(false);
+        setCurrentProgramDraft(null);
+        setCurrentProjectDraft(null);
+    };
+
+    // Menu selection handler
+    const handleMenuSelection = (menu: CurrentMenu) => {
+        resetFormStates(); // Reset all form states first
+        setCurrentMenu(menu);
         setShowDraftList(true); // Reset draft list view
         setSelectedProject(null);
     };
 
     // Workflow selection handler
-
     const handleWorkflowSelection = (workflow: Workflow) => {
-        setShowFillForm(false);
-        setShowScanForm(false);
-        setShowScanCustomForm(false);
-        setShowProjectApplication(false);
-        setShowProjectStatus(false);
-        setShowScanPrefillForm(false);
-        setShowProgramForm(false);
-        setShowProjectDrafts(false);  // Reset draft view
+        resetFormStates(); // Reset all form states first
 
         if (workflow === Workflow.FILL_FORM) {
             createNewReportId();
@@ -329,16 +325,6 @@ const Menu = () => {
             setProjectToEdit(null);
         }
         if (workflow === Workflow.PROGRAM_FORM) setShowProgramForm(true);
-    };
-
-    // Create a function to reset all form states
-    const resetFormStates = () => {
-        setShowFillForm(false);
-        setShowProgramForm(false);
-        setShowFinancialDrafts(false);
-        setShowProjectApplication(false);
-        setCurrentProgramDraft(null);
-        setCurrentProjectDraft(null);
     };
 
     const onEditDraft = async (draftId) => {
@@ -536,11 +522,14 @@ const Menu = () => {
                         errId={errId as string}
                         reportId={activeReportId}
                         project={selectedProject} 
-                        onReturnToMenu={() => handleMenuSelection(CurrentMenu.REPORTING)} 
+                        onReturnToMenu={() => {
+                            resetFormStates();
+                            handleMenuSelection(CurrentMenu.REPORTING);
+                        }}
                         onSubmitAnotherForm={() => {
-                            setShowFillForm(false);
+                            resetFormStates();
                             createNewReportId();
-                            setTimeout(() => setShowFillForm(true), 0);
+                            setShowFillForm(true);
                         }}
                         initialDraft={currentProjectDraft}
                     />
@@ -549,7 +538,13 @@ const Menu = () => {
 
             {showScanForm && (
                 <MessageBubble>
-                    <ScanForm project={selectedProject} onReturnToMenu={() => handleMenuSelection(CurrentMenu.REPORTING)} />
+                    <ScanForm 
+                        project={selectedProject} 
+                        onReturnToMenu={() => {
+                            resetFormStates();
+                            handleMenuSelection(CurrentMenu.REPORTING);
+                        }}
+                    />
                 </MessageBubble>
             )}
 
@@ -557,10 +552,13 @@ const Menu = () => {
                 <MessageBubble>
                     <ScanCustomForm
                         project={selectedProject}
-                        onReturnToMenu={() => handleMenuSelection(CurrentMenu.REPORTING)}
+                        onReturnToMenu={() => {
+                            resetFormStates();
+                            handleMenuSelection(CurrentMenu.REPORTING);
+                        }}
                         onSubmitAnotherForm={() => {
-                            setShowScanCustomForm(false);
-                            setTimeout(() => setShowScanCustomForm(true), 0); // Reset workflow
+                            resetFormStates();
+                            setShowScanCustomForm(true);
                         }}
                     />
                 </MessageBubble>
@@ -633,10 +631,13 @@ const Menu = () => {
                 <MessageBubble>
                     <ProgramReportForm
                         project={selectedProject}
-                        onReturnToMenu={() => handleMenuSelection(CurrentMenu.REPORTING)}
+                        onReturnToMenu={() => {
+                            resetFormStates();
+                            handleMenuSelection(CurrentMenu.REPORTING);
+                        }}
                         onSubmitAnotherForm={() => {
-                            setShowProgramForm(false);
-                            setTimeout(() => setShowProgramForm(true), 0);
+                            resetFormStates();
+                            setShowProgramForm(true);
                         }}
                         initialDraft={currentProgramDraft}
                     />
