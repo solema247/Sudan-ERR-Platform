@@ -98,7 +98,9 @@
   "errMembers": "ERR Members",
   "validation": {
     "required": "This field is required",
-    "pleaseFixErrors": "Please fix the errors before submitting."
+    "pleaseFixErrors": "Please fix the errors before submitting.",
+    "atLeastOneActivity": "At least one activity is required",
+    "minValue": "Value must be greater than 0"
   },
   "drafts": {
     "title": "Project Drafts",

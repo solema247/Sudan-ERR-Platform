@@ -11,7 +11,10 @@ const NewProjectActivities = ({ optionsActivities, optionsExpenses }) => {
     <FieldArray name="planned_activities">
       {({ push, remove, form }) => (
         <div className="space-y-4">
-          <h3 className="text-2xl font-bold pt-4">{t('activities.header')}</h3>
+          <h3 className="text-2xl font-bold pt-4">
+            {t('activities.header')}
+            <span className="text-red-500 ml-1">*</span>
+          </h3>
           {form.values.planned_activities.map((activity, index) => (
             <div key={index} className="p-4 pt-12 bg-gray-100 rounded-lg shadow-md relative">
               <Button
@@ -22,7 +25,10 @@ const NewProjectActivities = ({ optionsActivities, optionsExpenses }) => {
                 className="absolute top-3 right-3 !p-2 !m-0"
               />
               <div className="mb-3">
-                <label className="font-bold block text-sm mb-1">{t('activities.info')}</label>
+                <label className="font-bold block text-sm mb-1">
+                  {t('activities.info')}
+                  <span className="text-red-500 ml-1">*</span>
+                </label>
                 <Field
                   as="select"
                   name={`planned_activities[${index}].selectedActivity`}
@@ -35,23 +41,45 @@ const NewProjectActivities = ({ optionsActivities, optionsExpenses }) => {
                     </option>
                   ))}
                 </Field>
+                {form.touched.planned_activities?.[index]?.selectedActivity && 
+                 form.errors.planned_activities?.[index]?.selectedActivity && (
+                  <div className="text-red-500 text-sm mt-1">
+                    {form.errors.planned_activities[index].selectedActivity}
+                  </div>
+                )}
               </div>
 
               <div className="mb-3">
                 {/* Quantity and Duration in one row - no label */}
                 <div className="grid grid-cols-2 gap-4 mb-3">
-                  <Field
-                    name={`planned_activities[${index}].quantity`}
-                    type="number"
-                    className="text-sm w-full p-2 border rounded-lg"
-                    placeholder={t('quantity')}
-                  />
-                  <Field
-                    name={`planned_activities[${index}].duration`}
-                    type="number"
-                    className="text-sm w-full p-2 border rounded-lg"
-                    placeholder={t('activities.duration')}
-                  />
+                  <div>
+                    <Field
+                      name={`planned_activities[${index}].quantity`}
+                      type="number"
+                      className="text-sm w-full p-2 border rounded-lg"
+                      placeholder={t('quantity') + ' *'}
+                    />
+                    {form.touched.planned_activities?.[index]?.quantity && 
+                     form.errors.planned_activities?.[index]?.quantity && (
+                      <div className="text-red-500 text-sm mt-1">
+                        {form.errors.planned_activities[index].quantity}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <Field
+                      name={`planned_activities[${index}].duration`}
+                      type="number"
+                      className="text-sm w-full p-2 border rounded-lg"
+                      placeholder={t('activities.duration') + ' *'}
+                    />
+                    {form.touched.planned_activities?.[index]?.duration && 
+                     form.errors.planned_activities?.[index]?.duration && (
+                      <div className="text-red-500 text-sm mt-1">
+                        {form.errors.planned_activities[index].duration}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -61,8 +89,14 @@ const NewProjectActivities = ({ optionsActivities, optionsExpenses }) => {
                   name={`planned_activities[${index}].location`}
                   type="text"
                   className="text-sm w-full p-2 border rounded-lg mb-3"
-                  placeholder={t('activities.location')}
+                  placeholder={t('activities.location') + ' *'}
                 />
+                {form.touched.planned_activities?.[index]?.location && 
+                 form.errors.planned_activities?.[index]?.location && (
+                  <div className="text-red-500 text-sm mt-1">
+                    {form.errors.planned_activities[index].location}
+                  </div>
+                )}
               </div>
 
               <div className="mb-3">

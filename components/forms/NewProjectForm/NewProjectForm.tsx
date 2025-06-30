@@ -267,18 +267,37 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
    }, [projectToEdit, t]);
 
    const validationSchema = Yup.object({
-     date: Yup.string().nullable(),
+     date: Yup.string().required(t('validation.required')),
      err: Yup.string().nullable(),
-     state: Yup.string().nullable(),
-     locality: Yup.string().nullable(),
-     project_objectives: Yup.string().nullable(),
-     intended_beneficiaries: Yup.string().nullable(),
+     state: Yup.string().required(t('validation.required')),
+     locality: Yup.string().required(t('validation.required')),
+     project_objectives: Yup.string().required(t('validation.required')),
+     intended_beneficiaries: Yup.string().required(t('validation.required')),
      estimated_beneficiaries: Yup.number().nullable(),
-     planned_activities: Yup.array().nullable(),
-     estimated_timeframe: Yup.string().nullable(),
+     planned_activities: Yup.array()
+       .min(1, t('validation.atLeastOneActivity'))
+       .of(
+         Yup.object().shape({
+           selectedActivity: Yup.string().required(t('validation.required')),
+           quantity: Yup.number().required(t('validation.required')).min(1, t('validation.minValue')),
+           duration: Yup.number().required(t('validation.required')).min(1, t('validation.minValue')),
+           location: Yup.string().required(t('validation.required'))
+         })
+       ),
+     estimated_timeframe: Yup.string().required(t('validation.required')),
      additional_support: Yup.string().nullable(),
-     banking_details: Yup.string().nullable()
+     banking_details: Yup.string().required(t('validation.required')),
+     programOfficerName: Yup.string().required(t('validation.required')),
+     programOfficerPhone: Yup.string().required(t('validation.required'))
    });
+
+   // Helper component for required field labels
+   const RequiredLabel = ({ children, required = false }) => (
+     <label className="font-bold block text-base text-black-bold mb-1">
+       {children}
+       {required && <span className="text-red-500 ml-1">*</span>}
+     </label>
+   );
 
  const getAvailableStates = (localitiesData) => {
      return localitiesData
@@ -470,7 +489,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
 
                    {/* Date */}
                    <div className="mb-2">
-                     <label className="font-bold block text-base text-black-bold mb-1">{t('date')}</label>
+                     <RequiredLabel required>{t('date')}</RequiredLabel>
                      <Field name="date" type="date" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
                      {touched.date && errors.date && (
                        <div className="text-red-500 text-sm mt-1">{String(errors.date)}</div>
@@ -479,7 +498,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
 
                    {/* ERR ID */}
                    <div className="mb-2">
-                     <label className="font-bold block text-base text-black-bold mb-1">{t('errId')}</label>
+                     <RequiredLabel>{t('errId')}</RequiredLabel>
                      <Field
                        name="err"
                        type="text"
@@ -490,7 +509,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
 
                     {/* Objectives */}
                     <div className="mb-2">
-                     <label className="font-bold block text-base text-black-bold mb-1">{t('projectObjectives')}</label>
+                     <RequiredLabel required>{t('projectObjectives')}</RequiredLabel>
                      <Field 
                        name="project_objectives"
                        type="text" 
@@ -504,18 +523,21 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
 
                    {/* Intended beneficiaries */}
                     <div className="mb-2">
-                     <label className="font-bold block text-base text-black-bold mb-1">{t('intendedBeneficiaries')}</label>
+                     <RequiredLabel required>{t('intendedBeneficiaries')}</RequiredLabel>
                      <Field 
                        name="intended_beneficiaries"
                        type="text" 
                        className="text-sm w-full p-2 border rounded-lg" 
                        disabled={isLoading} 
                      />
+                     {touched.intended_beneficiaries && errors.intended_beneficiaries && (
+                       <div className="text-red-500 text-sm mt-1">{String(errors.intended_beneficiaries)}</div>
+                     )}
                    </div>
 
                    {/* Estimated beneficiaries*/}
                     <div className="mb-2">
-                     <label className="font-bold block text-base text-black-bold mb-1">{t('estimatedBeneficiaries')}</label>
+                     <RequiredLabel>{t('estimatedBeneficiaries')}</RequiredLabel>
                      <Field 
                        name="estimated_beneficiaries"
                        type="number" 
@@ -527,7 +549,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
 
                    {/* State or region */}
                    <div className="mb-2">
-                     <label className="font-bold block text-base text-black-bold mb-1">{t('state')}</label>
+                     <RequiredLabel required>{t('state')}</RequiredLabel>
                      <Field
                        name="state"
                        as="select"
@@ -551,12 +573,15 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                          </option>
                        ))}
                      </Field>
+                     {touched.state && errors.state && (
+                       <div className="text-red-500 text-sm mt-1">{String(errors.state)}</div>
+                     )}
                    </div>
 
                    {/* Locality*/}
 
                    <div className="mb-2">
-                     <label className="font-bold block text-base text-black-bold mb-1">{t('locality')}</label>
+                     <RequiredLabel required>{t('locality')}</RequiredLabel>
                      <Field
                        name="locality"
                        as="select"
@@ -576,16 +601,26 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                            </option>
                        )}
                        </Field>
+                     {touched.locality && errors.locality && (
+                       <div className="text-red-500 text-sm mt-1">{String(errors.locality)}</div>
+                     )}
                    </div>
 
                    {/* Add/remove activities and their expenses */}
 
                    <NewProjectActivities optionsActivities={optionsActivities} optionsExpenses={optionsExpenses} />
+                   {touched.planned_activities && errors.planned_activities && (
+                     <div className="text-red-500 text-sm mt-1">
+                       {typeof errors.planned_activities === 'string' 
+                         ? errors.planned_activities 
+                         : t('validation.required')}
+                     </div>
+                   )}
 
                    {/* Estimated timeframe */}
 
                    <div className="mb-2">
-                     <label className="font-bold block text-base text-black-bold mb-1">{t('estimatedTimeframe')}</label>
+                     <RequiredLabel required>{t('estimatedTimeframe')}</RequiredLabel>
                      <Field
                        as="textarea"
                        name="estimated_timeframe"
@@ -593,12 +628,15 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                        placeholder={t('enterEstimatedTimeframe')}
                        disabled={isLoading}
                      />
+                     {touched.estimated_timeframe && errors.estimated_timeframe && (
+                       <div className="text-red-500 text-sm mt-1">{String(errors.estimated_timeframe)}</div>
+                     )}
                    </div>
 
                    {/* Additional support */}
 
                    <div className="mb-2">
-                     <label className="font-bold block text-base text-black-bold mb-1">{t('additionalSupport')}</label>
+                     <RequiredLabel>{t('additionalSupport')}</RequiredLabel>
                      <Field
                        as="textarea"
                        name="additional_support"
@@ -610,7 +648,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
 
                    {/* Banking details */}
                    <div className="mb-2">
-                     <label className="font-bold block text-base text-black-bold mb-1">{t('bankDetails')}</label>
+                     <RequiredLabel required>{t('bankDetails')}</RequiredLabel>
                      <Field
                        name="banking_details"
                        type="text"
@@ -618,26 +656,39 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                        placeholder={t('enterBankDetails')}
                        disabled={isLoading}
                      />
+                     {touched.banking_details && errors.banking_details && (
+                       <div className="text-red-500 text-sm mt-1">{String(errors.banking_details)}</div>
+                     )}
                    </div>
 
                    {/* Add label and update the new fields section */}
                    <div className="mb-2">
-                     <label className="font-bold block text-base text-black-bold mb-1">{t('errMembers')}</label>
+                     <RequiredLabel required>{t('errMembers')}</RequiredLabel>
                      <div className="space-y-4">
                        {/* Program Officer */}
                        <div className="grid grid-cols-2 gap-4">
-                         <Field
-                           name="programOfficerName"
-                           type="text"
-                           placeholder={t('programOfficer.name')}
-                           className="text-sm w-full p-2 border rounded-lg"
-                         />
-                         <Field
-                           name="programOfficerPhone"
-                           type="tel"
-                           placeholder={t('programOfficer.phone')}
-                           className="text-sm w-full p-2 border rounded-lg"
-                         />
+                         <div>
+                           <Field
+                             name="programOfficerName"
+                             type="text"
+                             placeholder={t('programOfficer.name') + ' *'}
+                             className="text-sm w-full p-2 border rounded-lg"
+                           />
+                           {touched.programOfficerName && errors.programOfficerName && (
+                             <div className="text-red-500 text-sm mt-1">{String(errors.programOfficerName)}</div>
+                           )}
+                         </div>
+                         <div>
+                           <Field
+                             name="programOfficerPhone"
+                             type="tel"
+                             placeholder={t('programOfficer.phone') + ' *'}
+                             className="text-sm w-full p-2 border rounded-lg"
+                           />
+                           {touched.programOfficerPhone && errors.programOfficerPhone && (
+                             <div className="text-red-500 text-sm mt-1">{String(errors.programOfficerPhone)}</div>
+                           )}
+                         </div>
                        </div>
 
                        {/* Reporting Officer */}
@@ -677,8 +728,48 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                    <div className="container py-4 px-4 mx-0 min-w-full flex flex-col items-center">
                      {/* Add error summary above the submit button */}
                      {Object.keys(errors).length > 0 && Object.keys(touched).length > 0 && (
-                       <div className="text-red-500 text-sm mb-4">
-                         {t('validation.pleaseFixErrors')}
+                       <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4 w-full">
+                         <div className="flex">
+                           <div className="ml-3">
+                             <h3 className="text-sm font-medium text-red-800">
+                               {t('validation.pleaseFixErrors')}
+                             </h3>
+                             <div className="mt-2 text-sm text-red-700">
+                               <ul className="list-disc list-inside space-y-1">
+                                 {errors.date && touched.date && (
+                                   <li>{t('date')}</li>
+                                 )}
+                                 {errors.project_objectives && touched.project_objectives && (
+                                   <li>{t('projectObjectives')}</li>
+                                 )}
+                                 {errors.intended_beneficiaries && touched.intended_beneficiaries && (
+                                   <li>{t('intendedBeneficiaries')}</li>
+                                 )}
+                                 {errors.state && touched.state && (
+                                   <li>{t('state')}</li>
+                                 )}
+                                 {errors.locality && touched.locality && (
+                                   <li>{t('locality')}</li>
+                                 )}
+                                 {errors.planned_activities && touched.planned_activities && (
+                                   <li>{t('activities.header')}</li>
+                                 )}
+                                 {errors.estimated_timeframe && touched.estimated_timeframe && (
+                                   <li>{t('estimatedTimeframe')}</li>
+                                 )}
+                                 {errors.banking_details && touched.banking_details && (
+                                   <li>{t('bankDetails')}</li>
+                                 )}
+                                 {errors.programOfficerName && touched.programOfficerName && (
+                                   <li>{t('programOfficer.name')}</li>
+                                 )}
+                                 {errors.programOfficerPhone && touched.programOfficerPhone && (
+                                   <li>{t('programOfficer.phone')}</li>
+                                 )}
+                               </ul>
+                             </div>
+                           </div>
+                         </div>
                        </div>
                      )}
                      <div className="flex space-x-4">
