@@ -43,6 +43,11 @@ interface PrefilledFormProps {
   };
   onFormSubmit: (formData?: any, isDraft?: boolean) => void;
   project?: any;
+  showProgressBar?: boolean;
+  currentFormNumber?: number;
+  totalSelectedForms?: number;
+  formId?: string;
+  formDate?: string;
 }
 
 // Add this helper component for required field labels
@@ -52,7 +57,7 @@ const RequiredLabel: React.FC<{ text: string }> = ({ text }) => (
   </div>
 );
 
-const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, project }) => {
+const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, project, showProgressBar, currentFormNumber, totalSelectedForms, formId, formDate }) => {
   const { t } = useTranslation("scanForm");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -349,7 +354,9 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
       });
 
       await Promise.all(expensePromises);
-      onFormSubmit(formData);
+      
+      // Call onFormSubmit without parameters to let parent handle flow control
+      onFormSubmit();
     } catch (error) {
       console.error('Error submitting form:', error);
       alert('Failed to submit form');
@@ -678,6 +685,34 @@ const PrefilledForm: React.FC<PrefilledFormProps> = ({ data, onFormSubmit, proje
           />
         </label>
       </div>
+
+      {/* Progress Bar */}
+      {showProgressBar && currentFormNumber && totalSelectedForms && (
+        <div className="flex justify-between items-center mb-4 bg-gray-50 p-4 rounded-lg">
+          <div>
+            <h2 className="text-lg font-semibold">
+              {t('multiple_forms.processing_form', {
+                current: currentFormNumber,
+                total: totalSelectedForms
+              })}
+            </h2>
+            <p className="text-sm text-gray-600">
+              {formId} - {formDate}
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="h-2 w-32 bg-gray-200 rounded-full">
+              <div 
+                className="h-2 bg-green-500 rounded-full transition-all"
+                style={{ width: `${(currentFormNumber / totalSelectedForms) * 100}%` }}
+              />
+            </div>
+            <span className="text-sm text-gray-600">
+              {Math.round((currentFormNumber / totalSelectedForms) * 100)}%
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="flex justify-between gap-4 mt-6">
         <Button

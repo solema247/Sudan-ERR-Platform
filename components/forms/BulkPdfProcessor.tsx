@@ -134,28 +134,34 @@ const BulkPdfProcessor: React.FC<BulkPdfProcessorProps> = ({ project, onFormSubm
     if (selectedFormIndex === null) return;
 
     const currentFormData = detectedForms[selectedFormIndex];
-    setProcessedFormData(prev => [...prev, currentFormData]);
-
+    
+    // Add to processed forms list
     const newProcessedForms = [...processedForms, selectedFormIndex];
     setProcessedForms(newProcessedForms);
     
-    await onFormSubmit(currentFormData, true);
-    
+    // Find the next unprocessed form that was selected
     const nextForm = detectedForms.findIndex((form, index) => 
       form.selected && !newProcessedForms.includes(index)
     );
 
     if (nextForm !== -1) {
+      // Move to next form - increment key to force PrefilledForm to re-render
       setFormKey(prev => prev + 1);
       setSelectedFormIndex(nextForm);
       setCurrentFormNumber(prev => prev + 1);
+      setProcessedFormData(prev => [...prev, currentFormData]);
     } else {
-      processedFormData.forEach(formData => {
-        onFormSubmit(formData, false);
-      });
+      // All forms are processed - call parent with completion signal
+      setProcessedFormData(prev => [...prev, currentFormData]);
       
+      // Call parent onFormSubmit to show completion
+      onFormSubmit(currentFormData, false);
+      
+      // Reset state
       setFile(null);
       setDetectedForms([]);
+      setSelectedFormIndex(null);
+      setProcessedForms([]);
       setTotalSelectedForms(0);
       setCurrentFormNumber(0);
       setProcessedFormData([]);
@@ -237,38 +243,17 @@ const BulkPdfProcessor: React.FC<BulkPdfProcessorProps> = ({ project, onFormSubm
       {/* Form Processing */}
       {selectedFormIndex !== null && (
         <div className="space-y-4">
-          {/* Progress Header */}
-          <div className="flex justify-between items-center mb-4 bg-gray-50 p-4 rounded-lg">
-            <div>
-              <h2 className="text-lg font-semibold">
-                {t('multiple_forms.processing_form', {
-                  current: currentFormNumber,
-                  total: totalSelectedForms
-                })}
-              </h2>
-              <p className="text-sm text-gray-600">
-                {detectedForms[selectedFormIndex].err_id} - {detectedForms[selectedFormIndex].date}
-              </p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="h-2 w-32 bg-gray-200 rounded-full">
-                <div 
-                  className="h-2 bg-green-500 rounded-full transition-all"
-                  style={{ width: `${(currentFormNumber / totalSelectedForms) * 100}%` }}
-                />
-              </div>
-              <span className="text-sm text-gray-600">
-                {Math.round((currentFormNumber / totalSelectedForms) * 100)}%
-              </span>
-            </div>
-          </div>
-
           {/* PrefilledForm */}
           <PrefilledForm
             key={`form-${selectedFormIndex}-${formKey}`}
             data={detectedForms[selectedFormIndex]}
             onFormSubmit={handleFormProcessed}
             project={project}
+            showProgressBar={true}
+            currentFormNumber={currentFormNumber}
+            totalSelectedForms={totalSelectedForms}
+            formId={detectedForms[selectedFormIndex].err_id}
+            formDate={detectedForms[selectedFormIndex].date}
           />
         </div>
       )}
