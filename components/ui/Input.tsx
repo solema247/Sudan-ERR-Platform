@@ -1,14 +1,15 @@
 import { FC } from 'react';
 
-interface InputProps {
+export interface InputProps {
     type: string;
-    placeholder: string; // Placeholder text is passed as a prop
+    placeholder: string;
     value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     required?: boolean;
+    dir?: string;
 }
 
-const Input: FC<InputProps> = ({ type, placeholder, value, onChange, required }) => {
+const Input: React.FC<InputProps> = ({ type, placeholder, value, onChange, required = false, dir }) => {
     return (
         <input
             type={type}
@@ -16,7 +17,8 @@ const Input: FC<InputProps> = ({ type, placeholder, value, onChange, required })
             value={value}
             onChange={onChange}
             required={required}
-            className="p-2 border rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            dir={dir}
+            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
     );
 };

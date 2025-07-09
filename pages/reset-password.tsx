@@ -16,7 +16,7 @@ const ResetPassword = () => {
     const [error, setError] = useState('');
     
     const router = useRouter();
-    const { t } = useTranslation('login');
+    const { t, i18n } = useTranslation('login');
 
     const handleResetPassword = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -63,6 +63,7 @@ const ResetPassword = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
                 />
 
                 {error && <p className="text-red-500 text-sm text-center">{error}</p>}

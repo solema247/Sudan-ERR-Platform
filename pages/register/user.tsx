@@ -174,6 +174,7 @@ const UserRegistration = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
                     />
                     {emailError && <p className="text-red-500 text-sm">{emailError}</p>}
                 </div>
@@ -186,10 +187,11 @@ const UserRegistration = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
+                            dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
                         />
                         <button
                             type="button"
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                            className={`absolute top-1/2 transform -translate-y-1/2 ${i18n.language === 'ar' ? 'left-2' : 'right-2'}`}
                             onClick={() => setShowPassword(!showPassword)}
                         >
                             <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -211,10 +213,11 @@ const UserRegistration = () => {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
+                            dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
                         />
                         <button
                             type="button"
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                            className={`absolute top-1/2 transform -translate-y-1/2 ${i18n.language === 'ar' ? 'left-2' : 'right-2'}`}
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         >
                             <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -234,6 +237,7 @@ const UserRegistration = () => {
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     required
+                    dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
                 />
 
                 {error && <p className="text-red-500 text-sm">{error}</p>}

@@ -17,7 +17,7 @@ const UpdatePassword = () => {
     const [error, setError] = useState('');
     
     const router = useRouter();
-    const { t } = useTranslation('login');
+    const { t, i18n } = useTranslation('login');
 
     const handleUpdatePassword = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -70,10 +70,11 @@ const UpdatePassword = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
                     />
                     <button
                         type="button"
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                        className={`absolute top-1/2 transform -translate-y-1/2 ${i18n.language === 'ar' ? 'left-2' : 'right-2'}`}
                         onClick={() => setShowPassword(!showPassword)}
                     >
                         <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -93,10 +94,11 @@ const UpdatePassword = () => {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
+                        dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
                     />
                     <button
                         type="button"
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                        className={`absolute top-1/2 transform -translate-y-1/2 ${i18n.language === 'ar' ? 'left-2' : 'right-2'}`}
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
                         <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
