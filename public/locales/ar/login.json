@@ -13,6 +13,21 @@
   "registerLink": "مستخدم جديد؟ سجل هنا",
   "logoAlt": "شعار غرف الطوارئ في السودان",
   "backToHome": "العودة إلى الصفحة الرئيسية",
-  "closeButton": "إغلاق"
+  "closeButton": "إغلاق",
+  "forgotPassword": "نسيت كلمة المرور؟",
+  "resetPasswordTitle": "إعادة تعيين كلمة المرور",
+  "resetPasswordDescription": "أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور",
+  "sendResetLink": "إرسال رابط إعادة التعيين",
+  "sendingResetLink": "جاري الإرسال...",
+  "resetPasswordError": "فشل إرسال رابط إعادة التعيين. يرجى التحقق من بريدك الإلكتروني والمحاولة مرة أخرى",
+  "resetPasswordSuccess": "تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني",
+  "updatePasswordTitle": "تحديث كلمة المرور",
+  "newPasswordPlaceholder": "أدخل كلمة المرور الجديدة",
+  "confirmPasswordPlaceholder": "تأكيد كلمة المرور الجديدة",
+  "updatePasswordButton": "تحديث كلمة المرور",
+  "updatingPassword": "جاري تحديث كلمة المرور...",
+  "passwordUpdateError": "فشل تحديث كلمة المرور. حاول مرة أخرى",
+  "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
+  "backToLogin": "العودة إلى تسجيل الدخول"
 }
 

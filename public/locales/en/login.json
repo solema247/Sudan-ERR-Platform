@@ -13,5 +13,20 @@
   "registerLink": "New user? Register here",
   "logoAlt": "Sudan Emergency Response Rooms Logo",
   "backToHome": "Back to Home",
-  "closeButton": "Close"
+  "closeButton": "Close",
+  "forgotPassword": "Forgot Password?",
+  "resetPasswordTitle": "Reset Password",
+  "resetPasswordDescription": "Enter your email address and we'll send you a link to reset your password.",
+  "sendResetLink": "Send Reset Link",
+  "sendingResetLink": "Sending...",
+  "resetPasswordError": "Failed to send reset link. Please check your email and try again.",
+  "resetPasswordSuccess": "Password reset link has been sent to your email.",
+  "updatePasswordTitle": "Update Password",
+  "newPasswordPlaceholder": "Enter New Password",
+  "confirmPasswordPlaceholder": "Confirm New Password",
+  "updatePasswordButton": "Update Password",
+  "updatingPassword": "Updating Password...",
+  "passwordUpdateError": "Failed to update password. Please try again.",
+  "passwordsDoNotMatch": "Passwords do not match.",
+  "backToLogin": "Back to Login"
 }

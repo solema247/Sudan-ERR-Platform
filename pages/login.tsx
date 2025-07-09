@@ -212,6 +212,13 @@ const Login = () => {
                     type="submit"
                     disabled={isLoading}
                 />
+                
+                <Link 
+                    href="/reset-password"
+                    className="text-sm text-blue-500 hover:text-blue-700 text-center"
+                >
+                    {t('forgotPassword')}
+                </Link>
             </form>
 
             {/* Error Message */}
