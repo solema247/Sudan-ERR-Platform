@@ -2,6 +2,7 @@
     "registerTitle": "تسجيل حساب جديد",
     "emailPlaceholder": "أدخل البريد الإلكتروني",
     "passwordPlaceholder": "أدخل كلمة المرور",
+    "confirmPasswordPlaceholder": "تأكيد كلمة المرور",
     "displayNamePlaceholder": "أدخل اسم العرض",
     "selectErrType": "اختر نوع غرفة الطوارئ",
     "stateErr": "غرفة طوارئ الولاية",

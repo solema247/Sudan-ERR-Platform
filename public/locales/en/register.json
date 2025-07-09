@@ -15,6 +15,7 @@
     "registeringFor": "Registering for:",
     "emailPlaceholder": "Enter Email",
     "passwordPlaceholder": "Enter Password",
+    "confirmPasswordPlaceholder": "Confirm Password",
     "displayNamePlaceholder": "Enter Your Name",
     "registering": "Registering...",
     "registerButton": "Register",
