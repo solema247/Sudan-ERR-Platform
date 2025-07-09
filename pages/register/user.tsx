@@ -63,6 +63,9 @@ const UserRegistration = () => {
             const { data: authData, error: authError } = await newSupabase.auth.signUp({
                 email,
                 password,
+                options: {
+                    emailRedirectTo: 'https://sudan-err-bot.vercel.app/login'
+                }
             });
 
             if (authError) throw authError;
