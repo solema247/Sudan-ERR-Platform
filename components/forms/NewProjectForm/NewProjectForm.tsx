@@ -44,6 +44,16 @@ interface Project {
     };
 }
 
+interface EmergencyRoom {
+    name: string;
+    name_ar: string | null;
+}
+
+interface UserDataResponse {
+    err_id: string;
+    emergency_rooms: EmergencyRoom;
+}
+
 interface NewProjectApplicationProps {
     onReturnToMenu: () => void;
     initialValues?: Project | null;
@@ -102,6 +112,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
    const [pendingSubmission, setPendingSubmission] = useState(null);
    const [userErrId, setUserErrId] = useState('');
+   const [userErrName, setUserErrName] = useState('');
    const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(initialValues?.id);
    const [editingProject, setEditingProject] = useState<Project | null>(null);
    const router = useRouter();
@@ -116,19 +127,30 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
            return;
          }
 
-         // Get user data directly from the users table
-         const { data: userData, error: userError } = await newSupabase
+         // Get user data with ERR name from the emergency_rooms table
+         const { data, error: userError } = await newSupabase
            .from('users')
-           .select('err_id')
+           .select(`
+             err_id,
+             emergency_rooms!inner (
+               name,
+               name_ar
+             )
+           `)
            .eq('id', session.user.id)
-           .single();
+           .single<UserDataResponse>();
 
-         if (userError || !userData) {
+         if (userError || !data) {
            console.error('Error fetching user data:', userError);
            return;
          }
 
-         setUserErrId(userData.err_id);
+         setUserErrId(data.err_id);
+         // Set ERR name based on current language
+         const errName = i18n.language === 'ar' && data.emergency_rooms.name_ar 
+           ? data.emergency_rooms.name_ar 
+           : data.emergency_rooms.name;
+         setUserErrName(errName || '');
        } catch (error) {
          console.error('Session validation error:', error);
        }
@@ -499,11 +521,13 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                    {/* ERR ID */}
                    <div className="mb-2">
                      <RequiredLabel>{t('errId')}</RequiredLabel>
+                     <div className="text-sm w-full p-2 border rounded-lg bg-gray-100">
+                       {userErrName}
+                     </div>
                      <Field
                        name="err"
-                       type="text"
-                       className="text-sm w-full p-2 border rounded-lg bg-gray-100"
-                       disabled={true}
+                       type="hidden"
+                       value={userErrId}
                      />
                    </div>
 
