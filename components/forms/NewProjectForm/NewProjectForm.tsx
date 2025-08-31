@@ -374,90 +374,138 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
    };
 
    const handleConfirmedSubmit = async () => {
-     if (!pendingSubmission) return;
-     
-     const { values, setSubmitting } = pendingSubmission;
-     setShowConfirmDialog(false);
-     setLoading(true);
-     
-     try {
-       const { data: { session } } = await newSupabase.auth.getSession();
-       
-       if (!session) {
-         throw new Error('No active session');
-       }
+    if (!pendingSubmission) return;
+    
+    const { values, setSubmitting } = pendingSubmission;
+    setShowConfirmDialog(false);
+    setLoading(true);
+    
+    try {
+      const { data: { session } } = await newSupabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No active session');
+      }
 
-               const { 
-          dirty, 
-          currentLanguage, 
-          err,
-          grant_call_id,
-          grant_call_state_allocation_id,
-          programOfficerName,
-          programOfficerPhone,
-          reportingOfficerName,
-          reportingOfficerPhone,
-          financeOfficerName,
-          financeOfficerPhone,
-          ...otherValues 
-        } = values;
-       
-               // Format data to match database schema
-        const projectData = {
-          ...otherValues,
-          err_id: err,
-          grant_call_id: grant_call_id,
-          grant_call_state_allocation_id: grant_call_state_allocation_id,
-          funding_status: 'unassigned',
-          program_officer_name: programOfficerName,
-          program_officer_phone: programOfficerPhone,
-          reporting_officer_name: reportingOfficerName,
-          reporting_officer_phone: reportingOfficerPhone,
-          finance_officer_name: financeOfficerName,
-          finance_officer_phone: financeOfficerPhone,
-          is_draft: false,
-          status: 'pending',
-          submitted_at: new Date().toISOString(),
-          last_modified: new Date().toISOString(),
-          created_by: userErrId,
-          language: currentLanguage || 'en'
-        };
+      const { 
+        dirty, 
+        currentLanguage, 
+        err,
+        grant_call_id,
+        grant_call_state_allocation_id,
+        planned_activities,
+        programOfficerName,
+        programOfficerPhone,
+        reportingOfficerName,
+        reportingOfficerPhone,
+        financeOfficerName,
+        financeOfficerPhone,
+        ...otherValues 
+      } = values;
 
-       // If we have a draft ID or editing an existing project, use PUT
-       const method = currentDraftId || projectToEdit ? 'PUT' : 'POST';
-       const id = currentDraftId || projectToEdit;
-       
-       const res = await fetch('/api/project-application', {
-         method,
-         headers: { 
-           'Content-Type': 'application/json',
-           'Authorization': `Bearer ${session.access_token}`
-         },
-         body: JSON.stringify({
-           ...projectData,
-           id
-         }),
-         credentials: 'include'
-       });
-       
-       if (res.ok) {
-         setIsFormSubmitted(true);
-         if (onDraftSubmitted) {
-           onDraftSubmitted();
-         }
-       } else {
-         const errorData = await res.json();
-         alert(t('submissionFailed') + ': ' + (errorData.message || 'Unknown error'));
-       }
-     } catch (error) {
-       console.error('Error submitting project:', error);
-       alert(t('submissionFailed') + ': ' + error.message);
-     } finally {
-       setLoading(false);
-       setSubmitting(false);
-       setPendingSubmission(null);
-     }
-   };
+      // Extract expenses from planned_activities but keep planned_activities as-is
+      let extractedExpenses = [];
+      
+      if (planned_activities && Array.isArray(planned_activities)) {
+        planned_activities.forEach(activity => {
+          // Extract expenses from each activity
+          if (activity.expenses && Array.isArray(activity.expenses)) {
+            // Transform expenses to match Mutual Aid Portal format
+            const transformedExpenses = activity.expenses.map(expense => {
+              const { total, expense: expenseId, frequency, unitPrice, description, ...otherFields } = expense;
+              return {
+                ...otherFields,
+                total_cost: total, // Transform 'total' to 'total_cost'
+                expense: expenseId,
+                frequency,
+                unitPrice,
+                description
+              };
+            });
+            extractedExpenses.push(...transformedExpenses);
+          }
+        });
+      }
+
+      // Get donor_id from the selected grant call
+      let donorId = null;
+      if (selectedGrantCall) {
+        try {
+          const { data: grantCallData, error: grantCallError } = await newSupabase
+            .from('grant_calls')
+            .select('donor_id')
+            .eq('id', selectedGrantCall.id)
+            .single();
+
+          if (!grantCallError && grantCallData) {
+            donorId = grantCallData.donor_id;
+          }
+        } catch (error) {
+          console.error('Error fetching donor_id:', error);
+        }
+      }
+      
+      // Format data to match database schema
+      const projectData = {
+        ...otherValues,
+        err_id: err,
+        emergency_room_id: err, // Set emergency_room_id to same as err_id
+        grant_call_id: selectedGrantCall?.id || grant_call_id,
+        grant_call_state_allocation_id: selectedGrantCall?.allocation_id || grant_call_state_allocation_id,
+        donor_id: donorId,
+        planned_activities: planned_activities, // Keep as-is for dependencies
+        expenses: extractedExpenses.length > 0 ? extractedExpenses : null,
+        funding_status: 'unassigned',
+        source: 'err_app', // Identify projects uploaded through this app
+        program_officer_name: programOfficerName,
+        program_officer_phone: programOfficerPhone,
+        reporting_officer_name: reportingOfficerName,
+        reporting_officer_phone: reportingOfficerPhone,
+        finance_officer_name: financeOfficerName,
+        finance_officer_phone: financeOfficerPhone,
+        is_draft: false,
+        status: 'pending',
+        submitted_at: new Date().toISOString(),
+        last_modified: new Date().toISOString(),
+        created_by: userErrId,
+        language: currentLanguage || 'en'
+      };
+
+      // If we have a draft ID or editing an existing project, use PUT
+      const method = currentDraftId || projectToEdit ? 'PUT' : 'POST';
+      const id = currentDraftId || projectToEdit;
+      
+      const res = await fetch('/api/project-application', {
+        method,
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          ...projectData,
+          id
+        }),
+        credentials: 'include'
+      });
+      
+      if (res.ok) {
+        setIsFormSubmitted(true);
+        if (onDraftSubmitted) {
+          onDraftSubmitted();
+        }
+      } else {
+        const errorData = await res.json();
+        alert(t('submissionFailed') + ': ' + (errorData.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error submitting project:', error);
+      alert(t('submissionFailed') + ': ' + error.message);
+    } finally {
+      setLoading(false);
+      setSubmitting(false);
+      setPendingSubmission(null);
+    }
+  };
 
    const handleCancelSubmit = () => {
      if (pendingSubmission) {
