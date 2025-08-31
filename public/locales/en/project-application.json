@@ -125,6 +125,18 @@
     "makeChanges": "Please make the requested changes and resubmit your project."
   },
   "errors": {
-    "fetchProjectError": "Failed to fetch project details"
-  }
+    "fetchProjectError": "Failed to fetch project details",
+    "fetchGrantCallsError": "Failed to fetch grant calls"
+  },
+  "grantCalls": {
+    "title": "Available Grant Calls",
+    "availableForState": "Available for your state",
+    "noCallsAvailable": "No grant calls are currently available for your state",
+    "donor": "Donor",
+    "availableAmount": "Available Amount",
+    "period": "Application Period",
+    "selectCall": "Select This Call"
+  },
+  "grantCall": "Grant Call",
+  "availableAmount": "Available Amount"
 }

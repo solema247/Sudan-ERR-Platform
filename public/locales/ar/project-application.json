@@ -133,7 +133,19 @@
     "makeChanges": "يرجى إجراء التغييرات المطلوبة وإعادة تقديم مشروعك."
   },
   "errors": {
-    "fetchProjectError": "فشل في جلب تفاصيل المشروع"
+    "fetchProjectError": "فشل في جلب تفاصيل المشروع",
+    "fetchGrantCallsError": "فشل في جلب نداءات المنح"
   },
+  "grantCalls": {
+    "title": "نداءات المنح المتاحة",
+    "availableForState": "متاح لولاية",
+    "noCallsAvailable": "لا توجد نداءات منح متاحة حالياً لولاية",
+    "donor": "المانح",
+    "availableAmount": "المبلغ المتاح",
+    "period": "فترة التقديم",
+    "selectCall": "اختر هذا النداء"
+  },
+  "grantCall": "نداء المنحة",
+  "availableAmount": "المبلغ المتاح",
   "troubleGettingLocalities": "مشكلة في الحصول على المحليات"
 }

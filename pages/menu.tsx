@@ -15,6 +15,7 @@ const LogoImage = '/icons/icon-512x512.png';
 import Project from '../components/forms/NewProjectForm/Project';
 import ProgramReportForm from '../components/forms/ProgramReportForm/ReportingForm';
 import ProjectDrafts from '../components/forms/NewProjectForm/ProjectDrafts';
+import GrantCallSelection from '../components/forms/NewProjectForm/GrantCallSelection';
 import FinancialReportDrafts from '../components/forms/FinancialReportForm/FinancialReportDrafts';
 import ProgramReportDrafts from '../components/forms/ProgramReportForm/ProgramReportDrafts';
 import { newSupabase } from '../services/newSupabaseClient';
@@ -85,6 +86,8 @@ const Menu = () => {
     const [activeReportId, setActiveReportId] = useState(null)
     const [showScanPrefillForm, setShowScanPrefillForm] = useState(false);
     const [showProjectDrafts, setShowProjectDrafts] = useState(false);
+    const [showGrantCallSelection, setShowGrantCallSelection] = useState(false);
+    const [selectedGrantCall, setSelectedGrantCall] = useState(null);
     const [drafts, setDrafts] = useState<Project[]>([]);
     const [showDraftList, setShowDraftList] = useState(true);
     const [currentProjectDraft, setCurrentProjectDraft] = useState<Project | null>(null);
@@ -293,6 +296,8 @@ const Menu = () => {
         setShowScanPrefillForm(false);
         setShowFinancialDrafts(false);
         setShowProjectDrafts(false);
+        setShowGrantCallSelection(false);
+        setSelectedGrantCall(null);
         setCurrentProgramDraft(null);
         setCurrentProjectDraft(null);
     };
@@ -316,9 +321,7 @@ const Menu = () => {
         if (workflow === Workflow.SCAN_FORM) setShowScanForm(true);
         if (workflow === Workflow.SCAN_CUSTOM_FORM) setShowScanCustomForm(true);
         if (workflow === Workflow.PROJECT_APPLICATION) {
-            setShowProjectApplication(true);
-            setShowProjectDrafts(true);
-            setShowDraftList(true);
+            setShowGrantCallSelection(true);
         }
         if (workflow === Workflow.PROJECT_STATUS) {
             setShowProjectStatus(true);
@@ -564,6 +567,21 @@ const Menu = () => {
                 </MessageBubble>
             )}
 
+            {showGrantCallSelection && (
+                <MessageBubble>
+                    <GrantCallSelection
+                        onSelectGrantCall={(grantCall) => {
+                            setSelectedGrantCall(grantCall);
+                            setShowGrantCallSelection(false);
+                            setShowProjectApplication(true);
+                            setShowProjectDrafts(true);
+                            setShowDraftList(true);
+                        }}
+                        onReturnToMenu={() => handleMenuSelection(CurrentMenu.PROJECTS)}
+                    />
+                </MessageBubble>
+            )}
+
             {showProjectApplication && (
                 <MessageBubble>
                     {showDraftList && !projectToEdit ? (
@@ -599,6 +617,7 @@ const Menu = () => {
                             }}
                             initialValues={currentProjectDraft}
                             projectToEdit={projectToEdit}
+                            selectedGrantCall={selectedGrantCall}
                             onDraftSubmitted={() => {
                                 if (currentProjectDraft) {
                                     setDrafts(drafts.filter(d => d.id !== currentProjectDraft.id));

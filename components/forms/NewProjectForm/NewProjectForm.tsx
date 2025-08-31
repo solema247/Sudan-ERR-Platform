@@ -54,10 +54,23 @@ interface UserDataResponse {
     emergency_rooms: EmergencyRoom;
 }
 
+interface GrantCall {
+    id: string;
+    allocation_id: string;
+    name: string;
+    shortname: string | null;
+    donor_name: string;
+    state_amount: number;
+    total_amount: number;
+    start_date: string;
+    end_date: string;
+}
+
 interface NewProjectApplicationProps {
     onReturnToMenu: () => void;
     initialValues?: Project | null;
     projectToEdit?: string;
+    selectedGrantCall?: GrantCall | null;
     onDraftSubmitted?: () => void;
 }
 
@@ -99,6 +112,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
     onReturnToMenu,
     initialValues,
     projectToEdit,
+    selectedGrantCall,
     onDraftSubmitted
 }) => {
    const { t, i18n } = useTranslation('projectApplication');
@@ -373,36 +387,41 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
          throw new Error('No active session');
        }
 
-       const { 
-         dirty, 
-         currentLanguage, 
-         err,
-         programOfficerName,
-         programOfficerPhone,
-         reportingOfficerName,
-         reportingOfficerPhone,
-         financeOfficerName,
-         financeOfficerPhone,
-         ...otherValues 
-       } = values;
+               const { 
+          dirty, 
+          currentLanguage, 
+          err,
+          grant_call_id,
+          grant_call_state_allocation_id,
+          programOfficerName,
+          programOfficerPhone,
+          reportingOfficerName,
+          reportingOfficerPhone,
+          financeOfficerName,
+          financeOfficerPhone,
+          ...otherValues 
+        } = values;
        
-       // Format data to match database schema
-       const projectData = {
-         ...otherValues,
-         err_id: err,
-         program_officer_name: programOfficerName,
-         program_officer_phone: programOfficerPhone,
-         reporting_officer_name: reportingOfficerName,
-         reporting_officer_phone: reportingOfficerPhone,
-         finance_officer_name: financeOfficerName,
-         finance_officer_phone: financeOfficerPhone,
-         is_draft: false,
-         status: 'pending',
-         submitted_at: new Date().toISOString(),
-         last_modified: new Date().toISOString(),
-         created_by: userErrId,
-         language: currentLanguage || 'en'
-       };
+               // Format data to match database schema
+        const projectData = {
+          ...otherValues,
+          err_id: err,
+          grant_call_id: grant_call_id,
+          grant_call_state_allocation_id: grant_call_state_allocation_id,
+          funding_status: 'unassigned',
+          program_officer_name: programOfficerName,
+          program_officer_phone: programOfficerPhone,
+          reporting_officer_name: reportingOfficerName,
+          reporting_officer_phone: reportingOfficerPhone,
+          finance_officer_name: financeOfficerName,
+          finance_officer_phone: financeOfficerPhone,
+          is_draft: false,
+          status: 'pending',
+          submitted_at: new Date().toISOString(),
+          last_modified: new Date().toISOString(),
+          created_by: userErrId,
+          language: currentLanguage || 'en'
+        };
 
        // If we have a draft ID or editing an existing project, use PUT
        const method = currentDraftId || projectToEdit ? 'PUT' : 'POST';
@@ -518,18 +537,40 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                      )}
                    </div>
 
-                   {/* ERR ID */}
-                   <div className="mb-2">
-                     <RequiredLabel>{t('errId')}</RequiredLabel>
-                     <div className="text-sm w-full p-2 border rounded-lg bg-gray-100">
-                       {userErrName}
-                     </div>
-                     <Field
-                       name="err"
-                       type="hidden"
-                       value={userErrId}
-                     />
-                   </div>
+                                       {/* ERR ID */}
+                    <div className="mb-2">
+                      <RequiredLabel>{t('errId')}</RequiredLabel>
+                      <div className="text-sm w-full p-2 border rounded-lg bg-gray-100">
+                        {userErrName}
+                      </div>
+                      <Field
+                        name="err"
+                        type="hidden"
+                        value={userErrId}
+                      />
+                    </div>
+
+                    {/* Selected Grant Call */}
+                    {selectedGrantCall && (
+                      <div className="mb-2">
+                        <RequiredLabel>{t('grantCall')}</RequiredLabel>
+                        <div className="text-sm w-full p-2 border rounded-lg bg-blue-50">
+                          <div className="font-semibold">{selectedGrantCall.shortname || selectedGrantCall.name}</div>
+                          <div className="text-gray-600">{selectedGrantCall.donor_name}</div>
+                          <div className="text-gray-600">{t('availableAmount')}: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(selectedGrantCall.state_amount)}</div>
+                        </div>
+                        <Field
+                          name="grant_call_id"
+                          type="hidden"
+                          value={selectedGrantCall.id}
+                        />
+                        <Field
+                          name="grant_call_state_allocation_id"
+                          type="hidden"
+                          value={selectedGrantCall.allocation_id}
+                        />
+                      </div>
+                    )}
 
                     {/* Objectives */}
                     <div className="mb-2">
