@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
 
-            const userState = userStateData.emergency_rooms.states.state_name;
+            const userState = userStateData.emergency_rooms[0].states[0].state_name;
 
             // First, get the latest decision_no for each grant call
             const { data: latestDecisions, error: decisionsError } = await newSupabase
@@ -107,20 +107,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             // Filter to only include allocations with the latest decision_no for each grant call
             const filteredGrantCalls = grantCalls.filter(call => 
-                call.decision_no === maxDecisionsByGrantCall[call.grant_calls.id]
+                call.decision_no === maxDecisionsByGrantCall[call.grant_calls[0].id]
             );
 
             // Format the response
             const formattedGrantCalls = filteredGrantCalls.map(call => ({
-                id: call.grant_calls.id,
+                id: call.grant_calls[0].id,
                 allocation_id: call.id,
-                name: call.grant_calls.name,
-                shortname: call.grant_calls.shortname,
-                donor_name: call.grant_calls.donors.short_name || call.grant_calls.donors.name,
+                name: call.grant_calls[0].name,
+                shortname: call.grant_calls[0].shortname,
+                donor_name: call.grant_calls[0].donors[0].short_name || call.grant_calls[0].donors[0].name,
                 state_amount: call.amount,
-                total_amount: call.grant_calls.amount,
-                start_date: call.grant_calls.start_date,
-                end_date: call.grant_calls.end_date
+                total_amount: call.grant_calls[0].amount,
+                start_date: call.grant_calls[0].start_date,
+                end_date: call.grant_calls[0].end_date
             }));
 
             return res.status(200).json({
