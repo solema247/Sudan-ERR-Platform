@@ -48,12 +48,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             const userState = userStateData.emergency_rooms.states.state_name;
 
-            // Fetch available grant calls for the user's state
+            // First, get the latest decision_no for each grant call
+            const { data: latestDecisions, error: decisionsError } = await newSupabase
+                .from('grant_call_state_allocations')
+                .select('grant_call_id, decision_no')
+                .eq('state_name', userState)
+                .order('decision_no', { ascending: false });
+
+            if (decisionsError) {
+                console.error('Error fetching latest decisions:', decisionsError);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Failed to fetch latest decisions',
+                    error: decisionsError.message 
+                });
+            }
+
+            // Group by grant_call_id and get the max decision_no for each
+            const maxDecisionsByGrantCall = latestDecisions.reduce((acc, item) => {
+                if (!acc[item.grant_call_id] || item.decision_no > acc[item.grant_call_id]) {
+                    acc[item.grant_call_id] = item.decision_no;
+                }
+                return acc;
+            }, {});
+
+            // Fetch available grant calls for the user's state with only the latest decision_no
             const { data: grantCalls, error: grantCallsError } = await newSupabase
                 .from('grant_call_state_allocations')
                 .select(`
                     id,
                     amount,
+                    decision_no,
                     grant_calls!inner (
                         id,
                         name,
@@ -68,7 +93,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     )
                 `)
                 .eq('state_name', userState)
-                .eq('grant_calls.status', 'open');
+                .eq('grant_calls.status', 'open')
+                .in('grant_call_id', Object.keys(maxDecisionsByGrantCall));
 
             if (grantCallsError) {
                 console.error('Error fetching grant calls:', grantCallsError);
@@ -79,8 +105,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
 
+            // Filter to only include allocations with the latest decision_no for each grant call
+            const filteredGrantCalls = grantCalls.filter(call => 
+                call.decision_no === maxDecisionsByGrantCall[call.grant_calls.id]
+            );
+
             // Format the response
-            const formattedGrantCalls = grantCalls.map(call => ({
+            const formattedGrantCalls = filteredGrantCalls.map(call => ({
                 id: call.grant_calls.id,
                 allocation_id: call.id,
                 name: call.grant_calls.name,
