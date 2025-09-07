@@ -46,7 +46,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
 
-            const userState = userStateData.emergency_rooms[0].states[0].state_name;
+            const userState = userStateData.emergency_rooms.states.state_name;
+            
+            if (!userState) {
+                console.error('Could not extract user state from data');
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Could not extract user state'
+                });
+            }
+
+            console.log('User state:', userState);
 
             // First, get the latest decision_no for each grant call
             const { data: latestDecisions, error: decisionsError } = await newSupabase
@@ -105,22 +115,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
 
+            console.log('Grant calls count:', grantCalls.length);
+            console.log('Max decisions:', maxDecisionsByGrantCall);
+
             // Filter to only include allocations with the latest decision_no for each grant call
             const filteredGrantCalls = grantCalls.filter(call => 
-                call.decision_no === maxDecisionsByGrantCall[call.grant_calls[0].id]
+                call.decision_no === maxDecisionsByGrantCall[call.grant_calls.id]
             );
 
             // Format the response
             const formattedGrantCalls = filteredGrantCalls.map(call => ({
-                id: call.grant_calls[0].id,
+                id: call.grant_calls.id,
                 allocation_id: call.id,
-                name: call.grant_calls[0].name,
-                shortname: call.grant_calls[0].shortname,
-                donor_name: call.grant_calls[0].donors[0].short_name || call.grant_calls[0].donors[0].name,
+                name: call.grant_calls.name,
+                shortname: call.grant_calls.shortname,
+                donor_name: call.grant_calls.donors.short_name || call.grant_calls.donors.name,
                 state_amount: call.amount,
-                total_amount: call.grant_calls[0].amount,
-                start_date: call.grant_calls[0].start_date,
-                end_date: call.grant_calls[0].end_date
+                total_amount: call.grant_calls.amount,
+                start_date: call.grant_calls.start_date,
+                end_date: call.grant_calls.end_date
             }));
 
             return res.status(200).json({
