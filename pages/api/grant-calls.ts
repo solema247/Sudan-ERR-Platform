@@ -52,8 +52,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             let userState;
             try {
                 // Based on the debug output, emergency_rooms is an object, not an array
-                if (userStateData.emergency_rooms && userStateData.emergency_rooms.states) {
-                    userState = userStateData.emergency_rooms.states.state_name;
+                const emergencyRooms = userStateData.emergency_rooms as any;
+                if (emergencyRooms && emergencyRooms.states) {
+                    userState = emergencyRooms.states.state_name;
                 }
             } catch (error) {
                 console.error('Error extracting user state:', error);
@@ -131,7 +132,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             // Filter to only include allocations with the latest decision_no for each grant call
             const filteredGrantCalls = grantCalls.filter(call => {
                 try {
-                    const grantCallId = call.grant_calls ? call.grant_calls.id : null;
+                    const grantCall = call.grant_calls as any;
+                    const grantCallId = grantCall ? grantCall.id : null;
                     const maxDecision = maxDecisionsByGrantCall[grantCallId];
                     return call.decision_no === maxDecision;
                 } catch (error) {
@@ -143,7 +145,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             // Format the response with error handling
             const formattedGrantCalls = filteredGrantCalls.map(call => {
                 try {
-                    const grantCall = call.grant_calls ? call.grant_calls : null;
+                    const grantCall = call.grant_calls as any;
                     const donor = grantCall && grantCall.donors ? grantCall.donors : null;
                     
                     if (!grantCall) {
