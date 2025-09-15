@@ -89,6 +89,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             );
         }
 
+        // Compute committed and pending sums for these allocations
+        const allocationIds = Object.values(allocationsByCycle)
+            .filter(Boolean)
+            .map(a => (a as any).id);
+
+        let totalsByAllocation: Record<string, { committed: number; pending: number }> = {};
+        if (allocationIds.length > 0) {
+            const { data: projects, error: projectsError } = await newSupabase
+                .from('err_projects')
+                .select('cycle_state_allocation_id, status, funding_status, expenses')
+                .in('cycle_state_allocation_id', allocationIds);
+
+            if (projectsError) {
+                return res.status(500).json({ success: false, message: 'Failed to fetch project totals', error: projectsError.message });
+            }
+
+            const sumExpenses = (expenses: any): number => {
+                if (!expenses) return 0;
+                try {
+                    const arr = Array.isArray(expenses) ? expenses : typeof expenses === 'string' ? JSON.parse(expenses) : [];
+                    if (!Array.isArray(arr)) return 0;
+                    return arr.reduce((sum, e) => sum + Number(e?.total_cost || 0), 0);
+                } catch {
+                    return 0;
+                }
+            };
+
+            projects?.forEach(p => {
+                const key = p.cycle_state_allocation_id as string;
+                if (!totalsByAllocation[key]) totalsByAllocation[key] = { committed: 0, pending: 0 };
+                const amount = sumExpenses(p.expenses);
+                if (p.status === 'approved' && p.funding_status === 'committed') {
+                    totalsByAllocation[key].committed += amount;
+                } else if (p.status === 'pending' && p.funding_status === 'allocated') {
+                    totalsByAllocation[key].pending += amount;
+                }
+            });
+        }
+
         return res.status(200).json({
             success: true,
             user_state: userState,
@@ -100,7 +139,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 start_date: c.start_date,
                 end_date: c.end_date,
                 state_amount: allocationsByCycle[c.id]?.amount ?? null,
-                allocation_id: allocationsByCycle[c.id]?.id ?? null
+                allocation_id: allocationsByCycle[c.id]?.id ?? null,
+                committed_amount: allocationsByCycle[c.id]?.id ? (totalsByAllocation[allocationsByCycle[c.id]!.id]?.committed || 0) : 0,
+                pending_amount: allocationsByCycle[c.id]?.id ? (totalsByAllocation[allocationsByCycle[c.id]!.id]?.pending || 0) : 0,
+                remaining_amount: (() => {
+                    const allocated = allocationsByCycle[c.id]?.amount ?? 0;
+                    const allocId = allocationsByCycle[c.id]?.id as string | undefined;
+                    const committed = allocId ? (totalsByAllocation[allocId]?.committed || 0) : 0;
+                    const pending = allocId ? (totalsByAllocation[allocId]?.pending || 0) : 0;
+                    return Number(allocated) - Number(committed) - Number(pending);
+                })()
             }))
         });
     } catch (error: any) {

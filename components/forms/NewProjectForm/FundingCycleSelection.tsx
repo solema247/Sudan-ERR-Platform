@@ -14,6 +14,9 @@ interface FundingCycle {
     end_date: string | null;
     state_amount: number | null;
     allocation_id: string | null;
+    committed_amount?: number;
+    pending_amount?: number;
+    remaining_amount?: number;
 }
 
 interface FundingCycleSelectionProps {
@@ -100,6 +103,9 @@ const FundingCycleSelection: React.FC<FundingCycleSelectionProps> = ({ onSelectF
                                 </h3>
                                 <div className="space-y-2 text-sm">
                                     <p><strong>{t('grantCalls.availableAmount')}:</strong> {formatAmount(cycle.state_amount)}</p>
+                                    <p><strong>Committed:</strong> {formatAmount(cycle.committed_amount)}</p>
+                                    <p><strong>Pending:</strong> {formatAmount(cycle.pending_amount)}</p>
+                                    <p><strong>Remaining:</strong> {formatAmount(cycle.remaining_amount)}</p>
                                     <p><strong>{t('grantCalls.period')}:</strong> {formatDate(cycle.start_date)} - {formatDate(cycle.end_date)}</p>
                                 </div>
                                 <div className="mt-4">
