@@ -590,7 +590,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                         <RequiredLabel>{t('grantCall')}</RequiredLabel>
                         <div className="text-sm w-full p-2 border rounded-lg bg-blue-50">
                           <div className="font-semibold">{selectedFundingCycle.name} — {selectedFundingCycle.year}/#{selectedFundingCycle.cycle_number}</div>
-                          <div className="text-gray-600">{t('availableAmount')}: {selectedFundingCycle.state_amount != null ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(selectedFundingCycle.state_amount) : '—'}</div>
+                          <div className="text-gray-600">Remaining: {'remaining_amount' in selectedFundingCycle && (selectedFundingCycle as any).remaining_amount != null ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((selectedFundingCycle as any).remaining_amount) : '—'}</div>
                         </div>
                         <Field
                           name="funding_cycle_id"
