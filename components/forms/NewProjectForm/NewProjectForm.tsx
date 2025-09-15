@@ -54,23 +54,22 @@ interface UserDataResponse {
     emergency_rooms: EmergencyRoom;
 }
 
-interface GrantCall {
+interface FundingCycle {
     id: string;
-    allocation_id: string;
     name: string;
-    shortname: string | null;
-    donor_name: string;
-    state_amount: number;
-    total_amount: number;
-    start_date: string;
-    end_date: string;
+    cycle_number: number;
+    year: number;
+    start_date?: string | null;
+    end_date?: string | null;
+    state_amount?: number | null;
+    allocation_id?: string | null;
 }
 
 interface NewProjectApplicationProps {
     onReturnToMenu: () => void;
     initialValues?: Project | null;
     projectToEdit?: string;
-    selectedGrantCall?: GrantCall | null;
+    selectedFundingCycle?: FundingCycle | null;
     onDraftSubmitted?: () => void;
 }
 
@@ -112,7 +111,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
     onReturnToMenu,
     initialValues,
     projectToEdit,
-    selectedGrantCall,
+    selectedFundingCycle,
     onDraftSubmitted
 }) => {
    const { t, i18n } = useTranslation('projectApplication');
@@ -391,8 +390,8 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
         dirty, 
         currentLanguage, 
         err,
-        grant_call_id,
-        grant_call_state_allocation_id,
+        funding_cycle_id,
+        cycle_state_allocation_id,
         planned_activities,
         programOfficerName,
         programOfficerPhone,
@@ -427,31 +426,16 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
         });
       }
 
-      // Get donor_id from the selected grant call
+      // Cycle-based flow: donor/grant call assignment happens later (back-office)
       let donorId = null;
-      if (selectedGrantCall) {
-        try {
-          const { data: grantCallData, error: grantCallError } = await newSupabase
-            .from('grant_calls')
-            .select('donor_id')
-            .eq('id', selectedGrantCall.id)
-            .single();
-
-          if (!grantCallError && grantCallData) {
-            donorId = grantCallData.donor_id;
-          }
-        } catch (error) {
-          console.error('Error fetching donor_id:', error);
-        }
-      }
       
       // Format data to match database schema
       const projectData = {
         ...otherValues,
         err_id: err,
         emergency_room_id: err, // Set emergency_room_id to same as err_id
-        grant_call_id: selectedGrantCall?.id || grant_call_id,
-        grant_call_state_allocation_id: selectedGrantCall?.allocation_id || grant_call_state_allocation_id,
+        funding_cycle_id: selectedFundingCycle?.id || funding_cycle_id,
+        cycle_state_allocation_id: cycle_state_allocation_id || selectedFundingCycle?.allocation_id || null,
         donor_id: donorId,
         planned_activities: planned_activities, // Keep as-is for dependencies
         expenses: extractedExpenses.length > 0 ? extractedExpenses : null,
@@ -565,6 +549,8 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                reportingOfficerPhone: editingProject?.reporting_officer_phone || initialValues?.reporting_officer_phone || '',
                financeOfficerName: editingProject?.finance_officer_name || initialValues?.finance_officer_name || '',
                financeOfficerPhone: editingProject?.finance_officer_phone || initialValues?.finance_officer_phone || '',
+               funding_cycle_id: (initialValues as any)?.funding_cycle_id || '',
+               cycle_state_allocation_id: (initialValues as any)?.cycle_state_allocation_id || '',
              }}
              validationSchema={validationSchema}
              onSubmit={handleSubmit}
@@ -598,25 +584,26 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                       />
                     </div>
 
-                    {/* Selected Grant Call */}
-                    {selectedGrantCall && (
+                    {/* Selected Funding Cycle */}
+                    {selectedFundingCycle && (
                       <div className="mb-2">
                         <RequiredLabel>{t('grantCall')}</RequiredLabel>
                         <div className="text-sm w-full p-2 border rounded-lg bg-blue-50">
-                          <div className="font-semibold">{selectedGrantCall.shortname || selectedGrantCall.name}</div>
-                          <div className="text-gray-600">{selectedGrantCall.donor_name}</div>
-                          <div className="text-gray-600">{t('availableAmount')}: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(selectedGrantCall.state_amount)}</div>
+                          <div className="font-semibold">{selectedFundingCycle.name} — {selectedFundingCycle.year}/#{selectedFundingCycle.cycle_number}</div>
+                          <div className="text-gray-600">{t('availableAmount')}: {selectedFundingCycle.state_amount != null ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(selectedFundingCycle.state_amount) : '—'}</div>
                         </div>
                         <Field
-                          name="grant_call_id"
+                          name="funding_cycle_id"
                           type="hidden"
-                          value={selectedGrantCall.id}
+                          value={selectedFundingCycle.id}
                         />
-                        <Field
-                          name="grant_call_state_allocation_id"
-                          type="hidden"
-                          value={selectedGrantCall.allocation_id}
-                        />
+                        {selectedFundingCycle.allocation_id && (
+                          <Field
+                            name="cycle_state_allocation_id"
+                            type="hidden"
+                            value={selectedFundingCycle.allocation_id}
+                          />
+                        )}
                       </div>
                     )}
 

@@ -56,6 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 finance_officer_name,
                 finance_officer_phone,
                 planned_activities,
+                funding_cycle_id,
                 version,
                 last_modified
             `)

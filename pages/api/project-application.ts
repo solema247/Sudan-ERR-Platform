@@ -110,6 +110,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             } = req.body;
 
             try {
+                // Compute cycle allocation if cycle and state are provided
+                let computedCycleAllocationId: string | null = null;
+                if (formData.funding_cycle_id && formData.state) {
+                    const { data: allocation, error: allocError } = await newSupabase
+                        .from('cycle_state_allocations')
+                        .select('id, decision_no')
+                        .eq('cycle_id', formData.funding_cycle_id)
+                        .eq('state_name', formData.state)
+                        .order('decision_no', { ascending: false })
+                        .limit(1)
+                        .single();
+                    if (!allocError && allocation) {
+                        computedCycleAllocationId = allocation.id;
+                    }
+                }
+
                 const projectData = {
                     ...formData,
                     err_id: user.err_id,
@@ -118,7 +134,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     is_draft: false,
                     last_modified: new Date().toISOString(),
                     submitted_at: new Date().toISOString(),
-                    created_by: user.err_id
+                    created_by: user.err_id,
+                    cycle_state_allocation_id: formData.cycle_state_allocation_id || computedCycleAllocationId || null
                 };
 
                 let result;
