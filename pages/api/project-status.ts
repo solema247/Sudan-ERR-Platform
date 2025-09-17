@@ -42,6 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 state,
                 locality,
                 status,
+                funding_status,
                 project_objectives,
                 intended_beneficiaries,
                 estimated_beneficiaries,

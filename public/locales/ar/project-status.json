@@ -42,4 +42,16 @@
     "bankingDetails": "التفاصيل المصرفية"
   },
   "feedbackFetchError": "فشل في جلب الملاحظات"
+,
+  "funding": {
+    "status": "حالة التمويل",
+    "unassigned": "غير معين",
+    "allocated": "مخصص مبدئيًا",
+    "committed": "مُلتزم",
+    "desc": {
+      "unassigned": "الطلب قيد المراجعة",
+      "allocated": "تم تخصيص الطلب مبدئيًا لمنحة",
+      "committed": "تم الالتزام بالطلب ضمن منحة"
+    }
+  }
 }

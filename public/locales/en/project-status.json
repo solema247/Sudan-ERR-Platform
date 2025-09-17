@@ -42,5 +42,17 @@
     "bankingDetails": "Banking Details"
   },
   "feedbackFetchError": "Failed to fetch feedback"
+,
+  "funding": {
+    "status": "Funding Status",
+    "unassigned": "Unassigned",
+    "allocated": "Allocated",
+    "committed": "Committed",
+    "desc": {
+      "unassigned": "Application is being checked",
+      "allocated": "Application is pre-allocated to a grant",
+      "committed": "Application is committed to a grant"
+    }
+  }
 }
 

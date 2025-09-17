@@ -172,6 +172,13 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu, onEditPro
                                         <strong>{t('submittedAt')}:</strong>{' '}
                                         {formatDate(project.submitted_at)}
                                     </p>
+                                    <p>
+                                        <strong>{t('funding.status')}:</strong>{' '}
+                                        <span className="text-gray-700">{t(`funding.${project.funding_status || 'unassigned'}`)}</span>
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        {t(`funding.desc.${project.funding_status || 'unassigned'}`)}
+                                    </p>
                                     {project.version > 1 && (
                                         <p>
                                             <strong>{t('version')}:</strong> {project.version}
