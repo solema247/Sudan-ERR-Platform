@@ -126,17 +126,53 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 }
 
-                const projectData = {
-                    ...formData,
-                    err_id: user.err_id,
-                    language: currentLanguage || 'en',
+                // Helper to coerce empty strings to null for UUID columns
+                const toNullableUuid = (value: any) => {
+                    if (value === undefined || value === null) return null;
+                    const trimmed = String(value).trim();
+                    return trimmed === '' ? null : trimmed;
+                };
+
+                // Whitelist allowed columns only
+                const allowedData: any = {
+                    date: formData.date ?? null,
+                    state: formData.state ?? null,
+                    locality: formData.locality ?? null,
+                    language: currentLanguage || formData.language || 'en',
                     status: 'pending',
+                    project_objectives: formData.project_objectives ?? null,
+                    intended_beneficiaries: formData.intended_beneficiaries ?? null,
+                    estimated_beneficiaries: formData.estimated_beneficiaries ?? null,
+                    estimated_timeframe: formData.estimated_timeframe ?? null,
+                    additional_support: formData.additional_support ?? null,
+                    banking_details: formData.banking_details ?? null,
+                    submitted_at: new Date().toISOString(),
+                    program_officer_name: formData.program_officer_name ?? null,
+                    program_officer_phone: formData.program_officer_phone ?? null,
+                    reporting_officer_name: formData.reporting_officer_name ?? null,
+                    reporting_officer_phone: formData.reporting_officer_phone ?? null,
+                    finance_officer_name: formData.finance_officer_name ?? null,
+                    finance_officer_phone: formData.finance_officer_phone ?? null,
+                    planned_activities: formData.planned_activities ?? null,
+                    expenses: formData.expenses ?? null,
+                    err_id: user.err_id,
                     is_draft: false,
                     last_modified: new Date().toISOString(),
-                    submitted_at: new Date().toISOString(),
                     created_by: user.err_id,
-                    cycle_state_allocation_id: formData.cycle_state_allocation_id || computedCycleAllocationId || null
+                    version: undefined, // set only on insert below
+                    current_feedback_id: undefined,
+                    emergency_room_id: toNullableUuid(formData.emergency_room_id),
+                    donor_id: toNullableUuid(formData.donor_id),
+                    funding_status: formData.funding_status || 'unassigned',
+                    grant_call_id: null,
+                    grant_call_state_allocation_id: null,
+                    funding_cycle_id: toNullableUuid(formData.funding_cycle_id),
+                    cycle_state_allocation_id: toNullableUuid(formData.cycle_state_allocation_id) || computedCycleAllocationId || null,
+                    source: formData.source || 'err_app',
                 };
+
+                // Remove undefined keys
+                Object.keys(allowedData).forEach((k) => allowedData[k] === undefined && delete allowedData[k]);
 
                 let result;
                 if (id) {
@@ -158,7 +194,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                     // Update version if this is a resubmission after feedback
                     if (currentProject.current_feedback_id) {
-                        projectData.version = (currentProject.version || 1) + 1;
+                        (allowedData as any).version = (currentProject.version || 1) + 1;
                         
                         // Update feedback status
                         const { error: feedbackError } = await newSupabase
@@ -179,7 +215,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     // Update existing project
                     const { data, error } = await newSupabase
                         .from('err_projects')
-                        .update(projectData)
+                        .update(allowedData)
                         .eq('id', id)
                         .eq('created_by', user.err_id)
                         .select()
@@ -199,7 +235,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     const { data, error } = await newSupabase
                         .from('err_projects')
                         .insert([{
-                            ...projectData,
+                            ...allowedData,
                             version: 1
                         }])
                         .select()

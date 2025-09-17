@@ -5,58 +5,49 @@ import FormBubble from '../../ui/FormBubble';
 import MessageBubble from '../../ui/MessageBubble';
 import { newSupabase } from '../../../services/newSupabaseClient';
 
-interface FundingCycle {
-    id: string;
-    name: string;
-    cycle_number: number;
-    year: number;
-    start_date: string | null;
-    end_date: string | null;
-    state_amount: number | null;
-    allocation_id: string | null;
-    committed_amount?: number;
-    pending_amount?: number;
-    remaining_amount?: number;
+interface FundingPoolSummary {
+    allocated: number;
+    committed: number;
+    pending: number;
+    remaining: number;
+    user_state: string | null;
 }
 
-interface FundingCycleSelectionProps {
-    onSelectFundingCycle: (cycle: FundingCycle) => void;
-    onReturnToMenu: () => void;
-}
+interface FundingCycleSelectionProps { onReturnToMenu: () => void; }
 
-const FundingCycleSelection: React.FC<FundingCycleSelectionProps> = ({ onSelectFundingCycle, onReturnToMenu }) => {
+const FundingCycleSelection: React.FC<FundingCycleSelectionProps> = ({ onReturnToMenu }) => {
     const { t } = useTranslation('projectApplication');
-    const [cycles, setCycles] = useState<FundingCycle[]>([]);
+    const [pool, setPool] = useState<FundingPoolSummary | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [userState, setUserState] = useState<string>('');
 
     useEffect(() => {
-        const fetchCycles = async () => {
+        const fetchPool = async () => {
             try {
                 const { data: { session } } = await newSupabase.auth.getSession();
                 if (!session) throw new Error('No active session');
 
-                const response = await fetch('/api/funding-cycles', {
+                const response = await fetch('/api/funding-pool', {
                     credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${session.access_token}`
                     }
                 });
-                if (!response.ok) throw new Error('Failed to fetch funding cycles');
+                if (!response.ok) throw new Error('Failed to fetch funding pool');
                 const data = await response.json();
-                if (!data.success) throw new Error(data.message || 'Failed to fetch cycles');
-                setCycles(data.cycles || []);
+                if (!data.success) throw new Error(data.message || 'Failed to fetch pool');
+                setPool({ allocated: data.allocated || 0, committed: data.committed || 0, pending: data.pending || 0, remaining: data.remaining || 0, user_state: data.user_state || null });
                 setUserState(data.user_state || '');
             } catch (err) {
-                console.error('Error fetching funding cycles:', err);
+                console.error('Error fetching funding pool:', err);
                 setError(err instanceof Error ? err.message : 'Unknown error');
             } finally {
                 setLoading(false);
             }
         };
-        fetchCycles();
+        fetchPool();
     }, []);
 
     const formatDate = (dateString?: string | null) => (dateString ? new Date(dateString).toLocaleDateString() : '—');
@@ -92,29 +83,20 @@ const FundingCycleSelection: React.FC<FundingCycleSelectionProps> = ({ onSelectF
                     </p>
                 )}
 
-                {cycles.length === 0 ? (
-                    <MessageBubble>{t('grantCalls.noCallsAvailable')}</MessageBubble>
-                ) : (
-                    <div className="space-y-4">
-                        {cycles.map((cycle) => (
-                            <div key={cycle.id} className="p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
-                                <h3 className="font-bold text-lg mb-2">
-                                    {cycle.name} — {cycle.year}/#{cycle.cycle_number}
-                                </h3>
-                                <div className="space-y-2 text-sm">
-                                    <p><strong>{t('grantCalls.availableAmount')}:</strong> {formatAmount(cycle.state_amount)}</p>
-                                    <p><strong>Committed:</strong> {formatAmount(cycle.committed_amount)}</p>
-                                    <p><strong>Pending:</strong> {formatAmount(cycle.pending_amount)}</p>
-                                    <p><strong>Remaining:</strong> {formatAmount(cycle.remaining_amount)}</p>
-                                    <p><strong>{t('grantCalls.period')}:</strong> {formatDate(cycle.start_date)} - {formatDate(cycle.end_date)}</p>
-                                </div>
-                                <div className="mt-4">
-                                    <Button text={t('grantCalls.selectCall')} onClick={() => onSelectFundingCycle(cycle)} className="w-full" />
-                                </div>
-                            </div>
-                        ))}
+                <div className="space-y-4">
+                    <div className="p-4 border rounded-lg bg-white shadow-sm">
+                        <h3 className="font-bold text-lg mb-2">{t('grantCalls.title')}</h3>
+                        <div className="space-y-2 text-sm">
+                            <p><strong>{t('grantCalls.availableAmount')}:</strong> {formatAmount(pool?.allocated)}</p>
+                            <p><strong>Committed:</strong> {formatAmount(pool?.committed)}</p>
+                            <p><strong>Pending:</strong> {formatAmount(pool?.pending)}</p>
+                            <p><strong>Remaining:</strong> {formatAmount(pool?.remaining)}</p>
+                        </div>
                     </div>
-                )}
+                    <div className="mt-2">
+                        <Button text={t('grantCalls.selectCall')} onClick={onReturnToMenu} className="w-full" />
+                    </div>
+                </div>
 
                 <Button text={t('returnToMenu')} onClick={onReturnToMenu} className="w-full mt-4" />
             </div>

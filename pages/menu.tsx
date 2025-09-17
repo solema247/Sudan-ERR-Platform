@@ -570,14 +570,12 @@ const Menu = () => {
             {showFundingCycleSelection && (
                 <MessageBubble>
                     <FundingCycleSelection
-                        onSelectFundingCycle={(cycle) => {
-                            setSelectedFundingCycle(cycle);
+                        onReturnToMenu={() => {
                             setShowFundingCycleSelection(false);
                             setShowProjectApplication(true);
                             setShowProjectDrafts(true);
                             setShowDraftList(true);
                         }}
-                        onReturnToMenu={() => handleMenuSelection(CurrentMenu.PROJECTS)}
                     />
                 </MessageBubble>
             )}
