@@ -312,10 +312,4 @@ const CustomFormReview: React.FC<CustomFormReviewProps> = ({ data, onSubmit }) =
     </div>
   );
 };
-
 export default CustomFormReview;
-
-
-
-
-
