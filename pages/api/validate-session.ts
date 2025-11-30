@@ -1,6 +1,7 @@
 // pages/api/validate-session.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { newSupabase } from '../../services/newSupabaseClient';
+import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -10,15 +11,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(401).json({ success: false, message: 'No authorization header' });
         }
 
-        // Get session
-        const { data: { user }, error: sessionError } = await newSupabase.auth.getUser(authHeader.replace('Bearer ', ''));
+        const accessToken = authHeader.replace('Bearer ', '');
+
+        // Get session to validate the token
+        const { data: { user }, error: sessionError } = await newSupabase.auth.getUser(accessToken);
 
         if (sessionError || !user) {
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
 
-        // Get user data
-        const { data: userData, error: userError } = await newSupabase
+        // Create an authenticated client for database queries
+        const authenticatedClient = createAuthenticatedClient(accessToken);
+
+        // Get user data using the authenticated client
+        const { data: userData, error: userError } = await authenticatedClient
             .from('users')
             .select('role, status, display_name')
             .eq('id', user.id)

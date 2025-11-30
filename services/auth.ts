@@ -1,6 +1,7 @@
 //lib/auth.ts
 import jwt from 'jsonwebtoken';
 import { newSupabase } from './newSupabaseClient';
+import { createAuthenticatedClient } from './createAuthenticatedClient';
 
 /**
  * Generate tokens used for user logins
@@ -58,8 +59,11 @@ export const validateSession = async (token: string) => {
             return null;
         }
 
+        // Create an authenticated client for database queries
+        const authenticatedClient = createAuthenticatedClient(token);
+
         // Get additional user data from our users table
-        const { data: userData, error: userError } = await newSupabase
+        const { data: userData, error: userError } = await authenticatedClient
             .from('users')
             .select('role, status, display_name, err_id')
             .eq('id', user.id)

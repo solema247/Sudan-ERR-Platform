@@ -2,6 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { newSupabase } from '../../services/newSupabaseClient';
 import { validateSession } from '../../services/auth';
+import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
 
 /**
  * F1 Project Application
@@ -19,27 +20,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(401).json({ success: false, message: 'No authorization header' });
         }
 
+        const accessToken = authHeader.replace('Bearer ', '');
+        
         // Validate session and get user data
-        const user = await validateSession(authHeader.replace('Bearer ', ''));
+        const user = await validateSession(accessToken);
         if (!user) {
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
+
+        // Create an authenticated client for database queries
+        const authenticatedClient = createAuthenticatedClient(accessToken);
 
         if (req.method === 'GET') {
             try {
                 const [plannedActivitiesResult, expenseCategoriesResult, statesResultRaw] = await Promise.all([
                     // Activities - only fetch English as translations are in JSON
-                    newSupabase
+                    authenticatedClient
                         .from('planned_activities')
                         .select('id, activity_name')
                         .eq('language', 'en'),
                     // Expenses - only fetch English as translations are in JSON
-                    newSupabase
+                    authenticatedClient
                         .from('expense_categories')
                         .select('id, expense_name')
                         .eq('language', 'en'),
                     // States - includes both English and Arabic in the table
-                    newSupabase
+                    authenticatedClient
                         .from('states')
                         .select('state_name, state_name_ar, locality, locality_ar')
                         .neq('state_name', null)
@@ -113,7 +119,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 // Compute cycle allocation if cycle and state are provided
                 let computedCycleAllocationId: string | null = null;
                 if (formData.funding_cycle_id && formData.state) {
-                    const { data: allocation, error: allocError } = await newSupabase
+                    const { data: allocation, error: allocError } = await authenticatedClient
                         .from('cycle_state_allocations')
                         .select('id, decision_no')
                         .eq('cycle_id', formData.funding_cycle_id)
@@ -177,7 +183,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 let result;
                 if (id) {
                     // Get current project version
-                    const { data: currentProject, error: versionError } = await newSupabase
+                    const { data: currentProject, error: versionError } = await authenticatedClient
                         .from('err_projects')
                         .select('version, current_feedback_id')
                         .eq('id', id)
@@ -197,7 +203,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         (allowedData as any).version = (currentProject.version || 1) + 1;
                         
                         // Update feedback status
-                        const { error: feedbackError } = await newSupabase
+                        const { error: feedbackError } = await authenticatedClient
                             .from('project_feedback')
                             .update({ feedback_status: 'changes_submitted' })
                             .eq('id', currentProject.current_feedback_id);
@@ -213,7 +219,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
 
                     // Update existing project
-                    const { data, error } = await newSupabase
+                    const { data, error } = await authenticatedClient
                         .from('err_projects')
                         .update(allowedData)
                         .eq('id', id)
@@ -232,7 +238,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     result = data;
                 } else {
                     // Create new project
-                    const { data, error } = await newSupabase
+                    const { data, error } = await authenticatedClient
                         .from('err_projects')
                         .insert([{
                             ...allowedData,

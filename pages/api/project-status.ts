@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { newSupabase } from '../../services/newSupabaseClient';
+import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
 
 /**
  * Project status
@@ -14,15 +15,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(401).json({ success: false, message: 'No authorization header' });
         }
 
+        const accessToken = authHeader.replace('Bearer ', '');
+
         // Get session
-        const { data: { user }, error: sessionError } = await newSupabase.auth.getUser(authHeader.replace('Bearer ', ''));
+        const { data: { user }, error: sessionError } = await newSupabase.auth.getUser(accessToken);
 
         if (sessionError || !user) {
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
 
+        // Create an authenticated client for database queries
+        const authenticatedClient = createAuthenticatedClient(accessToken);
+
         // First get the user's err_id from the users table
-        const { data: userData, error: userError } = await newSupabase
+        const { data: userData, error: userError } = await authenticatedClient
             .from('users')
             .select('err_id')
             .eq('id', user.id)
@@ -34,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Get user's projects using err_id with all fields
-        const { data: projects, error: projectsError } = await newSupabase
+        const { data: projects, error: projectsError } = await authenticatedClient
             .from('err_projects')
             .select(`
                 id,
@@ -71,7 +77,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Fetch all planned activities
-        const { data: activities, error: activitiesError } = await newSupabase
+        const { data: activities, error: activitiesError } = await authenticatedClient
             .from('planned_activities')
             .select('id, activity_name')
             .eq('language', req.query.language || 'en');

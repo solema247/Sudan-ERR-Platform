@@ -1,6 +1,7 @@
 // pages/api/login.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { newSupabase } from '../../services/newSupabaseClient';
+import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
 
 /**
  * Login
@@ -29,15 +30,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
 
-            if (!authData.user) {
+            if (!authData.user || !authData.session) {
                 return res.status(401).json({ 
                     success: false, 
                     message: 'No user data returned'
                 });
             }
 
-            // Fetch user's role and status
-            const { data: userData, error: userError } = await newSupabase
+            // Fetch user's role and status using the authenticated session
+            // Create an authenticated client with the access token to ensure RLS works
+            const authenticatedClient = createAuthenticatedClient(authData.session.access_token);
+            
+            const { data: userData, error: userError } = await authenticatedClient
                 .from('users')
                 .select('role, status, display_name')
                 .eq('id', authData.user.id)

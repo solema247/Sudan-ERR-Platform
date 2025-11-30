@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { newSupabase } from '../../services/newSupabaseClient';
 import { validateSession } from '../../services/auth';
+import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
 
 interface FeedbackUser {
     display_name: string;
@@ -23,11 +24,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(401).json({ success: false, message: 'No authorization header' });
         }
 
+        const accessToken = authHeader.replace('Bearer ', '');
+        
         // Validate session and get user data
-        const user = await validateSession(authHeader.replace('Bearer ', ''));
+        const user = await validateSession(accessToken);
         if (!user) {
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
+
+        // Create an authenticated client for database queries
+        const authenticatedClient = createAuthenticatedClient(accessToken);
 
         if (req.method === 'GET') {
             const { project_id } = req.query;
@@ -37,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
 
             // Get feedback for the project
-            const { data: feedbackRaw, error } = await newSupabase
+            const { data: feedbackRaw, error } = await authenticatedClient
                 .from('project_feedback')
                 .select(`
                     id,
@@ -62,21 +68,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
 
             // Type assertion after validating the structure
-            const feedback = feedbackRaw as unknown as Array<{
+            const feedback = (feedbackRaw || []) as unknown as Array<{
                 id: string;
                 feedback_text: string;
                 feedback_status: string;
                 created_at: string;
                 iteration_number: number;
-                users: { display_name: string };
+                users: { display_name: string } | null;
             }>;
 
             return res.status(200).json({
                 success: true,
                 feedback: feedback.map(f => ({
-                    ...f,
+                    id: f.id,
+                    feedback_text: f.feedback_text,
+                    feedback_status: f.feedback_status,
+                    created_at: f.created_at,
+                    iteration_number: f.iteration_number,
                     created_by: {
-                        full_name: f.users.display_name
+                        full_name: f.users?.display_name || 'Unknown'
                     }
                 }))
             });
@@ -94,7 +104,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
 
             // Get the latest iteration number for this project
-            const { data: latestFeedback, error: countError } = await newSupabase
+            const { data: latestFeedback, error: countError } = await authenticatedClient
                 .from('project_feedback')
                 .select('iteration_number')
                 .eq('project_id', project_id)
@@ -105,7 +115,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const nextIteration = latestFeedback ? latestFeedback.iteration_number + 1 : 1;
 
             // Insert new feedback
-            const { data, error } = await newSupabase
+            const { data, error } = await authenticatedClient
                 .from('project_feedback')
                 .insert([{
                     project_id,
@@ -127,7 +137,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
 
             // Update project status
-            const { error: projectError } = await newSupabase
+            const { error: projectError } = await authenticatedClient
                 .from('err_projects')
                 .update({ 
                     status: 'feedback',

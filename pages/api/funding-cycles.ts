@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { newSupabase } from '../../services/newSupabaseClient';
 import { validateSession } from '../../services/auth';
+import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
 
 /**
  * List open funding cycles and the user's state allocation (latest decision) if available.
@@ -12,7 +13,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(401).json({ success: false, message: 'No authorization header' });
         }
 
-        const user = await validateSession(authHeader.replace('Bearer ', ''));
+        const accessToken = authHeader.replace('Bearer ', '');
+        const user = await validateSession(accessToken);
         if (!user) {
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
@@ -22,8 +24,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(405).json({ success: false, message: 'Method not allowed' });
         }
 
+        // Create an authenticated client for database queries
+        const authenticatedClient = createAuthenticatedClient(accessToken);
+
         // Fetch user's state via relationships (users -> emergency_rooms -> states)
-        const { data: userStateData, error: userStateError } = await newSupabase
+        const { data: userStateData, error: userStateError } = await authenticatedClient
             .from('users')
             .select(`
                 emergency_rooms!inner (
@@ -50,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Get all open funding cycles
-        const { data: cycles, error: cyclesError } = await newSupabase
+        const { data: cycles, error: cyclesError } = await authenticatedClient
             .from('funding_cycles')
             .select('id, cycle_number, year, name, status, start_date, end_date')
             .eq('status', 'open')
@@ -65,7 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         let allocationsByCycle: Record<string, { id: string; amount: number } | null> = {};
         if (userState && cycles && cycles.length > 0) {
             const cycleIds = cycles.map(c => c.id);
-            const { data: allocations, error: allocError } = await newSupabase
+            const { data: allocations, error: allocError } = await authenticatedClient
                 .from('cycle_state_allocations')
                 .select('id, cycle_id, state_name, amount, decision_no')
                 .in('cycle_id', cycleIds)
@@ -96,7 +101,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         let totalsByAllocation: Record<string, { committed: number; pending: number }> = {};
         if (allocationIds.length > 0) {
-            const { data: projects, error: projectsError } = await newSupabase
+            const { data: projects, error: projectsError } = await authenticatedClient
                 .from('err_projects')
                 .select('cycle_state_allocation_id, status, funding_status, expenses')
                 .in('cycle_state_allocation_id', allocationIds);

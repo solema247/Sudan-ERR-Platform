@@ -53,11 +53,13 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu, onEditPro
                         feedbackProjects.map(async (project) => {
                             try {
                                 const feedback = await fetchProjectFeedback(project.id);
-                                if (feedback) {
+                                if (feedback && Array.isArray(feedback) && feedback.length > 0) {
                                     setFeedbackMap(prev => ({
                                         ...prev,
                                         [project.id]: feedback
                                     }));
+                                } else {
+                                    console.warn(`No feedback found for project ${project.id}`);
                                 }
                             } catch (error) {
                                 console.error('Error pre-fetching feedback:', error);
@@ -257,16 +259,20 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu, onEditPro
                                     )}
 
                                     {/* Feedback Section (if available) */}
-                                    {project.status === 'feedback' && feedbackMap[project.id] && (
+                                    {project.status === 'feedback' && feedbackMap[project.id] && feedbackMap[project.id].length > 0 && feedbackMap[project.id][0] && (
                                         <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 mt-2">
                                             <h4 className="font-semibold mb-2">{t('feedback.latest')}</h4>
                                             <p className="mb-2 text-sm">{feedbackMap[project.id][0].feedback_text}</p>
-                                            <p className="text-xs text-gray-600">
-                                                {t('feedback.by')}: {feedbackMap[project.id][0].created_by.full_name}
-                                            </p>
-                                            <p className="text-xs text-gray-600">
-                                                {t('feedback.at')}: {formatDate(feedbackMap[project.id][0].created_at)}
-                                            </p>
+                                            {feedbackMap[project.id][0].created_by && (
+                                                <p className="text-xs text-gray-600">
+                                                    {t('feedback.by')}: {feedbackMap[project.id][0].created_by.full_name || t('feedback.unknown')}
+                                                </p>
+                                            )}
+                                            {feedbackMap[project.id][0].created_at && (
+                                                <p className="text-xs text-gray-600">
+                                                    {t('feedback.at')}: {formatDate(feedbackMap[project.id][0].created_at)}
+                                                </p>
+                                            )}
                                             <div className="mt-2">
                                                 <Button
                                                     text={t('feedback.editProject')}

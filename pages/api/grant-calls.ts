@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { newSupabase } from '../../services/newSupabaseClient';
 import { validateSession } from '../../services/auth';
+import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
 
 /**
  * Grant Calls API
@@ -17,15 +18,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(401).json({ success: false, message: 'No authorization header' });
         }
 
+        const accessToken = authHeader.replace('Bearer ', '');
+        
         // Validate session and get user data
-        const user = await validateSession(authHeader.replace('Bearer ', ''));
+        const user = await validateSession(accessToken);
         if (!user) {
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
 
         if (req.method === 'GET') {
+            // Create an authenticated client for database queries
+            const authenticatedClient = createAuthenticatedClient(accessToken);
+
             // Get user's state through the relationship: users -> emergency_rooms -> states
-            const { data: userStateData, error: userStateError } = await newSupabase
+            const { data: userStateData, error: userStateError } = await authenticatedClient
                 .from('users')
                 .select(`
                     emergency_rooms!inner (
@@ -66,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
 
             // First, get the latest decision_no for each grant call
-            const { data: latestDecisions, error: decisionsError } = await newSupabase
+            const { data: latestDecisions, error: decisionsError } = await authenticatedClient
                 .from('grant_call_state_allocations')
                 .select('grant_call_id, decision_no')
                 .eq('state_name', userState)
@@ -92,7 +98,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }, {});
 
             // Fetch available grant calls for the user's state with only the latest decision_no
-            const { data: grantCalls, error: grantCallsError } = await newSupabase
+            const { data: grantCalls, error: grantCallsError } = await authenticatedClient
                 .from('grant_call_state_allocations')
                 .select(`
                     id,
