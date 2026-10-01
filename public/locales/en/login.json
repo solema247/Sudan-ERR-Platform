@@ -28,5 +28,6 @@
   "updatingPassword": "Updating Password...",
   "passwordUpdateError": "Failed to update password. Please try again.",
   "passwordsDoNotMatch": "Passwords do not match.",
-  "backToLogin": "Back to Login"
+  "backToLogin": "Back to Login",
+    "noAccess": "This account doesn't have access to this app. Contact your coordinator if you think this is a mistake."
 }

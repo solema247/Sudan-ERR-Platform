@@ -2,6 +2,7 @@
 import jwt from 'jsonwebtoken';
 import { newSupabase } from './newSupabaseClient';
 import { createAuthenticatedClient } from './createAuthenticatedClient';
+import { appAccess } from './appAccess';
 
 /**
  * Generate tokens used for user logins
@@ -74,7 +75,8 @@ export const validateSession = async (token: string) => {
         }
 
         // Only return data if user is active
-        if (userData.status !== 'active') {
+        // Only active ERR, support and admin accounts (not partners)
+        if (appAccess(userData) !== 'ok') {
             return null;
         }
 

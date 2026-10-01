@@ -7,7 +7,7 @@ import Button from '../components/ui/Button';
 import { newSupabase } from '../services/newSupabaseClient';
 import Link from 'next/link';
 
-const LogoImage = '/icons/icon-512x512.png';
+const LogoImage = '/brand/err-logo.png';
 
 const ResetPassword = () => {
     const [email, setEmail] = useState('');
@@ -26,7 +26,7 @@ const ResetPassword = () => {
 
         try {
             const { error } = await newSupabase.auth.resetPasswordForEmail(email, {
-                redirectTo: 'https://sudan-err-bot.vercel.app/update-password'
+                redirectTo: `${window.location.origin}/update-password`
             });
 
             if (error) {

@@ -34,15 +34,13 @@
     "financeOfficer": "المسؤول المالي",
     "plannedActivities": "الأنشطة المخططة",
     "activity": "النشاط",
-    "location": "الموقع",
     "quantity": "الكمية",
     "duration": "المدة",
     "additional": "معلومات إضافية",
     "additionalSupport": "الدعم الإضافي",
     "bankingDetails": "التفاصيل المصرفية"
   },
-  "feedbackFetchError": "فشل في جلب الملاحظات"
-,
+  "feedbackFetchError": "فشل في جلب الملاحظات",
   "funding": {
     "status": "حالة التمويل",
     "unassigned": "غير معين",
@@ -53,5 +51,6 @@
       "allocated": "تم تخصيص الطلب مبدئيًا لمنحة",
       "committed": "تم الالتزام بالطلب ضمن منحة"
     }
-  }
+  },
+  "room": "الغرفة"
 }

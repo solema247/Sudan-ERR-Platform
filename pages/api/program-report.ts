@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { newSupabase } from '../../services/newSupabaseClient';
+import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
 import { validateSession } from '../../services/auth';
 
 // API endpoint for program report submission
@@ -17,6 +17,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Validate session and get user data
     const user = await validateSession(authHeader.replace('Bearer ', ''));
+    // Query as the signed-in user so the database access rules (roles, rooms, states) apply
+    const db = createAuthenticatedClient(authHeader.replace('Bearer ', ''));
     if (!user) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
@@ -37,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // If this was a draft, delete the draft records first
     if (draft_id) {
       // Delete draft summary
-      const { error: deleteSummaryError } = await newSupabase
+      const { error: deleteSummaryError } = await db
         .from('err_program_report')
         .delete()
         .eq('id', draft_id)
@@ -46,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (deleteSummaryError) throw deleteSummaryError;
 
       // Delete draft activities
-      const { error: deleteActivitiesError } = await newSupabase
+      const { error: deleteActivitiesError } = await db
         .from('err_program_reach')
         .delete()
         .eq('report_id', draft_id)
@@ -56,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Insert main report
-    const { data: reportData, error: reportError } = await newSupabase
+    const { data: reportData, error: reportError } = await db
       .from('err_program_report')
       .insert({
         project_id,
@@ -91,7 +93,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       is_draft: false
     }));
 
-    const { error: reachError } = await newSupabase
+    const { error: reachError } = await db
       .from('err_program_reach')
       .insert(reachData);
 

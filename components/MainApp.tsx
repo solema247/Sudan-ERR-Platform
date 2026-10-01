@@ -54,7 +54,7 @@ const MainApp = ({ onLogout }) => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
       <div className="text-center mb-8">
         <div className="flex justify-center mb-4">
-          <Image src="/icons/icon-512x512.png" alt="App Icon" width={100} height={100} />
+          <Image src="/brand/err-logo.png" alt="App Icon" width={100} height={100} />
         </div>
         <h1 className="text-2xl font-bold text-black">{t('welcomeMessage')}</h1>
       </div>

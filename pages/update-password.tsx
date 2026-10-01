@@ -6,7 +6,7 @@ import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { newSupabase } from '../services/newSupabaseClient';
 
-const LogoImage = '/icons/icon-512x512.png';
+const LogoImage = '/brand/err-logo.png';
 
 const UpdatePassword = () => {
     const [password, setPassword] = useState('');

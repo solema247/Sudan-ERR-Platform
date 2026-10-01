@@ -143,9 +143,17 @@
     "donor": "المانح",
     "availableAmount": "المبلغ المتاح",
     "period": "فترة التقديم",
-    "selectCall": "اختر هذا النداء"
+    "selectCall": "اختر هذا النداء",
+    "yourState": "ولايتك"
   },
   "grantCall": "نداء المنحة",
   "availableAmount": "المبلغ المتاح",
-  "troubleGettingLocalities": "مشكلة في الحصول على المحليات"
+  "troubleGettingLocalities": "مشكلة في الحصول على المحليات",
+  "currency": {
+    "label": "العملة",
+    "usd": "دولار أمريكي (USD)",
+    "sdg": "جنيه سوداني (SDG)",
+    "hint": "اختر العملة التي كتبت بها المبالغ. رصيد المنحة يحسب المشاريع بالدولار فقط."
+  },
+  "totalExpenses": "إجمالي المصروفات"
 }

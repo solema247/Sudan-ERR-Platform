@@ -1,6 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { newSupabase } from '../../services/newSupabaseClient';
 import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
+import { validateSession } from '../../services/auth';
+import { getAccessScope, getRoomNames } from '../../services/accessScope';
 
 /**
  * Project status
@@ -17,30 +19,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const accessToken = authHeader.replace('Bearer ', '');
 
-        // Get session
-        const { data: { user }, error: sessionError } = await newSupabase.auth.getUser(accessToken);
-
-        if (sessionError || !user) {
+        // Only active ERR, support and admin accounts (partners and pending accounts are refused)
+        const user = await validateSession(accessToken);
+        if (!user) {
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
 
         // Create an authenticated client for database queries
         const authenticatedClient = createAuthenticatedClient(accessToken);
 
-        // First get the user's err_id from the users table
-        const { data: userData, error: userError } = await authenticatedClient
-            .from('users')
-            .select('err_id')
-            .eq('id', user.id)
-            .single();
-
-        if (userError || !userData) {
-            console.error('Error fetching user data:', userError);
+        // Which rooms this user may see: own room (base), whole state (state ERR),
+        // visible states (admin/support), everything (superadmin)
+        let scope;
+        try {
+            scope = await getAccessScope(authenticatedClient, user.id);
+        } catch (e) {
+            console.error('Error fetching user data:', e);
             return res.status(500).json({ success: false, message: 'Failed to fetch user data' });
         }
+        if (!scope.all && scope.roomIds.length === 0) {
+            return res.status(200).json({ success: true, projects: [] });
+        }
 
-        // Get user's projects using err_id with all fields
-        const { data: projects, error: projectsError } = await authenticatedClient
+        // Projects this user may see, newest first
+        let projectsQuery = authenticatedClient
             .from('err_projects')
             .select(`
                 id,
@@ -65,11 +67,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 planned_activities,
                 funding_cycle_id,
                 version,
-                last_modified
+                last_modified,
+                err_id
             `)
-            .eq('err_id', userData.err_id)
             .eq('is_draft', false)
             .order('last_modified', { ascending: false });
+        if (!scope.all) projectsQuery = projectsQuery.in('err_id', scope.roomIds);
+        const { data: projects, error: projectsError } = await projectsQuery;
 
         if (projectsError) {
             console.error('Error fetching projects:', projectsError);
@@ -93,6 +97,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return map;
         }, {});
 
+        // Room names, shown on projects that aren't the user's own room
+        const rooms = await getRoomNames(authenticatedClient, (projects || []).map((p: any) => String(p.err_id || '')));
+
         // Process projects to include activity names
         const processedProjects = projects.map(project => {
             let planned_activities = [];
@@ -112,7 +119,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             return {
                 ...project,
-                planned_activities
+                planned_activities,
+                is_own_room: String(project.err_id) === scope.ownRoomId,
+                room: rooms[String(project.err_id)] || null
             };
         });
 

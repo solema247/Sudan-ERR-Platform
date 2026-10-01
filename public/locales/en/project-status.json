@@ -34,15 +34,13 @@
     "financeOfficer": "Finance Officer",
     "plannedActivities": "Planned Activities",
     "activity": "Activity",
-    "location": "Location",
     "quantity": "Quantity",
     "duration": "Duration",
     "additional": "Additional Information",
     "additionalSupport": "Additional Support",
     "bankingDetails": "Banking Details"
   },
-  "feedbackFetchError": "Failed to fetch feedback"
-,
+  "feedbackFetchError": "Failed to fetch feedback",
   "funding": {
     "status": "Funding Status",
     "unassigned": "Unassigned",
@@ -53,6 +51,6 @@
       "allocated": "Application is pre-allocated to a grant",
       "committed": "Application is committed to a grant"
     }
-  }
+  },
+  "room": "Room"
 }
-

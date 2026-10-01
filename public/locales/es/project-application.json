@@ -45,7 +45,6 @@
   "Children’s Activities": "Actividades para niños",
   "Productive Activities": "Actividades productivas",
   "Protection & Evacuation": "Protección y evacuación",
-  "Others (please specify)": "Otros (por favor especifique)",
   "quantity": "Cantidad",
   "activityDuration": "Duración de la actividad",
   "placeOfOperation": "Lugar de operación",
@@ -56,5 +55,12 @@
   "remove": "Eliminar",
   "returnToMenu": "Volver al Menú",
   "button.submit": "Enviar",
-  "button.processing": "Procesando..."
+  "button.processing": "Procesando...",
+  "currency": {
+    "label": "Moneda",
+    "usd": "Dólar estadounidense (USD)",
+    "sdg": "Libra sudanesa (SDG)",
+    "hint": "Elige la moneda de tus montos. El saldo de la subvención solo cuenta presupuestos en USD."
+  },
+  "totalExpenses": "Total de gastos"
 }

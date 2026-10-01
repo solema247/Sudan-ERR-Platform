@@ -2,6 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { newSupabase } from '../../services/newSupabaseClient';
 import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
+import { appAccess } from '../../services/appAccess';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -35,8 +36,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Check if user is active
-        if (userData.status !== 'active') {
-            return res.status(401).json({ success: false, message: 'Account not active' });
+        if (appAccess(userData) !== 'ok') {
+            return res.status(401).json({ success: false, message: 'No access' });
         }
 
         return res.status(200).json({ 

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { newSupabase } from '../../../services/newSupabaseClient';
+import { createAuthenticatedClient } from '../../../services/createAuthenticatedClient';
 import { validateSession } from '../../../services/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -16,6 +16,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Validate session and get user data
         const user = await validateSession(authHeader.replace('Bearer ', ''));
+        // Query as the signed-in user so the database access rules (roles, rooms, states) apply
+        const db = createAuthenticatedClient(authHeader.replace('Bearer ', ''));
         if (!user) {
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
@@ -30,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Insert file metadata into the database with correct table name
-        const { error: filesError } = await newSupabase
+        const { error: filesError } = await db
             .from('err_program_files')
             .insert(
                 files.map(file => ({

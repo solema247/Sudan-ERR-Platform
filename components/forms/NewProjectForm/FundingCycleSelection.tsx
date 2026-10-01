@@ -13,6 +13,15 @@ interface FundingPoolSummary {
     user_state: string | null;
 }
 
+interface StatePool {
+    state: string;
+    allocated: number;
+    committed: number;
+    pending: number;
+    remaining: number;
+    is_own_state: boolean;
+}
+
 interface FundingCycleSelectionProps { onReturnToMenu: () => void; }
 
 const FundingCycleSelection: React.FC<FundingCycleSelectionProps> = ({ onReturnToMenu }) => {
@@ -21,6 +30,7 @@ const FundingCycleSelection: React.FC<FundingCycleSelectionProps> = ({ onReturnT
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [userState, setUserState] = useState<string>('');
+    const [states, setStates] = useState<StatePool[]>([]);
 
     useEffect(() => {
         const fetchPool = async () => {
@@ -40,6 +50,10 @@ const FundingCycleSelection: React.FC<FundingCycleSelectionProps> = ({ onReturnT
                 if (!data.success) throw new Error(data.message || 'Failed to fetch pool');
                 setPool({ allocated: data.allocated || 0, committed: data.committed || 0, pending: data.pending || 0, remaining: data.remaining || 0, user_state: data.user_state || null });
                 setUserState(data.user_state || '');
+                // One entry per state the user may see (older servers only send the user's own state)
+                setStates(Array.isArray(data.states) && data.states.length > 0
+                    ? data.states
+                    : data.user_state ? [{ state: data.user_state, allocated: data.allocated || 0, committed: data.committed || 0, pending: data.pending || 0, remaining: data.remaining || 0, is_own_state: true }] : []);
             } catch (err) {
                 console.error('Error fetching funding pool:', err);
                 setError(err instanceof Error ? err.message : 'Unknown error');
@@ -77,22 +91,34 @@ const FundingCycleSelection: React.FC<FundingCycleSelectionProps> = ({ onReturnT
             <div className="space-y-4">
                 <h2 className="text-xl font-bold mb-4">{t('grantCalls.title')}</h2>
 
-                {userState && (
+                {states.length === 1 && userState && (
                     <p className="text-sm text-gray-600 mb-4">
                         {t('grantCalls.availableForState')}: <strong>{userState}</strong>
                     </p>
                 )}
 
                 <div className="space-y-4">
-                    <div className="p-4 border rounded-lg bg-white shadow-sm">
-                        <h3 className="font-bold text-lg mb-2">{t('grantCalls.title')}</h3>
-                        <div className="space-y-2 text-sm">
-                            <p><strong>{t('grantCalls.availableAmount')}:</strong> {formatAmount(pool?.allocated)}</p>
-                            <p><strong>Committed:</strong> {formatAmount(pool?.committed)}</p>
-                            <p><strong>Pending:</strong> {formatAmount(pool?.pending)}</p>
-                            <p><strong>Remaining:</strong> {formatAmount(pool?.remaining)}</p>
+                    {states.map((s) => (
+                        <div
+                            key={s.state}
+                            className={`p-4 border rounded-lg bg-white shadow-sm ${s.is_own_state && states.length > 1 ? 'border-brand-blue border-2' : ''}`}
+                        >
+                            <div className="flex items-center justify-between gap-2 mb-2">
+                                <h3 className="font-bold text-lg">{s.state}</h3>
+                                {s.is_own_state && states.length > 1 && (
+                                    <span className="text-xs font-semibold px-2 py-1 rounded-full bg-brand-orangeSoft text-gray-800">
+                                        {t('grantCalls.yourState')}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="space-y-2 text-sm">
+                                <p><strong>{t('grantCalls.availableAmount')}:</strong> {formatAmount(s.allocated)}</p>
+                                <p><strong>Committed:</strong> {formatAmount(s.committed)}</p>
+                                <p><strong>Pending:</strong> {formatAmount(s.pending)}</p>
+                                <p><strong>Remaining:</strong> {formatAmount(s.remaining)}</p>
+                            </div>
                         </div>
-                    </div>
+                    ))}
                     <div className="mt-2">
                         <Button text={t('grantCalls.selectCall')} onClick={onReturnToMenu} className="w-full" />
                     </div>

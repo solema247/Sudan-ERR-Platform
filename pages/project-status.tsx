@@ -160,6 +160,13 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu, onEditPro
                                     <h3 className="font-bold">
                                         {t('project')}: {project.project_objectives}
                                     </h3>
+                                    {!project.is_own_room && project.room && (
+                                        <p className="text-sm text-gray-600">
+                                            <strong>{t('room')}:</strong>{' '}
+                                            {(i18n.language === 'ar' ? project.room.name_ar || project.room.name : project.room.name || project.room.name_ar) || project.room.err_code}
+                                            {project.room.state ? ` · ${project.room.state}` : ''}
+                                        </p>
+                                    )}
                                     <p>
                                         <strong>{t('status')}:</strong>{' '}
                                         <span className={

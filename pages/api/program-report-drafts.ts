@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { newSupabase } from '../../services/newSupabaseClient';
+import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
 import { validateSession } from '../../services/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -12,6 +12,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Validate session and get user data
         const user = await validateSession(authHeader.replace('Bearer ', ''));
+        // Query as the signed-in user so the database access rules (roles, rooms, states) apply
+        const db = createAuthenticatedClient(authHeader.replace('Bearer ', ''));
         if (!user) {
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
@@ -36,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (draft_id) {
                     // Update existing draft
-                    const { error: summaryError } = await newSupabase
+                    const { error: summaryError } = await db
                         .from('err_program_report')
                         .update(sanitizedSummary)
                         .eq('id', draft_id);
@@ -44,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     if (summaryError) throw summaryError;
 
                     // Delete old activities
-                    const { error: deleteError } = await newSupabase
+                    const { error: deleteError } = await db
                         .from('err_program_reach')
                         .delete()
                         .eq('report_id', draft_id)
@@ -53,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     if (deleteError) throw deleteError;
                 } else {
                     // Create new draft
-                    const { data: reportData, error: reportError } = await newSupabase
+                    const { data: reportData, error: reportError } = await db
                         .from('err_program_report')
                         .insert(sanitizedSummary)
                         .select()
@@ -81,7 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         is_draft: true
                     }));
 
-                    const { error: activitiesError } = await newSupabase
+                    const { error: activitiesError } = await db
                         .from('err_program_reach')
                         .insert(sanitizedActivities);
 
@@ -106,7 +108,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (req.query.draft_id) {
                 try {
                     const { draft_id, project_id } = req.query;
-                    const { data: draft, error } = await newSupabase
+                    const { data: draft, error } = await db
                         .from('err_program_report')
                         .select(`
                             *,
@@ -133,7 +135,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             // Otherwise, fetch all drafts for a project
             try {
                 const { project_id } = req.query;
-                const { data: drafts, error } = await newSupabase
+                const { data: drafts, error } = await db
                     .from('err_program_report')
                     .select(`
                         id,
@@ -167,7 +169,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (req.method === 'DELETE') {
             const { draft_id } = req.query;
             try {
-                const { error } = await newSupabase
+                const { error } = await db
                     .from('err_program_report')
                     .delete()
                     .eq('id', draft_id)

@@ -1,0 +1,78 @@
+{
+  "title": "Dashboard",
+  "scope": {
+    "all": "All states",
+    "states": "Your states",
+    "room": "Your room"
+  },
+  "updated": "Updated",
+  "print": "Print / Save as PDF",
+  "back": "Back to menu",
+  "loading": "Loading data...",
+  "error": "Couldn't load the dashboard. Please try again.",
+  "empty": "No data yet.",
+  "tiles": {
+    "projects": "Submitted projects",
+    "active": "Running projects",
+    "people": "People reached",
+    "remaining": "Grant funds remaining (USD)"
+  },
+  "funding": {
+    "title": "Funding by state",
+    "subtitle": "Open funding cycles, in US dollars. Only USD budgets are counted.",
+    "allocated": "Allocated",
+    "committed": "Committed",
+    "pending": "Pending",
+    "remaining": "Remaining",
+    "over": "Over allocation by"
+  },
+  "projects": {
+    "title": "Projects by status",
+    "byState": "Projects by state",
+    "count": "projects",
+    "subtitle": "Where every work plan is in the F-System, from the F-1 draft to the F-5 final report.",
+    "showAll": "Show all {{count}} states",
+    "showFewer": "Show fewer states"
+  },
+  "status": {
+    "pending": "Pending review",
+    "feedback": "Changes requested",
+    "approved": "Approved",
+    "active": "Running",
+    "completed": "Completed",
+    "rejected": "Rejected",
+    "unknown": "Not set",
+    "draft": "Drafts"
+  },
+  "budgets": {
+    "title": "Planned budgets",
+    "subtitle": "Budgets of submitted projects. Each currency shown separately, no conversion.",
+    "total": "Total",
+    "byActivity": "By activity",
+    "byExpense": "By expense type",
+    "other": "Other",
+    "none": "No budgets yet."
+  },
+  "people": {
+    "title": "People reached",
+    "subtitle": "From submitted program reports (F5).",
+    "individuals": "Individuals",
+    "households": "Households",
+    "female": "Female",
+    "male": "Male",
+    "girls": "Girls under 18",
+    "boys": "Boys under 18",
+    "reports": "Reports",
+    "none": "No program reports yet."
+  },
+  "table": "Show numbers",
+  "stage": {
+    "pending": "F-2 · waiting for review",
+    "feedback": "F-2 · back with the room",
+    "approved": "F-3 · contract, transfer due",
+    "active": "F-4 · spending and reporting",
+    "completed": "F-5 · final report in",
+    "rejected": "F-2 · not approved",
+    "draft": "F-1 · work plan not submitted yet"
+  }
+}

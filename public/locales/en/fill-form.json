@@ -76,5 +76,6 @@
     "saveError": "Failed to save draft",
     "returnToMenu": "Return to Menu",
     "noDrafts": "No saved drafts found"
-  }
+  },
+  "categoriesError": "Couldn't load the expense types. Check your connection and try again."
 }

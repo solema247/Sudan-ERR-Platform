@@ -161,6 +161,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     finance_officer_phone: formData.finance_officer_phone ?? null,
                     planned_activities: formData.planned_activities ?? null,
                     expenses: formData.expenses ?? null,
+                    currency: formData.currency === 'SDG' ? 'SDG' : 'USD', // budget currency, no conversion
                     err_id: user.err_id,
                     is_draft: false,
                     last_modified: new Date().toISOString(),

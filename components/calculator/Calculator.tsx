@@ -34,7 +34,7 @@ const Calculator: React.FC<CalculatorProps> = ({ onPinEntry }) => {
   };
 
   return (
-    <div className="calculator h-screen flex flex-col justify-center items-center bg-black">
+    <div dir="ltr" className="calculator h-screen flex flex-col justify-center items-center bg-black">
       <div className="display mb-4 p-2 bg-black text-white text-4xl text-right w-full max-w-md">
         <div className="input text-lg">{input}</div>
         <div className="result">{result}</div>

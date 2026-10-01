@@ -23,6 +23,7 @@ interface Project {
     err?: string;
     state?: string;
     locality?: string;
+    currency?: string;
     project_objectives?: string;
     intended_beneficiaries?: string;
     estimated_beneficiaries?: number;
@@ -47,7 +48,10 @@ interface Project {
 interface EmergencyRoom {
     name: string;
     name_ar: string | null;
+    states?: { state_name: string | null; state_name_ar: string | null; locality: string | null; locality_ar: string | null } | null;
 }
+
+const CURRENCIES = ['USD', 'SDG'] as const;
 
 interface UserDataResponse {
     err_id: string;
@@ -126,6 +130,9 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
    const [pendingSubmission, setPendingSubmission] = useState(null);
    const [userErrId, setUserErrId] = useState('');
    const [userErrName, setUserErrName] = useState('');
+   // The room's own state and locality, used to fill in the form (still editable)
+   const [roomState, setRoomState] = useState('');
+   const [roomLocality, setRoomLocality] = useState('');
    const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(initialValues?.id);
    const [editingProject, setEditingProject] = useState<Project | null>(null);
    const router = useRouter();
@@ -147,7 +154,8 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
              err_id,
              emergency_rooms!inner (
                name,
-               name_ar
+               name_ar,
+               states ( state_name, state_name_ar, locality, locality_ar )
              )
            `)
            .eq('id', session.user.id)
@@ -164,6 +172,13 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
            ? data.emergency_rooms.name_ar 
            : data.emergency_rooms.name;
          setUserErrName(errName || '');
+         // Fill in state and locality from the room, in the form's language (the dropdowns use the same names)
+         const roomPlace = data.emergency_rooms.states;
+         if (roomPlace) {
+           const isAr = i18n.language === 'ar';
+           setRoomState((isAr ? roomPlace.state_name_ar : roomPlace.state_name) || roomPlace.state_name || '');
+           setRoomLocality((isAr ? roomPlace.locality_ar : roomPlace.locality) || roomPlace.locality || '');
+         }
        } catch (error) {
          console.error('Session validation error:', error);
        }
@@ -274,6 +289,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
            err: project.err_id || '',
            state: project.state || '',
            locality: project.locality || '',
+           currency: project.currency || 'USD',
            project_objectives: project.project_objectives || '',
            intended_beneficiaries: project.intended_beneficiaries || '',
            estimated_beneficiaries: project.estimated_beneficiaries || '',
@@ -502,13 +518,11 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
 
    // Add this effect outside of Formik
    useEffect(() => {
-     if (editingProject?.state || initialValues?.state) {
-       const state = editingProject?.state || initialValues?.state;
-       if (state && localitiesDict[state]) {
-         setRelevantLocalities(localitiesDict[state]);
-       }
+     const state = editingProject?.state || initialValues?.state || roomState;
+     if (state && localitiesDict[state]) {
+       setRelevantLocalities(localitiesDict[state]);
      }
-   }, [editingProject?.state, initialValues?.state, localitiesDict]);
+   }, [editingProject?.state, initialValues?.state, roomState, localitiesDict]);
 
    return (
      <>
@@ -534,8 +548,9 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
              initialValues={{
                date: editingProject?.date || initialValues?.date || '',
                err: userErrId,
-               state: editingProject?.state || initialValues?.state || '',
-               locality: editingProject?.locality || initialValues?.locality || '',
+               state: editingProject?.state || initialValues?.state || roomState || '',
+               locality: editingProject?.locality || initialValues?.locality || (editingProject?.state || initialValues?.state ? '' : roomLocality) || '',
+               currency: editingProject?.currency || (initialValues as any)?.currency || 'USD',
                project_objectives: editingProject?.project_objectives || initialValues?.project_objectives || '',
                intended_beneficiaries: editingProject?.intended_beneficiaries || initialValues?.intended_beneficiaries || '',
                estimated_beneficiaries: editingProject?.estimated_beneficiaries || initialValues?.estimated_beneficiaries || '',
@@ -708,7 +723,41 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
 
                    {/* Add/remove activities and their expenses */}
 
+                   {/* Budget currency (no conversion: the USD grant balance only counts USD budgets) */}
+                   <div className="mb-2 pt-2">
+                     <RequiredLabel required>{t('currency.label')}</RequiredLabel>
+                     <div className="inline-flex rounded-lg border overflow-hidden" role="radiogroup" aria-label={t('currency.label')}>
+                       {CURRENCIES.map((code) => (
+                         <button
+                           key={code}
+                           type="button"
+                           role="radio"
+                           aria-checked={values.currency === code}
+                           onClick={() => setFieldValue('currency', code)}
+                           className={`px-4 py-2 text-sm font-semibold ${values.currency === code ? 'bg-brand-blue text-white' : 'bg-white text-gray-700'}`}
+                         >
+                           {t(`currency.${code.toLowerCase()}`)}
+                         </button>
+                       ))}
+                     </div>
+                     <p className="text-xs text-gray-500 mt-1">{t('currency.hint')}</p>
+                   </div>
+
                    <NewProjectActivities optionsActivities={optionsActivities} optionsExpenses={optionsExpenses} />
+
+                   {/* Total of all expenses across activities */}
+                   {(() => {
+                     const totalExpenses = (values.planned_activities || []).reduce((sum: number, activity: any) =>
+                       sum + (activity?.expenses || []).reduce((s: number, e: any) => s + (Number(e?.total) || 0), 0), 0);
+                     return (
+                       <div className="flex items-center justify-between p-3 rounded-lg bg-brand-orangeSoft border-s-4 border-brand-orange">
+                         <span className="font-bold">{t('totalExpenses')}</span>
+                         <span className="font-bold text-lg" dir="ltr">
+                           {new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(totalExpenses)} {values.currency}
+                         </span>
+                       </div>
+                     );
+                   })()}
                    {touched.planned_activities && errors.planned_activities && (
                      <div className="text-red-500 text-sm mt-1">
                        {typeof errors.planned_activities === 'string' 
