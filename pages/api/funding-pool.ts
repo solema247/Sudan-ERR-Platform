@@ -38,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     )
                 )
             `)
-            .eq('id', user.id)
+            .eq('auth_user_id', user.id)
             .single();
 
         if (userStateError || !userStateData) {

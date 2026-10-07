@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { data: userData, error: userError } = await authenticatedClient
             .from('users')
             .select('err_id')
-            .eq('id', user.id)
+            .eq('auth_user_id', user.id)
             .single();
 
         if (userError || !userData) {

@@ -66,7 +66,7 @@ export const validateSession = async (token: string) => {
         const { data: userData, error: userError } = await authenticatedClient
             .from('users')
             .select('role, status, display_name, err_id')
-            .eq('id', user.id)
+            .eq('auth_user_id', user.id)
             .single();
 
         if (userError || !userData) {

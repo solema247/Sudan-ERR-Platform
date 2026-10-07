@@ -150,7 +150,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                name_ar
              )
            `)
-           .eq('id', session.user.id)
+           .eq('auth_user_id', session.user.id)
            .single<UserDataResponse>();
 
          if (userError || !data) {

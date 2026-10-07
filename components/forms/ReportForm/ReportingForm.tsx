@@ -59,7 +59,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                 const { data: userData, error } = await newSupabase
                     .from('users')
                     .select('err_id')
-                    .eq('id', session.user.id)
+                    .eq('auth_user_id', session.user.id)
                     .single();
 
                 if (error || !userData) {
