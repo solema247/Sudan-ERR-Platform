@@ -7,7 +7,7 @@ import Button from '../../components/ui/Button';
 import Link from 'next/link';
 import { newSupabase } from '../../services/newSupabaseClient';
 
-const LogoImage = '/icons/icon-512x512.png';
+const LogoImage = '/brand/err-logo.png';
 
 interface EmergencyRoom {
     id: string;
@@ -116,7 +116,7 @@ const UserRegistration = () => {
                 email,
                 password,
                 options: {
-                    emailRedirectTo: 'https://sudan-err-bot.vercel.app/login'
+                    emailRedirectTo: `${window.location.origin}/login`
                 }
             });
 

@@ -10,5 +10,6 @@
   "declined": "Rechazado",
   "noProjectsFound": "No se encontraron proyectos.",
   "loading": "Cargando...",
-  "returnToMenu": "Volver al Menú"
+  "returnToMenu": "Volver al Menú",
+  "room": "Sala"
 }

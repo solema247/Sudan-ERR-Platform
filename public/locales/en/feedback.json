@@ -24,5 +24,53 @@
     "success": "Feedback submitted successfully!",
     "error": "Failed to submit feedback.",
     "generalError": "An error occurred while submitting feedback."
+  },
+  "tickets": {
+    "title": "Report a problem or send feedback",
+    "intro": "Tell us what happened or what could be better. Your request goes to the app team.",
+    "typeLabel": "Request type",
+    "types": {
+      "bug": "Report a bug",
+      "feedback": "App feedback",
+      "support": "Ask for help"
+    },
+    "typeHints": {
+      "bug": "Something doesn't work as it should or shows an error",
+      "feedback": "An idea or opinion to improve the app",
+      "support": "A question, or you need help using the app"
+    },
+    "subject": {
+      "label": "Subject",
+      "placeholder": "A short, one-line summary"
+    },
+    "description": {
+      "label": "Details",
+      "placeholder": {
+        "bug": "What were you doing? What happened? What did you expect to happen?",
+        "feedback": "What worked well, or what could be improved?",
+        "support": "What do you need help with?"
+      }
+    },
+    "rating": {
+      "label": "How easy is the app to use? (optional)",
+      "star": "{{n}} out of 5"
+    },
+    "privacy": "Don't include people's names, phone numbers or exact locations. Only your room code is sent with your request.",
+    "buttons": {
+      "submit": "Send",
+      "submitting": "Sending...",
+      "another": "Send another request"
+    },
+    "success": {
+      "title": "Thank you, we received your request",
+      "reference": "Reference: {{ref}}",
+      "delivered": "It has reached the app team.",
+      "queued": "Your request is saved and will reach the team shortly."
+    },
+    "errors": {
+      "required": "Please choose a type and fill in the subject and details.",
+      "session": "Your session has ended. Please sign in again.",
+      "failed": "Couldn't send. Check your connection and try again."
+    }
   }
-} 
+}

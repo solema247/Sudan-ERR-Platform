@@ -2,6 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { newSupabase } from '../../services/newSupabaseClient';
 import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
+import { appAccess } from '../../services/appAccess';
 
 /**
  * Login
@@ -55,10 +56,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
 
             // Check if user is approved
-            if (userData.status !== 'active') {
+            const access = appAccess(userData);
+            if (access !== 'ok') {
                 return res.status(401).json({ 
                     success: false, 
-                    message: 'Account not active'
+                    message: access === 'pending' ? 'Account not active' : 'No access to this app'
                 });
             }
 

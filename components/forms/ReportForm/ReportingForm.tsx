@@ -42,9 +42,11 @@ interface ReportingFormProps {
 const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project, onReturnToMenu, onSubmitAnotherForm, initialDraft }: ReportingFormProps) => {
     const { t, i18n } = useTranslation('fillForm');
     const [categories, setCategories] = useState([]);
+    const [categoriesError, setCategoriesError] = useState(false);
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [userErrId, setUserErrId] = useState('');
+    const [userRoomName, setUserRoomName] = useState('');
     const [formInitialValues, setFormInitialValues] = useState(() => getInitialValues(errId, initialDraft));
 
     useEffect(() => {
@@ -58,7 +60,7 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
 
                 const { data: userData, error } = await newSupabase
                     .from('users')
-                    .select('err_id')
+                    .select('err_id, emergency_rooms (name, name_ar)')
                     .eq('auth_user_id', session.user.id)
                     .single();
 
@@ -66,19 +68,25 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                     throw new Error('No user data found');
                 }
 
-                setUserErrId(userData.err_id);
-                setFormInitialValues(getInitialValues(userData.err_id, initialDraft));
+                // The report belongs to the project's room (staff may report on other rooms' projects)
+                const projectRoomId = (project as any)?.err_id || userData.err_id;
+                setUserErrId(projectRoomId);
+                // Show the room's name (Arabic when available) instead of its internal ID
+                const room: any = (project as any)?.room || userData.emergency_rooms;
+                const roomName = i18n.language === 'ar' && room?.name_ar ? room.name_ar : room?.name;
+                setUserRoomName(roomName || '');
+                setFormInitialValues(getInitialValues(projectRoomId, initialDraft));
             } catch (error) {
                 console.error('Error fetching user data:', error);
             }
         };
 
         fetchUserData();
-    }, [initialDraft]);
+    }, [initialDraft, project]);
 
     useEffect(() => {
         const fetchData = async () => {
-            populateCategories(setCategories, i18n.language)
+            populateCategories(setCategories, setCategoriesError)
             if (project) {
                 populateExpenses(project)    
             }
@@ -182,12 +190,10 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                                 <label htmlFor="err_id" className="font-bold block text-base text-black-bold mb-1">
                                     {t('errId')}
                                 </label>
-                                <Field 
-                                    type="text" 
-                                    name="err_id" 
-                                    className="text-sm w-full p-2 border rounded-lg bg-gray-100" 
-                                    disabled={true}
-                                />
+                                <div className="text-sm w-full p-2 border rounded-lg bg-gray-100">
+                                    {userRoomName || values.err_id}
+                                </div>
+                                <Field type="hidden" name="err_id" />
                                 <ErrorMessage name="err_id" component="div" />
                             </div>
 
@@ -216,6 +222,9 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
                             </div>
 
                             <h3 className="text-2xl font-bold">{t('activitiesAndExpenses')}</h3>
+                            {categoriesError && (
+                                <p className="text-red-600 text-sm" role="alert">{t('categoriesError')}</p>
+                            )}
 
                             <FieldArray
                                 name="expenses"
@@ -335,28 +344,20 @@ const ReportingForm: React.FC<ReportingFormProps> = ({ errId, reportId, project,
 };
 
 
-async function populateCategories(setCategories, language) {
-    // Fetch categories in both languages
-    const { data, error } = await supabase
+async function populateCategories(setCategories, setCategoriesError) {
+    // Expense types live in the main database, next to the reports (column expense_name).
+    // The label shown is the translation of the English name (fill-form.json "categories").
+    const { data, error } = await newSupabase
         .from(TABLE_NAME_EXPENSE_CATEGORIES)
-        .select('id, name, language')
-        .or(`language.eq.${language},language.eq.en`); // Fetch both current language and English as fallback
+        .select('id, expense_name, language');
 
     if (!error && data) {
-        // Group by ID and prioritize current language
-        const categoriesMap = data.reduce((acc, cat) => {
-            if (!acc[cat.id] || cat.language === language) {
-                acc[cat.id] = cat;
-            }
-            return acc;
-        }, {});
-
-        // Convert back to array
-        const uniqueCategories = Object.values(categoriesMap);
-        setCategories(uniqueCategories);
+        const english = data.filter((c: any) => !c.language || c.language === 'en');
+        setCategories((english.length > 0 ? english : data).map((c: any) => ({ id: c.id, name: c.expense_name })));
+        setCategoriesError(false);
     } else {
-        console.error('Error fetching categories:', error);
-        alert(error);
+        console.error('Error fetching expense categories:', error);
+        setCategoriesError(true);
     }
 }
 

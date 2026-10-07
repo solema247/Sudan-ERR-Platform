@@ -11,7 +11,7 @@ import ProjectApplication from '../components/forms/NewProjectForm/NewProjectFor
 import ProjectStatus from './project-status';
 import FeedbackForm from '../components/forms/FeedbackForm'; // Correct import path
 import ScanPrefillForm from '../pages/scan-prefill-form';
-const LogoImage = '/icons/icon-512x512.png'; 
+const LogoImage = '/brand/err-logo.png'; 
 import Project from '../components/forms/NewProjectForm/Project';
 import ProgramReportForm from '../components/forms/ProgramReportForm/ReportingForm';
 import ProjectDrafts from '../components/forms/NewProjectForm/ProjectDrafts';
@@ -302,6 +302,9 @@ const Menu = () => {
         setCurrentProjectDraft(null);
     };
 
+    // A report form, the scanner or the drafts list is open: hide the report-type buttons
+    const reportWorkflowOpen = showFillForm || showScanForm || showScanCustomForm || showProgramForm || showScanPrefillForm || showFinancialDrafts;
+
     // Menu selection handler
     const handleMenuSelection = (menu: CurrentMenu) => {
         resetFormStates(); // Reset all form states first
@@ -406,6 +409,7 @@ const Menu = () => {
                     <div className="grid grid-cols-1 space-y-3">
                         <Button text={t('projects')} onClick={() => handleMenuSelection(CurrentMenu.PROJECTS)} />
                         <Button text={t('reporting')} onClick={() => handleMenuSelection(CurrentMenu.REPORTING)} className="w-full" />
+                        <Button text={t('dashboard')} onClick={() => router.push('/dashboard')} className="w-full" />
                         <Button text={t('feedback')} onClick={() => setCurrentMenu(CurrentMenu.FEEDBACK)} className="w-full" />
                         <Button text={t('exitChat')} onClick={() => router.push('/login')} className="w-full" />
                     </div>
@@ -452,7 +456,9 @@ const Menu = () => {
                         {projects.map((project: any) => (
                             <Button
                                 key={project.id}
-                                text={`${project.project_objectives} (${project.locality})`}
+                                text={!project.is_own_room && project.room
+                                    ? `${project.project_objectives} — ${(i18n.language === 'ar' ? project.room.name_ar || project.room.name : project.room.name || project.room.name_ar) || project.room.err_code} (${project.locality})`
+                                    : `${project.project_objectives} (${project.locality})`}
                                 onClick={() => setSelectedProject(project)}
                                 className="w-full"
                             />
@@ -463,7 +469,7 @@ const Menu = () => {
             )}
 
             {/* Reporting Menu for Selected Project */}
-            {currentMenu === CurrentMenu.REPORTING && selectedProject && (
+            {currentMenu === CurrentMenu.REPORTING && selectedProject && !reportWorkflowOpen && (
                 <>
                     <MessageBubble text={t('selectReportType')} />
                     <div className="grid grid-cols-1 gap-2">
@@ -516,6 +522,13 @@ const Menu = () => {
                         />
                     </div>
                 </>
+            )}
+
+            {/* While a report form, the scanner or the drafts list is open: one way back to the report types */}
+            {currentMenu === CurrentMenu.REPORTING && selectedProject && reportWorkflowOpen && (
+                <div className="mb-2">
+                    <Button text={t('backToReportTypes')} onClick={() => resetFormStates()} className="w-full" />
+                </div>
             )}
 
             {/* Other workflows */}
@@ -661,36 +674,10 @@ const Menu = () => {
                 </MessageBubble>
             )}
 
-            {/* Feedback Menu */}
-            {currentMenu === CurrentMenu.FEEDBACK && (
-                <>
-                    <MessageBubble
-                        text={t('feedbackInstructions')}
-                        timestamp={getCurrentTimestamp()}
-                        fullWidth
-                    />
-                    <div className="grid grid-cols-1 space-y-2">
-                        <Button
-                            text={t('appFeedback')}
-                            onClick={() => setCurrentMenu(CurrentMenu.FEEDBACK)}
-                            className="w-full"
-                        />
-                        <Button
-                            text={t('returnToMainMenu')}
-                            onClick={() => handleMenuSelection(CurrentMenu.MAIN)}
-                            className="w-full"
-                        />
-                    </div>
-                </>
-            )}
-
-            {/* Feedback Form */}
+            {/* Feedback & support tickets (the form has its own type choice and "return to menu") */}
             {currentMenu === CurrentMenu.FEEDBACK && (
                 <MessageBubble>
-                    <FeedbackForm onReturnToMenu={() => {
-                        console.log('Menu component: Returning to main menu');  // Debug log
-                        handleMenuSelection(CurrentMenu.MAIN);  // Make sure we're using this
-                    }} />
+                    <FeedbackForm onReturnToMenu={() => handleMenuSelection(CurrentMenu.MAIN)} />
                 </MessageBubble>
             )}
 
@@ -800,16 +787,6 @@ const Menu = () => {
                         />
                     </div>
 
-                    {/* Single Return to Menu button */}
-                    <Button
-                        text={t('returnToMenu')}
-                        onClick={() => {
-                            resetFormStates();
-                            setSelectedProject(null);
-                            handleMenuSelection(CurrentMenu.REPORTING);
-                        }}
-                        className="w-full mt-4"
-                    />
                 </div>
             )}
         </ChatContainer>

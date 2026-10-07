@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { newSupabase } from '../../services/newSupabaseClient';
+import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
 import { validateSession } from '../../services/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -12,6 +12,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Validate session and get user data
         const user = await validateSession(authHeader.replace('Bearer ', ''));
+        // Query as the signed-in user so the database access rules (roles, rooms, states) apply
+        const db = createAuthenticatedClient(authHeader.replace('Bearer ', ''));
         if (!user) {
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
@@ -21,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             
             if (draft_id) {
                 // Fetch specific draft with its expenses
-                const { data: summaryData, error: summaryError } = await newSupabase
+                const { data: summaryData, error: summaryError } = await db
                     .from('err_summary')
                     .select('*')
                     .eq('id', draft_id)
@@ -30,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (summaryError) throw summaryError;
 
                 // Fetch associated expenses
-                const { data: expenseData, error: expenseError } = await newSupabase
+                const { data: expenseData, error: expenseError } = await db
                     .from('err_expense')
                     .select('*')
                     .eq('project_id', project_id)
@@ -59,7 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
 
             // Fetch drafts for the project
-            const { data, error } = await newSupabase
+            const { data, error } = await db
                 .from('err_summary')
                 .select('*')
                 .eq('project_id', project_id)
@@ -77,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 // If we have a draft_id, update existing draft
                 if (draft_id) {
                     // Update summary without updated_at field
-                    const { error: summaryError } = await newSupabase
+                    const { error: summaryError } = await db
                         .from('err_summary')
                         .update({
                             ...summary,
@@ -89,7 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     if (summaryError) throw summaryError;
 
                     // Delete old expenses
-                    const { error: deleteError } = await newSupabase
+                    const { error: deleteError } = await db
                         .from('err_expense')
                         .delete()
                         .eq('project_id', project_id)
@@ -98,7 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     if (deleteError) throw deleteError;
                 } else {
                     // Create new draft
-                    const { data: summaryData, error: summaryError } = await newSupabase
+                    const { data: summaryData, error: summaryError } = await db
                         .from('err_summary')
                         .insert({
                             ...summary,
@@ -125,7 +127,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         is_draft: true
                     }));
 
-                    const { error: expensesError } = await newSupabase
+                    const { error: expensesError } = await db
                         .from('err_expense')
                         .insert(expensesWithDraft);
 
@@ -149,7 +151,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const { draft_id, project_id } = req.query;
             
             // Delete related expenses first
-            const { error: expenseError } = await newSupabase
+            const { error: expenseError } = await db
                 .from('err_expense')
                 .delete()
                 .eq('project_id', project_id)
@@ -158,7 +160,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (expenseError) throw expenseError;
 
             // Then delete the summary
-            const { error: summaryError } = await newSupabase
+            const { error: summaryError } = await db
                 .from('err_summary')
                 .delete()
                 .eq('id', draft_id)

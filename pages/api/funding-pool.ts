@@ -1,12 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { newSupabase } from '../../services/newSupabaseClient';
 import { validateSession } from '../../services/auth';
 import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
+import { getAccessScope } from '../../services/accessScope';
+import { getFundingByState, StatePool } from '../../services/fundingPool';
 
 /**
  * Funding Pool API
- * Aggregates Allocated, Committed, Pending, Remaining across ALL open cycles for the user's state.
+ * Allocated, Committed, Pending and Remaining across ALL open cycles, one entry per state the user may see:
+ * their own state (base / state ERR), their visible states (admin / support), or every state (superadmin).
+ * The top-level fields keep the user's own state's figures.
  */
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         const authHeader = req.headers.authorization;
@@ -25,113 +29,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(405).json({ success: false, message: 'Method not allowed' });
         }
 
-        // Create an authenticated client for database queries
-        const authenticatedClient = createAuthenticatedClient(accessToken);
+        const db = createAuthenticatedClient(accessToken);
 
-        // Get user's state via relationships
-        const { data: userStateData, error: userStateError } = await authenticatedClient
-            .from('users')
-            .select(`
-                emergency_rooms!inner (
-                    states!inner (
-                        state_name
-                    )
-                )
-            `)
-            .eq('auth_user_id', user.id)
-            .single();
-
-        if (userStateError || !userStateData) {
-            return res.status(500).json({ success: false, message: 'Failed to fetch user state', error: userStateError?.message });
-        }
-
-        let userState: string | null = null;
+        let scope;
         try {
-            const emergencyRooms: any = userStateData.emergency_rooms;
-            if (emergencyRooms && emergencyRooms.states) {
-                userState = emergencyRooms.states.state_name;
-            }
+            scope = await getAccessScope(db, user.id);
         } catch (e: any) {
-            return res.status(500).json({ success: false, message: 'Error extracting user state', error: e.message });
+            return res.status(500).json({ success: false, message: 'Failed to fetch user state', error: e.message });
         }
+        const userState = scope.ownState;
+        const empty = { success: true, user_state: userState, allocated: 0, committed: 0, pending: 0, remaining: 0, states: [] as StatePool[] };
 
-        if (!userState) {
-            return res.status(200).json({ success: true, user_state: null, allocated: 0, committed: 0, pending: 0, remaining: 0 });
+        let states: StatePool[];
+        try {
+            states = await getFundingByState(db, scope);
+        } catch (e: any) {
+            return res.status(500).json({ success: false, message: 'Failed to fetch funding pool', error: e.message });
         }
+        if (states.length === 0) return res.status(200).json(empty);
 
-        // Open cycles only
-        const { data: cycles, error: cyclesError } = await authenticatedClient
-            .from('funding_cycles')
-            .select('id')
-            .eq('status', 'open');
-
-        if (cyclesError) {
-            return res.status(500).json({ success: false, message: 'Failed to fetch funding cycles', error: cyclesError.message });
-        }
-
-        const cycleIds = (cycles || []).map(c => c.id);
-        if (cycleIds.length === 0) {
-            return res.status(200).json({ success: true, user_state: userState, allocated: 0, committed: 0, pending: 0, remaining: 0 });
-        }
-
-        // Latest allocation per cycle for user's state
-        const { data: allocations, error: allocError } = await authenticatedClient
-            .from('cycle_state_allocations')
-            .select('id, cycle_id, amount, decision_no')
-            .in('cycle_id', cycleIds)
-            .eq('state_name', userState)
-            .order('decision_no', { ascending: false });
-
-        if (allocError) {
-            return res.status(500).json({ success: false, message: 'Failed to fetch allocations', error: allocError.message });
-        }
-
-        const latestByCycle = (allocations || []).reduce((acc: Record<string, any>, a: any) => {
-            const existing = acc[a.cycle_id];
-            if (!existing || a.decision_no > existing.decision_no) acc[a.cycle_id] = a;
-            return acc;
-        }, {});
-
-        const latestAllocations = Object.values(latestByCycle) as Array<{ id: string; amount: number }>;
-        const allocated = latestAllocations.reduce((sum, a) => sum + Number(a.amount || 0), 0);
-        const allocationIds = latestAllocations.map(a => a.id);
-
-        let committed = 0;
-        let pending = 0;
-        if (allocationIds.length > 0) {
-            const { data: projects, error: projectsError } = await authenticatedClient
-                .from('err_projects')
-                .select('cycle_state_allocation_id, status, funding_status, expenses')
-                .in('cycle_state_allocation_id', allocationIds);
-
-            if (projectsError) {
-                return res.status(500).json({ success: false, message: 'Failed to fetch project totals', error: projectsError.message });
-            }
-
-            const sumExpenses = (expenses: any): number => {
-                if (!expenses) return 0;
-                try {
-                    const arr = Array.isArray(expenses) ? expenses : typeof expenses === 'string' ? JSON.parse(expenses) : [];
-                    if (!Array.isArray(arr)) return 0;
-                    return arr.reduce((sum, e) => sum + Number(e?.total_cost || 0), 0);
-                } catch {
-                    return 0;
-                }
-            };
-
-            projects?.forEach(p => {
-                const amount = sumExpenses(p.expenses);
-                if (p.status === 'approved' && p.funding_status === 'committed') committed += amount;
-                else if (p.status === 'pending' && p.funding_status === 'allocated') pending += amount;
-            });
-        }
-
-        const remaining = Number(allocated) - Number(committed) - Number(pending);
-
-        return res.status(200).json({ success: true, user_state: userState, allocated, committed, pending, remaining });
+        const own = states.find(s => s.is_own_state);
+        return res.status(200).json({
+            success: true,
+            user_state: userState,
+            allocated: own?.allocated || 0,
+            committed: own?.committed || 0,
+            pending: own?.pending || 0,
+            remaining: own?.remaining || 0,
+            states,
+        });
     } catch (error: any) {
         return res.status(500).json({ success: false, message: 'Unexpected server error', error: error.message });
     }
 }
-
-

@@ -31,5 +31,7 @@
     "draftsTitle": "Program Report Drafts",
     "newReport": "Start New Program Report"
   },
-  "returnToMenu": "Return to Menu"
+  "returnToMenu": "Return to Menu",
+  "dashboard": "Dashboard",
+  "backToReportTypes": "Back to report types"
 }

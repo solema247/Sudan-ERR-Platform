@@ -8,8 +8,9 @@ import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import OfflineForm from '../components/forms/OfflineForm';
 import { newSupabase } from '../services/newSupabaseClient';
+import { appAccess } from '../services/appAccess';
 import Link from 'next/link';
-const LogoImage = '/icons/icon-512x512.png';
+const LogoImage = '/brand/err-logo.png';
 import i18n from '../services/i18n'; 
 
 /**
@@ -118,9 +119,12 @@ const Login = () => {
                 return;
             }
 
-            // Check if user is approved
-            if (userData.status !== 'active') {
-                setError(t('accountPending'));
+            // Only active ERR, support and admin accounts may use the app (partners use the portal)
+            const access = appAccess(userData);
+            if (access !== 'ok') {
+                await newSupabase.auth.signOut();
+                localStorage.removeItem('supabase.auth.token');
+                setError(t(access === 'pending' ? 'accountPending' : 'noAccess'));
                 setIsLoading(false);
                 return;
             }

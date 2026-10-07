@@ -31,5 +31,7 @@
     "draftsTitle": "مسودات تقارير البرنامج",
     "newReport": "بدء تقرير برنامج جديد"
   },
-  "returnToMenu": "العودة إلى القائمة"
+  "returnToMenu": "العودة إلى القائمة",
+  "dashboard": "لوحة المعلومات",
+  "backToReportTypes": "العودة إلى أنواع التقارير"
 }

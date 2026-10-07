@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { newSupabase } from '../../services/newSupabaseClient';
+import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
 import { validateSession } from '../../services/auth';
 
 /**
@@ -21,12 +21,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Validate session and get user data
         const user = await validateSession(authHeader.replace('Bearer ', ''));
+        // Query as the signed-in user so the database access rules (roles, rooms, states) apply
+        const db = createAuthenticatedClient(authHeader.replace('Bearer ', ''));
         if (!user) {
             return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
 
         if (req.method === 'GET') {
-            const { data, error } = await newSupabase
+            const { data, error } = await db
                 .from('err_projects')
                 .select('*')
                 .eq('created_by', user.err_id)
@@ -61,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             try {
                 // First check if this is a project with feedback
                 if (id) {
-                    const { data: existingProject, error: checkError } = await newSupabase
+                    const { data: existingProject, error: checkError } = await db
                         .from('err_projects')
                         .select('status, version, current_feedback_id')
                         .eq('id', id)
@@ -81,7 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             current_feedback_id: existingProject.current_feedback_id
                         };
 
-                        const { data, error } = await newSupabase
+                        const { data, error } = await db
                             .from('err_projects')
                             .update(draftData)
                             .eq('id', id)
@@ -108,7 +110,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 let result;
                 if (id) {
-                    const { data, error } = await newSupabase
+                    const { data, error } = await db
                         .from('err_projects')
                         .update(draftData)
                         .eq('id', id)
@@ -120,7 +122,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     result = data;
                 } else {
                     // Create new draft
-                    const { data, error } = await newSupabase
+                    const { data, error } = await db
                         .from('err_projects')
                         .insert([draftData])
                         .select()
@@ -147,7 +149,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (req.method === 'DELETE') {
             const { id } = req.query;
             
-            const { error } = await newSupabase
+            const { error } = await db
                 .from('err_projects')
                 .delete()
                 .eq('id', id)

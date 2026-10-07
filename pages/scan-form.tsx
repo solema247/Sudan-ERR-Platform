@@ -249,24 +249,24 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
             <h2 className="text-lg font-semibold">{t("title")}</h2>
             <p className="text-gray-700">{t("instruction")}</p>
             
-            <div className="flex space-x-2 rounded-xl bg-blue-900/20 p-1">
+            <div className="flex gap-1 rounded-xl bg-gray-100 border border-gray-200 p-1" role="tablist">
               <button
                 className={`w-full rounded-lg py-2.5 text-sm font-medium leading-5 
-                  ${uploadType === 'image' ? 'bg-white text-blue-700 shadow' : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'}`}
+                  ${uploadType === 'image' ? 'bg-white text-brand-blue font-semibold shadow' : 'text-gray-700 hover:bg-white/70'}`}
                 onClick={() => setUploadType('image')}
               >
                 {t("upload_image")}
               </button>
               <button
                 className={`w-full rounded-lg py-2.5 text-sm font-medium leading-5
-                  ${uploadType === 'pdf' ? 'bg-white text-blue-700 shadow' : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'}`}
+                  ${uploadType === 'pdf' ? 'bg-white text-brand-blue font-semibold shadow' : 'text-gray-700 hover:bg-white/70'}`}
                 onClick={() => setUploadType('pdf')}
               >
                 {t("upload_pdf")}
               </button>
               <button
                 className={`w-full rounded-lg py-2.5 text-sm font-medium leading-5
-                  ${uploadType === 'bulk-pdf' ? 'bg-white text-blue-700 shadow' : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'}`}
+                  ${uploadType === 'bulk-pdf' ? 'bg-white text-brand-blue font-semibold shadow' : 'text-gray-700 hover:bg-white/70'}`}
                 onClick={() => setUploadType('bulk-pdf')}
               >
                 {t("upload_bulk_pdf")}

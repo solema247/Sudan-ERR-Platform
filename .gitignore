@@ -75,6 +75,7 @@ web_modules/
 # Environment files
 .env
 .env.local
+.env.template
 .env.*.local
 .env.development
 .env.test

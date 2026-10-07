@@ -33,5 +33,9 @@
     "roomPendingApproval": "Your room will be reviewed by an administrator. You will be notified once approved.",
     "registerHere": "Register Here",
     "selectLocality": "Select Locality",
-    "backToRegister": "Back to Register"
-} 
+    "backToRegister": "Back to Register",
+    "stateFetchError": "Could not load the list of states. Check your connection and try again.",
+    "invalidEmail": "Please enter a valid email address.",
+    "passwordsDoNotMatch": "Passwords do not match.",
+    "emailTypoSuggestion": "Did you mean {{suggestion}}?"
+}

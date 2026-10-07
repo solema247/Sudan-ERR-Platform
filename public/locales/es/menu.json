@@ -19,5 +19,7 @@
   "selectDifferentProject": "Selecciona un proyecto diferente para continuar con el informe.",
   "feedback": "Retroalimentación",
   "feedbackInstructions": "Por favor selecciona una opción para retroalimentación.",
-  "appFeedback": "Retroalimentación de la aplicación"
+  "appFeedback": "Retroalimentación de la aplicación",
+  "dashboard": "Panel",
+  "backToReportTypes": "Volver a los tipos de informe"
 }

@@ -34,5 +34,9 @@
     "registeringFor": "التسجيل في:",
     "registerHere": "سجل هنا",
     "selectLocality": "اختر المحلية",
-    "backToRegister": "العودة إلى التسجيل"
-} 
+    "backToRegister": "العودة إلى التسجيل",
+    "stateFetchError": "تعذّر تحميل قائمة الولايات. تحقّق من اتصالك وحاول مرة أخرى.",
+    "invalidEmail": "يرجى إدخال بريد إلكتروني صحيح.",
+    "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين.",
+    "emailTypoSuggestion": "هل تقصد {{suggestion}}؟"
+}
