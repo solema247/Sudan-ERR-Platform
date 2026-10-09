@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { ChevronRight } from 'lucide-react';
 import { HomeCard } from '../../home/HomeSection';
 import { WorkPlanScene, ReportingScene } from '../../home/illustrations';
-import F1ScopeFields, { F1ScopeValue, scopeIsReady } from './F1ScopeFields';
+import F1ScopeFields, { emptyF1Scope, F1ScopeValue, scopeIsReady } from './F1ScopeFields';
 
 type F1CreateChooserProps = {
   onBack: () => void;
@@ -18,13 +18,7 @@ export default function F1CreateChooser({
 }: F1CreateChooserProps) {
   const router = useRouter();
   const [step, setStep] = useState<'method' | 'manual-scope'>('method');
-  const [scope, setScope] = useState<F1ScopeValue>({
-    emergency_room_id: '',
-    grant_segment: '',
-    state_name: '',
-    locality: '',
-    room_label: '',
-  });
+  const [scope, setScope] = useState<F1ScopeValue>(emptyF1Scope);
   const [scopeError, setScopeError] = useState<string | null>(null);
 
   if (step === 'manual-scope') {

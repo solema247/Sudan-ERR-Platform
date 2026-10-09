@@ -46,10 +46,16 @@ export type F1OcrReviewPayload = {
   extracted: MapExtractedData;
   emergency_room_id: string;
   grant_segment: string;
+  organization_id: string;
+  organization_label: string;
   state_name: string;
   locality: string;
   room_label: string;
   temp_file_key: string;
   form_currency: string;
   exchange_rate: number;
+  /** Local file kept for review preview (object URL); not serialized */
+  file?: File | null;
+  file_name?: string;
+  file_type?: string;
 };

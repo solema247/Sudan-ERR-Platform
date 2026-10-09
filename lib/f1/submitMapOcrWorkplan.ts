@@ -98,6 +98,7 @@ async function translateFields(data: MapExtractedData, sourceLanguage: string) {
 export type SubmitMapOcrOptions = {
   emergency_room_id: string;
   grant_segment?: string | null;
+  organization_id: string;
   temp_file_key: string;
   /** Snapshot from OCR before user edits (for ocr_edited_fields_count) */
   initialExtracted: MapExtractedData;
@@ -109,7 +110,14 @@ export async function submitMapOcrWorkplan(
   editedData: MapExtractedData,
   options: SubmitMapOcrOptions
 ): Promise<{ id: string }> {
-  const { emergency_room_id, grant_segment, temp_file_key, initialExtracted, accessToken } = options;
+  const {
+    emergency_room_id,
+    grant_segment,
+    organization_id,
+    temp_file_key,
+    initialExtracted,
+    accessToken,
+  } = options;
   const sourceLanguage = editedData.language || 'en';
   const { translatedData, originalText } = await translateFields(editedData, sourceLanguage);
 
@@ -127,6 +135,7 @@ export async function submitMapOcrWorkplan(
   const payload = {
     mode: 'ocr' as const,
     emergency_room_id,
+    organization_id,
     grant_segment: grant_segment ? String(grant_segment) : null,
     date: typeof translatedData.date === 'string' ? translatedData.date : null,
     locality: translatedData.locality ?? null,

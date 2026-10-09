@@ -52,6 +52,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'emergency_room_id is required' });
   }
 
+  const organizationId = emptyToNull(v.organization_id);
+  if (!organizationId) {
+    return res.status(400).json({ error: 'organization_id is required' });
+  }
+
   // Base ERR locked to own room (id from login/staging profile)
   if (user.err_id && !['admin', 'support', 'superadmin'].includes(user.role || '')) {
     if (emergencyRoomId !== user.err_id) {
@@ -72,6 +77,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const db = createProdSupabaseAdmin();
+
+    const { data: org, error: orgErr } = await db
+      .from('organizations')
+      .select('id, name, org_type, is_active')
+      .eq('id', organizationId)
+      .maybeSingle();
+
+    if (orgErr || !org) {
+      return res.status(400).json({ error: 'Organization not found in Prod' });
+    }
+    if (!org.is_active) {
+      return res.status(400).json({ error: 'Organization is not active' });
+    }
+    if (org.org_type !== 'processor' && org.org_type !== 'coordinator') {
+      return res.status(400).json({ error: 'Organization type cannot own F1 submissions' });
+    }
 
     const { data: room, error: roomErr } = await db
       .from('emergency_rooms')
@@ -140,6 +161,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       planned_activities: plannedActivities,
       expenses,
       emergency_room_id: emergencyRoomId,
+      organization_id: organizationId,
       err_id: emptyToNull(room.err_code),
       status: 'pending',
       source: 'err_app',

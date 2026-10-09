@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronRight, Plus } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import { newSupabase } from '../../../services/newSupabaseClient';
 import type { F1OcrReviewPayload, MapExpense, MapExtractedData, MapPlannedActivity } from '../../../lib/f1/mapReviewTypes';
 import { seedReviewFromOcr } from '../../../lib/f1/mapReviewNormalize';
@@ -48,8 +48,46 @@ export default function F1OcrReview({ payload, onBack, onSubmitted }: Props) {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [fileOpen, setFileOpen] = useState(false);
+  const [fileUrl, setFileUrl] = useState('');
 
   const formCurrency = edited.form_currency || payload.form_currency || 'USD';
+  const fileType = payload.file_type || payload.file?.type || '';
+  const isPdf =
+    fileType === 'application/pdf' ||
+    (payload.file_name || '').toLowerCase().endsWith('.pdf');
+  const isImage = fileType.startsWith('image/');
+
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl: string | null = null;
+
+    if (payload.file) {
+      objectUrl = URL.createObjectURL(payload.file);
+      setFileUrl(objectUrl);
+      return () => {
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+      };
+    }
+
+    (async () => {
+      if (!payload.temp_file_key) return;
+      const {
+        data: { session },
+      } = await newSupabase.auth.getSession();
+      if (!session || cancelled) return;
+      const res = await fetch(
+        `/api/f1/temp-signed-url?key=${encodeURIComponent(payload.temp_file_key)}`,
+        { headers: { Authorization: `Bearer ${session.access_token}` } }
+      );
+      const data = await res.json();
+      if (!cancelled && res.ok && data.signedUrl) setFileUrl(data.signedUrl);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [payload.file, payload.temp_file_key]);
 
   useEffect(() => {
     let cancelled = false;
@@ -169,6 +207,7 @@ export default function F1OcrReview({ payload, onBack, onSubmitted }: Props) {
       await submitMapOcrWorkplan(edited, {
         emergency_room_id: payload.emergency_room_id,
         grant_segment: payload.grant_segment,
+        organization_id: payload.organization_id,
         temp_file_key: payload.temp_file_key,
         initialExtracted: initialSnapshot,
         accessToken: session.access_token,
@@ -200,7 +239,8 @@ export default function F1OcrReview({ payload, onBack, onSubmitted }: Props) {
         <p className="app-section-label mb-0.5">F1 · Review</p>
         <h2 className="text-lg font-bold text-white leading-snug">Review extracted F1</h2>
         <p className="text-xs text-[#8a97ab] mt-0.5 mb-0">
-          {payload.room_label || 'Room'}
+          {payload.organization_label || 'Org'}
+          {payload.room_label ? ` · ${payload.room_label}` : ''}
           {payload.grant_segment ? ` · ${payload.grant_segment}` : ''}
         </p>
       </div>
@@ -652,6 +692,69 @@ export default function F1OcrReview({ payload, onBack, onSubmitted }: Props) {
           <ChevronRight className="h-4 w-4 rotate-180" />
           Back
         </button>
+
+        {/* Original file — MAP-style collapsible (no OCR text) */}
+        <div className="rounded-xl border border-white/10 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setFileOpen((o) => !o)}
+            className="w-full flex items-center justify-between gap-2 px-3 py-2.5 bg-[#1c2d48] text-left"
+          >
+            <span className="text-sm font-semibold text-white">Original file</span>
+            <ChevronDown
+              className={`h-4 w-4 text-[#a8b6cc] transition-transform ${
+                fileOpen ? 'rotate-180' : ''
+              }`}
+            />
+          </button>
+          {fileOpen && (
+            <div className="p-3 space-y-2 bg-[#152238]">
+              {(payload.file_name || payload.temp_file_key) && (
+                <p className="text-[11px] text-[#8a97ab] truncate mb-0">
+                  {payload.file_name || payload.temp_file_key}
+                </p>
+              )}
+              {fileUrl ? (
+                isPdf ? (
+                  <div className="w-full h-[420px] rounded-lg border border-white/10 overflow-hidden">
+                    <iframe
+                      src={fileUrl}
+                      className="w-full h-full"
+                      title="Uploaded F1"
+                    />
+                  </div>
+                ) : isImage ? (
+                  <div className="w-full max-h-[420px] rounded-lg border border-white/10 overflow-auto">
+                    <img
+                      src={fileUrl}
+                      alt="Uploaded F1"
+                      className="w-full h-auto object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-white/10 px-3 py-6 text-center space-y-2">
+                    <p className="text-sm text-[#a8b6cc] mb-0">
+                      Preview not available for this file type.
+                    </p>
+                    <a
+                      href={fileUrl}
+                      download={payload.file_name || 'f1-document'}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex text-sm font-semibold text-brand-orange hover:underline"
+                    >
+                      Open / download file
+                    </a>
+                  </div>
+                )
+              ) : (
+                <div className="rounded-lg border border-white/10 px-3 py-8 text-center text-sm text-[#8a97ab]">
+                  No file preview available
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -7,6 +7,9 @@ export type F1ScopeValue = {
   state_name: string;
   locality: string;
   room_label: string;
+  /** Canvas org that will own the F1 (Prod organization_id) */
+  organization_id: string;
+  organization_label: string;
 };
 
 type GrantSegment = {
@@ -29,12 +32,22 @@ type RoomRow = {
   } | null;
 };
 
+type OrgOption = {
+  id: string;
+  slug: string;
+  name: string;
+  org_type: string;
+  is_default_owner?: boolean;
+};
+
 type F1ScopeFieldsProps = {
   value: F1ScopeValue;
   onChange: (next: F1ScopeValue) => void;
   locale?: string;
   /** Tighter labels + 2-column rows on upload screens */
   compact?: boolean;
+  /** Show + require canvas org (OCR upload — includes LCC coordinator) */
+  showOrganization?: boolean;
 };
 
 const selectClass = 'app-input !py-2 text-sm';
@@ -45,6 +58,7 @@ export default function F1ScopeFields({
   onChange,
   locale = 'en',
   compact = false,
+  showOrganization = false,
 }: F1ScopeFieldsProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +66,7 @@ export default function F1ScopeFields({
   const [segments, setSegments] = useState<GrantSegment[]>([]);
   const [states, setStates] = useState<string[]>([]);
   const [rooms, setRooms] = useState<RoomRow[]>([]);
+  const [organizations, setOrganizations] = useState<OrgOption[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -64,11 +79,16 @@ export default function F1ScopeFields({
         } = await newSupabase.auth.getSession();
         if (!session) throw new Error('Not signed in');
 
-        const res = await fetch('/api/f1/scope-options', {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        const headers = { Authorization: `Bearer ${session.access_token}` };
+        const [scopeRes, orgRes] = await Promise.all([
+          fetch('/api/f1/scope-options', { headers }),
+          showOrganization
+            ? fetch('/api/f1/org-options', { headers })
+            : Promise.resolve(null),
+        ]);
+
+        const data = await scopeRes.json();
+        if (!scopeRes.ok || !data.success) {
           throw new Error(data.message || 'Failed to load options');
         }
         if (cancelled) return;
@@ -78,16 +98,27 @@ export default function F1ScopeFields({
         setStates(data.states || []);
         setRooms(data.rooms || []);
 
+        if (orgRes) {
+          const orgData = await orgRes.json();
+          if (!orgRes.ok || !orgData.success) {
+            throw new Error(orgData.message || 'Failed to load organizations');
+          }
+          if (!cancelled) setOrganizations(orgData.organizations || []);
+        }
+
         if (!data.needsRoomPicker && data.err_id) {
           const room = (data.rooms || []).find((r: RoomRow) => r.id === data.err_id);
           if (room) {
             const place = placeLabels(room, locale);
             onChange({
+              ...value,
               emergency_room_id: room.id,
-              grant_segment: '',
+              grant_segment: value.grant_segment || '',
               state_name: place.state_name,
               locality: place.locality,
               room_label: roomLabel(room, locale),
+              organization_id: value.organization_id || '',
+              organization_label: value.organization_label || '',
             });
           }
         }
@@ -101,7 +132,7 @@ export default function F1ScopeFields({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [showOrganization]);
 
   const isAr = !!locale?.startsWith('ar');
 
@@ -154,6 +185,8 @@ export default function F1ScopeFields({
 
   const gap = compact ? 'gap-2.5' : 'gap-3';
   const stack = compact ? `grid ${gap}` : `space-y-3`;
+
+  const orgLabel = (o: OrgOption) => o.name;
 
   return (
     <div className={stack}>
@@ -226,21 +259,64 @@ export default function F1ScopeFields({
         </div>
       )}
 
-      <div>
-        <label className={labelClass}>Grant segment</label>
-        <select
-          className={selectClass}
-          value={value.grant_segment}
-          onChange={(e) => onChange({ ...value, grant_segment: e.target.value })}
-        >
-          <option value="">Select</option>
-          {segments.map((s) => (
-            <option key={s.id} value={s.code}>
-              {segmentLabel(s)}
-            </option>
-          ))}
-        </select>
-      </div>
+      {showOrganization ? (
+        <div className={`grid grid-cols-2 ${gap}`}>
+          <div className="min-w-0">
+            <label className={labelClass}>Grant segment</label>
+            <select
+              className={selectClass}
+              value={value.grant_segment}
+              onChange={(e) => onChange({ ...value, grant_segment: e.target.value })}
+            >
+              <option value="">Select</option>
+              {segments.map((s) => (
+                <option key={s.id} value={s.code}>
+                  {segmentLabel(s)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="min-w-0">
+            <label className={labelClass}>Organization</label>
+            <select
+              className={selectClass}
+              value={value.organization_id}
+              onChange={(e) => {
+                const id = e.target.value;
+                const org = organizations.find((o) => o.id === id);
+                onChange({
+                  ...value,
+                  organization_id: id,
+                  organization_label: org ? org.name : '',
+                });
+              }}
+            >
+              <option value="">Select</option>
+              {organizations.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {orgLabel(o)}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <label className={labelClass}>Grant segment</label>
+          <select
+            className={selectClass}
+            value={value.grant_segment}
+            onChange={(e) => onChange({ ...value, grant_segment: e.target.value })}
+          >
+            <option value="">Select</option>
+            {segments.map((s) => (
+              <option key={s.id} value={s.code}>
+                {segmentLabel(s)}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
     </div>
   );
 }
@@ -265,8 +341,24 @@ function roomLabel(room: RoomRow, locale: string) {
   return [room.err_code, name].filter(Boolean).join(' · ') || room.id;
 }
 
-export function scopeIsReady(scope: F1ScopeValue) {
+export function scopeIsReady(
+  scope: F1ScopeValue,
+  opts?: { requireOrganization?: boolean }
+) {
   if (!scope.grant_segment) return false;
   if (!scope.emergency_room_id) return false;
+  if (opts?.requireOrganization && !scope.organization_id) return false;
   return true;
+}
+
+export function emptyF1Scope(): F1ScopeValue {
+  return {
+    emergency_room_id: '',
+    grant_segment: '',
+    state_name: '',
+    locality: '',
+    room_label: '',
+    organization_id: '',
+    organization_label: '',
+  };
 }

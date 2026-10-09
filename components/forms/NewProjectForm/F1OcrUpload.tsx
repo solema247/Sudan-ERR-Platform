@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { ChevronRight } from 'lucide-react';
-import F1ScopeFields, { F1ScopeValue, scopeIsReady } from './F1ScopeFields';
+import F1ScopeFields, { emptyF1Scope, F1ScopeValue, scopeIsReady } from './F1ScopeFields';
 import { newSupabase } from '../../../services/newSupabaseClient';
 import type { F1OcrReviewPayload, MapExtractedData } from '../../../lib/f1/mapReviewTypes';
 
@@ -16,13 +16,7 @@ type F1OcrUploadProps = {
 export default function F1OcrUpload({ onBack, onOcrComplete }: F1OcrUploadProps) {
   const router = useRouter();
   const locale = router.locale || 'en';
-  const [scope, setScope] = useState<F1ScopeValue>({
-    emergency_room_id: '',
-    grant_segment: '',
-    state_name: '',
-    locality: '',
-    room_label: '',
-  });
+  const [scope, setScope] = useState<F1ScopeValue>(emptyF1Scope);
   const [currency, setCurrency] = useState<'USD' | 'SDG'>('SDG');
   /** Keep as string while editing so empty/partial values don't snap back to default */
   const [exchangeRateInput, setExchangeRateInput] = useState(String(DEFAULT_SDG_RATE));
@@ -32,7 +26,8 @@ export default function F1OcrUpload({ onBack, onOcrComplete }: F1OcrUploadProps)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const ready = scopeIsReady(scope) && !!file && !!tempFileKey;
+  const ready =
+    scopeIsReady(scope, { requireOrganization: true }) && !!file && !!tempFileKey;
 
   const uploadTemp = async (selected: File) => {
     setUploadingFile(true);
@@ -103,12 +98,17 @@ export default function F1OcrUpload({ onBack, onOcrComplete }: F1OcrUploadProps)
         },
         emergency_room_id: scope.emergency_room_id,
         grant_segment: scope.grant_segment,
+        organization_id: scope.organization_id,
+        organization_label: scope.organization_label,
         state_name: scope.state_name,
         locality: scope.locality,
         room_label: scope.room_label,
         temp_file_key: tempFileKey,
         form_currency: currency,
         exchange_rate: rate,
+        file,
+        file_name: file.name,
+        file_type: file.type,
       });
     } catch (e: any) {
       setError(e.message || 'OCR failed');
@@ -125,7 +125,13 @@ export default function F1OcrUpload({ onBack, onOcrComplete }: F1OcrUploadProps)
       </div>
 
       <div className="grid gap-2.5 mb-4">
-        <F1ScopeFields value={scope} onChange={setScope} locale={locale} compact />
+        <F1ScopeFields
+          value={scope}
+          onChange={setScope}
+          locale={locale}
+          compact
+          showOrganization
+        />
 
         <div className="grid grid-cols-[1fr_auto] gap-2.5 items-end">
           <div className="min-w-0">
