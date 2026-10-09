@@ -7,8 +7,11 @@
   --err-blue: #5d7eb3;
   --err-deep: #4a6798;
   --err-orange: #f9a778;
-  --err-page: #f3f6fb;
-  --err-ink: #1f2a3d;
+  --err-navy: #152238;
+  --err-navy-deep: #0f1828;
+  --err-navy-panel: #1c2d48;
+  --err-page: #0f1828;
+  --err-ink: #e8eef8;
 }
 
 html,
@@ -37,14 +40,14 @@ h3,
 h4,
 h5,
 h6 {
-  color: var(--err-ink);
+  color: #f3f6fb;
   font-weight: 700;
   line-height: 1.25;
 }
 
 p {
   margin-bottom: 0.75rem;
-  color: #5b6b82;
+  color: #a8b6cc;
   line-height: 1.55;
 }
 
@@ -65,44 +68,52 @@ html[dir='ltr'] {
 }
 
 @layer components {
-  /* Soft page wash — calm but still a work app */
   .app-page-bg {
-    background-color: #f3f6fb;
+    background-color: #0f1828;
     background-image:
-      radial-gradient(ellipse 80% 50% at 0% -10%, rgba(93, 126, 179, 0.14), transparent 55%),
-      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(249, 167, 120, 0.12), transparent 50%);
+      radial-gradient(ellipse 80% 50% at 10% -10%, rgba(93, 126, 179, 0.35), transparent 55%),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(249, 167, 120, 0.18), transparent 50%),
+      linear-gradient(180deg, #152238 0%, #0f1828 55%, #0c1422 100%);
   }
 
   .app-panel {
-    @apply bg-white border border-green-100/90 rounded-2xl shadow-soft;
+    @apply bg-[#1c2d48] border border-white/10 rounded-2xl shadow-soft;
   }
 
   .app-section-label {
-    @apply text-xs font-semibold uppercase tracking-wide text-ink-faint;
+    @apply text-xs font-semibold uppercase tracking-wide text-[#8a97ab];
   }
 
   .app-action {
-    @apply w-full text-start rounded-2xl bg-white border border-green-100 px-4 py-3.5
-      font-semibold text-ink shadow-soft
-      hover:border-brand-blue/50 hover:shadow-lift
+    @apply w-full text-start rounded-2xl bg-[#1c2d48] border border-white/10 px-4 py-3.5
+      font-semibold text-[#e8eef8] shadow-soft
+      hover:border-brand-orange/40 hover:bg-[#243656]
       active:scale-[0.99] transition-all duration-150;
   }
 
   .app-action-primary {
-    @apply w-full text-start rounded-2xl bg-brand-deep text-white px-4 py-3.5
+    @apply w-full text-start rounded-2xl bg-brand-orange text-[#152238] px-4 py-3.5
       font-semibold shadow-soft
-      hover:bg-brand-darker
+      hover:bg-[#ffb88a]
       active:scale-[0.99] transition-all duration-150;
   }
 
   .app-input {
-    @apply w-full rounded-xl border border-green-200 bg-white py-2.5 px-3 text-sm text-ink
-      placeholder:text-ink-faint
-      focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue;
+    @apply w-full rounded-xl border border-white/15 bg-[#152238] py-2.5 px-3 text-sm text-[#e8eef8]
+      placeholder:text-[#8a97ab]
+      focus:outline-none focus:ring-2 focus:ring-brand-orange/40 focus:border-brand-orange;
   }
 
   .app-toolbar {
-    @apply flex flex-wrap items-center gap-2 rounded-2xl bg-white/80 border border-green-100
+    @apply flex flex-wrap items-center gap-2 rounded-2xl bg-[#1c2d48]/90 border border-white/10
       px-3 py-2 shadow-soft backdrop-blur-sm;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 }
