@@ -72,12 +72,17 @@ const ProjectDrafts: React.FC<ProjectDraftsProps> = ({
     return (
         <div>
             <div className="mb-6">
-                <p className="app-section-label mb-1">F1 · Work Plans</p>
+                <p className="app-section-label mb-1">
+                    {t('drafts.hubSectionLabel', { defaultValue: 'F1 · Work Plans' })}
+                </p>
                 <h2 className="text-xl font-bold text-white leading-snug mb-1">
-                    Project Drafts
+                    {t('drafts.hubTitle', { defaultValue: 'F1 Work Plans' })}
                 </h2>
                 <p className="text-sm text-[#a8b6cc] mb-0">
-                    Continue a saved draft or start a new work plan for your room.
+                    {t('drafts.hubSubtitle', {
+                        defaultValue:
+                            'Continue a saved draft or start a new work plan for your room.',
+                    })}
                 </p>
             </div>
 

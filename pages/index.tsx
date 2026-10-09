@@ -1,36 +1,39 @@
 import { useState, useEffect } from 'react';
 import crypto from 'crypto';
+import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
 import Calculator from '../components/calculator/Calculator';
-import MainApp from './MainApp';
 
 /**
- * Index.tsx
- * 
- * Home component shows calculator.
+ * PIN gate → login. Landing menu (MainApp) is merged into /login.
  */
 
 const Home = () => {
   const { t } = useTranslation('home');
+  const router = useRouter();
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [checking, setChecking] = useState(true);
 
-  // Check if we're coming from login/offline screens
   useEffect(() => {
     const fromInternalPage = sessionStorage.getItem('fromInternalPage') === 'true';
     if (fromInternalPage) {
-      setIsUnlocked(true);
       sessionStorage.removeItem('fromInternalPage');
-    } else {
-      const unlocked = sessionStorage.getItem('isUnlocked') === 'true';
-      setIsUnlocked(unlocked);
+      sessionStorage.setItem('isUnlocked', 'true');
+      setIsUnlocked(true);
+      setChecking(false);
+      return;
     }
+    const unlocked = sessionStorage.getItem('isUnlocked') === 'true';
+    setIsUnlocked(unlocked);
+    setChecking(false);
   }, []);
 
-  const handleLogout = () => {
-    setIsUnlocked(false);
-    sessionStorage.removeItem('isUnlocked');
-  };
+  useEffect(() => {
+    if (!checking && isUnlocked) {
+      router.replace('/login');
+    }
+  }, [checking, isUnlocked, router]);
 
   const handlePinEntry = (pin: string) => {
     if (doesEntryMatchHash(pin)) {
@@ -47,20 +50,28 @@ const Home = () => {
       const calculatorPinHash = process.env.NEXT_PUBLIC_CALCULATOR_PIN;
 
       if (!calculatorPinHash) {
-        throw new Error('Missing system hash needed for PIN')
+        throw new Error('Missing system hash needed for PIN');
       }
       return hash === calculatorPinHash;
+    } catch (e) {
+      console.log(e);
+      return false;
     }
-    catch(e) {
-      console.log(e)
-    }
-  }
+  };
 
   if (isLocked) {
     return <div>{t('appLocked')}</div>;
   }
 
-  return isUnlocked ? <MainApp onLogout={handleLogout} /> : <Calculator onPinEntry={handlePinEntry} />;
+  if (checking || isUnlocked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center app-page-bg">
+        <p className="text-sm text-[#a8b6cc]">Loading…</p>
+      </div>
+    );
+  }
+
+  return <Calculator onPinEntry={handlePinEntry} />;
 };
 
 export default Home;

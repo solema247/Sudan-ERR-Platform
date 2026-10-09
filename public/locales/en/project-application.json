@@ -103,7 +103,11 @@
     "minValue": "Value must be greater than 0"
   },
   "drafts": {
-    "title": "Project Drafts",
+    "hubSectionLabel": "F1 · Work Plans",
+    "hubTitle": "F1 Work Plans",
+    "hubSubtitle": "Continue a saved draft or start a new work plan for your room.",
+    "title": "F1 Work Plans",
+    "subtitle": "Continue a saved draft or start a new work plan for your room.",
     "newProject": "Start New Project",
     "noDrafts": "No drafts found",
     "untitled": "Untitled Project",
