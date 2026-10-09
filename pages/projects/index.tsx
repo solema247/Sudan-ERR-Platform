@@ -54,27 +54,22 @@ export default function ProjectsPage() {
     <AppShell title={t('projects', 'Projects')}>
       {view === 'menu' && (
         <div className="space-y-3">
-          <p className="text-sm text-gray-600 mb-2">
-            {t('projectsInstructions', 'Manage project applications and status.')}
-          </p>
-          <button
-            type="button"
-            onClick={openApplication}
-            className="w-full rounded-xl bg-brand-deep text-white py-3 px-4 font-medium text-start"
-          >
+          <div className="mb-1">
+            <p className="app-section-label mb-1">Projects</p>
+            <p className="text-sm text-ink-muted mb-0">
+              {t('projectsInstructions', 'Manage project applications and status.')}
+            </p>
+          </div>
+          <button type="button" onClick={openApplication} className="app-action-primary">
             {t('projectApplication', 'Project application')}
           </button>
-          <button
-            type="button"
-            onClick={() => setView('status')}
-            className="w-full rounded-xl bg-white border border-green-200 py-3 px-4 font-medium text-start text-gray-900"
-          >
+          <button type="button" onClick={() => setView('status')} className="app-action">
             {t('projectStatus', 'Project status')}
           </button>
           <button
             type="button"
             onClick={() => router.push('/home')}
-            className="w-full rounded-xl bg-white border border-green-100 py-3 px-4 text-sm text-gray-600"
+            className="text-sm font-medium text-ink-muted hover:text-brand-deep px-1 py-2"
           >
             {t('returnToMainMenu', 'Back to home')}
           </button>
@@ -82,7 +77,7 @@ export default function ProjectsPage() {
       )}
 
       {view === 'funding' && (
-        <div className="bg-white rounded-xl border border-green-100 p-4">
+        <div className="app-panel p-4">
           <FundingCycleSelection
             onReturnToMenu={() => {
               setView('application');
@@ -100,7 +95,7 @@ export default function ProjectsPage() {
       )}
 
       {view === 'application' && (
-        <div className="bg-white rounded-xl border border-green-100 p-4">
+        <div className="app-panel p-4">
           {showDraftList && !projectToEdit ? (
             <ProjectDrafts
               drafts={drafts.map((d) => ({
@@ -142,7 +137,7 @@ export default function ProjectsPage() {
       )}
 
       {view === 'status' && (
-        <div className="bg-white rounded-xl border border-green-100 p-4">
+        <div className="app-panel p-4">
           <ProjectStatus
             onReturnToMenu={() => setView('menu')}
             onEditProject={(projectId) => {

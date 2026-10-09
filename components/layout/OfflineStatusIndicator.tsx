@@ -55,8 +55,12 @@ const OfflineStatusIndicator: React.FC = () => {
 
   return (
     <div
-      className={`text-xs sm:text-sm px-3 py-1.5 flex items-center justify-between gap-2 ${
-        !online ? 'bg-red-600 text-white' : failed ? 'bg-amber-500 text-white' : 'bg-brand-blue text-white'
+      className={`text-xs sm:text-sm px-4 py-2 flex items-center justify-between gap-2 font-medium ${
+        !online
+          ? 'bg-red-600 text-white'
+          : failed
+            ? 'bg-brand-orange text-ink'
+            : 'bg-brand-deep text-white'
       }`}
     >
       <span>

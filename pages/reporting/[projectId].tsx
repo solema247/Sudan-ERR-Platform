@@ -103,31 +103,32 @@ export default function ReportingProjectPage() {
 
   return (
     <AppShell title={t('reporting', 'Reporting')}>
-      <div className="mb-4">
+      <div className="mb-5 app-panel p-4">
         <button
           type="button"
           onClick={() => (workflow === 'menu' ? router.push('/reporting') : setWorkflow('menu'))}
-          className="text-sm text-brand-deep underline"
+          className="text-xs font-semibold text-brand-deep hover:underline"
         >
           {workflow === 'menu' ? t('selectDifferentProject', 'Choose another project') : t('backToReportTypes', 'Back')}
         </button>
-        <h2 className="mt-2 font-semibold text-gray-900 text-base leading-snug">
+        <h2 className="mt-2 font-bold text-ink text-base leading-snug">
           {project.project_objectives}
         </h2>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-ink-muted mt-1 mb-0">
           {[project.locality, project.state].filter(Boolean).join(' · ')}
         </p>
       </div>
 
       {workflow === 'menu' && (
         <div className="space-y-2">
-          <p className="text-sm text-gray-600 mb-2">{t('selectReportType', 'What do you want to do?')}</p>
+          <p className="app-section-label mb-2">{t('selectReportType', 'Actions')}</p>
           {[
-            { key: 'fill' as const, label: t('reportFillForm', 'Fill financial report'), action: openFill },
+            { key: 'fill' as const, label: t('reportFillForm', 'Fill financial report'), action: openFill, primary: true },
             {
               key: 'scan' as const,
               label: t('reportScanForm', 'Scan financial report'),
               action: () => setWorkflow('scan'),
+              primary: false,
             },
             {
               key: 'program' as const,
@@ -136,6 +137,7 @@ export default function ReportingProjectPage() {
                 setCurrentProgramDraft(null);
                 setWorkflow('program');
               },
+              primary: false,
             },
             {
               key: 'drafts' as const,
@@ -144,13 +146,14 @@ export default function ReportingProjectPage() {
                 await fetchDrafts();
                 setWorkflow('drafts');
               },
+              primary: false,
             },
           ].map((item) => (
             <button
               key={item.key}
               type="button"
               onClick={item.action}
-              className="w-full rounded-xl bg-white border border-green-200 py-3 px-4 text-start font-medium text-gray-900 hover:border-brand-blue"
+              className={item.primary ? 'app-action-primary' : 'app-action'}
             >
               {item.label}
             </button>
@@ -159,7 +162,7 @@ export default function ReportingProjectPage() {
       )}
 
       {workflow === 'fill' && (
-        <div className="bg-white rounded-xl border border-green-100 p-4">
+        <div className="app-panel p-4">
           <ReportingForm
             errId={project.err_id}
             reportId={activeReportId}
@@ -172,13 +175,13 @@ export default function ReportingProjectPage() {
       )}
 
       {workflow === 'scan' && (
-        <div className="bg-white rounded-xl border border-green-100 p-4">
+        <div className="app-panel p-4">
           <ScanForm project={project} onReturnToMenu={() => setWorkflow('menu')} />
         </div>
       )}
 
       {workflow === 'program' && (
-        <div className="bg-white rounded-xl border border-green-100 p-4">
+        <div className="app-panel p-4">
           <ProgramReportForm
             project={project}
             onReturnToMenu={() => setWorkflow('menu')}
@@ -189,7 +192,7 @@ export default function ReportingProjectPage() {
       )}
 
       {workflow === 'drafts' && (
-        <div className="space-y-6 bg-white rounded-xl border border-green-100 p-4">
+        <div className="space-y-6 app-panel p-4">
           <div>
             <h3 className="font-semibold mb-3">{t('financial.draftsTitle', 'Financial drafts')}</h3>
             <FinancialReportDrafts

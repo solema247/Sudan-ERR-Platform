@@ -72,17 +72,18 @@ const OfflineMode: React.FC = () => {
   return (
     <AppShell title={t('instructions_title', 'Offline mode')}>
       <div
-        className={`rounded-lg px-3 py-2 text-sm text-white mb-4 ${
-          isOnline ? 'bg-green-600' : 'bg-red-600'
+        className={`rounded-2xl px-4 py-2.5 text-sm font-semibold mb-4 ${
+          isOnline ? 'bg-brand-deep text-white' : 'bg-red-600 text-white'
         }`}
       >
         {isOnline ? t('status_online', 'Online') : t('status_offline', 'Offline')}
       </div>
 
-      <div className="bg-white rounded-xl border border-green-100 p-4 mb-4 space-y-2 text-sm text-gray-700">
-        <p>{t('instructions_step_1', 'Fill the form even when offline.')}</p>
-        <p>{t('instructions_step_2', 'Required fields must be completed.')}</p>
-        <p>{t('instructions_step_3', 'Queued forms sync automatically when you are back online.')}</p>
+      <div className="app-panel p-4 mb-4 space-y-2 text-sm text-ink-muted">
+        <p className="app-section-label mb-2">How it works</p>
+        <p className="mb-1">{t('instructions_step_1', 'Fill the form even when offline.')}</p>
+        <p className="mb-1">{t('instructions_step_2', 'Required fields must be completed.')}</p>
+        <p className="mb-0">{t('instructions_step_3', 'Queued forms sync automatically when you are back online.')}</p>
       </div>
 
       {submissionMessage && (
@@ -95,7 +96,7 @@ const OfflineMode: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
-          className="bg-brand-deep text-white font-medium py-2.5 px-5 rounded-lg"
+          className="bg-brand-deep text-white font-semibold py-2.5 px-5 rounded-2xl shadow-soft"
         >
           {t('open_form_button', 'Open offline form')}
         </button>
@@ -104,7 +105,7 @@ const OfflineMode: React.FC = () => {
             type="button"
             onClick={syncNow}
             disabled={syncing}
-            className="bg-white border border-green-200 text-brand-deep font-medium py-2.5 px-5 rounded-lg disabled:opacity-50"
+            className="bg-white border border-green-200 text-brand-deep font-semibold py-2.5 px-5 rounded-2xl disabled:opacity-50"
           >
             {syncing ? 'Syncing…' : 'Sync now'}
           </button>
@@ -112,8 +113,8 @@ const OfflineMode: React.FC = () => {
       </div>
 
       <div className="space-y-4">
-        <section className="bg-white rounded-xl border border-green-100 p-4">
-          <h2 className="font-semibold text-gray-900 mb-3">
+        <section className="app-panel p-4">
+          <h2 className="font-bold text-ink mb-3">
             {t('queued_forms_title', 'Queued')} ({queuedForms.length})
           </h2>
           {queuedForms.length === 0 ? (
@@ -146,9 +147,9 @@ const OfflineMode: React.FC = () => {
           )}
         </section>
 
-        <section className="bg-white rounded-xl border border-green-100 p-4">
+        <section className="app-panel p-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-gray-900">
+            <h2 className="font-bold text-ink">
               {t('submitted_forms_title', 'Synced')} ({submittedForms.length})
             </h2>
             {submittedForms.length > 0 && (

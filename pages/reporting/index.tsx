@@ -21,9 +21,15 @@ export default function ReportingIndexPage() {
 
   return (
     <AppShell title={t('reporting', 'Reporting')}>
-      <p className="text-sm text-gray-600 mb-4">
-        {t('selectProject', 'Select a project to fill or scan a report.')}
-      </p>
+      <div className="mb-4">
+        <p className="app-section-label mb-1">Reporting</p>
+        <h2 className="text-lg font-bold text-ink leading-snug mb-1">
+          {t('selectProject', 'Select a project')}
+        </h2>
+        <p className="text-sm text-ink-muted mb-0">
+          Search or filter, then open a project to fill or scan a report.
+        </p>
+      </div>
       <ProjectIndex
         token={token}
         mode="reporting"

@@ -21,7 +21,7 @@ export default function FeedbackPage() {
 
   return (
     <AppShell title={t('feedback', 'Feedback')}>
-      <div className="bg-white rounded-xl border border-green-100 p-4">
+      <div className="app-panel p-4">
         <FeedbackForm onReturnToMenu={() => router.push('/home')} />
       </div>
     </AppShell>

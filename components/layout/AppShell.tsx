@@ -52,7 +52,6 @@ function isActive(item: NavItem, pathname: string) {
 type AppShellProps = {
   children: ReactNode;
   title?: string;
-  /** Hide chrome for calculator PIN / login-like pages */
   bare?: boolean;
 };
 
@@ -65,51 +64,52 @@ const AppShell: React.FC<AppShellProps> = ({ children, title, bare }) => {
     return <>{children}</>;
   }
 
-  const navLinkClass = (active: boolean, desktop: boolean) =>
-    desktop
-      ? `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-          active ? 'bg-brand-deep text-white' : 'text-gray-700 hover:bg-green-50'
-        }`
-      : `flex flex-col items-center justify-center gap-0.5 flex-1 py-2 text-[10px] sm:text-xs ${
-          active ? 'text-brand-deep' : 'text-gray-500'
-        }`;
-
   return (
-    <div className={`min-h-screen bg-green-50 flex ${isDesktop ? 'flex-row' : 'flex-col'}`}>
-      {/* Desktop sidebar */}
+    <div className={`min-h-screen app-page-bg flex ${isDesktop ? 'flex-row' : 'flex-col'}`}>
       {isDesktop && (
-        <aside className="w-60 shrink-0 bg-white border-r border-green-100 flex flex-col sticky top-0 h-screen">
-          <div className="flex items-center gap-2 px-4 py-4 border-b border-green-100">
-            <img src={LogoImage} alt="ERR" className="h-9 w-9 object-contain" />
+        <aside className="w-64 shrink-0 bg-white/90 backdrop-blur-sm border-r border-green-100/80 flex flex-col sticky top-0 h-screen shadow-soft">
+          <div className="flex items-center gap-3 px-5 py-5 border-b border-green-100/80">
+            <div className="h-10 w-10 rounded-2xl bg-surface-muted flex items-center justify-center overflow-hidden">
+              <img src={LogoImage} alt="ERR" className="h-8 w-8 object-contain" />
+            </div>
             <div>
               <p className="font-bold text-brand-deep text-sm leading-tight">ERR App</p>
-              <p className="text-[11px] text-gray-500">Emergency Response Rooms</p>
+              <p className="text-[11px] text-ink-faint">Workspaces & reports</p>
             </div>
           </div>
-          <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+            <p className="app-section-label px-3 mb-2 mt-1">Navigate</p>
             {NAV.map((item) => {
               const Icon = item.icon;
               const active = isActive(item, router.pathname);
               return (
-                <Link key={item.href} href={item.href} className={navLinkClass(active, true)}>
-                  <Icon className="h-5 w-5 shrink-0" />
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
+                    active
+                      ? 'bg-brand-deep text-white shadow-soft'
+                      : 'text-ink-muted hover:bg-surface-muted hover:text-ink'
+                  }`}
+                >
+                  <Icon className="h-5 w-5 shrink-0 opacity-90" />
                   {item.label}
                 </Link>
               );
             })}
           </nav>
-          <div className="p-3 border-t border-green-100 space-y-2">
+          <div className="p-3 border-t border-green-100/80 space-y-1">
             <button
               type="button"
               onClick={() => setLayout('mobile')}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-green-50"
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-muted hover:bg-surface-muted"
             >
               <Smartphone className="h-4 w-4" />
               Mobile layout
             </button>
             <Link
               href="/login"
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-green-50"
+              className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-muted hover:bg-surface-muted"
             >
               <LogOut className="h-4 w-4" />
               Sign out
@@ -121,53 +121,74 @@ const AppShell: React.FC<AppShellProps> = ({ children, title, bare }) => {
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         <OfflineStatusIndicator />
 
-        {/* Mobile / shared top bar */}
-        <header className="sticky top-0 z-40 bg-white border-b border-green-100 px-4 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 min-w-0">
+        <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-green-100/80 px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             {!isDesktop && (
-              <img src={LogoImage} alt="" className="h-8 w-8 object-contain shrink-0" />
+              <div className="h-9 w-9 rounded-xl bg-surface-muted flex items-center justify-center shrink-0">
+                <img src={LogoImage} alt="" className="h-7 w-7 object-contain" />
+              </div>
             )}
-            <h1 className="font-semibold text-brand-deep truncate text-base sm:text-lg">
-              {title || 'ERR App'}
-            </h1>
+            <div className="min-w-0">
+              <h1 className="font-bold text-ink truncate text-base sm:text-lg leading-tight">
+                {title || 'ERR App'}
+              </h1>
+              {!isDesktop && (
+                <p className="text-[11px] text-ink-faint truncate">ERR workspace</p>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1 shrink-0 rounded-xl bg-surface-muted/80 p-0.5">
             <button
               type="button"
               title="Mobile layout"
               onClick={() => setLayout('mobile')}
-              className={`p-2 rounded-lg ${!isDesktop ? 'bg-green-100 text-brand-deep' : 'text-gray-400 hover:bg-green-50'}`}
+              className={`p-2 rounded-lg transition-colors ${
+                !isDesktop ? 'bg-white text-brand-deep shadow-soft' : 'text-ink-faint hover:text-ink'
+              }`}
             >
-              <Smartphone className="h-5 w-5" />
+              <Smartphone className="h-4 w-4" />
             </button>
             <button
               type="button"
               title="Desktop layout"
               onClick={() => setLayout('desktop')}
-              className={`p-2 rounded-lg ${isDesktop ? 'bg-green-100 text-brand-deep' : 'text-gray-400 hover:bg-green-50'}`}
+              className={`p-2 rounded-lg transition-colors ${
+                isDesktop ? 'bg-white text-brand-deep shadow-soft' : 'text-ink-faint hover:text-ink'
+              }`}
             >
-              <Monitor className="h-5 w-5" />
+              <Monitor className="h-4 w-4" />
             </button>
           </div>
         </header>
 
         <main
-          className={`flex-1 w-full mx-auto ${
-            isDesktop ? 'max-w-6xl px-6 py-6' : 'max-w-lg px-4 py-4 pb-24'
+          className={`flex-1 w-full mx-auto animate-fade-up ${
+            isDesktop ? 'max-w-6xl px-6 py-6' : 'max-w-lg px-4 py-5 pb-28'
           }`}
         >
           {children}
         </main>
 
-        {/* Mobile bottom nav */}
         {!isDesktop && (
-          <nav className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-green-100 flex safe-area-pb">
+          <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-green-100/80 flex px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(74,103,152,0.06)]">
             {NAV.slice(0, 5).map((item) => {
               const Icon = item.icon;
               const active = isActive(item, router.pathname);
               return (
-                <Link key={item.href} href={item.href} className={navLinkClass(active, false)}>
-                  <Icon className={`h-5 w-5 ${active ? 'text-brand-deep' : ''}`} />
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2.5 text-[10px] sm:text-xs font-semibold ${
+                    active ? 'text-brand-deep' : 'text-ink-faint'
+                  }`}
+                >
+                  <span
+                    className={`rounded-xl p-1.5 ${
+                      active ? 'bg-brand-orangeSoft text-brand-deep' : ''
+                    }`}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </span>
                   <span>{item.label}</span>
                 </Link>
               );

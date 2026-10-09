@@ -11,36 +11,36 @@ const tiles = [
     href: '/projects',
     labelKey: 'projects',
     fallback: 'Projects',
-    desc: 'Apply for funding and check project status',
     icon: FolderKanban,
+    accent: 'bg-brand-orangeSoft text-brand-darker',
   },
   {
     href: '/reporting',
     labelKey: 'reporting',
     fallback: 'Reporting',
-    desc: 'Fill, scan, or draft financial and program reports',
     icon: FileText,
+    accent: 'bg-surface-muted text-brand-deep',
   },
   {
     href: '/dashboard',
     labelKey: 'dashboard',
     fallback: 'Dashboard',
-    desc: 'View analytics for your room',
     icon: BarChart3,
+    accent: 'bg-surface-muted text-brand-deep',
   },
   {
     href: '/feedback',
     labelKey: 'feedback',
     fallback: 'Feedback',
-    desc: 'Send feedback or open a support ticket',
     icon: MessageSquare,
+    accent: 'bg-surface-muted text-brand-deep',
   },
   {
     href: '/offline-mode',
     labelKey: 'offline',
-    fallback: 'Offline / Queue',
-    desc: 'Fill forms offline and sync when connected',
+    fallback: 'Offline',
     icon: WifiOff,
+    accent: 'bg-surface-warm text-brand-darker',
   },
 ];
 
@@ -51,36 +51,40 @@ export default function HomePage() {
   if (!ready) {
     return (
       <AppShell title="Home">
-        <p className="text-gray-500 text-sm">Loading…</p>
+        <p className="text-ink-muted text-sm">Loading…</p>
       </AppShell>
     );
   }
 
   return (
-    <AppShell title={t('chooseMainMenu', 'Home')}>
-      <p className="text-gray-600 text-sm mb-6">
-        {t('introMessage', 'Welcome. Choose what you want to work on.')}
-      </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <AppShell title="Home">
+      <div className="mb-5">
+        <h2 className="text-lg font-bold text-ink leading-snug mb-1">
+          What do you want to work on?
+        </h2>
+        <p className="text-sm text-ink-muted mb-0">
+          Apply for projects, submit reports, check your dashboard, or work offline.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
         {tiles.map((tile) => {
           const Icon = tile.icon;
+          const isWide = tile.href === '/offline-mode';
           return (
             <Link
               key={tile.href}
               href={tile.href}
-              className="rounded-xl bg-white border border-green-100 p-4 shadow-sm hover:border-brand-blue hover:shadow transition-all"
+              className={`group app-panel flex flex-col items-center justify-center text-center gap-3 p-5 min-h-[7.5rem] hover:shadow-lift hover:border-brand-blue/40 active:scale-[0.98] transition-all duration-150 ${
+                isWide ? 'col-span-2 flex-row justify-start text-start px-5 py-4 min-h-0' : ''
+              }`}
             >
-              <div className="flex items-start gap-3">
-                <span className="rounded-lg bg-green-50 p-2 text-brand-deep">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <span>
-                  <span className="block font-semibold text-gray-900">
-                    {t(tile.labelKey, tile.fallback)}
-                  </span>
-                  <span className="block text-xs text-gray-500 mt-1">{tile.desc}</span>
-                </span>
-              </div>
+              <span className={`rounded-2xl p-3 ${tile.accent}`}>
+                <Icon className="h-6 w-6" />
+              </span>
+              <span className="font-bold text-ink text-sm leading-tight">
+                {t(tile.labelKey, tile.fallback)}
+              </span>
             </Link>
           );
         })}

@@ -14,8 +14,8 @@ const UpdateBanner: React.FC = () => {
 
   return (
     <div className="fixed bottom-20 md:bottom-4 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
-      <div className="pointer-events-auto flex items-center gap-3 rounded-lg bg-brand-deep text-white px-4 py-3 shadow-lg max-w-md w-full">
-        <p className="text-sm flex-1">A new version is available.</p>
+      <div className="pointer-events-auto flex items-center gap-3 rounded-2xl bg-brand-deep text-white px-4 py-3 shadow-lift max-w-md w-full">
+        <p className="text-sm flex-1 mb-0">A new version is available.</p>
         <button
           type="button"
           className="text-sm font-semibold underline"
