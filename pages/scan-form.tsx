@@ -105,7 +105,7 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
       <p className="text-sm text-gray-600">
         {t(
           'instruction',
-          'Upload a photo or PDF of an F4 financial report. We extract fields with Gemini (same pipeline as MAP).'
+          'Upload a photo or PDF of an F4 financial report. We extract the fields for you to review.'
         )}
       </p>
 

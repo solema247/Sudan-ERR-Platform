@@ -3,8 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
   Home,
-  FolderKanban,
-  FileText,
+  Layers,
   BarChart3,
   MessageSquare,
   WifiOff,
@@ -28,16 +27,10 @@ type NavItem = {
 const NAV: NavItem[] = [
   { href: '/home', label: 'Home', icon: Home },
   {
-    href: '/projects',
-    label: 'Projects',
-    icon: FolderKanban,
-    match: (p) => p.startsWith('/projects'),
-  },
-  {
-    href: '/reporting',
-    label: 'Reporting',
-    icon: FileText,
-    match: (p) => p.startsWith('/reporting'),
+    href: '/f-system',
+    label: 'F-System',
+    icon: Layers,
+    match: (p) => p.startsWith('/f-system') || p.startsWith('/projects') || p.startsWith('/reporting'),
   },
   { href: '/dashboard', label: 'Dashboard', icon: BarChart3 },
   { href: '/feedback', label: 'Feedback', icon: MessageSquare },
@@ -82,19 +75,46 @@ const AppShell: React.FC<AppShellProps> = ({ children, title, bare }) => {
             {NAV.map((item) => {
               const Icon = item.icon;
               const active = isActive(item, router.pathname);
+              const isFSystem = item.href === '/f-system';
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
-                    active
-                      ? 'bg-brand-deep text-white shadow-soft'
-                      : 'text-ink-muted hover:bg-surface-muted hover:text-ink'
-                  }`}
-                >
-                  <Icon className="h-5 w-5 shrink-0 opacity-90" />
-                  {item.label}
-                </Link>
+                <div key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
+                      active && !isFSystem
+                        ? 'bg-brand-deep text-white shadow-soft'
+                        : active && isFSystem
+                          ? 'bg-surface-muted text-brand-deep'
+                          : 'text-ink-muted hover:bg-surface-muted hover:text-ink'
+                    }`}
+                  >
+                    <Icon className="h-5 w-5 shrink-0 opacity-90" />
+                    {item.label}
+                  </Link>
+                  {isFSystem && (
+                    <div className="ms-4 mt-0.5 mb-1 space-y-0.5 border-s border-green-100 ps-2">
+                      {[
+                        { href: '/f-system/f1', label: 'F1 Work Plans' },
+                        { href: '/f-system/f4-f5', label: 'F4 & F5 Reporting' },
+                      ].map((sub) => {
+                        const subActive = router.pathname.startsWith(sub.href);
+                        return (
+                          <Link
+                            key={sub.href}
+                            href={sub.href}
+                            className={`block rounded-lg px-3 py-2 text-xs font-semibold ${
+                              subActive
+                                ? 'bg-brand-deep text-white'
+                                : 'text-ink-muted hover:bg-surface-muted hover:text-ink'
+                            }`}
+                          >
+                            {sub.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </nav>

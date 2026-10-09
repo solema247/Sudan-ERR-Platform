@@ -106,7 +106,7 @@ const ProjectIndex: React.FC<ProjectIndexProps> = ({
       return;
     }
     if (mode === 'reporting') {
-      router.push(`/reporting/${project.id}`);
+      router.push(`/f-system/f4-f5/${project.id}`);
     }
   };
 
