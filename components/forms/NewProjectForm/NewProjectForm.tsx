@@ -3,10 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Formik, Form, Field, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import Button from '../../ui/Button';
-import FormBubble from '../../ui/FormBubble';
 import NewProjectActivities from './NewProjectActivities';
 import { newSupabase } from '../../../services/newSupabaseClient';
 import { useRouter } from 'next/router';
+
+const FIELD = 'app-input !py-2 text-sm';
 
 /**
  * F1 Form
@@ -58,23 +59,21 @@ interface UserDataResponse {
     emergency_rooms: EmergencyRoom;
 }
 
-interface FundingCycle {
-    id: string;
-    name: string;
-    cycle_number: number;
-    year: number;
-    start_date?: string | null;
-    end_date?: string | null;
-    state_amount?: number | null;
-    allocation_id?: string | null;
-}
+export type F1RoomScope = {
+  emergency_room_id: string;
+  grant_segment: string;
+  state_name?: string;
+  locality?: string;
+  room_label?: string;
+};
 
 interface NewProjectApplicationProps {
     onReturnToMenu: () => void;
     initialValues?: Project | null;
     projectToEdit?: string;
-    selectedFundingCycle?: FundingCycle | null;
     onDraftSubmitted?: () => void;
+    /** Selected room + grant segment from Create flow (OCR or manual scope) */
+    roomScope?: F1RoomScope | null;
 }
 
 interface ConfirmDialogProps {
@@ -84,24 +83,26 @@ interface ConfirmDialogProps {
 }
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ isOpen, onConfirm, onCancel }) => {
-  const { t } = useTranslation('projectApplication');
+  const { t } = useTranslation('project-application');
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg max-w-md">
-        <h3 className="text-xl font-bold mb-4">{t('confirmDialog.title')}</h3>
-        <p className="mb-6">{t('confirmDialog.message')}</p>
-        <div className="flex justify-end space-x-4">
+    <div className="fixed inset-0 bg-[#0f1828]/85 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="app-panel p-6 max-w-md w-full">
+        <h3 className="text-xl font-bold mb-4 text-white">{t('confirmDialog.title')}</h3>
+        <p className="mb-6 text-[#a8b6cc]">{t('confirmDialog.message')}</p>
+        <div className="flex justify-end gap-3">
           <button
+            type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+            className="px-4 py-2 text-sm font-semibold text-[#a8b6cc] hover:text-white"
           >
             {t('confirmDialog.review')}
           </button>
           <button
+            type="button"
             onClick={onConfirm}
-            className="px-4 py-2 bg-primaryGreen text-white rounded hover:bg-primaryGreen-dark"
+            className="px-4 py-2 text-sm font-bold rounded-xl bg-brand-orange text-[#152238] hover:bg-[#ffb88a]"
           >
             {t('confirmDialog.confirm')}
           </button>
@@ -115,10 +116,10 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
     onReturnToMenu,
     initialValues,
     projectToEdit,
-    selectedFundingCycle,
-    onDraftSubmitted
+    onDraftSubmitted,
+    roomScope = null,
 }) => {
-   const { t, i18n } = useTranslation('projectApplication');
+   const { t, i18n } = useTranslation('project-application');
    const [availableRegions, setAvailableRegions] = useState([]);
    const [localitiesDict, setLocalitiesDict] = useState({});
    const [relevantLocalities, setRelevantLocalities] = useState([]);
@@ -147,37 +148,48 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
            return;
          }
 
-         // Get user data with ERR name from the emergency_rooms table
+         // Prefer room chosen in Create flow (admin/OCR/manual scope)
+         if (roomScope?.emergency_room_id) {
+           setUserErrId(roomScope.emergency_room_id);
+           setUserErrName(roomScope.room_label || roomScope.emergency_room_id);
+           if (roomScope.state_name) setRoomState(roomScope.state_name);
+           if (roomScope.locality) setRoomLocality(roomScope.locality);
+           return;
+         }
+
+         // Own room (base_err) — left join so admin without room still loads
          const { data, error: userError } = await newSupabase
            .from('users')
            .select(`
              err_id,
-             emergency_rooms!inner (
+             emergency_rooms (
                name,
                name_ar,
                states ( state_name, state_name_ar, locality, locality_ar )
              )
            `)
            .eq('auth_user_id', session.user.id)
-           .single<UserDataResponse>();
+           .single();
 
          if (userError || !data) {
            console.error('Error fetching user data:', userError);
            return;
          }
 
-         setUserErrId(data.err_id);
-         // Set ERR name based on current language
-         const errName = i18n.language === 'ar' && data.emergency_rooms.name_ar 
-           ? data.emergency_rooms.name_ar 
-           : data.emergency_rooms.name;
-         setUserErrName(errName || '');
-         // Fill in state and locality from the room, in the form's language (the dropdowns use the same names)
-         const roomPlace = data.emergency_rooms.states;
-         if (roomPlace) {
-           const isAr = i18n.language === 'ar';
-           setRoomState((isAr ? roomPlace.state_name_ar : roomPlace.state_name) || roomPlace.state_name || '');
-           setRoomLocality((isAr ? roomPlace.locality_ar : roomPlace.locality) || roomPlace.locality || '');
+         setUserErrId(data.err_id || '');
+         const er = data.emergency_rooms as any;
+         const room = Array.isArray(er) ? er[0] : er;
+         if (room) {
+           const errName = i18n.language === 'ar' && room.name_ar
+             ? room.name_ar
+             : room.name;
+           setUserErrName(errName || '');
+           const roomPlace = Array.isArray(room.states) ? room.states[0] : room.states;
+           if (roomPlace) {
+             const isAr = i18n.language === 'ar';
+             setRoomState((isAr ? roomPlace.state_name_ar : roomPlace.state_name) || roomPlace.state_name || '');
+             setRoomLocality((isAr ? roomPlace.locality_ar : roomPlace.locality) || roomPlace.locality || '');
+           }
          }
        } catch (error) {
          console.error('Session validation error:', error);
@@ -185,13 +197,6 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
      };
 
      validateSession();
-
-     /**
-      * Fetches Select options for activities, expenses and localities (which are based on what state you have selected.)
-      * 
-      * "intendedBeneficiaries": "Intended Beneficiaries",
-    "estimatedBeneficiaries": "Estimated Beneficiaries",
-      */
 
      const fetchOptions = async () => {
        setLoading(true);
@@ -247,7 +252,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
        }
      };
      fetchOptions();
-   }, [i18n.language, t, router, editingProject?.state, initialValues?.state]);
+   }, [i18n.language, t, router, editingProject?.state, initialValues?.state, roomScope?.emergency_room_id, roomScope?.grant_segment]);
 
    useEffect(() => {
      const fetchProjectDetails = async () => {
@@ -342,11 +347,10 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
      programOfficerPhone: Yup.string().required(t('validation.required'))
    });
 
-   // Helper component for required field labels
    const RequiredLabel = ({ children, required = false }) => (
-     <label className="font-bold block text-base text-black-bold mb-1">
+     <label className="font-semibold block text-xs text-[#a8b6cc] mb-1">
        {children}
-       {required && <span className="text-red-500 ml-1">*</span>}
+       {required && <span className="text-brand-orange ml-0.5">*</span>}
      </label>
    );
 
@@ -406,8 +410,8 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
         dirty, 
         currentLanguage, 
         err,
-        funding_cycle_id,
-        cycle_state_allocation_id,
+        funding_cycle_id: _fundingCycleId,
+        cycle_state_allocation_id: _cycleAllocationId,
         planned_activities,
         programOfficerName,
         programOfficerPhone,
@@ -423,14 +427,12 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
       
       if (planned_activities && Array.isArray(planned_activities)) {
         planned_activities.forEach(activity => {
-          // Extract expenses from each activity
           if (activity.expenses && Array.isArray(activity.expenses)) {
-            // Transform expenses to match Mutual Aid Portal format
             const transformedExpenses = activity.expenses.map(expense => {
               const { total, expense: expenseId, frequency, unitPrice, description, ...otherFields } = expense;
               return {
                 ...otherFields,
-                total_cost: total, // Transform 'total' to 'total_cost'
+                total_cost: total,
                 expense: expenseId,
                 frequency,
                 unitPrice,
@@ -442,21 +444,32 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
         });
       }
 
-      // Cycle-based flow: donor/grant call assignment happens later (back-office)
-      let donorId = null;
-      
-      // Format data to match database schema
+      const roomId =
+        (otherValues as any).emergency_room_id ||
+        roomScope?.emergency_room_id ||
+        err ||
+        userErrId;
+      const grantSegment =
+        (otherValues as any).grant_segment ||
+        roomScope?.grant_segment ||
+        (initialValues as any)?.grant_segment ||
+        null;
+
+      // Room-linked; funding cycle/grant call still assigned later in portal
       const projectData = {
         ...otherValues,
-        err_id: err,
-        emergency_room_id: err, // Set emergency_room_id to same as err_id
-        funding_cycle_id: selectedFundingCycle?.id || funding_cycle_id,
-        cycle_state_allocation_id: cycle_state_allocation_id || selectedFundingCycle?.allocation_id || null,
-        donor_id: donorId,
-        planned_activities: planned_activities, // Keep as-is for dependencies
+        err_id: roomId,
+        emergency_room_id: roomId,
+        grant_segment: grantSegment,
+        funding_cycle_id: null,
+        cycle_state_allocation_id: null,
+        grant_call_id: null,
+        grant_call_state_allocation_id: null,
+        donor_id: null,
+        planned_activities: planned_activities,
         expenses: extractedExpenses.length > 0 ? extractedExpenses : null,
         funding_status: 'unassigned',
-        source: 'err_app', // Identify projects uploaded through this app
+        source: 'err_app',
         program_officer_name: programOfficerName,
         program_officer_phone: programOfficerPhone,
         reporting_officer_name: reportingOfficerName,
@@ -467,7 +480,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
         status: 'pending',
         submitted_at: new Date().toISOString(),
         last_modified: new Date().toISOString(),
-        created_by: userErrId,
+        created_by: userErrId || roomId,
         language: currentLanguage || 'en'
       };
 
@@ -527,19 +540,19 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
    return (
      <>
        {isFormSubmitted ? (
-         <div className="bg-white p-4 rounded-lg">
-           <p className="text-black-bold text-base mb-4">{t('formSubmitted')}</p>
-           <div className="flex justify-center">
-             <Button text={t('returnToMenu')} onClick={onReturnToMenu} />
-           </div>
+         <div className="space-y-4">
+           <p className="text-white text-base">{t('formSubmitted')}</p>
+           <button type="button" onClick={onReturnToMenu} className="app-action-primary">
+             {t('returnToMenu')}
+           </button>
          </div>
        ) : (
-         <FormBubble removeBoxShadow>
+         <div>
            {editingProject?.feedback && (
-             <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-               <h3 className="text-lg font-semibold mb-2">{t('feedback.title')}</h3>
-               <p className="mb-2">{editingProject.feedback.feedback_text}</p>
-               <p className="text-sm text-gray-600">
+             <div className="mb-6 p-4 rounded-2xl bg-[#1c2d48] border border-brand-orange/30">
+               <h3 className="text-lg font-semibold mb-2 text-white">{t('feedback.title')}</h3>
+               <p className="mb-2 text-[#e8eef8]">{editingProject.feedback.feedback_text}</p>
+               <p className="text-sm text-[#8a97ab]">
                  {t('feedback.providedBy')}: {editingProject.feedback.created_by.full_name}
                </p>
              </div>
@@ -547,9 +560,11 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
            <Formik
              initialValues={{
                date: editingProject?.date || initialValues?.date || '',
-               err: userErrId,
-               state: editingProject?.state || initialValues?.state || roomState || '',
-               locality: editingProject?.locality || initialValues?.locality || (editingProject?.state || initialValues?.state ? '' : roomLocality) || '',
+               err: roomScope?.emergency_room_id || (initialValues as any)?.emergency_room_id || userErrId,
+               emergency_room_id: roomScope?.emergency_room_id || (initialValues as any)?.emergency_room_id || userErrId,
+               grant_segment: roomScope?.grant_segment || (initialValues as any)?.grant_segment || '',
+               state: editingProject?.state || initialValues?.state || roomScope?.state_name || roomState || '',
+               locality: editingProject?.locality || initialValues?.locality || roomScope?.locality || (editingProject?.state || initialValues?.state ? '' : roomLocality) || '',
                currency: editingProject?.currency || (initialValues as any)?.currency || 'USD',
                project_objectives: editingProject?.project_objectives || initialValues?.project_objectives || '',
                intended_beneficiaries: editingProject?.intended_beneficiaries || initialValues?.intended_beneficiaries || '',
@@ -558,175 +573,148 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                estimated_timeframe: editingProject?.estimated_timeframe || initialValues?.estimated_timeframe || '',
                additional_support: editingProject?.additional_support || initialValues?.additional_support || '',
                banking_details: editingProject?.banking_details || initialValues?.banking_details || '',
-               programOfficerName: editingProject?.program_officer_name || initialValues?.program_officer_name || '',
-               programOfficerPhone: editingProject?.program_officer_phone || initialValues?.program_officer_phone || '',
-               reportingOfficerName: editingProject?.reporting_officer_name || initialValues?.reporting_officer_name || '',
-               reportingOfficerPhone: editingProject?.reporting_officer_phone || initialValues?.reporting_officer_phone || '',
-               financeOfficerName: editingProject?.finance_officer_name || initialValues?.finance_officer_name || '',
-               financeOfficerPhone: editingProject?.finance_officer_phone || initialValues?.finance_officer_phone || '',
-               funding_cycle_id: (initialValues as any)?.funding_cycle_id || '',
-               cycle_state_allocation_id: (initialValues as any)?.cycle_state_allocation_id || '',
+               programOfficerName: editingProject?.program_officer_name || (initialValues as any)?.programOfficerName || initialValues?.program_officer_name || '',
+               programOfficerPhone: editingProject?.program_officer_phone || (initialValues as any)?.programOfficerPhone || initialValues?.program_officer_phone || '',
+               reportingOfficerName: editingProject?.reporting_officer_name || (initialValues as any)?.reportingOfficerName || initialValues?.reporting_officer_name || '',
+               reportingOfficerPhone: editingProject?.reporting_officer_phone || (initialValues as any)?.reportingOfficerPhone || initialValues?.reporting_officer_phone || '',
+               financeOfficerName: editingProject?.finance_officer_name || (initialValues as any)?.financeOfficerName || initialValues?.finance_officer_name || '',
+               financeOfficerPhone: editingProject?.finance_officer_phone || (initialValues as any)?.financeOfficerPhone || initialValues?.finance_officer_phone || '',
              }}
              validationSchema={validationSchema}
              onSubmit={handleSubmit}
              enableReinitialize={true}
            >
              {({ isSubmitting, values, setFieldValue, errors, touched, dirty }) => {
-               // Remove the useEffect here and handle state changes in onChange
                return (
-                 <Form className="space-y-3 bg-white p-3 rounded-lg">
-                   <p className="text-3xl">{t('newProjectApplication')}</p>
-
-                   {/* Date */}
+                 <Form className="space-y-2.5">
                    <div className="mb-2">
-                     <RequiredLabel required>{t('date')}</RequiredLabel>
-                     <Field name="date" type="date" className="text-sm w-full p-2 border rounded-lg" disabled={isLoading} />
-                     {touched.date && errors.date && (
-                       <div className="text-red-500 text-sm mt-1">{String(errors.date)}</div>
-                     )}
+                     <p className="app-section-label mb-0.5">F1</p>
+                     <h2 className="text-lg font-bold text-white">{t('newProjectApplication')}</h2>
                    </div>
 
-                                       {/* ERR ID */}
-                    <div className="mb-2">
-                      <RequiredLabel>{t('errId')}</RequiredLabel>
-                      <div className="text-sm w-full p-2 border rounded-lg bg-gray-100">
-                        {userErrName}
-                      </div>
-                      <Field
-                        name="err"
-                        type="hidden"
-                        value={userErrId}
-                      />
-                    </div>
+                   <div className="grid grid-cols-2 gap-2.5">
+                     <div className="min-w-0">
+                       <RequiredLabel required>{t('date')}</RequiredLabel>
+                       <Field name="date" type="date" className={FIELD} disabled={isLoading} />
+                       {touched.date && errors.date && (
+                         <div className="text-red-300 text-xs mt-0.5">{String(errors.date)}</div>
+                       )}
+                     </div>
+                     <div className="min-w-0">
+                       <RequiredLabel>{t('errId')}</RequiredLabel>
+                       <div className={`${FIELD} bg-[#1c2d48] text-[#a8b6cc] truncate`}>
+                         {userErrName || roomScope?.room_label || values.err || '—'}
+                       </div>
+                       <Field name="err" type="hidden" />
+                       <Field name="emergency_room_id" type="hidden" />
+                       <Field name="grant_segment" type="hidden" />
+                       {(values as any).grant_segment && (
+                         <p className="text-[11px] text-[#8a97ab] mt-0.5 mb-0 truncate">
+                           {(values as any).grant_segment}
+                         </p>
+                       )}
+                     </div>
+                   </div>
 
-                    {/* Selected Funding Cycle */}
-                    {selectedFundingCycle && (
-                      <div className="mb-2">
-                        <RequiredLabel>{t('grantCall')}</RequiredLabel>
-                        <div className="text-sm w-full p-2 border rounded-lg bg-blue-50">
-                          <div className="font-semibold">{selectedFundingCycle.name} — {selectedFundingCycle.year}/#{selectedFundingCycle.cycle_number}</div>
-                          <div className="text-gray-600">Remaining: {'remaining_amount' in selectedFundingCycle && (selectedFundingCycle as any).remaining_amount != null ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((selectedFundingCycle as any).remaining_amount) : '—'}</div>
-                        </div>
-                        <Field
-                          name="funding_cycle_id"
-                          type="hidden"
-                          value={selectedFundingCycle.id}
-                        />
-                        {selectedFundingCycle.allocation_id && (
-                          <Field
-                            name="cycle_state_allocation_id"
-                            type="hidden"
-                            value={selectedFundingCycle.allocation_id}
-                          />
-                        )}
-                      </div>
-                    )}
-
-                    {/* Objectives */}
-                    <div className="mb-2">
+                   <div>
                      <RequiredLabel required>{t('projectObjectives')}</RequiredLabel>
-                     <Field 
+                     <Field
                        name="project_objectives"
-                       type="text" 
-                       className="text-sm w-full p-2 border rounded-lg" 
-                       disabled={isLoading} 
+                       as="textarea"
+                       rows={2}
+                       className={FIELD}
+                       disabled={isLoading}
                      />
                      {touched.project_objectives && errors.project_objectives && (
-                       <div className="text-red-500 text-sm mt-1">{String(errors.project_objectives)}</div>
+                       <div className="text-red-300 text-xs mt-0.5">{String(errors.project_objectives)}</div>
                      )}
                    </div>
 
-                   {/* Intended beneficiaries */}
-                    <div className="mb-2">
-                     <RequiredLabel required>{t('intendedBeneficiaries')}</RequiredLabel>
-                     <Field 
-                       name="intended_beneficiaries"
-                       type="text" 
-                       className="text-sm w-full p-2 border rounded-lg" 
-                       disabled={isLoading} 
-                     />
-                     {touched.intended_beneficiaries && errors.intended_beneficiaries && (
-                       <div className="text-red-500 text-sm mt-1">{String(errors.intended_beneficiaries)}</div>
-                     )}
-                   </div>
-
-                   {/* Estimated beneficiaries*/}
-                    <div className="mb-2">
-                     <RequiredLabel>{t('estimatedBeneficiaries')}</RequiredLabel>
-                     <Field 
-                       name="estimated_beneficiaries"
-                       type="number" 
-                       min="0"
-                       className="text-sm w-full p-2 border rounded-lg" 
-                       disabled={isLoading} 
-                     />
-                   </div>
-
-                   {/* State or region */}
-                   <div className="mb-2">
-                     <RequiredLabel required>{t('state')}</RequiredLabel>
-                     <Field
-                       name="state"
-                       as="select"
-                       className="text-sm w-full p-2 border rounded-lg"
-                       disabled={isLoading}
-                       onChange={(e) => {
-                         const selectedState = e.target.value;
-                         setFieldValue('state', selectedState);
-                         setFieldValue('locality', ''); // Reset locality when state changes
-                         if (selectedState && localitiesDict[selectedState]) {
-                           setRelevantLocalities(localitiesDict[selectedState]);
-                         } else {
-                           setRelevantLocalities([]);
-                         }
-                       }}
-                     >
-                       <option value="">{t('selectState')}</option>
-                       {availableRegions.map((state_name) => (
-                         <option key={state_name} value={state_name}>
-                           {state_name}
-                         </option>
-                       ))}
-                     </Field>
-                     {touched.state && errors.state && (
-                       <div className="text-red-500 text-sm mt-1">{String(errors.state)}</div>
-                     )}
-                   </div>
-
-                   {/* Locality*/}
-
-                   <div className="mb-2">
-                     <RequiredLabel required>{t('locality')}</RequiredLabel>
-                     <Field
-                       name="locality"
-                       as="select"
-                       className="text-sm w-full p-2 border rounded-lg"
-                       disabled={!values.state || isLoading}
-                       >
-                       <option value="">{t('selectLocality')}</option>
-                       {relevantLocalities && relevantLocalities.length > 0 ? (
-                           relevantLocalities.map((locality) => (
-                           <option key={locality} value={locality}>
-                               {locality}
-                           </option>
-                           ))
-                       ) : (
-                           <option key="no" value="Trouble getting localities">
-                           {t('troubleGettingLocalities')}
-                           </option>
+                   <div className="grid grid-cols-2 gap-2.5">
+                     <div className="min-w-0">
+                       <RequiredLabel required>{t('intendedBeneficiaries')}</RequiredLabel>
+                       <Field
+                         name="intended_beneficiaries"
+                         type="text"
+                         className={FIELD}
+                         disabled={isLoading}
+                       />
+                       {touched.intended_beneficiaries && errors.intended_beneficiaries && (
+                         <div className="text-red-300 text-xs mt-0.5">{String(errors.intended_beneficiaries)}</div>
                        )}
-                       </Field>
-                     {touched.locality && errors.locality && (
-                       <div className="text-red-500 text-sm mt-1">{String(errors.locality)}</div>
-                     )}
+                     </div>
+                     <div className="min-w-0">
+                       <RequiredLabel>{t('estimatedBeneficiaries')}</RequiredLabel>
+                       <Field
+                         name="estimated_beneficiaries"
+                         type="number"
+                         min="0"
+                         className={FIELD}
+                         disabled={isLoading}
+                       />
+                     </div>
                    </div>
 
-                   {/* Add/remove activities and their expenses */}
+                   <div className="grid grid-cols-2 gap-2.5">
+                     <div className="min-w-0">
+                       <RequiredLabel required>{t('state')}</RequiredLabel>
+                       <Field
+                         name="state"
+                         as="select"
+                         className={FIELD}
+                         disabled={isLoading}
+                         onChange={(e) => {
+                           const selectedState = e.target.value;
+                           setFieldValue('state', selectedState);
+                           setFieldValue('locality', '');
+                           if (selectedState && localitiesDict[selectedState]) {
+                             setRelevantLocalities(localitiesDict[selectedState]);
+                           } else {
+                             setRelevantLocalities([]);
+                           }
+                         }}
+                       >
+                         <option value="">{t('selectState')}</option>
+                         {availableRegions.map((state_name) => (
+                           <option key={state_name} value={state_name}>
+                             {state_name}
+                           </option>
+                         ))}
+                       </Field>
+                       {touched.state && errors.state && (
+                         <div className="text-red-300 text-xs mt-0.5">{String(errors.state)}</div>
+                       )}
+                     </div>
+                     <div className="min-w-0">
+                       <RequiredLabel required>{t('locality')}</RequiredLabel>
+                       <Field
+                         name="locality"
+                         as="select"
+                         className={FIELD}
+                         disabled={!values.state || isLoading}
+                       >
+                         <option value="">{t('selectLocality')}</option>
+                         {relevantLocalities && relevantLocalities.length > 0 ? (
+                           relevantLocalities.map((locality) => (
+                             <option key={locality} value={locality}>
+                               {locality}
+                             </option>
+                           ))
+                         ) : (
+                           <option key="no" value="Trouble getting localities">
+                             {t('troubleGettingLocalities')}
+                           </option>
+                         )}
+                       </Field>
+                       {touched.locality && errors.locality && (
+                         <div className="text-red-300 text-xs mt-0.5">{String(errors.locality)}</div>
+                       )}
+                     </div>
+                   </div>
 
-                   {/* Budget currency (no conversion: the USD grant balance only counts USD budgets) */}
-                   <div className="mb-2 pt-2">
+                   <div className="flex items-center justify-between gap-3 pt-0.5">
                      <RequiredLabel required>{t('currency.label')}</RequiredLabel>
-                     <div className="inline-flex rounded-lg border overflow-hidden" role="radiogroup" aria-label={t('currency.label')}>
+                     <div className="inline-flex rounded-lg border border-white/15 overflow-hidden" role="radiogroup" aria-label={t('currency.label')}>
                        {CURRENCIES.map((code) => (
                          <button
                            key={code}
@@ -734,194 +722,147 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                            role="radio"
                            aria-checked={values.currency === code}
                            onClick={() => setFieldValue('currency', code)}
-                           className={`px-4 py-2 text-sm font-semibold ${values.currency === code ? 'bg-brand-blue text-white' : 'bg-white text-gray-700'}`}
+                           className={`px-3 py-1.5 text-xs font-semibold ${values.currency === code ? 'bg-brand-orange text-[#152238]' : 'bg-[#152238] text-[#a8b6cc]'}`}
                          >
-                           {t(`currency.${code.toLowerCase()}`)}
+                           {code}
                          </button>
                        ))}
                      </div>
-                     <p className="text-xs text-gray-500 mt-1">{t('currency.hint')}</p>
                    </div>
 
                    <NewProjectActivities optionsActivities={optionsActivities} optionsExpenses={optionsExpenses} />
 
-                   {/* Total of all expenses across activities */}
                    {(() => {
                      const totalExpenses = (values.planned_activities || []).reduce((sum: number, activity: any) =>
                        sum + (activity?.expenses || []).reduce((s: number, e: any) => s + (Number(e?.total) || 0), 0), 0);
                      return (
-                       <div className="flex items-center justify-between p-3 rounded-lg bg-brand-orangeSoft border-s-4 border-brand-orange">
-                         <span className="font-bold">{t('totalExpenses')}</span>
-                         <span className="font-bold text-lg" dir="ltr">
+                       <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-brand-orange/20 border border-brand-orange/40">
+                         <span className="font-semibold text-sm text-white">{t('totalExpenses')}</span>
+                         <span className="font-bold text-brand-orange" dir="ltr">
                            {new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(totalExpenses)} {values.currency}
                          </span>
                        </div>
                      );
                    })()}
                    {touched.planned_activities && errors.planned_activities && (
-                     <div className="text-red-500 text-sm mt-1">
+                     <div className="text-red-300 text-xs mt-0.5">
                        {typeof errors.planned_activities === 'string' 
                          ? errors.planned_activities 
                          : t('validation.required')}
                      </div>
                    )}
 
-                   {/* Estimated timeframe */}
-
-                   <div className="mb-2">
-                     <RequiredLabel required>{t('estimatedTimeframe')}</RequiredLabel>
-                     <Field
-                       as="textarea"
-                       name="estimated_timeframe"
-                       className="text-sm w-full p-2 border rounded-lg"
-                       placeholder={t('enterEstimatedTimeframe')}
-                       disabled={isLoading}
-                     />
-                     {touched.estimated_timeframe && errors.estimated_timeframe && (
-                       <div className="text-red-500 text-sm mt-1">{String(errors.estimated_timeframe)}</div>
-                     )}
+                   <div className="grid grid-cols-2 gap-2.5">
+                     <div className="min-w-0">
+                       <RequiredLabel required>{t('estimatedTimeframe')}</RequiredLabel>
+                       <Field
+                         as="textarea"
+                         rows={2}
+                         name="estimated_timeframe"
+                         className={FIELD}
+                         placeholder={t('enterEstimatedTimeframe')}
+                         disabled={isLoading}
+                       />
+                       {touched.estimated_timeframe && errors.estimated_timeframe && (
+                         <div className="text-red-300 text-xs mt-0.5">{String(errors.estimated_timeframe)}</div>
+                       )}
+                     </div>
+                     <div className="min-w-0">
+                       <RequiredLabel>{t('additionalSupport')}</RequiredLabel>
+                       <Field
+                         as="textarea"
+                         rows={2}
+                         name="additional_support"
+                         className={FIELD}
+                         placeholder={t('enterAdditionalSupport')}
+                         disabled={isLoading}
+                       />
+                     </div>
                    </div>
 
-                   {/* Additional support */}
-
-                   <div className="mb-2">
-                     <RequiredLabel>{t('additionalSupport')}</RequiredLabel>
-                     <Field
-                       as="textarea"
-                       name="additional_support"
-                       className="text-sm w-full p-2 border rounded-lg"
-                       placeholder={t('enterAdditionalSupport')}
-                       disabled={isLoading}
-                     />
-                   </div>
-
-                   {/* Banking details */}
-                   <div className="mb-2">
+                   <div>
                      <RequiredLabel required>{t('bankDetails')}</RequiredLabel>
                      <Field
                        name="banking_details"
                        type="text"
-                       className="text-sm w-full p-2 border rounded-lg"
+                       className={FIELD}
                        placeholder={t('enterBankDetails')}
                        disabled={isLoading}
                      />
                      {touched.banking_details && errors.banking_details && (
-                       <div className="text-red-500 text-sm mt-1">{String(errors.banking_details)}</div>
+                       <div className="text-red-300 text-xs mt-0.5">{String(errors.banking_details)}</div>
                      )}
                    </div>
 
-                   {/* Add label and update the new fields section */}
-                   <div className="mb-2">
+                   <div>
                      <RequiredLabel required>{t('errMembers')}</RequiredLabel>
-                     <div className="space-y-4">
-                       {/* Program Officer */}
-                       <div className="grid grid-cols-2 gap-4">
-                         <div>
-                           <Field
-                             name="programOfficerName"
-                             type="text"
-                             placeholder={t('programOfficer.name') + ' *'}
-                             className="text-sm w-full p-2 border rounded-lg"
-                           />
-                           {touched.programOfficerName && errors.programOfficerName && (
-                             <div className="text-red-500 text-sm mt-1">{String(errors.programOfficerName)}</div>
-                           )}
-                         </div>
-                         <div>
-                           <Field
-                             name="programOfficerPhone"
-                             type="tel"
-                             placeholder={t('programOfficer.phone') + ' *'}
-                             className="text-sm w-full p-2 border rounded-lg"
-                           />
-                           {touched.programOfficerPhone && errors.programOfficerPhone && (
-                             <div className="text-red-500 text-sm mt-1">{String(errors.programOfficerPhone)}</div>
-                           )}
-                         </div>
+                     <div className="space-y-2">
+                       <div className="grid grid-cols-2 gap-2">
+                         <Field
+                           name="programOfficerName"
+                           type="text"
+                           placeholder={t('programOfficer.name') + ' *'}
+                           className={FIELD}
+                         />
+                         <Field
+                           name="programOfficerPhone"
+                           type="tel"
+                           placeholder={t('programOfficer.phone') + ' *'}
+                           className={FIELD}
+                         />
                        </div>
-
-                       {/* Reporting Officer */}
-                       <div className="grid grid-cols-2 gap-4">
+                       <div className="grid grid-cols-2 gap-2">
                          <Field
                            name="reportingOfficerName"
                            type="text"
                            placeholder={t('reportingOfficer.name')}
-                           className="text-sm w-full p-2 border rounded-lg"
+                           className={FIELD}
                          />
                          <Field
                            name="reportingOfficerPhone"
                            type="tel"
                            placeholder={t('reportingOfficer.phone')}
-                           className="text-sm w-full p-2 border rounded-lg"
+                           className={FIELD}
                          />
                        </div>
-
-                       {/* Finance Officer */}
-                       <div className="grid grid-cols-2 gap-4">
+                       <div className="grid grid-cols-2 gap-2">
                          <Field
                            name="financeOfficerName"
                            type="text"
                            placeholder={t('financeOfficer.name')}
-                           className="text-sm w-full p-2 border rounded-lg"
+                           className={FIELD}
                          />
                          <Field
                            name="financeOfficerPhone"
                            type="tel"
                            placeholder={t('financeOfficer.phone')}
-                           className="text-sm w-full p-2 border rounded-lg"
+                           className={FIELD}
                          />
                        </div>
                      </div>
                    </div>
 
-                   <div className="container py-4 px-4 mx-0 min-w-full flex flex-col items-center">
-                     {/* Add error summary above the submit button */}
+                   <div className="pt-2 flex flex-col gap-2">
                      {Object.keys(errors).length > 0 && Object.keys(touched).length > 0 && (
-                       <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4 w-full">
-                         <div className="flex">
-                           <div className="ml-3">
-                             <h3 className="text-sm font-medium text-red-800">
-                               {t('validation.pleaseFixErrors')}
-                             </h3>
-                             <div className="mt-2 text-sm text-red-700">
-                               <ul className="list-disc list-inside space-y-1">
-                                 {errors.date && touched.date && (
-                                   <li>{t('date')}</li>
-                                 )}
-                                 {errors.project_objectives && touched.project_objectives && (
-                                   <li>{t('projectObjectives')}</li>
-                                 )}
-                                 {errors.intended_beneficiaries && touched.intended_beneficiaries && (
-                                   <li>{t('intendedBeneficiaries')}</li>
-                                 )}
-                                 {errors.state && touched.state && (
-                                   <li>{t('state')}</li>
-                                 )}
-                                 {errors.locality && touched.locality && (
-                                   <li>{t('locality')}</li>
-                                 )}
-                                 {errors.planned_activities && touched.planned_activities && (
-                                   <li>{t('activities.header')}</li>
-                                 )}
-                                 {errors.estimated_timeframe && touched.estimated_timeframe && (
-                                   <li>{t('estimatedTimeframe')}</li>
-                                 )}
-                                 {errors.banking_details && touched.banking_details && (
-                                   <li>{t('bankDetails')}</li>
-                                 )}
-                                 {errors.programOfficerName && touched.programOfficerName && (
-                                   <li>{t('programOfficer.name')}</li>
-                                 )}
-                                 {errors.programOfficerPhone && touched.programOfficerPhone && (
-                                   <li>{t('programOfficer.phone')}</li>
-                                 )}
-                               </ul>
-                             </div>
-                           </div>
-                         </div>
+                       <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-4 w-full">
+                         <h3 className="text-sm font-medium text-red-300">
+                           {t('validation.pleaseFixErrors')}
+                         </h3>
+                         <ul className="mt-2 text-sm text-red-200/90 list-disc list-inside space-y-1">
+                           {errors.date && touched.date && <li>{t('date')}</li>}
+                           {errors.project_objectives && touched.project_objectives && <li>{t('projectObjectives')}</li>}
+                           {errors.intended_beneficiaries && touched.intended_beneficiaries && <li>{t('intendedBeneficiaries')}</li>}
+                           {errors.state && touched.state && <li>{t('state')}</li>}
+                           {errors.locality && touched.locality && <li>{t('locality')}</li>}
+                           {errors.planned_activities && touched.planned_activities && <li>{t('activities.header')}</li>}
+                           {errors.estimated_timeframe && touched.estimated_timeframe && <li>{t('estimatedTimeframe')}</li>}
+                           {errors.banking_details && touched.banking_details && <li>{t('bankDetails')}</li>}
+                           {errors.programOfficerName && touched.programOfficerName && <li>{t('programOfficer.name')}</li>}
+                           {errors.programOfficerPhone && touched.programOfficerPhone && <li>{t('programOfficer.phone')}</li>}
+                         </ul>
                        </div>
                      )}
-                     <div className="flex space-x-4">
+                     <div className="flex flex-col sm:flex-row gap-3 w-full">
                        <Button
                          type="button"
                          text={!dirty ? t('drafts.saved') : t('actions.saveDraft')}
@@ -941,18 +882,36 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                                    reportingOfficerPhone,
                                    financeOfficerName,
                                    financeOfficerPhone,
+                                   funding_cycle_id: _fc,
+                                   cycle_state_allocation_id: _ca,
                                    ...otherValues 
-                               } = values;
+                               } = values as any;
 
+                               const roomId =
+                                 (otherValues as any).emergency_room_id ||
+                                 roomScope?.emergency_room_id ||
+                                 err ||
+                                 userErrId;
                                const draftData = {
                                    ...Object.entries(otherValues).reduce((acc, [key, value]) => {
                                        if (value !== undefined && value !== null && value !== '') {
                                            acc[key] = value;
                                        }
                                        return acc;
-                                   }, {}),
+                                   }, {} as Record<string, unknown>),
                                    id: projectToEdit || currentDraftId,
-                                   err_id: err,
+                                   err_id: roomId,
+                                   emergency_room_id: roomId,
+                                   grant_segment:
+                                     (otherValues as any).grant_segment ||
+                                     roomScope?.grant_segment ||
+                                     null,
+                                   funding_cycle_id: null,
+                                   cycle_state_allocation_id: null,
+                                   grant_call_id: null,
+                                   grant_call_state_allocation_id: null,
+                                   donor_id: null,
+                                   funding_status: 'unassigned',
                                    program_officer_name: programOfficerName || null,
                                    program_officer_phone: programOfficerPhone || null,
                                    reporting_officer_name: reportingOfficerName || null,
@@ -961,7 +920,7 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                                    finance_officer_phone: financeOfficerPhone || null,
                                    is_draft: true,
                                    status: 'draft',
-                                   created_by: userErrId
+                                   created_by: userErrId || roomId
                                };
 
                                const response = await fetch('/api/project-drafts', {
@@ -993,20 +952,28 @@ const NewProjectForm:React.FC<NewProjectApplicationProps> = ({
                            }
                          }}
                          disabled={isSubmitting || isLoading || !dirty}
-                         className={!dirty ? 'opacity-50 cursor-not-allowed' : ''}
+                         className={`!m-0 flex-1 !rounded-xl !bg-[#1c2d48] !text-white border border-white/10 ${!dirty ? 'opacity-50 cursor-not-allowed' : ''}`}
                        />
                        <Button
                          type="submit"
                          text={t('actions.submit')}
                          disabled={isSubmitting || isLoading}
+                         className="!m-0 flex-1 !rounded-xl !bg-brand-orange !text-[#152238] font-bold hover:!bg-[#ffb88a]"
                        />
                      </div>
+                     <button
+                       type="button"
+                       onClick={onReturnToMenu}
+                       className="text-sm font-medium text-[#8a97ab] hover:text-brand-orange py-2 transition-colors"
+                     >
+                       {t('returnToMenu')}
+                     </button>
                    </div>
                  </Form>
                );
              }}
            </Formik>
-         </FormBubble>
+         </div>
        )}
        
        <ConfirmDialog

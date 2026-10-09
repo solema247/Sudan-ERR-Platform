@@ -37,30 +37,34 @@ export function HomeSection({ title, href, children }: HomeSectionProps) {
 
 type HomeCardProps = {
   href?: string;
+  onClick?: () => void;
   code?: string;
   title: string;
   subtitle?: string;
-  icon: React.ComponentType<{ className?: string }>;
+  /** Flat scene drawn in the wash (not a Lucide icon) */
+  illustration: React.ComponentType<{ className?: string }>;
   /** Top wash (peach / blue) */
   wash: string;
-  /** Icon well on the wash */
-  accent: string;
   disabled?: boolean;
   disabledLabel?: string;
+  /** Wider cards for hub menus (default carousel width) */
+  size?: 'sm' | 'md';
 };
 
 export function HomeCard({
   href,
+  onClick,
   code,
   title,
   subtitle,
-  icon: Icon,
+  illustration: Illustration,
   wash,
-  accent,
   disabled,
   disabledLabel = 'Soon',
+  size = 'sm',
 }: HomeCardProps) {
-  const className = `snap-start shrink-0 w-[10rem] overflow-hidden rounded-2xl border border-white/10 shadow-lift flex flex-col ${
+  const width = size === 'md' ? 'w-[11.5rem] sm:w-[12.5rem]' : 'w-[10.5rem]';
+  const className = `snap-start shrink-0 ${width} overflow-hidden rounded-2xl border border-white/10 shadow-lift flex flex-col text-start ${
     disabled
       ? 'opacity-55 cursor-not-allowed'
       : 'hover:border-brand-orange/40 active:scale-[0.98] transition-all duration-150'
@@ -68,10 +72,10 @@ export function HomeCard({
 
   const body = (
     <>
-      <div className={`relative px-3 pt-3 pb-4 min-h-[5.25rem] ${wash}`}>
-        <div className="flex items-center justify-between gap-1 mb-3">
+      <div className={`relative h-[6.75rem] overflow-hidden ${wash}`}>
+        <div className="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-1 px-2.5 pt-2">
           {code ? (
-            <span className="text-[10px] font-bold uppercase tracking-wide text-[#152238]/80 bg-white/70 px-1.5 py-0.5 rounded-md">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-[#152238]/80 bg-white/75 px-1.5 py-0.5 rounded-md">
               {code}
             </span>
           ) : (
@@ -83,9 +87,7 @@ export function HomeCard({
             </span>
           )}
         </div>
-        <span className={`inline-flex rounded-2xl p-2.5 shadow-sm ${accent}`}>
-          <Icon className="h-5 w-5" />
-        </span>
+        <Illustration className="absolute inset-0 h-full w-full" />
       </div>
       <div className="bg-[#152238] px-3 py-3 flex-1">
         <span className="block font-bold text-white text-sm leading-snug">{title}</span>
@@ -96,7 +98,23 @@ export function HomeCard({
     </>
   );
 
-  if (disabled || !href) {
+  if (disabled) {
+    return (
+      <div className={className} aria-disabled>
+        {body}
+      </div>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={className}>
+        {body}
+      </button>
+    );
+  }
+
+  if (!href) {
     return (
       <div className={className} aria-disabled>
         {body}

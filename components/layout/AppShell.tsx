@@ -1,11 +1,10 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
   Home,
   Layers,
   BarChart3,
-  MessageSquare,
   WifiOff,
   Monitor,
   Smartphone,
@@ -14,6 +13,7 @@ import {
 import { useLayoutPreference } from '../../hooks/useLayoutPreference';
 import OfflineStatusIndicator from './OfflineStatusIndicator';
 import UpdateBanner from './UpdateBanner';
+import { newSupabase } from '../../services/newSupabaseClient';
 
 const LogoImage = '/brand/err-logo.png';
 
@@ -34,7 +34,6 @@ const NAV: NavItem[] = [
       p.startsWith('/f-system') || p.startsWith('/projects') || p.startsWith('/reporting'),
   },
   { href: '/dashboard', label: 'Dashboard', icon: BarChart3 },
-  { href: '/feedback', label: 'Feedback', icon: MessageSquare },
   { href: '/offline-mode', label: 'Offline', icon: WifiOff },
 ];
 
@@ -53,6 +52,19 @@ const AppShell: React.FC<AppShellProps> = ({ children, title, bare }) => {
   const router = useRouter();
   const { layout, setLayout, ready } = useLayoutPreference();
   const isDesktop = ready && layout === 'desktop';
+
+  const handleLogout = useCallback(async () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('isUnlocked');
+      sessionStorage.removeItem('fromInternalPage');
+    }
+    try {
+      await newSupabase.auth.signOut();
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+    router.push('/login');
+  }, [router]);
 
   if (bare) {
     return <>{children}</>;
@@ -128,13 +140,14 @@ const AppShell: React.FC<AppShellProps> = ({ children, title, bare }) => {
               <Smartphone className="h-4 w-4" />
               Mobile layout
             </button>
-            <Link
-              href="/login"
-              className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[#a8b6cc] hover:bg-white/5"
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[#a8b6cc] hover:bg-white/5"
             >
               <LogOut className="h-4 w-4" />
-              Sign out
-            </Link>
+              Log out
+            </button>
           </div>
         </aside>
       )}
@@ -195,15 +208,15 @@ const AppShell: React.FC<AppShellProps> = ({ children, title, bare }) => {
         </main>
 
         {!isDesktop && (
-          <nav className="fixed bottom-0 inset-x-0 z-40 bg-[#152238]/95 backdrop-blur-md border-t border-white/10 flex px-1 pb-[env(safe-area-inset-bottom)]">
-            {NAV.slice(0, 5).map((item) => {
+          <nav className="fixed bottom-0 inset-x-0 z-40 bg-[#152238]/95 backdrop-blur-md border-t border-white/10 flex px-0.5 pb-[env(safe-area-inset-bottom)]">
+            {NAV.map((item) => {
               const Icon = item.icon;
               const active = isActive(item, router.pathname);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2.5 text-[10px] sm:text-xs font-semibold ${
+                  className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2.5 text-[10px] font-semibold ${
                     active ? 'text-brand-orange' : 'text-[#8a97ab]'
                   }`}
                 >
@@ -214,10 +227,20 @@ const AppShell: React.FC<AppShellProps> = ({ children, title, bare }) => {
                   >
                     <Icon className={`h-5 w-5 ${active ? 'text-[#152238]' : ''}`} />
                   </span>
-                  <span>{item.label}</span>
+                  <span className="truncate max-w-full px-0.5">{item.label}</span>
                 </Link>
               );
             })}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2.5 text-[10px] font-semibold text-[#8a97ab]"
+            >
+              <span className="rounded-xl p-1.5">
+                <LogOut className="h-5 w-5" />
+              </span>
+              <span>Log out</span>
+            </button>
           </nav>
         )}
       </div>

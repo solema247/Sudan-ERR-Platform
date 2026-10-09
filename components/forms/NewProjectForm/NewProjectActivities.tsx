@@ -4,35 +4,37 @@ import { useTranslation } from "react-i18next";
 import Button from "../../ui/Button";
 import { PlusCircleIcon, MinusCircleIcon, TrashIcon } from '@heroicons/react/24/outline';
 
+const FIELD = 'app-input !py-2 text-sm';
+
 const NewProjectActivities = ({ optionsActivities, optionsExpenses }) => {
-  const { t } = useTranslation('projectApplication');
+  const { t } = useTranslation('project-application');
   
   return (
     <FieldArray name="planned_activities">
       {({ push, remove, form }) => (
-        <div className="space-y-4">
-          <h3 className="text-2xl font-bold pt-4">
+        <div className="space-y-2.5">
+          <h3 className="text-sm font-bold pt-1 text-white">
             {t('activities.header')}
-            <span className="text-red-500 ml-1">*</span>
+            <span className="text-brand-orange ml-1">*</span>
           </h3>
           {form.values.planned_activities.map((activity, index) => (
-            <div key={index} className="p-4 pt-12 bg-gray-100 rounded-lg shadow-md relative">
+            <div key={index} className="p-3 pt-10 rounded-xl bg-[#1c2d48] border border-white/10 relative">
               <Button
                 text=""
                 onClick={() => remove(index)}
-                icon={<TrashIcon className="w-5 h-5" />}
+                icon={<TrashIcon className="w-4 h-4" />}
                 variant="danger"
-                className="absolute top-3 right-3 !p-2 !m-0"
+                className="absolute top-2 right-2 !p-1.5 !m-0 !rounded-lg"
               />
-              <div className="mb-3">
-                <label className="font-bold block text-sm mb-1">
+              <div className="mb-2">
+                <label className="font-semibold block text-xs text-[#a8b6cc] mb-1">
                   {t('activities.info')}
-                  <span className="text-red-500 ml-1">*</span>
+                  <span className="text-brand-orange ml-0.5">*</span>
                 </label>
                 <Field
                   as="select"
                   name={`planned_activities[${index}].selectedActivity`}
-                  className="text-sm w-full p-2 border rounded-lg"
+                  className={FIELD}
                 >
                   <option value="">{t('activities.placeholder')}</option>
                   {optionsActivities.map((option) => (
@@ -43,73 +45,44 @@ const NewProjectActivities = ({ optionsActivities, optionsExpenses }) => {
                 </Field>
                 {form.touched.planned_activities?.[index]?.selectedActivity && 
                  form.errors.planned_activities?.[index]?.selectedActivity && (
-                  <div className="text-red-500 text-sm mt-1">
+                  <div className="text-red-300 text-xs mt-0.5">
                     {form.errors.planned_activities[index].selectedActivity}
                   </div>
                 )}
               </div>
 
-              <div className="mb-3">
-                {/* Quantity and Duration in one row - no label */}
-                <div className="grid grid-cols-2 gap-4 mb-3">
-                  <div>
-                    <Field
-                      name={`planned_activities[${index}].quantity`}
-                      type="number"
-                      className="text-sm w-full p-2 border rounded-lg"
-                      placeholder={t('quantity') + ' *'}
-                    />
-                    {form.touched.planned_activities?.[index]?.quantity && 
-                     form.errors.planned_activities?.[index]?.quantity && (
-                      <div className="text-red-500 text-sm mt-1">
-                        {form.errors.planned_activities[index].quantity}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <Field
-                      name={`planned_activities[${index}].duration`}
-                      type="number"
-                      className="text-sm w-full p-2 border rounded-lg"
-                      placeholder={t('activities.duration') + ' *'}
-                    />
-                    {form.touched.planned_activities?.[index]?.duration && 
-                     form.errors.planned_activities?.[index]?.duration && (
-                      <div className="text-red-500 text-sm mt-1">
-                        {form.errors.planned_activities[index].duration}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-3">
-                {/* Location - no label */}
+              <div className="grid grid-cols-3 gap-2 mb-2">
+                <Field
+                  name={`planned_activities[${index}].quantity`}
+                  type="number"
+                  className={FIELD}
+                  placeholder={t('quantity') + ' *'}
+                />
+                <Field
+                  name={`planned_activities[${index}].duration`}
+                  type="number"
+                  className={FIELD}
+                  placeholder={t('activities.duration') + ' *'}
+                />
                 <Field
                   name={`planned_activities[${index}].location`}
                   type="text"
-                  className="text-sm w-full p-2 border rounded-lg mb-3"
+                  className={FIELD}
                   placeholder={t('activities.location') + ' *'}
                 />
-                {form.touched.planned_activities?.[index]?.location && 
-                 form.errors.planned_activities?.[index]?.location && (
-                  <div className="text-red-500 text-sm mt-1">
-                    {form.errors.planned_activities[index].location}
-                  </div>
-                )}
               </div>
 
-              <div className="mb-3">
-                <label className="font-bold block text-sm mb-1">{t('activities.expenses.label')}</label>
+              <div>
+                <label className="font-semibold block text-xs text-[#a8b6cc] mb-1">{t('activities.expenses.label')}</label>
                 <FieldArray name={`planned_activities[${index}].expenses`}>
                   {({ push: pushExpense, remove: removeExpense }) => (
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {activity.expenses && activity.expenses.map((expense, expenseIndex) => (
-                        <div key={expenseIndex} className="space-y-2 p-3 border rounded-lg">
+                        <div key={expenseIndex} className="space-y-1.5 p-2 rounded-lg border border-white/10 bg-[#152238]">
                           <Field
                             as="select"
                             name={`planned_activities[${index}].expenses[${expenseIndex}].expense`}
-                            className="text-sm w-full p-2 border rounded-lg"
+                            className={FIELD}
                           >
                             <option value="">{t('activities.expenses.selectExpense')}</option>
                             {optionsExpenses.map((option) => (
@@ -123,16 +96,15 @@ const NewProjectActivities = ({ optionsActivities, optionsExpenses }) => {
                             name={`planned_activities[${index}].expenses[${expenseIndex}].description`}
                             type="text"
                             placeholder={t('activities.expenses.description')}
-                            className="text-sm w-full p-2 border rounded-lg"
+                            className={FIELD}
                           />
 
-                          {/* Frequency and Unit Price in one row */}
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-3 gap-1.5">
                             <Field
                               name={`planned_activities[${index}].expenses[${expenseIndex}].frequency`}
                               type="number"
                               placeholder={t('frequency')}
-                              className="text-sm w-full p-2 border rounded-lg"
+                              className={FIELD}
                               onChange={(e) => {
                                 const value = e.target.value;
                                 const unitPrice = form.values.planned_activities[index].expenses[expenseIndex].unitPrice || 0;
@@ -147,7 +119,7 @@ const NewProjectActivities = ({ optionsActivities, optionsExpenses }) => {
                               name={`planned_activities[${index}].expenses[${expenseIndex}].unitPrice`}
                               type="number"
                               placeholder={t('unitPrice')}
-                              className="text-sm w-full p-2 border rounded-lg"
+                              className={FIELD}
                               onChange={(e) => {
                                 const value = e.target.value;
                                 const frequency = form.values.planned_activities[index].expenses[expenseIndex].frequency || 0;
@@ -158,18 +130,16 @@ const NewProjectActivities = ({ optionsActivities, optionsExpenses }) => {
                                 );
                               }}
                             />
+                            <Field
+                              name={`planned_activities[${index}].expenses[${expenseIndex}].total`}
+                              type="number"
+                              placeholder={t('total')}
+                              className={`${FIELD} bg-[#1c2d48]`}
+                              disabled
+                            />
                           </div>
 
-                          {/* Total (Read-only) */}
-                          <Field
-                            name={`planned_activities[${index}].expenses[${expenseIndex}].total`}
-                            type="number"
-                            placeholder={t('total')}
-                            className="text-sm w-full p-2 border rounded-lg bg-gray-50"
-                            disabled
-                          />
-
-                          <div className="flex justify-end space-x-2 mt-2">
+                          <div className="flex justify-end gap-1.5">
                             <Button
                               text=""
                               onClick={() => pushExpense({ 
@@ -179,15 +149,15 @@ const NewProjectActivities = ({ optionsActivities, optionsExpenses }) => {
                                 unitPrice: '',
                                 total: ''
                               })}
-                              icon={<PlusCircleIcon className="w-5 h-5" />}
-                              className="text-sm"
+                              icon={<PlusCircleIcon className="w-4 h-4" />}
+                              className="!m-0 !p-1.5 !rounded-lg !bg-[#1c2d48] !text-white border border-white/10 text-xs"
                             />
                             <Button
                               text=""
                               onClick={() => removeExpense(expenseIndex)}
-                              icon={<MinusCircleIcon className="w-5 h-5" />}
+                              icon={<MinusCircleIcon className="w-4 h-4" />}
                               variant="danger"
-                              className="text-sm"
+                              className="!m-0 !p-1.5 !rounded-lg text-xs"
                             />
                           </div>
                         </div>
@@ -202,8 +172,8 @@ const NewProjectActivities = ({ optionsActivities, optionsExpenses }) => {
                             unitPrice: '',
                             total: ''
                           })}
-                          icon={<PlusCircleIcon className="w-5 h-5" />}
-                          className="text-sm"
+                          icon={<PlusCircleIcon className="w-4 h-4" />}
+                          className="!m-0 !py-1.5 !rounded-lg !bg-[#152238] !text-white border border-white/10 text-xs"
                         />
                       )}
                     </div>
@@ -221,7 +191,7 @@ const NewProjectActivities = ({ optionsActivities, optionsExpenses }) => {
               location: '',
               expenses: []
             })}
-            className="w-full"
+            className="!m-0 w-full !py-2 !rounded-xl !bg-[#1c2d48] !text-white border border-white/10 text-sm"
           />
         </div>
       )}
@@ -229,4 +199,4 @@ const NewProjectActivities = ({ optionsActivities, optionsExpenses }) => {
   );
 };
 
-export default NewProjectActivities
+export default NewProjectActivities;

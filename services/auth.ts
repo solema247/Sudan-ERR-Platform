@@ -8,10 +8,12 @@ import { appAccess } from './appAccess';
  * Generate tokens used for user logins
  */
 
-const SECRET_KEY = process.env.JWT_SECRET_KEY; // Secret key from environment variables
-
-if (!SECRET_KEY) {
-    throw new Error('JWT_SECRET_KEY is not defined in environment variables');
+function getJwtSecret(): string {
+    const secret = process.env.JWT_SECRET_KEY;
+    if (!secret) {
+        throw new Error('JWT_SECRET_KEY is not defined in environment variables');
+    }
+    return secret;
 }
 
 /**
@@ -21,7 +23,7 @@ if (!SECRET_KEY) {
  * @returns Signed JWT
  */
 export const generateToken = (payload: object, expiresIn = '1h') => {
-    return jwt.sign(payload, SECRET_KEY, { expiresIn });
+    return jwt.sign(payload, getJwtSecret(), { expiresIn });
 };
 
 
@@ -32,7 +34,7 @@ export const generateToken = (payload: object, expiresIn = '1h') => {
  */
 export const validateJWT = (token: string) => {
     try {
-        return jwt.verify(token, SECRET_KEY); // Verifies and decodes the token
+        return jwt.verify(token, getJwtSecret()); // Verifies and decodes the token
     } catch (error) {
         return null; // Return null if token is invalid or expired
     }

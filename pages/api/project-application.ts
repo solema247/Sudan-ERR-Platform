@@ -116,22 +116,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             } = req.body;
 
             try {
-                // Compute cycle allocation if cycle and state are provided
-                let computedCycleAllocationId: string | null = null;
-                if (formData.funding_cycle_id && formData.state) {
-                    const { data: allocation, error: allocError } = await authenticatedClient
-                        .from('cycle_state_allocations')
-                        .select('id, decision_no')
-                        .eq('cycle_id', formData.funding_cycle_id)
-                        .eq('state_name', formData.state)
-                        .order('decision_no', { ascending: false })
-                        .limit(1)
-                        .single();
-                    if (!allocError && allocation) {
-                        computedCycleAllocationId = allocation.id;
-                    }
-                }
-
                 // Helper to coerce empty strings to null for UUID columns
                 const toNullableUuid = (value: any) => {
                     if (value === undefined || value === null) return null;
@@ -139,7 +123,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return trimmed === '' ? null : trimmed;
                 };
 
-                // Whitelist allowed columns only
+                const roomId =
+                    toNullableUuid(formData.emergency_room_id) ||
+                    toNullableUuid(formData.err_id) ||
+                    toNullableUuid(user.err_id);
+
+                if (!roomId) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'emergency_room_id is required',
+                    });
+                }
+
+                const grantSegment =
+                    formData.grant_segment === undefined || formData.grant_segment === null
+                        ? null
+                        : String(formData.grant_segment).trim() || null;
+
+                // Room-linked; funding cycle / grant call assigned later in portal
                 const allowedData: any = {
                     date: formData.date ?? null,
                     state: formData.state ?? null,
@@ -162,19 +163,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     planned_activities: formData.planned_activities ?? null,
                     expenses: formData.expenses ?? null,
                     currency: formData.currency === 'SDG' ? 'SDG' : 'USD', // budget currency, no conversion
-                    err_id: user.err_id,
+                    err_id: roomId,
                     is_draft: false,
                     last_modified: new Date().toISOString(),
-                    created_by: user.err_id,
+                    created_by: user.err_id || roomId,
                     version: undefined, // set only on insert below
                     current_feedback_id: undefined,
-                    emergency_room_id: toNullableUuid(formData.emergency_room_id),
-                    donor_id: toNullableUuid(formData.donor_id),
-                    funding_status: formData.funding_status || 'unassigned',
+                    emergency_room_id: roomId,
+                    grant_segment: grantSegment,
+                    donor_id: null,
+                    funding_status: 'unassigned',
                     grant_call_id: null,
                     grant_call_state_allocation_id: null,
-                    funding_cycle_id: toNullableUuid(formData.funding_cycle_id),
-                    cycle_state_allocation_id: toNullableUuid(formData.cycle_state_allocation_id) || computedCycleAllocationId || null,
+                    funding_cycle_id: null,
+                    cycle_state_allocation_id: null,
                     source: formData.source || 'err_app',
                 };
 

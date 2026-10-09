@@ -7,9 +7,10 @@ export interface InputProps {
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     required?: boolean;
     dir?: string;
+    className?: string;
 }
 
-const Input: React.FC<InputProps> = ({ type, placeholder, value, onChange, required = false, dir }) => {
+const Input: React.FC<InputProps> = ({ type, placeholder, value, onChange, required = false, dir, className }) => {
     return (
         <input
             type={type}
@@ -18,7 +19,7 @@ const Input: React.FC<InputProps> = ({ type, placeholder, value, onChange, requi
             onChange={onChange}
             required={required}
             dir={dir}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={className || 'app-input'}
         />
     );
 };

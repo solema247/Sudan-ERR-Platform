@@ -1,27 +1,42 @@
 import React, { useState } from 'react';
-import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 import AppShell from '../../components/layout/AppShell';
 import { useRequireAuth } from '../../hooks/useRequireAuth';
 import ProjectStatus from '../project-status';
-import ProjectApplication from '../../components/forms/NewProjectForm/NewProjectForm';
+import ProjectApplication, {
+  F1RoomScope,
+} from '../../components/forms/NewProjectForm/NewProjectForm';
 import ProjectDrafts from '../../components/forms/NewProjectForm/ProjectDrafts';
-import FundingCycleSelection from '../../components/forms/NewProjectForm/FundingCycleSelection';
+import F1CreateChooser from '../../components/forms/NewProjectForm/F1CreateChooser';
+import F1OcrUpload from '../../components/forms/NewProjectForm/F1OcrUpload';
+import F1OcrReview from '../../components/forms/NewProjectForm/F1OcrReview';
+import { HomeCard } from '../../components/home/HomeSection';
+import { WorkPlanScene, ApprovalsScene } from '../../components/home/illustrations';
 import { newSupabase } from '../../services/newSupabaseClient';
+import type { F1ScopeValue } from '../../components/forms/NewProjectForm/F1ScopeFields';
+import type { F1OcrReviewPayload } from '../../lib/f1/mapReviewTypes';
 
-type View = 'menu' | 'application' | 'status' | 'funding' | 'drafts';
+type View =
+  | 'menu'
+  | 'application'
+  | 'status'
+  | 'create-method'
+  | 'ocr-upload'
+  | 'ocr-review'
+  | 'form';
 
 export default function F1WorkPlansPage() {
   const { ready } = useRequireAuth();
   const { t } = useTranslation('menu');
-  const router = useRouter();
   const [view, setView] = useState<View>('menu');
   const [drafts, setDrafts] = useState<any[]>([]);
   const [currentDraft, setCurrentDraft] = useState<any>(null);
-  const [selectedFundingCycle, setSelectedFundingCycle] = useState<any>(null);
   const [projectToEdit, setProjectToEdit] = useState<any>(null);
-  const [showDraftList, setShowDraftList] = useState(true);
+  const [roomScope, setRoomScope] = useState<F1RoomScope | null>(null);
+  const [ocrReviewPayload, setOcrReviewPayload] = useState<F1OcrReviewPayload | null>(null);
 
   const fetchDrafts = async () => {
     const {
@@ -39,13 +54,24 @@ export default function F1WorkPlansPage() {
 
   const openApplication = async () => {
     await fetchDrafts();
-    setView('funding');
+    setCurrentDraft(null);
+    setProjectToEdit(null);
+    setRoomScope(null);
+    setView('application');
   };
+
+  const scopeFromChooser = (scope: F1ScopeValue): F1RoomScope => ({
+    emergency_room_id: scope.emergency_room_id,
+    grant_segment: scope.grant_segment,
+    state_name: scope.state_name,
+    locality: scope.locality,
+    room_label: scope.room_label,
+  });
 
   if (!ready) {
     return (
       <AppShell title="F1 Work Plans">
-        <p className="text-ink-muted text-sm">Loading…</p>
+        <p className="text-[#a8b6cc] text-sm">Loading…</p>
       </AppShell>
     );
   }
@@ -53,100 +79,160 @@ export default function F1WorkPlansPage() {
   return (
     <AppShell title="F1 Work Plans">
       {view === 'menu' && (
-        <div className="space-y-3">
-          <div className="mb-1">
+        <div>
+          <div className="mb-6">
             <p className="app-section-label mb-1">F1 · Work Plans</p>
-            <p className="text-sm text-ink-muted mb-0">
-              {t('projectsInstructions', 'Apply for a project or review project status.')}
+            <h2 className="text-xl font-bold text-white leading-snug mb-1">
+              What do you want to do?
+            </h2>
+            <p className="text-sm text-[#a8b6cc] mb-0">
+              {t(
+                'projectsInstructions',
+                'Apply for a project linked to your room, or review project status.'
+              )}
             </p>
           </div>
-          <button type="button" onClick={openApplication} className="app-action-primary">
-            {t('projectApplication', 'Project application')}
-          </button>
-          <button type="button" onClick={() => setView('status')} className="app-action">
-            {t('projectStatus', 'Project status')}
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push('/f-system')}
-            className="text-sm font-medium text-ink-muted hover:text-brand-deep px-1 py-2"
-          >
-            Back to F-System
-          </button>
-        </div>
-      )}
 
-      {view === 'funding' && (
-        <div className="app-panel p-4">
-          <FundingCycleSelection
-            onReturnToMenu={() => {
-              setView('application');
-              setShowDraftList(true);
-            }}
-          />
-          <button
-            type="button"
-            className="mt-4 text-sm text-brand-deep underline"
-            onClick={() => setView('menu')}
+          <section className="mb-6">
+            <div className="flex items-center gap-1.5 mb-3 px-0.5">
+              <h3 className="text-lg font-bold text-white leading-tight">Actions</h3>
+            </div>
+            <div className="-mx-4 overflow-x-auto pb-2 scrollbar-none">
+              <div className="flex w-max min-w-full gap-3 px-4 snap-x snap-mandatory items-stretch">
+                <HomeCard
+                  onClick={openApplication}
+                  code="Apply"
+                  title={t('projectApplication', 'Project application')}
+                  subtitle="New work plan for your room"
+                  illustration={WorkPlanScene}
+                  wash="bg-brand-orangeSoft"
+                  size="md"
+                />
+                <HomeCard
+                  onClick={() => setView('status')}
+                  code="Status"
+                  title={t('projectStatus', 'Project status')}
+                  subtitle="Track submitted plans"
+                  illustration={ApprovalsScene}
+                  wash="bg-[#7B96C4]"
+                  size="md"
+                />
+              </div>
+            </div>
+          </section>
+
+          <Link
+            href="/f-system"
+            className="inline-flex items-center gap-1 text-sm font-medium text-[#8a97ab] hover:text-brand-orange transition-colors"
           >
-            Back
-          </button>
+            <span className="rtl:rotate-180 inline-flex">
+              <ChevronRight className="h-4 w-4 rotate-180" />
+            </span>
+            Back to F-System
+          </Link>
         </div>
       )}
 
       {view === 'application' && (
-        <div className="app-panel p-4">
-          {showDraftList && !projectToEdit ? (
-            <ProjectDrafts
-              drafts={drafts.map((d) => ({
-                ...d,
-                last_modified: d.last_modified || new Date().toISOString(),
-              }))}
-              onEditDraft={(draftId) => {
-                setCurrentDraft(drafts.find((d) => d.id === draftId));
-                setShowDraftList(false);
-              }}
-              onDeleteDraft={(draftId) => setDrafts(drafts.filter((d) => d.id !== draftId))}
-              onNewProject={() => {
-                setCurrentDraft(null);
-                setShowDraftList(false);
-              }}
-              onReturnToMenu={() => setView('menu')}
-            />
-          ) : (
-            <ProjectApplication
-              onReturnToMenu={() => {
-                if (projectToEdit) {
-                  setView('status');
-                  setProjectToEdit(null);
-                } else {
-                  setShowDraftList(true);
-                }
-              }}
-              initialValues={currentDraft}
-              projectToEdit={projectToEdit}
-              selectedFundingCycle={selectedFundingCycle}
-              onDraftSubmitted={() => {
-                setShowDraftList(true);
-                setProjectToEdit(null);
-                fetchDrafts();
-              }}
-            />
-          )}
-        </div>
+        <ProjectDrafts
+          drafts={drafts.map((d) => ({
+            ...d,
+            last_modified: d.last_modified || new Date().toISOString(),
+          }))}
+          onEditDraft={(draftId) => {
+            const draft = drafts.find((d) => d.id === draftId);
+            setCurrentDraft(draft);
+            setRoomScope(
+              draft?.emergency_room_id
+                ? {
+                    emergency_room_id: draft.emergency_room_id,
+                    grant_segment: draft.grant_segment || '',
+                    state_name: draft.state || '',
+                    locality: draft.locality || '',
+                    room_label: '',
+                  }
+                : null
+            );
+            setView('form');
+          }}
+          onDeleteDraft={(draftId) => setDrafts(drafts.filter((d) => d.id !== draftId))}
+          onNewProject={() => {
+            setCurrentDraft(null);
+            setProjectToEdit(null);
+            setRoomScope(null);
+            setView('create-method');
+          }}
+          onReturnToMenu={() => setView('menu')}
+        />
+      )}
+
+      {view === 'create-method' && (
+        <F1CreateChooser
+          onBack={() => setView('application')}
+          onChooseOcr={() => setView('ocr-upload')}
+          onChooseManual={(scope) => {
+            setRoomScope(scopeFromChooser(scope));
+            setCurrentDraft(null);
+            setView('form');
+          }}
+        />
+      )}
+
+      {view === 'ocr-upload' && (
+        <F1OcrUpload
+          onBack={() => setView('create-method')}
+          onOcrComplete={(payload) => {
+            setOcrReviewPayload(payload);
+            setView('ocr-review');
+          }}
+        />
+      )}
+
+      {view === 'ocr-review' && ocrReviewPayload && (
+        <F1OcrReview
+          payload={ocrReviewPayload}
+          onBack={() => {
+            setOcrReviewPayload(null);
+            setView('ocr-upload');
+          }}
+          onSubmitted={() => {
+            setOcrReviewPayload(null);
+            setView('application');
+            fetchDrafts();
+          }}
+        />
+      )}
+
+      {view === 'form' && (
+        <ProjectApplication
+          onReturnToMenu={() => {
+            if (projectToEdit) {
+              setView('status');
+              setProjectToEdit(null);
+            } else {
+              setView('application');
+              fetchDrafts();
+            }
+          }}
+          initialValues={currentDraft}
+          projectToEdit={projectToEdit}
+          roomScope={roomScope}
+          onDraftSubmitted={() => {
+            setProjectToEdit(null);
+            setView('application');
+            fetchDrafts();
+          }}
+        />
       )}
 
       {view === 'status' && (
-        <div className="app-panel p-4">
-          <ProjectStatus
-            onReturnToMenu={() => setView('menu')}
-            onEditProject={(projectId) => {
-              setProjectToEdit(projectId);
-              setView('application');
-              setShowDraftList(false);
-            }}
-          />
-        </div>
+        <ProjectStatus
+          onReturnToMenu={() => setView('menu')}
+          onEditProject={(projectId) => {
+            setProjectToEdit(projectId);
+            setView('form');
+          }}
+        />
       )}
     </AppShell>
   );

@@ -4,14 +4,14 @@ import AppShell from '../components/layout/AppShell';
 import { useRequireAuth } from '../hooks/useRequireAuth';
 import { HomeSection, HomeCard } from '../components/home/HomeSection';
 import {
-  ClipboardList,
-  CheckSquare,
-  FileSignature,
-  FileText,
-  BarChart3,
-  MessageSquare,
-  WifiOff,
-} from 'lucide-react';
+  WorkPlanScene,
+  ApprovalsScene,
+  MouScene,
+  ReportingScene,
+  DashboardScene,
+  FeedbackScene,
+  OfflineScene,
+} from '../components/home/illustrations';
 
 export default function HomePage() {
   const { ready } = useRequireAuth();
@@ -41,26 +41,23 @@ export default function HomePage() {
           code="F1"
           title="Work Plans"
           subtitle="Apply & status"
-          icon={ClipboardList}
+          illustration={WorkPlanScene}
           wash="bg-brand-orangeSoft"
-          accent="bg-brand-orange text-white"
         />
         <HomeCard
           code="F2"
           title="Approvals"
           subtitle="Not available yet"
-          icon={CheckSquare}
+          illustration={ApprovalsScene}
           wash="bg-[#9BB0D4]"
-          accent="bg-brand-deep text-white"
           disabled
         />
         <HomeCard
           code="F3"
           title="MOUs"
           subtitle="Not available yet"
-          icon={FileSignature}
+          illustration={MouScene}
           wash="bg-[#BCCBE3]"
-          accent="bg-brand-deep text-white"
           disabled
         />
         <HomeCard
@@ -68,9 +65,8 @@ export default function HomePage() {
           code="F4 & F5"
           title="Reporting"
           subtitle="Financial & program"
-          icon={FileText}
+          illustration={ReportingScene}
           wash="bg-[#7B96C4]"
-          accent="bg-[#152238] text-white"
         />
       </HomeSection>
 
@@ -79,9 +75,8 @@ export default function HomePage() {
           href="/dashboard"
           title="Overview"
           subtitle="Funding & reach"
-          icon={BarChart3}
+          illustration={DashboardScene}
           wash="bg-[#5D7EB3]"
-          accent="bg-white text-brand-deep"
         />
       </HomeSection>
 
@@ -90,17 +85,15 @@ export default function HomePage() {
           href="/feedback"
           title="Feedback"
           subtitle="Tickets & support"
-          icon={MessageSquare}
+          illustration={FeedbackScene}
           wash="bg-[#4A6798]"
-          accent="bg-brand-orangeSoft text-brand-darker"
         />
         <HomeCard
           href="/offline-mode"
           title="Offline"
           subtitle="Queue & sync"
-          icon={WifiOff}
+          illustration={OfflineScene}
           wash="bg-brand-orangeSoft"
-          accent="bg-brand-orange text-white"
         />
       </HomeSection>
     </AppShell>

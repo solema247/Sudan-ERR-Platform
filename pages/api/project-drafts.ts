@@ -28,12 +28,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         if (req.method === 'GET') {
-            const { data, error } = await db
+            let query = db
                 .from('err_projects')
                 .select('*')
-                .eq('created_by', user.err_id)
                 .eq('is_draft', true)
                 .order('last_modified', { ascending: false });
+
+            // Room users: drafts they created for their room. Admins without err_id: recent app drafts.
+            if (user.err_id) {
+                query = query.eq('created_by', user.err_id);
+            } else {
+                query = query.eq('source', 'err_app').limit(50);
+            }
+
+            const { data, error } = await query;
 
             if (error) {
                 return res.status(500).json({ 

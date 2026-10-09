@@ -1,8 +1,6 @@
 //pages/project-status.tsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import MessageBubble from '../components/ui/MessageBubble';
-import Button from '../components/ui/Button';
 import { newSupabase } from '../services/newSupabaseClient';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 
@@ -11,8 +9,15 @@ interface ProjectStatusProps {
     onEditProject?: (projectId: string) => void;
 }
 
+const statusColor = (status: string) => {
+    if (status === 'active') return 'text-emerald-300';
+    if (status === 'pending') return 'text-brand-orange';
+    if (status === 'feedback') return 'text-[#9BB0D4]';
+    return 'text-[#a8b6cc]';
+};
+
 const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu, onEditProject }) => {
-    const { t, i18n } = useTranslation('projectStatus'); // Use translations for the "project-status" namespace
+    const { t, i18n } = useTranslation('project-status');
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -24,7 +29,6 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu, onEditPro
         const fetchProjectStatuses = async () => {
             setLoading(true);
             try {
-                // Get current session
                 const { data: { session } } = await newSupabase.auth.getSession();
                 
                 if (!session) {
@@ -47,7 +51,6 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu, onEditPro
                 if (data.success) {
                     setProjects(data.projects);
                     
-                    // Pre-fetch feedback for all projects with feedback status
                     const feedbackProjects = data.projects.filter(p => p.status === 'feedback');
                     await Promise.all(
                         feedbackProjects.map(async (project) => {
@@ -61,16 +64,16 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu, onEditPro
                                 } else {
                                     console.warn(`No feedback found for project ${project.id}`);
                                 }
-                            } catch (error) {
-                                console.error('Error pre-fetching feedback:', error);
+                            } catch (err) {
+                                console.error('Error pre-fetching feedback:', err);
                             }
                         })
                     );
                 } else {
                     setError(data.message || 'Failed to fetch projects');
                 }
-            } catch (error) {
-                console.error('Error fetching project statuses:', error);
+            } catch (err) {
+                console.error('Error fetching project statuses:', err);
                 setError(t('fetchError'));
             } finally {
                 setLoading(false);
@@ -105,24 +108,22 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu, onEditPro
                 return data.feedback;
             }
             return null;
-        } catch (error) {
-            console.error('Error fetching feedback:', error);
+        } catch (err) {
+            console.error('Error fetching feedback:', err);
             setError(t('feedbackFetchError'));
             return null;
         }
     };
 
     const handleProjectClick = async (project) => {
-        // If clicking the same project, collapse it
         if (selectedProject?.id === project.id) {
             setIsExpanding(false);
             setTimeout(() => {
                 setSelectedProject(null);
-            }, 200); // Match this with the transition duration
+            }, 200);
             return;
         }
 
-        // Otherwise expand the new project
         setIsExpanding(true);
         setSelectedProject(project);
     };
@@ -139,62 +140,58 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu, onEditPro
     };
 
     return (
-        <div className="space-y-4 p-4">
-            {/* Page Title */}
-            <h2 className="text-xl font-bold">{t('projectStatusTitle')}</h2>
+        <div className="space-y-4">
+            <div>
+                <p className="app-section-label mb-1">F1</p>
+                <h2 className="text-xl font-bold text-white mb-1">{t('projectStatusTitle')}</h2>
+                <p className="text-sm text-[#a8b6cc] mb-0">
+                    Track submitted work plans linked to your room.
+                </p>
+            </div>
 
-            {/* Loading Indicator */}
+            {error && (
+                <div className="rounded-xl bg-red-500/10 border border-red-400/30 text-red-300 px-3 py-2 text-sm">
+                    {error}
+                </div>
+            )}
+
             {loading ? (
-                <MessageBubble>{t('loading')}</MessageBubble>
+                <p className="text-sm text-[#a8b6cc]">{t('loading')}</p>
             ) : projects.length > 0 ? (
-                <div className="space-y-4">
-                    {/* Display Each Project */}
+                <div className="space-y-3">
                     {projects.map((project) => (
                         <div
                             key={project.id}
-                            className="p-4 border rounded-lg shadow-md bg-white transition-all duration-200 cursor-pointer hover:shadow-lg hover:border-gray-300"
+                            className="rounded-2xl border border-white/10 bg-[#1c2d48] p-4 shadow-soft cursor-pointer hover:border-brand-orange/40 transition-colors"
                             onClick={() => handleProjectClick(project)}
                         >
-                            <div className="flex justify-between items-start">
-                                <div className="flex-grow">
-                                    <h3 className="font-bold">
-                                        {t('project')}: {project.project_objectives}
+                            <div className="flex justify-between items-start gap-3">
+                                <div className="flex-grow min-w-0">
+                                    <h3 className="font-bold text-white text-sm leading-snug">
+                                        {project.project_objectives || t('project')}
                                     </h3>
                                     {!project.is_own_room && project.room && (
-                                        <p className="text-sm text-gray-600">
-                                            <strong>{t('room')}:</strong>{' '}
+                                        <p className="text-xs text-[#a8b6cc] mt-1">
                                             {(i18n.language === 'ar' ? project.room.name_ar || project.room.name : project.room.name || project.room.name_ar) || project.room.err_code}
                                             {project.room.state ? ` · ${project.room.state}` : ''}
                                         </p>
                                     )}
-                                    <p>
-                                        <strong>{t('status')}:</strong>{' '}
-                                        <span className={
-                                            project.status === 'active' ? 'text-green-600' : 
-                                            project.status === 'pending' ? 'text-orange-500' :
-                                            project.status === 'feedback' ? 'text-blue-500' : ''
-                                        }>
+                                    <p className="text-sm mt-1.5">
+                                        <span className="text-[#8a97ab]">{t('status')}: </span>
+                                        <span className={statusColor(project.status)}>
                                             {project.status === 'feedback' ? t('feedbackStatus') : t(project.status)}
                                         </span>
                                     </p>
-                                    <p>
-                                        <strong>{t('submittedAt')}:</strong>{' '}
-                                        {formatDate(project.submitted_at)}
-                                    </p>
-                                    <p>
-                                        <strong>{t('funding.status')}:</strong>{' '}
-                                        <span className="text-gray-700">{t(`funding.${project.funding_status || 'unassigned'}`)}</span>
-                                    </p>
-                                    <p className="text-xs text-gray-500">
-                                        {t(`funding.desc.${project.funding_status || 'unassigned'}`)}
+                                    <p className="text-xs text-[#8a97ab] mt-0.5">
+                                        {t('submittedAt')}: {formatDate(project.submitted_at)}
                                     </p>
                                     {project.version > 1 && (
-                                        <p>
-                                            <strong>{t('version')}:</strong> {project.version}
+                                        <p className="text-xs text-[#8a97ab]">
+                                            {t('version')}: {project.version}
                                         </p>
                                     )}
                                 </div>
-                                <div className="flex items-center text-gray-500">
+                                <div className="flex items-center text-[#8a97ab] shrink-0">
                                     {selectedProject?.id === project.id ? (
                                         <ChevronUpIcon className="h-5 w-5" />
                                     ) : (
@@ -208,48 +205,45 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu, onEditPro
                                     selectedProject?.id === project.id ? 'max-h-[2000px] opacity-100 mt-4' : 'max-h-0 opacity-0'
                                 }`}
                             >
-                                {/* Project Details Section */}
-                                <div className="space-y-4">
-                                    {/* Basic Information */}
-                                    <div className="bg-gray-50 p-3 rounded-lg">
-                                        <h4 className="font-semibold mb-2">{t('details.basicInfo')}</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
+                                    <div className="bg-[#152238] p-3 rounded-xl border border-white/5">
+                                        <h4 className="font-semibold mb-2 text-white text-sm">{t('details.basicInfo')}</h4>
+                                        <div className="grid grid-cols-1 gap-1.5 text-sm text-[#a8b6cc]">
                                             {project.date && (
-                                                <p className="text-sm"><strong>{t('details.date')}:</strong> {formatDate(project.date)}</p>
+                                                <p><span className="text-[#8a97ab]">{t('details.date')}:</span> {formatDate(project.date)}</p>
                                             )}
                                             {(project.state || project.locality) && (
-                                                <p className="text-sm"><strong>{t('details.location')}:</strong> {[project.state, project.locality].filter(Boolean).join(', ')}</p>
+                                                <p><span className="text-[#8a97ab]">{t('details.location')}:</span> {[project.state, project.locality].filter(Boolean).join(', ')}</p>
                                             )}
                                             {project.intended_beneficiaries && (
-                                                <p className="text-sm"><strong>{t('details.intendedBeneficiaries')}:</strong> {project.intended_beneficiaries}</p>
+                                                <p><span className="text-[#8a97ab]">{t('details.intendedBeneficiaries')}:</span> {project.intended_beneficiaries}</p>
                                             )}
                                             {project.estimated_beneficiaries && (
-                                                <p className="text-sm"><strong>{t('details.estimatedBeneficiaries')}:</strong> {project.estimated_beneficiaries}</p>
+                                                <p><span className="text-[#8a97ab]">{t('details.estimatedBeneficiaries')}:</span> {project.estimated_beneficiaries}</p>
                                             )}
                                             {project.estimated_timeframe && (
-                                                <p className="text-sm"><strong>{t('details.timeframe')}:</strong> {project.estimated_timeframe}</p>
+                                                <p><span className="text-[#8a97ab]">{t('details.timeframe')}:</span> {project.estimated_timeframe}</p>
                                             )}
                                         </div>
                                     </div>
 
-                                    {/* Activities Section */}
                                     {project.planned_activities && project.planned_activities.length > 0 && (
-                                        <div className="bg-gray-50 p-3 rounded-lg mt-2">
-                                            <h4 className="font-semibold mb-2">{t('details.plannedActivities')}</h4>
+                                        <div className="bg-[#152238] p-3 rounded-xl border border-white/5">
+                                            <h4 className="font-semibold mb-2 text-white text-sm">{t('details.plannedActivities')}</h4>
                                             <div className="space-y-2">
                                                 {project.planned_activities.map((activity, index) => (
-                                                    <div key={index} className="border-b pb-1 text-sm">
+                                                    <div key={index} className="border-b border-white/5 pb-2 text-sm text-[#a8b6cc] last:border-0 last:pb-0">
                                                         {activity.activityName && (
-                                                            <p><strong>{t('details.activity')}:</strong> {activity.activityName}</p>
+                                                            <p><span className="text-[#8a97ab]">{t('details.activity')}:</span> {activity.activityName}</p>
                                                         )}
                                                         {activity.location && (
-                                                            <p><strong>{t('details.location')}:</strong> {activity.location}</p>
+                                                            <p><span className="text-[#8a97ab]">{t('details.location')}:</span> {activity.location}</p>
                                                         )}
                                                         {activity.quantity && (
-                                                            <p><strong>{t('details.quantity')}:</strong> {activity.quantity}</p>
+                                                            <p><span className="text-[#8a97ab]">{t('details.quantity')}:</span> {activity.quantity}</p>
                                                         )}
                                                         {activity.duration && (
-                                                            <p><strong>{t('details.duration')}:</strong> {activity.duration}</p>
+                                                            <p><span className="text-[#8a97ab]">{t('details.duration')}:</span> {activity.duration}</p>
                                                         )}
                                                     </div>
                                                 ))}
@@ -257,36 +251,34 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu, onEditPro
                                         </div>
                                     )}
 
-                                    {/* Additional Support */}
                                     {project.additional_support && (
-                                        <div className="bg-gray-50 p-3 rounded-lg mt-2">
-                                            <h4 className="font-semibold mb-2">{t('details.additional')}</h4>
-                                            <p className="text-sm"><strong>{t('details.additionalSupport')}:</strong> {project.additional_support}</p>
+                                        <div className="bg-[#152238] p-3 rounded-xl border border-white/5">
+                                            <h4 className="font-semibold mb-2 text-white text-sm">{t('details.additional')}</h4>
+                                            <p className="text-sm text-[#a8b6cc]">{project.additional_support}</p>
                                         </div>
                                     )}
 
-                                    {/* Feedback Section (if available) */}
                                     {project.status === 'feedback' && feedbackMap[project.id] && feedbackMap[project.id].length > 0 && feedbackMap[project.id][0] && (
-                                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 mt-2">
-                                            <h4 className="font-semibold mb-2">{t('feedback.latest')}</h4>
-                                            <p className="mb-2 text-sm">{feedbackMap[project.id][0].feedback_text}</p>
+                                        <div className="bg-brand-orange/10 p-3 rounded-xl border border-brand-orange/30">
+                                            <h4 className="font-semibold mb-2 text-white text-sm">{t('feedback.latest')}</h4>
+                                            <p className="mb-2 text-sm text-[#e8eef8]">{feedbackMap[project.id][0].feedback_text}</p>
                                             {feedbackMap[project.id][0].created_by && (
-                                                <p className="text-xs text-gray-600">
+                                                <p className="text-xs text-[#8a97ab]">
                                                     {t('feedback.by')}: {feedbackMap[project.id][0].created_by.full_name || t('feedback.unknown')}
                                                 </p>
                                             )}
                                             {feedbackMap[project.id][0].created_at && (
-                                                <p className="text-xs text-gray-600">
+                                                <p className="text-xs text-[#8a97ab]">
                                                     {t('feedback.at')}: {formatDate(feedbackMap[project.id][0].created_at)}
                                                 </p>
                                             )}
-                                            <div className="mt-2">
-                                                <Button
-                                                    text={t('feedback.editProject')}
-                                                    onClick={() => handleEditProject(project.id)}
-                                                    className="w-full"
-                                                />
-                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleEditProject(project.id)}
+                                                className="mt-3 w-full rounded-xl bg-brand-orange text-[#152238] text-sm font-bold py-2.5 hover:bg-[#ffb88a]"
+                                            >
+                                                {t('feedback.editProject')}
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -295,15 +287,18 @@ const ProjectStatus: React.FC<ProjectStatusProps> = ({ onReturnToMenu, onEditPro
                     ))}
                 </div>
             ) : (
-                <MessageBubble>{t('noProjectsFound')}</MessageBubble>
+                <p className="text-sm text-[#8a97ab]">{t('noProjectsFound')}</p>
             )}
 
-            {/* Return to Menu Button */}
-            <Button text={t('returnToMenu')} onClick={onReturnToMenu} />
+            <button
+                type="button"
+                onClick={onReturnToMenu}
+                className="text-sm font-medium text-[#8a97ab] hover:text-brand-orange px-1 py-2 transition-colors"
+            >
+                {t('returnToMenu')}
+            </button>
         </div>
     );
 };
 
 export default ProjectStatus;
-
-

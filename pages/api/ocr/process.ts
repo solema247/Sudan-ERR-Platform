@@ -79,18 +79,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       exchange_rate: exchangeRate,
     });
 
-    // Always adapt F4 (and F4-like) to PrefilledForm for Chatbot save path
-    const prefilled =
-      formType === 'F4' || !formType
-        ? f4ToPrefilled(structured, errId)
-        : f4ToPrefilled(structured, errId);
-
     try {
       fs.unlinkSync(uploaded.filepath);
     } catch {
       /* ignore */
     }
 
+    // F1: return MAP structured JSON as-is. F4: adapt to PrefilledForm.
+    if (formType === 'F1') {
+      return res.status(200).json({
+        success: true,
+        data: structured,
+        raw: structured,
+      });
+    }
+
+    const prefilled = f4ToPrefilled(structured, errId);
     return res.status(200).json({
       success: true,
       data: prefilled,
