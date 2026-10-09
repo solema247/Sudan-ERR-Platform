@@ -1,202 +1,223 @@
-// pages/offline-mode.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import OfflineForm from '../components/forms/OfflineForm';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from 'next/router';
-import { getSessionQueue, clearSessionQueue, getSubmittedQueue } from '../services/sessionUtils';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import dynamic from 'next/dynamic';
+import AppShell from '../components/layout/AppShell';
+import {
+  getSessionQueue,
+  getSubmittedQueue,
+  clearSubmittedQueue,
+  type OfflineQueuedItem,
+} from '../lib/offline/offlineQueue';
+import { handleOnline } from '../services/handleOnline';
 
 const OfflineMode: React.FC = () => {
   const { t, i18n } = useTranslation('offlineMode');
-  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submissionMessage, setSubmissionMessage] = useState<string | null>(null);
-  const [queuedForms, setQueuedForms] = useState<any[]>([]);
-  const [submittedForms, setSubmittedForms] = useState<any[]>([]);
-  const [isOnline, setIsOnline] = useState(false);
+  const [queuedForms, setQueuedForms] = useState<OfflineQueuedItem[]>([]);
+  const [submittedForms, setSubmittedForms] = useState<OfflineQueuedItem[]>([]);
+  const [isOnline, setIsOnline] = useState(true);
+  const [syncing, setSyncing] = useState(false);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsOnline(navigator.onLine);
+  const refreshQueues = useCallback(async () => {
+    try {
+      setQueuedForms(await getSessionQueue());
+      setSubmittedForms(await getSubmittedQueue());
+    } catch (e) {
+      console.error(e);
     }
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const fetchQueuedForms = () => {
-        setQueuedForms(getSessionQueue() || []);
-        setSubmittedForms(getSubmittedQueue() || []);
-      };
+    setIsOnline(typeof navigator !== 'undefined' ? navigator.onLine : true);
+    refreshQueues();
 
-      fetchQueuedForms();
+    const onSubmitted = (event: CustomEvent) => {
+      setSubmissionMessage(event.detail?.message || 'Synced');
+      setTimeout(() => setSubmissionMessage(null), 3000);
+      refreshQueues();
+    };
+    const onOnline = () => {
+      setIsOnline(true);
+      handleOnline().finally(refreshQueues);
+    };
+    const onOffline = () => setIsOnline(false);
+    const onQueue = () => refreshQueues();
 
-      const successMessage = localStorage.getItem('offlineSubmissionSuccess');
-      if (successMessage) {
-        setSubmissionMessage(successMessage);
-        localStorage.removeItem('offlineSubmissionSuccess');
-      }
+    window.addEventListener('offlineFormSubmitted', onSubmitted as EventListener);
+    window.addEventListener('offlineQueueUpdated', onQueue);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
 
-      const handleOfflineFormSubmitted = (event: CustomEvent) => {
-        setSubmissionMessage(event.detail.message);
-        setTimeout(() => setSubmissionMessage(null), 3000);
-        fetchQueuedForms();
-      };
+    return () => {
+      window.removeEventListener('offlineFormSubmitted', onSubmitted as EventListener);
+      window.removeEventListener('offlineQueueUpdated', onQueue);
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
+  }, [refreshQueues]);
 
-      window.addEventListener('offlineFormSubmitted', handleOfflineFormSubmitted);
-      window.addEventListener('online', () => setIsOnline(true));
-      window.addEventListener('offline', () => setIsOnline(false));
-
-      return () => {
-        window.removeEventListener('offlineFormSubmitted', handleOfflineFormSubmitted);
-        window.removeEventListener('online', () => setIsOnline(true));
-        window.removeEventListener('offline', () => setIsOnline(false));
-      };
+  const syncNow = async () => {
+    setSyncing(true);
+    try {
+      await handleOnline();
+      await refreshQueues();
+    } finally {
+      setSyncing(false);
     }
-  }, []);
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleSubmitSuccess = () => {
-    setIsModalOpen(false);
-    alert(t('form_submit_success'));
-  };
-
-  const handleReturnToHome = () => {
-    sessionStorage.setItem('fromInternalPage', 'true');
-    router.push('/');
-  };
-
-  const handleClearSubmitted = () => {
-    setSubmittedForms([]);
-    localStorage.removeItem('offlineSubmittedQueue');
-  };
-
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
+    <AppShell title={t('instructions_title', 'Offline mode')}>
       <div
-        className={`fixed top-0 left-0 w-full py-2 text-center text-white ${
-          isOnline ? 'bg-green-500' : 'bg-red-500'
+        className={`rounded-lg px-3 py-2 text-sm text-white mb-4 ${
+          isOnline ? 'bg-green-600' : 'bg-red-600'
         }`}
       >
-        {isOnline ? t('status_online') : t('status_offline')}
+        {isOnline ? t('status_online', 'Online') : t('status_offline', 'Offline')}
       </div>
 
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-semibold text-black mb-4">{t('instructions_title')}</h1>
-        <ul className="text-lg text-gray-700 space-y-2">
-          <li>
-            <span role="img" aria-label="form">📝</span> {t('instructions_step_1')}
-          </li>
-          <li>
-            <span role="img" aria-label="fields">✅</span> {t('instructions_step_2')}
-          </li>
-          <li>
-            <span role="img" aria-label="upload">📤</span> {t('instructions_step_3')}
-          </li>
-        </ul>
-      </div>
-
-      <div className="w-full max-w-md mb-6">
-        {queuedForms.length > 0 && (
-          <div className="bg-white p-4 rounded shadow mb-6">
-            <h2 className="text-lg font-medium text-gray-800 mb-2">{t('queued_forms_title')}</h2>
-            <ul className="space-y-2">
-              {queuedForms.map((form, index) => (
-                <li
-                  key={index}
-                  className="bg-gray-50 p-2 rounded border border-gray-200 text-sm text-gray-700"
-                >
-                  <p>
-                    <strong>{t('queued_form_id')}:</strong> {form.formData.err_id || t('unknown')}
-                  </p>
-                  <p>
-                    <strong>{t('queued_form_date')}:</strong> {form.formData.date || t('unknown')}
-                  </p>
-                  <p className="text-yellow-500">{t('queued_form_status_pending')}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {submittedForms.length > 0 ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6 shadow-lg">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">{t('submitted_forms_title')}</h2>
-            <ul className="space-y-4">
-              {submittedForms.map((form, index) => (
-                <li
-                  key={index}
-                  className="flex justify-between items-center bg-white border border-gray-300 rounded-lg p-4 shadow-sm"
-                >
-                  <div>
-                    <p className="text-gray-700">
-                      <strong>{t('submitted_form_id')}:</strong> {form.formData?.err_id || t('unknown')}
-                    </p>
-                    <p className="text-gray-700">
-                      <strong>{t('submitted_form_date')}:</strong> {form.formData?.date || t('unknown')}
-                    </p>
-                  </div>
-                  <span className="text-green-600 font-medium text-sm">{t('submitted_form_status')}</span>
-                </li>
-              ))}
-            </ul>
-            <button
-              onClick={handleClearSubmitted}
-              className="mt-6 w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-semibold shadow-lg transition-all"
-            >
-              {t('clear_list_button')}
-            </button>
-          </div>
-        ) : (
-          <p className="text-gray-500 text-center text-sm">{t('no_submitted_forms')}</p>
-        )}
+      <div className="bg-white rounded-xl border border-green-100 p-4 mb-4 space-y-2 text-sm text-gray-700">
+        <p>{t('instructions_step_1', 'Fill the form even when offline.')}</p>
+        <p>{t('instructions_step_2', 'Required fields must be completed.')}</p>
+        <p>{t('instructions_step_3', 'Queued forms sync automatically when you are back online.')}</p>
       </div>
 
       {submissionMessage && (
-        <div className="bg-green-100 text-green-700 px-4 py-2 rounded shadow mb-6">
+        <div className="bg-green-100 text-green-800 px-3 py-2 rounded-lg text-sm mb-4">
           {submissionMessage}
         </div>
       )}
 
-      <button
-        onClick={handleOpenModal}
-        className="bg-primaryGreen hover:bg-primaryGreenHover text-white font-medium py-2 px-6 rounded shadow mb-4"
-      >
-        {t('open_form_button')}
-      </button>
+      <div className="flex flex-wrap gap-2 mb-6">
+        <button
+          type="button"
+          onClick={() => setIsModalOpen(true)}
+          className="bg-brand-deep text-white font-medium py-2.5 px-5 rounded-lg"
+        >
+          {t('open_form_button', 'Open offline form')}
+        </button>
+        {isOnline && queuedForms.length > 0 && (
+          <button
+            type="button"
+            onClick={syncNow}
+            disabled={syncing}
+            className="bg-white border border-green-200 text-brand-deep font-medium py-2.5 px-5 rounded-lg disabled:opacity-50"
+          >
+            {syncing ? 'Syncing…' : 'Sync now'}
+          </button>
+        )}
+      </div>
 
-      <button
-        onClick={handleReturnToHome}
-        className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded shadow mb-4"
-      >
-        {t('return_home_button')}
-      </button>
+      <div className="space-y-4">
+        <section className="bg-white rounded-xl border border-green-100 p-4">
+          <h2 className="font-semibold text-gray-900 mb-3">
+            {t('queued_forms_title', 'Queued')} ({queuedForms.length})
+          </h2>
+          {queuedForms.length === 0 ? (
+            <p className="text-sm text-gray-500">No pending forms.</p>
+          ) : (
+            <ul className="space-y-2">
+              {queuedForms.map((form) => (
+                <li
+                  key={form.id}
+                  className="rounded-lg border border-green-50 bg-green-50/50 px-3 py-2 text-sm"
+                >
+                  <p>
+                    <strong>{t('queued_form_id', 'ERR')}:</strong>{' '}
+                    {form.formData?.err_id || t('unknown', '—')}
+                  </p>
+                  <p>
+                    <strong>{t('queued_form_date', 'Date')}:</strong>{' '}
+                    {form.formData?.date || t('unknown', '—')}
+                  </p>
+                  {form.lastError ? (
+                    <p className="text-red-600 text-xs mt-1">{form.lastError}</p>
+                  ) : (
+                    <p className="text-amber-600 text-xs mt-1">
+                      {t('queued_form_status_pending', 'Pending')}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
-      <div className="flex justify-center space-x-4 mt-4">
-        <button onClick={() => changeLanguage('en')} className="mx-2 text-blue-500 underline">
+        <section className="bg-white rounded-xl border border-green-100 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-gray-900">
+              {t('submitted_forms_title', 'Synced')} ({submittedForms.length})
+            </h2>
+            {submittedForms.length > 0 && (
+              <button
+                type="button"
+                className="text-xs text-red-600 underline"
+                onClick={async () => {
+                  await clearSubmittedQueue();
+                  setSubmittedForms([]);
+                }}
+              >
+                {t('clear_list_button', 'Clear')}
+              </button>
+            )}
+          </div>
+          {submittedForms.length === 0 ? (
+            <p className="text-sm text-gray-500">{t('no_submitted_forms', 'No synced forms yet.')}</p>
+          ) : (
+            <ul className="space-y-2">
+              {submittedForms.map((form) => (
+                <li
+                  key={form.id}
+                  className="rounded-lg border border-green-50 px-3 py-2 text-sm flex justify-between gap-2"
+                >
+                  <span>
+                    {form.formData?.err_id || '—'} · {form.formData?.date || '—'}
+                  </span>
+                  <span className="text-green-600 text-xs font-medium">
+                    {t('submitted_form_status', 'Synced')}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+
+      <div className="flex gap-3 mt-6 text-sm">
+        <button type="button" onClick={() => i18n.changeLanguage('en')} className="text-brand-blue underline">
           English
         </button>
-        <button onClick={() => changeLanguage('ar')} className="mx-2 text-blue-500 underline">
+        <button type="button" onClick={() => i18n.changeLanguage('ar')} className="text-brand-blue underline">
           العربية
         </button>
       </div>
 
       {isModalOpen && (
-        <OfflineForm onClose={handleCloseModal} onSubmitSuccess={handleSubmitSuccess} />
+        <OfflineForm
+          onClose={() => {
+            setIsModalOpen(false);
+            refreshQueues();
+          }}
+          onSubmitSuccess={() => {
+            setIsModalOpen(false);
+            refreshQueues();
+            alert(t('form_submit_success'));
+          }}
+        />
       )}
-    </div>
+    </AppShell>
   );
 };
 
 export default dynamic(() => Promise.resolve(OfflineMode), { ssr: false });
 
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale || 'ar', ['offline-mode'])),
+    },
+  };
+}

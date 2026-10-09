@@ -1,66 +1,61 @@
-//pages/_app.tsx
 import { useEffect } from 'react';
 import Head from 'next/head';
 import '../styles/globals.css';
-import { registerServiceWorker } from '../services/serviceWorkerRegistration';
+import {
+  registerServiceWorker,
+  onServiceWorkerUpdate,
+} from '../services/serviceWorkerRegistration';
 import { handleOnline } from '../services/handleOnline';
 import { appWithTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
-import i18n from '../services/i18n'; // Import i18n initialization
+import i18n from '../services/i18n';
+import { ensureOfflineDbReady } from '../lib/offline/offlineQueue';
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
 
-  // Register the service worker and setup online/offline event listeners
   useEffect(() => {
-    console.log('Initializing service worker and network event listeners.');
+    ensureOfflineDbReady().catch(() => {});
 
-    // Register service worker
-    registerServiceWorker();
+    if (process.env.NODE_ENV === 'production') {
+      onServiceWorkerUpdate(() => {
+        window.dispatchEvent(new CustomEvent('swUpdateAvailable'));
+      });
+      registerServiceWorker();
+    } else if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => registration.unregister());
+      });
+      if ('caches' in window) {
+        caches.keys().then((names) => names.forEach((name) => caches.delete(name)));
+      }
+    }
 
-    // Handle online and offline events
     const onOnline = () => {
-      console.log('Network connectivity restored. Processing queued submissions.');
       handleOnline();
     };
 
-    const onOffline = () => {
-      console.log('App is now offline. Queued submissions will sync when online.');
-    };
-
     window.addEventListener('online', onOnline);
-    window.addEventListener('offline', onOffline);
-
-    // Cleanup event listeners on unmount
-    return () => {
-      window.removeEventListener('online', onOnline);
-      window.removeEventListener('offline', onOffline);
-    };
+    return () => window.removeEventListener('online', onOnline);
   }, []);
 
-  // Update document attributes based on locale
   useEffect(() => {
-    console.log(`Setting language and direction attributes for locale: ${router.locale}`);
-
     const dir = router.locale === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.setAttribute('dir', dir);
     document.documentElement.setAttribute('lang', router.locale || 'en');
 
-    // Synchronize i18next with Next.js locale
     if (router.locale) {
-      i18n.changeLanguage(router.locale).then(() => {
-        console.log(`Language successfully changed to ${router.locale}`);
-      }).catch((error) => {
-        console.error('Error changing language:', error);
-      });
+      i18n.changeLanguage(router.locale).catch(() => {});
     }
   }, [router.locale]);
 
-  // Render the application
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
+        />
       </Head>
       <Component {...pageProps} />
     </>

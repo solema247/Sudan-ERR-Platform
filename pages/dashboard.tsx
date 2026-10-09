@@ -1,11 +1,11 @@
 // Dashboard: basic analysis of funding, projects, budgets and people reached,
 // limited to what the signed-in user may see. Prints / saves to PDF with colours kept.
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
 import { newSupabase } from '../services/newSupabaseClient';
+import AppShell from '../components/layout/AppShell';
 
 // Chart colours: ERR blue and orange, deepened to pass colour-blind and contrast checks on white
 const C = { blue: '#3B68B8', orange: '#D46A2C', track: '#E4EAF4', ink: '#1F2937', muted: '#6B7280', line: '#E5E7EB' };
@@ -193,7 +193,8 @@ export default function Dashboard() {
     const scopeLabel = data ? (data.scope === 'all' ? t('scope.all') : data.scope === 'states' ? `${t('scope.states')}: ${data.states.map(stateName).join(isAr ? '، ' : ', ')}` : `${t('scope.room')}${data.states[0] ? ` · ${stateName(data.states[0])}` : ''}`) : '';
 
     return (
-        <div className="min-h-screen bg-gray-50 dashboard-page">
+        <AppShell title={t('title', 'Dashboard')}>
+        <div className="dashboard-page">
             <Head><title>Calculator</title></Head>
             <style jsx global>{`
                 .dashboard-page, .dashboard-page * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -204,21 +205,13 @@ export default function Dashboard() {
                 }
             `}</style>
 
-            <header className="bg-brand-blue text-white px-4 py-3 flex items-center gap-3 border-b-4 border-brand-orange">
-                <div className="bg-white rounded-full p-1 flex items-center justify-center shrink-0" style={{ width: 44, height: 44 }}>
-                    <Image src="/brand/err-logo.png" alt="ERR" width={36} height={36} />
-                </div>
-                <div className="min-w-0">
-                    <h1 className="font-bold text-lg leading-tight">{t('title')}</h1>
-                    {data && <div className="text-xs opacity-90 truncate">{scopeLabel}</div>}
-                </div>
-            </header>
+            {data && <p className="text-xs text-gray-500 mb-3 truncate">{scopeLabel}</p>}
 
-            <main className="max-w-3xl mx-auto p-4">
+            <main>
                 <div className="no-print flex flex-wrap gap-2 mb-4">
                     <button onClick={() => window.print()} disabled={!data}
                         className="px-4 py-2 rounded-lg bg-brand-blue text-white font-semibold disabled:opacity-50">{t('print')}</button>
-                    <button onClick={() => router.push('/menu')}
+                    <button onClick={() => router.push('/home')}
                         className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-800 font-semibold">{t('back')}</button>
                 </div>
 
@@ -373,5 +366,6 @@ export default function Dashboard() {
                 )}
             </main>
         </div>
+        </AppShell>
     );
 }

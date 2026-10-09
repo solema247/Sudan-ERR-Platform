@@ -130,7 +130,7 @@ const Login = () => {
             }
 
             // Successful login
-            router.push('/menu');
+            router.push('/home');
 
         } catch (error) {
             console.error('Login error:', error);

@@ -1,95 +1,78 @@
-// lib/serviceWorkerRegistration.js
+// Soft-update service worker registration (no forced reload loops)
+
+let updateCallback = null;
+
+export function onServiceWorkerUpdate(cb) {
+  updateCallback = cb;
+}
+
+export function applyServiceWorkerUpdate() {
+  if (!navigator.serviceWorker) return;
+  navigator.serviceWorker.getRegistration().then((registration) => {
+    if (registration?.waiting) {
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    }
+  });
+}
 
 export function registerServiceWorker() {
-  console.log('App component mounted, checking for service worker support...');
-
-  if ('serviceWorker' in navigator) {
-    console.log('Service worker supported, proceeding with registration...');
-
-    if (document.readyState === 'complete') {
-      console.log('Document already loaded, registering service worker...');
-      registerSW();
-    } else {
-      window.addEventListener('load', () => {
-        console.log('Window load event triggered, attempting to register service worker...');
-        registerSW();
-      });
-    }
-  } else {
-    console.warn('Service worker not supported in this browser.');
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Skipping service worker registration in development.');
+    return;
   }
+
+  if (!('serviceWorker' in navigator)) {
+    console.warn('Service worker not supported in this browser.');
+    return;
+  }
+
+  const start = () => registerSW();
+  if (document.readyState === 'complete') start();
+  else window.addEventListener('load', start);
 }
 
 function registerSW() {
   navigator.serviceWorker
-    .register('/sw.js', { updateViaCache: 'none' }) // Always check for updates
+    .register('/sw.js', { updateViaCache: 'none' })
     .then((registration) => {
-      console.log('Service Worker registered successfully with scope:', registration.scope);
+      console.log('Service Worker registered:', registration.scope);
 
-      // Check for immediate updates
-      registration.update();
-
-      // Listen for updates to the Service Worker
-      registration.addEventListener('updatefound', () => {
-        console.log('New service worker found, installing...');
-        const newSW = registration.installing;
-        if (newSW) {
-          newSW.addEventListener('statechange', () => {
-            if (newSW.state === 'installed') {
-              if (navigator.serviceWorker.controller) {
-                // There's a new service worker available
-                console.log('New Service Worker installed. Clearing caches and reloading...');
-                
-                // Clear all caches
-                if ('caches' in window) {
-                  caches.keys().then((cacheNames) => {
-                    return Promise.all(
-                      cacheNames.map((cacheName) => {
-                        console.log('Clearing cache:', cacheName);
-                        return caches.delete(cacheName);
-                      })
-                    );
-                  }).then(() => {
-                    console.log('All caches cleared. Reloading page...');
-                    // Reload the page to get fresh HTML with new build ID
-                    window.location.reload();
-                  });
-                } else {
-                  // If caches API not available, just reload
-                  window.location.reload();
-                }
-              } else {
-                console.log('Service Worker installed for the first time.');
-              }
-            }
-            
-            if (newSW.state === 'activated') {
-              console.log('New Service Worker activated');
-            }
-          });
-        }
+      // When a new worker takes control, reload once (user-initiated soft update)
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
       });
 
-      // Listen for messages from service worker
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'SW_UPDATED') {
-          console.log('Service Worker updated with cache version:', event.data.cacheVersion);
-          // Optionally reload if needed
-          if (registration.waiting) {
-            console.log('New service worker is waiting, reloading...');
-            window.location.reload();
+      const notifyWaiting = () => {
+        if (registration.waiting && navigator.serviceWorker.controller) {
+          if (typeof updateCallback === 'function') {
+            updateCallback(registration);
+          } else {
+            window.dispatchEvent(
+              new CustomEvent('swUpdateAvailable', { detail: { registration } })
+            );
           }
         }
+      };
+
+      if (registration.waiting) notifyWaiting();
+
+      registration.addEventListener('updatefound', () => {
+        const newSW = registration.installing;
+        if (!newSW) return;
+        newSW.addEventListener('statechange', () => {
+          if (newSW.state === 'installed') notifyWaiting();
+        });
       });
 
-      // Periodically check for updates (every hour)
+      // Periodic update check (hourly) — does not reload by itself
       setInterval(() => {
-        registration.update();
+        registration.update().catch(() => {});
       }, 60 * 60 * 1000);
     })
     .catch((err) => {
       console.error('Service Worker registration failed:', err);
     });
 }
-
-

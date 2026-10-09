@@ -1,100 +1,93 @@
-// lib/handleOnline.js
-
 /**
- * Handles resubmission of offline forms when the user goes online.
- * */
+ * Sync IndexedDB offline queue when the device comes online.
+ */
+import {
+  getSessionQueue,
+  removeFormFromSessionQueue,
+  addFormToSubmittedQueue,
+  markQueueItemError,
+  getFileBlob,
+} from '../lib/offline/offlineQueue';
+import { newSupabase } from './newSupabaseClient';
 
-import { 
-  getSessionQueue, 
-  clearSessionQueue, 
-  removeFormFromSessionQueue, 
-  addFormToSubmittedQueue 
-} from './sessionUtils';
-import { uploadImagesAndInsertRecord, ImageCategory } from './uploadImages';
-import { supabase } from './supabaseClient';
+const ImageCategory = {
+  REPORT_EXPENSES: 'report_expenses',
+};
 
-async function uploadOfflineFormFile(file, errId) {
+async function uploadOfflineFormFile(file, errId, projectId) {
   try {
-    // Upload file to storage
-    const filename = `${crypto.randomUUID()}.${file.name.split('.').pop() || 'bin'}`;
+    const ext = (file.name && file.name.split('.').pop()) || 'bin';
+    const filename = `${crypto.randomUUID()}.${ext}`;
     const newPath = `reports/expenses/${filename}`;
-    
-    const { data: _, error: uploadError } = await supabase
-      .storage
+
+    const { error: uploadError } = await newSupabase.storage
       .from('images')
       .upload(newPath, file);
 
     if (uploadError) throw uploadError;
 
-    // Create record with the offline project ID
-    const { error: insertError } = await supabase
-      .from('images')
-      .insert([
-        {
-          created_at: new Date().toISOString(),
-          filename: filename,
-          path: newPath,
-          category: ImageCategory[ImageCategory.REPORT_EXPENSES],
-          project_id: '514b2d2b-ee38-4f6f-ae35-22c6c982a256',  // Dedicated offline project ID
-          notes: `ERR ID: ${errId}`  // Still store ERR ID in notes for reference
-        },
-      ]);
+    const row = {
+      created_at: new Date().toISOString(),
+      filename,
+      path: newPath,
+      category: ImageCategory.REPORT_EXPENSES,
+      notes: `ERR ID: ${errId}`,
+    };
+    if (projectId) row.project_id = projectId;
 
+    const { error: insertError } = await newSupabase.from('images').insert([row]);
     if (insertError) throw insertError;
 
-    return {
-      success: true,
-      filename: filename
-    };
+    return { success: true, filename };
   } catch (error) {
     console.error('Error uploading offline form file:', error);
-    return {
-      success: false,
-      errorMessage: 'Failed to upload file'
-    };
+    return { success: false, errorMessage: 'Failed to upload file' };
   }
 }
 
 export const handleOnline = async () => {
   console.log('Handling online event: Processing offline forms queue.');
 
-  // Retrieve the session-specific offline queue
-  const offlineSessionQueue = getSessionQueue();
-  if (!offlineSessionQueue || offlineSessionQueue.length === 0) {
-    console.log('No offline forms to process.');
-    return;
+  let offlineSessionQueue = [];
+  try {
+    offlineSessionQueue = await getSessionQueue();
+  } catch (e) {
+    console.error('Could not read offline queue:', e);
+    return { synced: 0, failed: 0 };
   }
 
-  const failedSubmissions = []; // Temporary storage for failed submissions
+  if (!offlineSessionQueue.length) {
+    console.log('No offline forms to process.');
+    return { synced: 0, failed: 0 };
+  }
+
+  window.dispatchEvent(
+    new CustomEvent('offlineSyncStatus', { detail: { status: 'syncing', pending: offlineSessionQueue.length } })
+  );
+
+  let synced = 0;
+  let failed = 0;
 
   for (const queuedData of offlineSessionQueue) {
     try {
-      console.log('Attempting to submit form:', queuedData);
-
-      // If there's a file, upload it first
       let fileUrl = null;
-      if (queuedData.file) {
-        try {
-          const response = await fetch(queuedData.file.objectUrl);
-          const blobData = await response.blob();
-          const file = new File([blobData], queuedData.file.name, {
-            type: queuedData.file.type,
-            lastModified: queuedData.file.lastModified
+      if (queuedData.file?.blobId) {
+        const blob = await getFileBlob(queuedData.file.blobId);
+        if (blob) {
+          const file = new File([blob], queuedData.file.name || 'attachment', {
+            type: queuedData.file.type || blob.type,
+            lastModified: queuedData.file.lastModified || Date.now(),
           });
-          
           const uploadResult = await uploadOfflineFormFile(
             file,
-            queuedData.formData.err_id || 'unknown'
+            queuedData.formData?.err_id || 'unknown',
+            queuedData.formData?.project_id || null
           );
-          
           if (uploadResult.success) {
             fileUrl = uploadResult.filename;
           } else {
-            throw new Error(uploadResult.errorMessage || 'File upload failed');
+            console.warn('File upload failed; continuing with form submit');
           }
-        } catch (fileError) {
-          console.error('Error processing file:', fileError);
-          // Continue with form submission even if file upload fails
         }
       }
 
@@ -102,50 +95,47 @@ export const handleOnline = async () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...queuedData,
+          formData: queuedData.formData,
+          expenses: queuedData.expenses,
           fileUrl,
-          is_offline: true
+          is_offline: true,
         }),
       });
 
       if (!response.ok) {
-        console.error('Submission failed with status:', response.status);
-        failedSubmissions.push(queuedData);
+        failed += 1;
+        await markQueueItemError(queuedData.id, `HTTP ${response.status}`);
         continue;
       }
 
       const data = await response.json();
-
       if (data.message === 'Form submitted successfully!') {
-        console.log('Form submitted successfully:', queuedData);
-
-        // Dispatch a custom event to notify about the successful submission
+        synced += 1;
         window.dispatchEvent(
           new CustomEvent('offlineFormSubmitted', {
             detail: { message: 'Successfully submitted 1 form(s)' },
           })
         );
-
-        // Move the form to the submitted queue
-        addFormToSubmittedQueue(queuedData);
-
-        // Remove the form from the session queue
-        removeFormFromSessionQueue(queuedData);
+        await addFormToSubmittedQueue(queuedData);
+        await removeFormFromSessionQueue(queuedData.id);
       } else {
-        console.error('Submission failed with response:', data.message);
-        failedSubmissions.push(queuedData);
+        failed += 1;
+        await markQueueItemError(queuedData.id, data.message || 'Submission failed');
       }
     } catch (error) {
-      console.error('Error submitting form:', error.message || error);
-      failedSubmissions.push(queuedData);
+      failed += 1;
+      console.error('Error submitting form:', error);
+      try {
+        await markQueueItemError(queuedData.id, error?.message || String(error));
+      } catch (_) {}
     }
   }
 
-  if (failedSubmissions.length === 0) {
-    console.log('All offline forms submitted successfully.');
-    clearSessionQueue();
-  } else {
-    console.warn('Some forms could not be submitted. Retaining in the offline queue.');
-    localStorage.setItem('offlineQueue', JSON.stringify(failedSubmissions));
-  }
+  window.dispatchEvent(
+    new CustomEvent('offlineSyncStatus', {
+      detail: { status: failed ? 'partial' : 'idle', synced, failed },
+    })
+  );
+
+  return { synced, failed };
 };

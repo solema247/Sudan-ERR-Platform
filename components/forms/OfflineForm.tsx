@@ -66,43 +66,41 @@ const OfflineForm: React.FC<OfflineFormProps> = ({ onClose, onSubmitSuccess }) =
   const handleSubmit = async () => {
     if (!validateFormData()) return;
 
-    const offlineData = {
+    const payload = {
       formData: { ...formData, expenses: undefined },
       expenses: formData.expenses,
-      file: file ? {
-        name: file.name,
-        type: file.type,
-        lastModified: file.lastModified,
-        // Store file as object URL for offline storage
-        objectUrl: URL.createObjectURL(file)
-      } : null
+      file: file || null,
     };
 
     if (navigator.onLine) {
-      console.log('Submitting form online:', offlineData);
-
-      fetch('/api/offline-mode', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(offlineData),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.message === t('form_submit_success')) {
-            alert(t('form_submit_success'));
-            onSubmitSuccess();
-          } else {
-            alert(t('submission_failed'));
-          }
-        })
-        .catch((error) => {
-          console.error('Error during submission:', error);
-          alert(t('error_during_submission'));
+      try {
+        const res = await fetch('/api/offline-mode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            formData: payload.formData,
+            expenses: payload.expenses,
+            is_offline: false,
+          }),
         });
+        const data = await res.json();
+        if (data.message === t('form_submit_success') || data.message === 'Form submitted successfully!') {
+          alert(t('form_submit_success'));
+          onSubmitSuccess();
+        } else {
+          // Fall back to queue if online submit fails
+          await addFormToSessionQueue(payload);
+          alert(t('form_saved_offline'));
+          onClose();
+        }
+      } catch (error) {
+        console.error('Error during submission:', error);
+        await addFormToSessionQueue(payload);
+        alert(t('form_saved_offline'));
+        onClose();
+      }
     } else {
-      console.log('Saving form offline:', offlineData);
-
-      addFormToSessionQueue(offlineData);
+      await addFormToSessionQueue(payload);
       alert(t('form_saved_offline'));
       onClose();
     }

@@ -1,174 +1,153 @@
-// public/sw.js
-// Dynamic cache versioning: Increment this version number when deploying to invalidate old caches
-// The service worker file itself will be updated on deployment, triggering a new install
-const CACHE_VERSION = '4'; // Increment this on each deployment to invalidate old caches
-const CACHE_NAME = `offline-chatbot-cache-v${CACHE_VERSION}`;
+// public/sw.js — stable offline shell for ERR App
+// Bump CACHE_VERSION (or rely on file change) on deploy to refresh precache.
+const CACHE_VERSION = '5';
+const CACHE_NAME = `err-app-cache-v${CACHE_VERSION}`;
 
-// Static assets to pre-cache (excluding HTML pages for network-first strategy)
-const urlsToCache = [
-  '/styles/globals.css',
-  '/favicon.ico',
+const PRECACHE_URLS = [
   '/manifest.json',
+  '/favicon.ico',
+  '/offline-mode',
+  '/home',
+  '/reporting',
+  '/projects',
+  '/feedback',
   '/locales/en/login.json',
   '/locales/ar/login.json',
   '/locales/es/login.json',
   '/locales/en/home.json',
   '/locales/ar/home.json',
   '/locales/es/home.json',
-  '/offline-mode' // Keep offline fallback page cached
+  '/locales/en/offline-mode.json',
+  '/locales/ar/offline-mode.json',
+  '/locales/es/offline-mode.json',
+  '/locales/en/menu.json',
+  '/locales/ar/menu.json',
+  '/locales/es/menu.json',
+  '/locales/en/scan-form.json',
+  '/locales/ar/scan-form.json',
+  '/locales/es/scan-form.json',
 ];
 
-// Install event: cache static assets only
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Install event triggered with cache version:', CACHE_VERSION);
-  // Force the new service worker to activate immediately
-  self.skipWaiting();
-  
+  // Do NOT skipWaiting here — wait for client to accept the update (soft update).
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache:', CACHE_NAME);
-        return Promise.all(
-          urlsToCache.map((url) =>
-            cache.add(url).catch((err) => console.error(`Failed to cache ${url}:`, err))
-          )
-        );
-      })
-      .then(() => {
-        console.log('Static assets cached successfully');
-      })
-      .catch((error) => console.error('Failed to cache assets on install:', error))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.all(
+        PRECACHE_URLS.map((url) =>
+          cache.add(url).catch((err) => console.warn('Precache failed:', url, err))
+        )
+      )
+    )
   );
 });
 
-// Helper function to check if request is for HTML page
 function isHTMLRequest(request) {
-  return request.mode === 'navigate' || 
-         request.headers.get('accept')?.includes('text/html') ||
-         request.url.endsWith('/') ||
-         !request.url.includes('.');
+  return (
+    request.mode === 'navigate' ||
+    (request.headers.get('accept') || '').includes('text/html')
+  );
 }
 
-// Fetch event: network-first for HTML, cache-first for static assets
+function isStaticAsset(url) {
+  return (
+    url.pathname.startsWith('/_next/static/') ||
+    url.pathname.startsWith('/locales/') ||
+    url.pathname.startsWith('/brand/') ||
+    url.pathname.startsWith('/styles/') ||
+    /\.(css|js|png|jpg|jpeg|svg|webp|woff2?|ico)$/i.test(url.pathname)
+  );
+}
+
 self.addEventListener('fetch', (event) => {
   const request = event.request;
-
-  // Only handle this app's own GET requests for pages and static files.
-  // API calls (our /api routes, and Supabase on its own host) always go
-  // straight to the network, so a failed call can never be answered with
-  // the cached offline page.
   const url = new URL(request.url);
-  if (request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.startsWith('/api/')) {
+
+  // Never intercept APIs or cross-origin
+  if (
+    request.method !== 'GET' ||
+    url.origin !== self.location.origin ||
+    url.pathname.startsWith('/api/')
+  ) {
     return;
   }
-  const isHTML = isHTMLRequest(request);
 
-  // Network-first strategy for HTML pages
-  if (isHTML) {
+  // Never treat the service worker script itself as a cacheable HTML page
+  if (url.pathname === '/sw.js') {
+    return;
+  }
+
+  if (isHTMLRequest(request)) {
     event.respondWith(
-      // Whatever the server answers is passed on as it is (don't cache HTML): a page, an error page,
-      // or a redirect such as a login page in front of a test site. The offline page is only for
-      // when there is no network at all (fetch throws).
       fetch(request)
-        .catch(() => {
-          // If offline, try to serve from cache
-          console.log('Network request failed, trying cache for:', request.url);
-          return caches.match(request)
-            .then((cachedResponse) => {
-              if (cachedResponse) {
-                return cachedResponse;
-              }
-              // If no cached HTML, return offline fallback page
-              return caches.match('/offline-mode')
-                .then((offlinePage) => {
-                  if (offlinePage) {
-                    return offlinePage;
-                  }
-                  return new Response('Offline page not available.', {
-                    status: 503,
-                    headers: { 'Content-Type': 'text/plain' },
-                  });
-                });
-            });
-        })
-    );
-  } else {
-    // Cache-first strategy for static assets (CSS, JS, images, locales, etc.)
-    event.respondWith(
-      caches.match(request)
-        .then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
+        .then((response) => {
+          // Cache successful navigations for offline shell (clone before return)
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
           }
-
-          // Not in cache, fetch from network
-          return fetch(request)
-            .then((fetchResponse) => {
-              // Only cache successful responses
-              if (fetchResponse && fetchResponse.status === 200) {
-                const responseToCache = fetchResponse.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                  // Cache static assets for offline use
-                  if (request.url.includes('/locales/') || 
-                      request.url.includes('/_next/static/') ||
-                      request.url.includes('/styles/') ||
-                      request.url.includes('.css') ||
-                      request.url.includes('.js') ||
-                      request.url.includes('.png') ||
-                      request.url.includes('.jpg') ||
-                      request.url.includes('.jpeg') ||
-                      request.url.includes('.svg')) {
-                    cache.put(request, responseToCache);
-                  }
-                });
-              }
-              return fetchResponse;
-            })
-            .catch(() => {
-              // If offline and not in cache, return appropriate response
-              if (request.url.includes('/locales/')) {
-                return new Response(JSON.stringify({}), {
-                  status: 503,
-                  headers: { 'Content-Type': 'application/json' },
-                });
-              }
-              return new Response('Resource not available offline.', {
-                status: 503,
-                headers: { 'Content-Type': 'text/plain' },
-              });
-            });
+          return response;
         })
+        .catch(() =>
+          caches.match(request).then((cached) => {
+            if (cached) return cached;
+            return caches.match('/offline-mode').then(
+              (offline) =>
+                offline ||
+                new Response('Offline', {
+                  status: 503,
+                  headers: { 'Content-Type': 'text/plain' },
+                })
+            );
+          })
+        )
+    );
+    return;
+  }
+
+  if (isStaticAsset(url)) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              const copy = response.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
+            }
+            return response;
+          })
+          .catch(() => {
+            if (url.pathname.includes('/locales/')) {
+              return new Response('{}', {
+                status: 503,
+                headers: { 'Content-Type': 'application/json' },
+              });
+            }
+            return new Response('Resource not available offline.', {
+              status: 503,
+              headers: { 'Content-Type': 'text/plain' },
+            });
+          });
+      })
     );
   }
 });
 
-// Activate event: remove old caches and claim clients
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activate event triggered');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      // Delete all caches that don't match the current cache name
-      const deletePromises = cacheNames
-        .filter((cacheName) => cacheName !== CACHE_NAME)
-        .map((cacheName) => {
-          console.log('Deleting old cache:', cacheName);
-          return caches.delete(cacheName);
-        });
-      
-      // Claim all clients immediately to activate the new service worker
-      return Promise.all([...deletePromises, self.clients.claim()]);
-    })
-    .then(() => {
-      console.log('Service Worker activated, old caches cleared');
-      // Notify all clients that the service worker has been updated
-      return self.clients.matchAll().then((clients) => {
-        clients.forEach((client) => {
-          client.postMessage({
-            type: 'SW_UPDATED',
-            cacheVersion: CACHE_VERSION
-          });
-        });
-      });
-    })
+    caches.keys().then((names) =>
+      Promise.all(
+        names
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
+      )
+    ).then(() => self.clients.claim())
   );
+});
+
+// Soft update: client asks waiting worker to activate
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
