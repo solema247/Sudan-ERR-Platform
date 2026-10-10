@@ -4,6 +4,14 @@ import { createAuthenticatedClient } from '../../services/createAuthenticatedCli
 import { getAccessScope, getRoomNames } from '../../services/accessScope';
 import { validateSession } from '../../services/auth';
 
+function splitPipe(v: unknown): string[] {
+  if (typeof v !== 'string' || !v.trim()) return [];
+  return v
+    .split('|')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);
@@ -29,8 +37,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       room_id,
       id: projectId,
       status = 'active',
+      state: stateRaw,
+      locality: localityRaw,
+      f4_status: f4StatusRaw,
+      f5_status: f5StatusRaw,
+      date_from: dateFrom,
+      date_to: dateTo,
+      transfer_from: transferFrom,
+      transfer_to: transferTo,
       limit: limitRaw,
       offset: offsetRaw,
+      include_filter_options: includeFilterOptions,
     } = req.query;
 
     const limit = Math.min(Math.max(parseInt(String(limitRaw || '100'), 10) || 100, 1), 200);
@@ -39,15 +56,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const roomId = typeof room_id === 'string' && room_id ? room_id : null;
     const idFilter = typeof projectId === 'string' && projectId ? projectId : null;
     const statusFilter = typeof status === 'string' && status ? status : 'active';
+    const states = splitPipe(stateRaw);
+    const localities = splitPipe(localityRaw);
+    const statuses = splitPipe(statusFilter);
+    const f4Status =
+      typeof f4StatusRaw === 'string' && f4StatusRaw.trim() ? f4StatusRaw.trim() : '';
+    const f5Status =
+      typeof f5StatusRaw === 'string' && f5StatusRaw.trim() ? f5StatusRaw.trim() : '';
+    const wantOptions = String(includeFilterOptions || '') === '1';
 
     const scope = await getAccessScope(db, user.id);
     if (!scope.all && scope.roomIds.length === 0) {
-      return res.status(200).json({ success: true, projects: [], total: 0, roomOptions: [] });
+      return res.status(200).json({
+        success: true,
+        projects: [],
+        total: 0,
+        roomOptions: [],
+        filterOptions: { states: [], localities: [] },
+      });
     }
 
     let query = db
       .from('err_projects')
-      .select('id, project_objectives, state, locality, err_id, status', { count: 'exact' });
+      .select(
+        'id, project_objectives, project_name, state, locality, err_id, status, date, submitted_at, date_transfer, f4_status, f5_status',
+        { count: 'exact' }
+      );
 
     if (idFilter) {
       query = query.eq('id', idFilter);
@@ -55,8 +89,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!includeDrafts) {
       query = query.eq('is_draft', false);
     }
-    if (statusFilter !== 'all' && !idFilter) {
-      query = query.eq('status', statusFilter);
+    if (!idFilter) {
+      if (statuses.length === 1 && statuses[0] !== 'all') {
+        query = query.eq('status', statuses[0]);
+      } else if (statuses.length > 1) {
+        query = query.in('status', statuses);
+      } else if (statusFilter !== 'all') {
+        query = query.eq('status', statusFilter);
+      }
     }
     if (!scope.all) {
       query = query.in('err_id', scope.roomIds);
@@ -64,15 +104,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (roomId) {
       query = query.eq('err_id', roomId);
     }
+    if (states.length === 1) {
+      query = query.eq('state', states[0]);
+    } else if (states.length > 1) {
+      query = query.in('state', states);
+    }
+    if (localities.length === 1) {
+      query = query.eq('locality', localities[0]);
+    } else if (localities.length > 1) {
+      query = query.in('locality', localities);
+    }
+    if (f4Status) {
+      query = query.eq('f4_status', f4Status);
+    }
+    if (f5Status) {
+      query = query.eq('f5_status', f5Status);
+    }
+    if (typeof dateFrom === 'string' && dateFrom) {
+      query = query.gte('date', dateFrom);
+    }
+    if (typeof dateTo === 'string' && dateTo) {
+      query = query.lte('date', dateTo);
+    }
+    if (typeof transferFrom === 'string' && transferFrom) {
+      query = query.gte('date_transfer', transferFrom);
+    }
+    if (typeof transferTo === 'string' && transferTo) {
+      query = query.lte('date_transfer', transferTo);
+    }
     if (search) {
-      // PostgREST or-filter across text columns
       const escaped = search.replace(/%/g, '\\%').replace(/,/g, '');
       query = query.or(
-        `project_objectives.ilike.%${escaped}%,locality.ilike.%${escaped}%,state.ilike.%${escaped}%`
+        `project_objectives.ilike.%${escaped}%,locality.ilike.%${escaped}%,state.ilike.%${escaped}%,project_name.ilike.%${escaped}%`
       );
     }
 
-    query = query.order('project_objectives', { ascending: true }).range(offset, offset + limit - 1);
+    query = query
+      .order('submitted_at', { ascending: false, nullsFirst: false })
+      .range(offset, offset + limit - 1);
 
     const { data: projects, error, count } = await query;
 
@@ -91,7 +160,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       room: rooms[String(p.err_id)] || null,
     }));
 
-    // Room filter options for multi-room users
     let roomOptions: { id: string; label: string }[] = [];
     if (!scope.all && scope.roomIds.length > 1) {
       const allRoomNames = await getRoomNames(db, scope.roomIds.map(String));
@@ -110,6 +178,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
+    let filterOptions: {
+      states: string[];
+      localities: { state: string; locality: string }[];
+    } | null = null;
+
+    if (wantOptions) {
+      let optQuery = db
+        .from('err_projects')
+        .select('state, locality')
+        .eq('is_draft', false)
+        .not('state', 'is', null);
+      if (!scope.all) {
+        optQuery = optQuery.in('err_id', scope.roomIds);
+      }
+      const { data: optRows } = await optQuery.limit(5000);
+      const stateSet = new Set<string>();
+      const locPairs = new Map<string, { state: string; locality: string }>();
+      (optRows || []).forEach((r: any) => {
+        const st = r.state ? String(r.state).trim() : '';
+        const loc = r.locality ? String(r.locality).trim() : '';
+        if (st) stateSet.add(st);
+        if (st && loc) locPairs.set(`${st}||${loc}`, { state: st, locality: loc });
+      });
+      filterOptions = {
+        states: Array.from(stateSet).sort((a, b) => a.localeCompare(b)),
+        localities: Array.from(locPairs.values()).sort((a, b) =>
+          a.locality.localeCompare(b.locality)
+        ),
+      };
+    }
+
     return res.status(200).json({
       success: true,
       projects: withRooms,
@@ -117,6 +216,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       limit,
       offset,
       roomOptions,
+      ...(filterOptions ? { filterOptions } : {}),
     });
   } catch (error: any) {
     console.error('Unexpected error in get-projects:', error.message);

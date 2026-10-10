@@ -7,6 +7,7 @@ import AppShell from '../../../components/layout/AppShell';
 import { useRequireAuth } from '../../../hooks/useRequireAuth';
 import ReportingForm from '../../../components/forms/ReportForm/ReportingForm';
 import ScanForm from '../../scan-form';
+import ScanCustomForm from '../../scan-custom-form';
 import ProgramReportForm from '../../../components/forms/ProgramReportForm/ReportingForm';
 import FinancialReportDrafts from '../../../components/forms/FinancialReportForm/FinancialReportDrafts';
 import ProgramReportDrafts from '../../../components/forms/ProgramReportForm/ProgramReportDrafts';
@@ -19,15 +20,25 @@ import {
 } from '../../../components/home/illustrations';
 import { v4 as uuidv4 } from 'uuid';
 
-type Workflow = 'menu' | 'fill' | 'scan' | 'program' | 'drafts';
+type Workflow = 'menu' | 'fill' | 'scan' | 'program' | 'program-scan' | 'drafts';
+
+function workflowFromAction(action: string | string[] | undefined): Workflow | null {
+  const a = Array.isArray(action) ? action[0] : action;
+  if (a === 'f4-ai') return 'scan';
+  if (a === 'f4-manual') return 'fill';
+  if (a === 'f5-ai') return 'program-scan';
+  if (a === 'f5-manual') return 'program';
+  return null;
+}
 
 export default function F4F5ProjectPage() {
   const router = useRouter();
-  const { projectId } = router.query;
+  const { projectId, action } = router.query;
   const { ready, token } = useRequireAuth();
   const { t } = useTranslation('menu');
   const [project, setProject] = useState<any>(null);
   const [workflow, setWorkflow] = useState<Workflow>('menu');
+  const [actionApplied, setActionApplied] = useState(false);
   const [activeReportId, setActiveReportId] = useState<string | null>(null);
   const [financialDrafts, setFinancialDrafts] = useState([]);
   const [programDrafts, setProgramDrafts] = useState([]);
@@ -51,6 +62,28 @@ export default function F4F5ProjectPage() {
       }
     })();
   }, [ready, token, projectId]);
+
+  // Open the hub-selected action once project is ready
+  useEffect(() => {
+    if (!project || actionApplied || loading) return;
+    const next = workflowFromAction(action);
+    if (next === 'fill') {
+      setActiveReportId(uuidv4());
+      setCurrentProjectDraft(null);
+      setWorkflow('fill');
+      setActionApplied(true);
+    } else if (next === 'scan') {
+      setWorkflow('scan');
+      setActionApplied(true);
+    } else if (next === 'program') {
+      setCurrentProgramDraft(null);
+      setWorkflow('program');
+      setActionApplied(true);
+    } else if (next === 'program-scan') {
+      setWorkflow('program-scan');
+      setActionApplied(true);
+    }
+  }, [project, action, actionApplied, loading]);
 
   const fetchDrafts = async () => {
     if (!token || !projectId) return;
@@ -76,6 +109,19 @@ export default function F4F5ProjectPage() {
     setActiveReportId(uuidv4());
     setCurrentProjectDraft(null);
     setWorkflow('fill');
+  };
+
+  const goBack = () => {
+    if (workflow === 'menu') {
+      router.push('/f-system/f4-f5');
+      return;
+    }
+    // If user arrived via hub action, return to hub; otherwise project menu
+    if (action && actionApplied) {
+      router.push('/f-system/f4-f5');
+      return;
+    }
+    setWorkflow('menu');
   };
 
   if (!ready) {
@@ -106,7 +152,7 @@ export default function F4F5ProjectPage() {
           <span className="rtl:rotate-180 inline-flex">
             <ChevronRight className="h-4 w-4 rotate-180" />
           </span>
-          Back to projects
+          Back to reporting
         </button>
       </AppShell>
     );
@@ -117,16 +163,14 @@ export default function F4F5ProjectPage() {
       <div className="mb-6">
         <button
           type="button"
-          onClick={() =>
-            workflow === 'menu' ? router.push('/f-system/f4-f5') : setWorkflow('menu')
-          }
+          onClick={goBack}
           className="inline-flex items-center gap-1 text-sm font-medium text-[#8a97ab] hover:text-brand-orange transition-colors mb-3"
         >
           <span className="rtl:rotate-180 inline-flex">
             <ChevronRight className="h-4 w-4 rotate-180" />
           </span>
           {workflow === 'menu'
-            ? t('selectDifferentProject', 'Choose another project')
+            ? t('selectDifferentProject', 'Back to reporting')
             : t('backToReportTypes', 'Back')}
         </button>
         <p className="app-section-label mb-1">F4 & F5 · Reporting</p>
@@ -148,21 +192,30 @@ export default function F4F5ProjectPage() {
           <div className="-mx-4 overflow-x-auto pb-2 scrollbar-none">
             <div className="flex w-max min-w-full gap-3 px-4 snap-x snap-mandatory items-stretch">
               <HomeCard
-                onClick={openFill}
-                code="F4"
-                title="Financial report"
-                subtitle="Fill expenses for this project"
-                illustration={ReportingScene}
+                onClick={() => setWorkflow('scan')}
+                code="AI"
+                title="Upload F4 with AI"
+                subtitle="Scan a financial report"
+                illustration={MouScene}
                 wash="bg-brand-orangeSoft"
                 size="md"
               />
               <HomeCard
-                onClick={() => setWorkflow('scan')}
-                code="F4"
-                title="Scan report"
-                subtitle="OCR a financial report"
-                illustration={MouScene}
+                onClick={openFill}
+                code="Manual"
+                title="Upload F4 Manual Form"
+                subtitle="Fill expenses by hand"
+                illustration={ReportingScene}
                 wash="bg-[#7B96C4]"
+                size="md"
+              />
+              <HomeCard
+                onClick={() => setWorkflow('program-scan')}
+                code="AI"
+                title="Upload F5 with AI"
+                subtitle="Scan a program report"
+                illustration={ApprovalsScene}
+                wash="bg-brand-orangeSoft"
                 size="md"
               />
               <HomeCard
@@ -170,11 +223,11 @@ export default function F4F5ProjectPage() {
                   setCurrentProgramDraft(null);
                   setWorkflow('program');
                 }}
-                code="F5"
-                title="Program report"
-                subtitle="Report on activities"
+                code="Manual"
+                title="Upload F5 Manual Form"
+                subtitle="Fill the program report"
                 illustration={WorkPlanScene}
-                wash="bg-brand-orangeSoft"
+                wash="bg-[#7B96C4]"
                 size="md"
               />
               <HomeCard
@@ -186,7 +239,7 @@ export default function F4F5ProjectPage() {
                 title={t('viewDrafts', 'View drafts')}
                 subtitle="Continue saved reports"
                 illustration={ApprovalsScene}
-                wash="bg-[#7B96C4]"
+                wash="bg-[#9BB0D4]"
                 size="md"
               />
             </div>
@@ -200,7 +253,7 @@ export default function F4F5ProjectPage() {
             errId={project.err_id}
             reportId={activeReportId}
             project={project}
-            onReturnToMenu={() => setWorkflow('menu')}
+            onReturnToMenu={goBack}
             onSubmitAnotherForm={openFill}
             initialDraft={currentProjectDraft}
           />
@@ -209,7 +262,7 @@ export default function F4F5ProjectPage() {
 
       {workflow === 'scan' && (
         <div className="rounded-xl border border-white/10 bg-[#122038]/60 p-4">
-          <ScanForm project={project} onReturnToMenu={() => setWorkflow('menu')} />
+          <ScanForm project={project} onReturnToMenu={goBack} />
         </div>
       )}
 
@@ -217,9 +270,19 @@ export default function F4F5ProjectPage() {
         <div className="rounded-xl border border-white/10 bg-[#122038]/60 p-4">
           <ProgramReportForm
             project={project}
-            onReturnToMenu={() => setWorkflow('menu')}
+            onReturnToMenu={goBack}
             onSubmitAnotherForm={() => setWorkflow('program')}
             initialDraft={currentProgramDraft}
+          />
+        </div>
+      )}
+
+      {workflow === 'program-scan' && (
+        <div className="rounded-xl border border-white/10 bg-[#122038]/60 p-4">
+          <ScanCustomForm
+            project={project}
+            onReturnToMenu={goBack}
+            onSubmitAnotherForm={() => setWorkflow('program-scan')}
           />
         </div>
       )}
@@ -274,6 +337,8 @@ export async function getServerSideProps({ locale }: { locale: string }) {
       ...(await serverSideTranslations(locale || 'ar', [
         'menu',
         'scan-form',
+        'scanForm',
+        'customScanForm',
         'fill-form',
         'financial-report',
         'program-report',

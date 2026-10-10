@@ -90,6 +90,10 @@ export default function F4F5ReportingIndexPage() {
           token={token}
           mode="reporting"
           locale={i18n.language}
+          status="active"
+          layout="status-table"
+          enableSmartFilters
+          reportKind={action.startsWith('f5') ? 'f5' : 'f4'}
           onSelect={(project) =>
             router.push(`/f-system/f4-f5/${project.id}?action=${action}`)
           }
@@ -113,7 +117,9 @@ export default function F4F5ReportingIndexPage() {
       {/* F4 carousel */}
       <section className="mb-8">
         <div className="flex items-center gap-1.5 mb-3 px-0.5">
-          <h3 className="text-lg font-bold text-white leading-tight">F4</h3>
+          <h3 className="text-lg font-bold text-white leading-tight">
+            F4 - Financial Reports
+          </h3>
         </div>
         <div className="-mx-4 overflow-x-auto pb-2 scrollbar-none">
           <div className="flex w-max min-w-full gap-3 px-4 snap-x snap-mandatory items-stretch">
@@ -142,7 +148,9 @@ export default function F4F5ReportingIndexPage() {
       {/* F5 carousel */}
       <section className="mb-8">
         <div className="flex items-center gap-1.5 mb-3 px-0.5">
-          <h3 className="text-lg font-bold text-white leading-tight">F5</h3>
+          <h3 className="text-lg font-bold text-white leading-tight">
+            F5 - Program Reports
+          </h3>
         </div>
         <div className="-mx-4 overflow-x-auto pb-2 scrollbar-none">
           <div className="flex w-max min-w-full gap-3 px-4 snap-x snap-mandatory items-stretch">

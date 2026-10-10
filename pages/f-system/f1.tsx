@@ -102,7 +102,7 @@ export default function F1WorkPlansPage() {
                 <HomeCard
                   onClick={openApplication}
                   code="Apply"
-                  title={t('projectApplication', 'Project application')}
+                  title="F1 - Project Application"
                   subtitle="New work plan for your room"
                   illustration={WorkPlanScene}
                   wash="bg-brand-orangeSoft"
@@ -111,7 +111,7 @@ export default function F1WorkPlansPage() {
                 <HomeCard
                   onClick={() => setView('status')}
                   code="Status"
-                  title={t('projectStatus', 'Project status')}
+                  title="F1 - Application Status"
                   subtitle="Track submitted plans"
                   illustration={ApprovalsScene}
                   wash="bg-[#7B96C4]"
