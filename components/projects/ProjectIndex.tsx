@@ -37,6 +37,8 @@ type ProjectIndexProps = {
   enableSmartFilters?: boolean;
   /** Which report status filter to expose */
   reportKind?: 'f4' | 'f5';
+  /** Read projects from Prod (F4 AI / reporting) */
+  useProdDb?: boolean;
 };
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -61,6 +63,7 @@ const ProjectIndex: React.FC<ProjectIndexProps> = ({
   pageSize = DEFAULT_PAGE_SIZE,
   enableSmartFilters = false,
   reportKind = 'f4',
+  useProdDb = false,
 }) => {
   const router = useRouter();
   const [q, setQ] = useState('');
@@ -127,14 +130,20 @@ const ProjectIndex: React.FC<ProjectIndexProps> = ({
     });
   }, [localityOptions, enableSmartFilters]);
 
+  const roomOptions = useMemo(
+    () => rooms.map((r) => ({ value: r.id, label: r.label })),
+    [rooms]
+  );
+
   const filterFields = useMemo(
     () =>
       getReportingFilterFields({
         reportKind,
         stateOptions: allStates,
         localityOptions,
+        roomOptions,
       }),
-    [reportKind, allStates, localityOptions]
+    [reportKind, allStates, localityOptions, roomOptions]
   );
 
   const filterParams = useMemo(
@@ -151,6 +160,7 @@ const ProjectIndex: React.FC<ProjectIndexProps> = ({
           limit: String(pageSize),
           offset: String(nextOffset),
         });
+        if (useProdDb) params.set('db', 'prod');
 
         if (enableSmartFilters) {
           if (filterParams.status) params.set('status', filterParams.status);
@@ -164,7 +174,8 @@ const ProjectIndex: React.FC<ProjectIndexProps> = ({
         }
 
         if (debouncedQ) params.set('q', debouncedQ);
-        if (roomFilter) params.set('room_id', roomFilter);
+        // Room comes from smart filters when enabled; otherwise standalone dropdown
+        if (!enableSmartFilters && roomFilter) params.set('room_id', roomFilter);
 
         const res = await fetch(`/api/get-projects?${params}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -223,6 +234,7 @@ const ProjectIndex: React.FC<ProjectIndexProps> = ({
       useTable,
       enableSmartFilters,
       filterParams,
+      useProdDb,
     ]
   );
 
@@ -306,7 +318,10 @@ const ProjectIndex: React.FC<ProjectIndexProps> = ({
           fields={filterFields}
           filters={filters}
           onFiltersChange={onFiltersChange}
-          chipOptionsByFieldId={{ locality: localityOptions }}
+          chipOptionsByFieldId={{
+            locality: localityOptions,
+            room: roomOptions,
+          }}
           title="Projects"
           count={total}
         />
@@ -323,7 +338,7 @@ const ProjectIndex: React.FC<ProjectIndexProps> = ({
             className="w-full rounded-xl border border-white/10 bg-[#122038] pl-10 pr-3 rtl:pl-3 rtl:pr-10 py-2.5 text-sm text-white placeholder:text-[#6b7a94] outline-none focus:border-brand-orange/50"
           />
         </div>
-        {rooms.length > 1 && (
+        {!enableSmartFilters && rooms.length > 1 && (
           <select
             value={roomFilter}
             onChange={(e) => setRoomFilter(e.target.value)}

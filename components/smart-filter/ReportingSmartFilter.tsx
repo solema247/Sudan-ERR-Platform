@@ -27,6 +27,7 @@ export const PROJECT_STATUS_OPTIONS: FilterSelectOption[] = [
 const CHIP_COLORS: Record<string, string> = {
   state: 'border-sky-400/40 bg-sky-500/10',
   locality: 'border-lime-400/40 bg-lime-500/10',
+  room: 'border-cyan-400/40 bg-cyan-500/10',
   project_status: 'border-brand-orange/40 bg-brand-orange/10',
   f4_status: 'border-amber-400/40 bg-amber-500/10',
   f5_status: 'border-emerald-400/40 bg-emerald-500/10',
@@ -341,6 +342,7 @@ export function getReportingFilterFields(opts: {
   reportKind: 'f4' | 'f5';
   stateOptions: FilterSelectOption[];
   localityOptions: FilterSelectOption[];
+  roomOptions?: FilterSelectOption[];
 }): FilterFieldConfig[] {
   const reportStatusField: FilterFieldConfig =
     opts.reportKind === 'f4'
@@ -359,7 +361,7 @@ export function getReportingFilterFields(opts: {
           placeholder: 'Any',
         };
 
-  return [
+  const fields: FilterFieldConfig[] = [
     {
       id: 'state',
       label: 'State',
@@ -374,6 +376,19 @@ export function getReportingFilterFields(opts: {
       options: opts.localityOptions,
       placeholder: 'All localities',
     },
+  ];
+
+  if ((opts.roomOptions?.length || 0) > 0) {
+    fields.push({
+      id: 'room',
+      label: 'Room',
+      type: 'select',
+      options: opts.roomOptions || [],
+      placeholder: 'All rooms',
+    });
+  }
+
+  fields.push(
     {
       id: 'project_status',
       label: 'Project Status',
@@ -391,8 +406,10 @@ export function getReportingFilterFields(opts: {
       id: 'transfer_date_range',
       label: 'Date Transfer Range',
       type: 'date_range',
-    },
-  ];
+    }
+  );
+
+  return fields;
 }
 
 /** Serialize active filters into API query params */
@@ -404,6 +421,9 @@ export function filtersToQueryParams(filters: ActiveFilter[]): Record<string, st
     }
     if (f.fieldId === 'locality' && Array.isArray(f.value) && f.value.length) {
       out.locality = f.value.map(String).join('|');
+    }
+    if (f.fieldId === 'room' && typeof f.value === 'string' && f.value) {
+      out.room_id = f.value;
     }
     if (f.fieldId === 'project_status' && Array.isArray(f.value) && f.value.length) {
       out.status = f.value.map(String).join('|');

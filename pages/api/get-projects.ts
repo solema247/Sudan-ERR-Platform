@@ -3,6 +3,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { createAuthenticatedClient } from '../../services/createAuthenticatedClient';
 import { getAccessScope, getRoomNames } from '../../services/accessScope';
 import { validateSession } from '../../services/auth';
+import {
+  createProdSupabaseAdmin,
+  isProdSupabaseConfigured,
+} from '../../services/prodSupabaseAdmin';
 
 function splitPipe(v: unknown): string[] {
   if (typeof v !== 'string' || !v.trim()) return [];
@@ -26,7 +30,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const token = authHeader.replace('Bearer ', '');
     const user = await validateSession(token);
-    const db = createAuthenticatedClient(token);
     if (!user) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
@@ -48,7 +51,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       limit: limitRaw,
       offset: offsetRaw,
       include_filter_options: includeFilterOptions,
+      db: dbTarget,
     } = req.query;
+
+    // Scope always from staging profile; project rows may come from Prod (F4 reporting).
+    const staging = createAuthenticatedClient(token);
+    const useProd = String(dbTarget || '') === 'prod';
+    if (useProd && !isProdSupabaseConfigured()) {
+      return res.status(500).json({
+        success: false,
+        message: 'Prod Supabase not configured',
+      });
+    }
+    const db = useProd ? createProdSupabaseAdmin() : staging;
 
     const limit = Math.min(Math.max(parseInt(String(limitRaw || '100'), 10) || 100, 1), 200);
     const offset = Math.max(parseInt(String(offsetRaw || '0'), 10) || 0, 0);
@@ -65,7 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       typeof f5StatusRaw === 'string' && f5StatusRaw.trim() ? f5StatusRaw.trim() : '';
     const wantOptions = String(includeFilterOptions || '') === '1';
 
-    const scope = await getAccessScope(db, user.id);
+    const scope = await getAccessScope(staging, user.id);
     if (!scope.all && scope.roomIds.length === 0) {
       return res.status(200).json({
         success: true,
