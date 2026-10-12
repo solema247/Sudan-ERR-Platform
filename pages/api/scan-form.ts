@@ -9,6 +9,7 @@ import path from 'path';
 import formidable from 'formidable';
 import { franc } from 'franc';
 import os from 'os';
+import { requireApiSession } from '../../services/requireApiSession';
 
 // Disable Next.js's default body parsing to allow for file uploads
 export const config = {
@@ -264,6 +265,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.setHeader('Allow', ['POST']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
+
+  const user = await requireApiSession(req, res);
+  if (!user) return;
 
   let filePath: string | null = null;
 

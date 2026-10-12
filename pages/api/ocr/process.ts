@@ -6,6 +6,7 @@ import formidable from 'formidable';
 import fs from 'fs';
 import { processFForm } from '../../../lib/ocr/ocrProcess';
 import { f4ToPrefilled } from '../../../lib/ocr/f4ToPrefilled';
+import { requireApiSession } from '../../../services/requireApiSession';
 
 export const config = {
   api: {
@@ -37,6 +38,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.setHeader('Allow', ['POST']);
     return res.status(405).json({ success: false, message: 'Method not allowed' });
   }
+
+  const user = await requireApiSession(req, res);
+  if (!user) return;
 
   if (!process.env.GEMINI_API_KEY) {
     return res.status(500).json({

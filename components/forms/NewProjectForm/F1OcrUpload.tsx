@@ -71,6 +71,11 @@ export default function F1OcrUpload({ onBack, onOcrComplete }: F1OcrUploadProps)
     setLoading(true);
     setError(null);
     try {
+      const {
+        data: { session },
+      } = await newSupabase.auth.getSession();
+      if (!session) throw new Error('Not signed in');
+
       const rate = currency === 'SDG' ? parsedExchangeRate : 1;
       const formData = new FormData();
       formData.append('file', file);
@@ -79,7 +84,11 @@ export default function F1OcrUpload({ onBack, onOcrComplete }: F1OcrUploadProps)
       formData.append('exchange_rate', String(rate));
       formData.append('err_id', scope.emergency_room_id);
 
-      const res = await fetch('/api/ocr/process', { method: 'POST', body: formData });
+      const res = await fetch('/api/ocr/process', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: formData,
+      });
       const result = await res.json();
       if (!res.ok || !result.success) {
         throw new Error(result.message || 'OCR failed');

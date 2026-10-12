@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PrefilledForm from '../components/forms/PrefilledForm';
 import Button from '../components/ui/Button';
+import { newSupabase } from '../services/newSupabaseClient';
 
 interface ScanFormProps {
   onReturnToMenu: () => void;
@@ -42,8 +43,14 @@ const ScanForm: React.FC<ScanFormProps> = ({ onReturnToMenu, onSubmitAnotherForm
     if (project?.err_id) formData.append('err_id', String(project.err_id));
 
     try {
+      const {
+        data: { session },
+      } = await newSupabase.auth.getSession();
+      if (!session) throw new Error('Not signed in');
+
       const response = await fetch('/api/ocr/process', {
         method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
         body: formData,
       });
       const result = await response.json();

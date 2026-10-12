@@ -8,6 +8,10 @@ import {
   createProdSupabaseAdmin,
   isProdSupabaseConfigured,
 } from '../../../services/prodSupabaseAdmin';
+import {
+  assertProdProjectAccess,
+  isAllowedF4TempKey,
+} from '../../../services/prodProjectAccess';
 import { processFForm } from '../../../lib/ocr/ocrProcess';
 import { mapOcrToF4Drafts } from '../../../lib/f4/mapOcrToDrafts';
 
@@ -34,7 +38,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: 'Unauthorized' });
-  const user = await validateSession(authHeader.replace('Bearer ', ''));
+  const accessToken = authHeader.replace('Bearer ', '');
+  const user = await validateSession(accessToken);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
@@ -43,13 +48,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'project_id and file_key_temp required' });
     }
 
-    const prod = createProdSupabaseAdmin();
+    if (!isAllowedF4TempKey(String(file_key_temp), String(project_id))) {
+      return res.status(400).json({ error: 'Invalid file_key_temp path' });
+    }
 
-    const { data: project } = await prod
-      .from('err_projects')
-      .select('id, project_objectives, estimated_beneficiaries, err_id')
-      .eq('id', project_id)
-      .maybeSingle();
+    const prod = createProdSupabaseAdmin();
+    const access = await assertProdProjectAccess({
+      accessToken,
+      userId: user.id,
+      prod,
+      projectId: String(project_id),
+      select: 'id, project_objectives, estimated_beneficiaries, err_id, emergency_room_id',
+    });
+    if (!access.ok) {
+      return res.status(access.status).json({ error: access.error });
+    }
+    const project = access.project;
 
     const { data: signed, error: signedErr } = await prod.storage
       .from('images')

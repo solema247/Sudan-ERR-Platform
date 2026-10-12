@@ -10,6 +10,10 @@ import {
   isProdSupabaseConfigured,
 } from '../../../services/prodSupabaseAdmin';
 import {
+  assertProdProjectAccess,
+  isAllowedF4TempKey,
+} from '../../../services/prodProjectAccess';
+import {
   inferF4SourceLanguage,
   normalizePaymentDateForDb,
   statusAfterUpload,
@@ -27,7 +31,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: 'Unauthorized' });
-  const user = await validateSession(authHeader.replace('Bearer ', ''));
+  const accessToken = authHeader.replace('Bearer ', '');
+  const user = await validateSession(accessToken);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
@@ -36,17 +41,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'project_id and summary required' });
     }
 
-    const prod = createProdSupabaseAdmin();
-
-    const { data: prj, error: prjErr } = await prod
-      .from('err_projects')
-      .select('id, err_id, state, grant_serial_id, f4_status, organization_id, emergency_rooms ( err_code )')
-      .eq('id', project_id)
-      .maybeSingle();
-
-    if (prjErr || !prj) {
-      return res.status(404).json({ error: 'Project not found in Prod' });
+    if (file_key_temp && !isAllowedF4TempKey(String(file_key_temp), String(project_id))) {
+      return res.status(400).json({ error: 'Invalid file_key_temp path' });
     }
+
+    const prod = createProdSupabaseAdmin();
+    const access = await assertProdProjectAccess({
+      accessToken,
+      userId: user.id,
+      prod,
+      projectId: String(project_id),
+      select:
+        'id, err_id, emergency_room_id, state, grant_serial_id, f4_status, organization_id, emergency_rooms ( err_code )',
+    });
+    if (!access.ok) {
+      return res.status(access.status).json({ error: access.error });
+    }
+    const prj = access.project;
 
     const err_id = (prj as any).err_id || null;
     const state_name = (prj as any).state || null;

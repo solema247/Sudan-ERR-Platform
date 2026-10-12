@@ -8,6 +8,7 @@ import {
   createProdSupabaseAdmin,
   isProdSupabaseConfigured,
 } from '../../../services/prodSupabaseAdmin';
+import { assertProdProjectAccess } from '../../../services/prodProjectAccess';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -21,7 +22,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: 'Unauthorized' });
-  const user = await validateSession(authHeader.replace('Bearer ', ''));
+  const accessToken = authHeader.replace('Bearer ', '');
+  const user = await validateSession(accessToken);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
   const projectId =
@@ -32,6 +34,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const prod = createProdSupabaseAdmin();
+    const access = await assertProdProjectAccess({
+      accessToken,
+      userId: user.id,
+      prod,
+      projectId,
+    });
+    if (!access.ok) {
+      return res.status(access.status).json({ error: access.error });
+    }
+
     const { data, error } = await prod
       .from('err_summary')
       .select(

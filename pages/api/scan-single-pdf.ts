@@ -7,6 +7,7 @@ import OpenAI from 'openai';
 import { franc } from 'franc';
 import pdf from 'pdf-parse';
 import { supabase } from '../../services/supabaseClient';
+import { requireApiSession } from '../../services/requireApiSession';
 
 export const config = {
   api: {
@@ -137,8 +138,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
+  const user = await requireApiSession(req, res);
+  if (!user) return;
+
   let filePath: string | null = null;
-  
+
   try {
     const { fileUrl } = req.body;
     if (!fileUrl) {

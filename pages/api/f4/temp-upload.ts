@@ -10,6 +10,10 @@ import {
   createProdSupabaseAdmin,
   isProdSupabaseConfigured,
 } from '../../../services/prodSupabaseAdmin';
+import {
+  assertProdProjectAccess,
+  isAllowedF4TempKey,
+} from '../../../services/prodProjectAccess';
 
 export const config = {
   api: { bodyParser: false },
@@ -48,7 +52,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ success: false, message: 'Unauthorized' });
-  const user = await validateSession(authHeader.replace('Bearer ', ''));
+  const accessToken = authHeader.replace('Bearer ', '');
+  const user = await validateSession(accessToken);
   if (!user) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
   try {
@@ -61,10 +66,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     let fileKeyTemp = firstField(fields, 'file_key_temp') || '';
     const projectId = firstField(fields, 'project_id') || '';
+    if (!projectId) {
+      return res.status(400).json({ success: false, message: 'project_id is required' });
+    }
+
+    const prod = createProdSupabaseAdmin();
+    const access = await assertProdProjectAccess({
+      accessToken,
+      userId: user.id,
+      prod,
+      projectId,
+    });
+    if (!access.ok) {
+      return res.status(access.status).json({ success: false, message: access.error });
+    }
+
     if (!fileKeyTemp) {
-      if (!projectId) {
-        return res.status(400).json({ success: false, message: 'project_id or file_key_temp required' });
-      }
       const original = uploaded.originalFilename || 'document.pdf';
       const ext = original.includes('.') ? original.split('.').pop()!.toLowerCase() : 'pdf';
       fileKeyTemp = `f4-financial-reports/${projectId}/tmp/${Date.now()}-${Math.random()
@@ -72,9 +89,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .slice(2)}.${ext}`;
     }
 
+    if (!isAllowedF4TempKey(fileKeyTemp, projectId)) {
+      return res.status(400).json({ success: false, message: 'Invalid file_key_temp path' });
+    }
+
     const buffer = fs.readFileSync(uploaded.filepath);
     const mime = uploaded.mimetype || 'application/octet-stream';
-    const prod = createProdSupabaseAdmin();
     const { error: uploadError } = await prod.storage.from('images').upload(fileKeyTemp, buffer, {
       cacheControl: '3600',
       upsert: false,

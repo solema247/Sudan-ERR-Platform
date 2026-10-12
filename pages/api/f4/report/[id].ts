@@ -7,6 +7,7 @@ import {
   createProdSupabaseAdmin,
   isProdSupabaseConfigured,
 } from '../../../../services/prodSupabaseAdmin';
+import { assertProdProjectAccess } from '../../../../services/prodProjectAccess';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -20,7 +21,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: 'Unauthorized' });
-  const user = await validateSession(authHeader.replace('Bearer ', ''));
+  const accessToken = authHeader.replace('Bearer ', '');
+  const user = await validateSession(accessToken);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
   const idRaw = Array.isArray(req.query.id) ? req.query.id[0] : req.query.id;
@@ -42,6 +44,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Failed to load report' });
     }
     if (!summary) return res.status(404).json({ error: 'Report not found' });
+
+    const projectId = summary.project_id ? String(summary.project_id) : '';
+    if (!projectId) return res.status(404).json({ error: 'Report not found' });
+    const access = await assertProdProjectAccess({
+      accessToken,
+      userId: user.id,
+      prod,
+      projectId,
+    });
+    if (!access.ok) {
+      return res.status(access.status).json({ error: access.error });
+    }
 
     const [{ data: expenses }, { data: attachments }] = await Promise.all([
       prod
