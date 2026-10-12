@@ -67,14 +67,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const fileName = uploaded.originalFilename || 'document';
 
     // processFForm expects a File-like object (Node 18+ File, or a minimal shim)
+    const bytes = new Uint8Array(buffer);
     const fileLike =
       typeof File !== 'undefined'
-        ? new File([buffer], fileName, { type: mime })
+        ? new File([bytes], fileName, { type: mime })
         : ({
             name: fileName,
             type: mime,
             arrayBuffer: async () =>
-              buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength),
+              bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
           } as File);
 
     const structured = await processFForm(fileLike, {

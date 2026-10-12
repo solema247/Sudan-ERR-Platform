@@ -55,7 +55,7 @@ async function extractTextWithGemini(
   // Large file — upload via File API then reference by URI
   const fileManager = new GoogleAIFileManager(getGeminiApiKey())
   const tmpPath = path.join(os.tmpdir(), `gemini-upload-${Date.now()}`)
-  fs.writeFileSync(tmpPath, buffer)
+  fs.writeFileSync(tmpPath, new Uint8Array(buffer))
   try {
     const uploadResult = await withTimeout(
       fileManager.uploadFile(tmpPath, { mimeType, displayName: 'document' }),

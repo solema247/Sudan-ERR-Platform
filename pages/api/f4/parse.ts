@@ -91,14 +91,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (mime.includes('pdf') || lowerKey.endsWith('.pdf')) filename += '.pdf';
     else if (mime.startsWith('image/')) filename += `.${mime.split('/')[1] || 'png'}`;
 
+    const bytes = new Uint8Array(buffer);
     const fileLike =
       typeof File !== 'undefined'
-        ? new File([buffer], filename, { type: mime })
+        ? new File([bytes], filename, { type: mime })
         : ({
             name: filename,
             type: mime,
-            arrayBuffer: async () =>
-              buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength),
+            arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
           } as File);
 
     const ocrJson = await processFForm(fileLike, {
@@ -108,7 +108,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     const { summaryDraft, expensesDraft } = mapOcrToF4Drafts(ocrJson, {
-      project_objectives: project?.project_objectives,
+      project_objectives:
+        typeof project?.project_objectives === 'string'
+          ? project.project_objectives
+          : project?.project_objectives == null
+            ? null
+            : String(project.project_objectives),
       estimated_beneficiaries: project?.estimated_beneficiaries as number | null | undefined,
     });
 

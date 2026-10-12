@@ -50,7 +50,7 @@ async function downloadFile(url: string): Promise<string> {
     const tmpDir = os.tmpdir();
     const tmpFile = path.join(tmpDir, `${Date.now()}.pdf`);
     
-    fs.writeFileSync(tmpFile, Buffer.from(await data.arrayBuffer()));
+    fs.writeFileSync(tmpFile, new Uint8Array(await data.arrayBuffer()));
     console.log('File downloaded successfully to:', tmpFile);
     
     return tmpFile;
