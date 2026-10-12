@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import crypto from 'crypto';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
 import Calculator from '../components/calculator/Calculator';
@@ -71,7 +72,14 @@ const Home = () => {
     );
   }
 
-  return <Calculator onPinEntry={handlePinEntry} />;
+  return (
+    <>
+      <Head>
+        <title>Calculator</title>
+      </Head>
+      <Calculator onPinEntry={handlePinEntry} />
+    </>
+  );
 };
 
 export default Home;
