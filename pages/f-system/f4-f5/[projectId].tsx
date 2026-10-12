@@ -6,10 +6,11 @@ import { ChevronRight, X } from 'lucide-react';
 import AppShell from '../../../components/layout/AppShell';
 import { useRequireAuth } from '../../../hooks/useRequireAuth';
 import ReportingForm from '../../../components/forms/ReportForm/ReportingForm';
-import ScanCustomForm from '../../scan-custom-form';
 import ProgramReportForm from '../../../components/forms/ProgramReportForm/ReportingForm';
 import F4WizardFlow from '../../../components/f4/F4WizardFlow';
 import F4ReportView from '../../../components/f4/F4ReportView';
+import F5WizardFlow from '../../../components/f5/F5WizardFlow';
+import F5ReportView from '../../../components/f5/F5ReportView';
 import FinancialReportDrafts from '../../../components/forms/FinancialReportForm/FinancialReportDrafts';
 import ProgramReportDrafts from '../../../components/forms/ProgramReportForm/ProgramReportDrafts';
 import { HomeCard } from '../../../components/home/HomeSection';
@@ -26,6 +27,9 @@ type Workflow =
   | 'f4-choice'
   | 'f4-upload'
   | 'f4-view'
+  | 'f5-choice'
+  | 'f5-upload'
+  | 'f5-view'
   | 'fill'
   | 'scan'
   | 'program'
@@ -33,6 +37,7 @@ type Workflow =
   | 'drafts';
 
 type F4UploadMode = 'scan' | 'fill';
+type F5UploadMode = 'scan' | 'fill';
 
 function workflowFromAction(action: string | string[] | undefined): Workflow | null {
   const a = Array.isArray(action) ? action[0] : action;
@@ -68,6 +73,7 @@ export default function F4F5ProjectPage() {
   const [workflow, setWorkflow] = useState<Workflow>('menu');
   const [actionApplied, setActionApplied] = useState(false);
   const [f4UploadMode, setF4UploadMode] = useState<F4UploadMode>('scan');
+  const [f5UploadMode, setF5UploadMode] = useState<F5UploadMode>('scan');
   const [existingReports, setExistingReports] = useState<any[]>([]);
   const [existingLoading, setExistingLoading] = useState(false);
   const [existingError, setExistingError] = useState('');
@@ -92,7 +98,8 @@ export default function F4F5ProjectPage() {
       try {
         const actionStr = Array.isArray(action) ? action[0] : action;
         const useProd =
-          (typeof actionStr === 'string' && actionStr.startsWith('f4')) ||
+          (typeof actionStr === 'string' &&
+            (actionStr.startsWith('f4') || actionStr.startsWith('f5'))) ||
           Boolean(reportIdStr);
         const params = new URLSearchParams({
           id: projectId,
@@ -114,8 +121,11 @@ export default function F4F5ProjectPage() {
   useEffect(() => {
     if (!project || actionApplied || loading) return;
     if (reportIdStr) {
+      const actionStr = Array.isArray(action) ? action[0] : action;
       setViewReportId(String(reportIdStr));
-      setWorkflow('f4-view');
+      setWorkflow(
+        typeof actionStr === 'string' && actionStr.startsWith('f5') ? 'f5-view' : 'f4-view'
+      );
       setActionApplied(true);
       return;
     }
@@ -140,16 +150,18 @@ export default function F4F5ProjectPage() {
     }
   }, [project, action, actionApplied, loading, reportIdStr]);
 
-  // Load existing reports whenever the F4 choice modal opens
+  // Load existing reports whenever the F4 / F5 choice modal opens
   useEffect(() => {
-    if (workflow !== 'f4-choice' || !token || !projectId) return;
+    if ((workflow !== 'f4-choice' && workflow !== 'f5-choice') || !token || !projectId) return;
     let cancelled = false;
+    const reportApi =
+      workflow === 'f5-choice' ? '/api/f5/project-reports' : '/api/f4/project-reports';
     (async () => {
       setExistingLoading(true);
       setExistingError('');
       try {
         const res = await fetch(
-          `/api/f4/project-reports?project_id=${encodeURIComponent(String(projectId))}`,
+          `${reportApi}?project_id=${encodeURIComponent(String(projectId))}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await res.json();
@@ -185,7 +197,7 @@ export default function F4F5ProjectPage() {
     if (!file) return;
     setPendingFile(file);
     setUploadError('');
-    setWorkflow('f4-choice');
+    setWorkflow(workflow === 'f5-choice' ? 'f5-choice' : 'f4-choice');
   };
 
   const startScan = () => {
@@ -203,6 +215,35 @@ export default function F4F5ProjectPage() {
   const openExistingReport = (id: string | number) => {
     setViewReportId(String(id));
     setWorkflow('f4-view');
+  };
+
+  const openF5Upload = () => {
+    if (f5UploadMode === 'fill') {
+      setCurrentProgramDraft(null);
+      setWorkflow('f5-upload');
+      return;
+    }
+    setUploadError('');
+    fileInputRef.current?.click();
+  };
+
+  const startF5Scan = () => {
+    if (!pendingFile) return;
+    setUploadError('');
+    setWorkflow('f5-upload');
+  };
+
+  const openExistingF5Report = (id: string | number) => {
+    setViewReportId(String(id));
+    setWorkflow('f5-view');
+  };
+
+  const finishF5Upload = () => {
+    setViewReportId(null);
+    setPendingFile(null);
+    setUploadError('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    setWorkflow('f5-choice');
   };
 
   const finishF4Upload = () => {
@@ -253,7 +294,16 @@ export default function F4F5ProjectPage() {
       setWorkflow('f4-choice');
       return;
     }
-    if (workflow === 'f4-choice') {
+    if (workflow === 'f5-view' || workflow === 'f5-upload') {
+      if (reportIdStr && workflow === 'f5-view') {
+        router.push('/f-system/f4-f5');
+        return;
+      }
+      setViewReportId(null);
+      setWorkflow('f5-choice');
+      return;
+    }
+    if (workflow === 'f4-choice' || workflow === 'f5-choice') {
       setWorkflow('menu');
       return;
     }
@@ -264,6 +314,10 @@ export default function F4F5ProjectPage() {
     }
     if (workflow === 'scan' || (workflow === 'fill' && !currentProjectDraft)) {
       setWorkflow('f4-choice');
+      return;
+    }
+    if (workflow === 'program-scan' || (workflow === 'program' && !currentProgramDraft)) {
+      setWorkflow('f5-choice');
       return;
     }
     setWorkflow('menu');
@@ -329,7 +383,9 @@ export default function F4F5ProjectPage() {
 
       {(workflow === 'menu' ||
         workflow === 'f4-choice' ||
-        workflow === 'f4-upload') && (
+        workflow === 'f4-upload' ||
+        workflow === 'f5-choice' ||
+        workflow === 'f5-upload') && (
         <section className="mb-6">
           <div className="flex items-center gap-1.5 mb-3 px-0.5">
             <h3 className="text-lg font-bold text-white leading-tight">
@@ -363,7 +419,10 @@ export default function F4F5ProjectPage() {
                 size="md"
               />
               <HomeCard
-                onClick={() => setWorkflow('program-scan')}
+                onClick={() => {
+                  setF5UploadMode('scan');
+                  setWorkflow('f5-choice');
+                }}
                 code="AI"
                 title="Upload F5 with AI"
                 subtitle="Scan a program report"
@@ -373,8 +432,9 @@ export default function F4F5ProjectPage() {
               />
               <HomeCard
                 onClick={() => {
+                  setF5UploadMode('fill');
                   setCurrentProgramDraft(null);
-                  setWorkflow('program');
+                  setWorkflow('f5-choice');
                 }}
                 code="Manual"
                 title="Upload F5 Manual Form"
@@ -412,17 +472,17 @@ export default function F4F5ProjectPage() {
         workflow === 'f4-upload' ||
         workflow === 'f4-view') && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f1828]/85 backdrop-blur-sm p-4"
+          className="app-shell-modal-backdrop"
           onClick={workflow === 'f4-choice' ? () => setWorkflow('menu') : undefined}
           role="presentation"
         >
           <div
-            className={`app-panel w-full shadow-xl ${
+            className={`app-panel app-shell-modal-panel w-full shadow-xl ${
               workflow === 'f4-choice'
                 ? 'max-w-sm p-5'
                 : f4WizardWide
-                  ? 'max-w-5xl max-h-[92vh] overflow-y-auto p-4'
-                  : 'max-w-lg max-h-[90vh] overflow-y-auto p-5'
+                  ? 'max-w-5xl p-4'
+                  : 'max-w-lg p-5'
             }`}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
@@ -597,6 +657,186 @@ export default function F4F5ProjectPage() {
         </div>
       )}
 
+      {(workflow === 'f5-choice' ||
+        workflow === 'f5-upload' ||
+        workflow === 'f5-view') && (
+        <div
+          className="app-shell-modal-backdrop"
+          onClick={workflow === 'f5-choice' ? () => setWorkflow('menu') : undefined}
+          role="presentation"
+        >
+          <div
+            className={`app-panel app-shell-modal-panel w-full shadow-xl ${
+              workflow === 'f5-choice'
+                ? 'max-w-sm p-5'
+                : f4WizardWide
+                  ? 'max-w-5xl p-4'
+                  : 'max-w-lg p-5'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="f5-project-choice-title"
+          >
+            {workflow === 'f5-choice' && (
+              <>
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="min-w-0">
+                    <p className="app-section-label mb-1">F5 · Program</p>
+                    <h3
+                      id="f5-project-choice-title"
+                      className="text-lg font-bold text-white leading-snug mb-0"
+                    >
+                      What would you like to do?
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setWorkflow('menu')}
+                    className="shrink-0 rounded-lg p-1.5 text-[#8a97ab] hover:text-white hover:bg-white/5"
+                    aria-label="Close"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {f5UploadMode === 'scan' && pendingFile ? (
+                  <div className="mb-4 space-y-3">
+                    <div className="rounded-xl border border-white/10 bg-[#152238] px-3 py-2.5">
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a97ab] mb-0.5">
+                        File selected
+                      </p>
+                      <p className="text-sm font-semibold text-white mb-0 truncate">
+                        {pendingFile.name}
+                      </p>
+                    </div>
+                    {uploadError && (
+                      <div className="rounded-xl bg-red-500/10 border border-red-400/30 text-red-300 px-3 py-2 text-sm">
+                        {uploadError}
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={startF5Scan}
+                      className="w-full rounded-xl bg-brand-orange text-[#152238] text-sm font-bold py-3 px-4 hover:bg-[#ffb88a]"
+                    >
+                      Upload & scan
+                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={openF5Upload}
+                        className="flex-1 rounded-xl border border-white/15 text-white text-sm font-semibold py-2.5"
+                      >
+                        Change file
+                      </button>
+                      <button
+                        type="button"
+                        onClick={clearPendingFile}
+                        className="flex-1 rounded-xl border border-white/15 text-[#a8b6cc] text-sm font-semibold py-2.5"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={openF5Upload}
+                    className="w-full rounded-xl bg-brand-orange text-[#152238] text-sm font-bold py-3 px-4 hover:bg-[#ffb88a] mb-4"
+                  >
+                    Upload new
+                  </button>
+                )}
+
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#8a97ab] mb-2">
+                    Existing reports
+                  </p>
+                  {existingLoading && (
+                    <p className="text-sm text-[#a8b6cc]">Loading reports…</p>
+                  )}
+                  {existingError && (
+                    <div className="rounded-xl bg-red-500/10 border border-red-400/30 text-red-300 px-3 py-2 text-sm">
+                      {existingError}
+                    </div>
+                  )}
+                  {!existingLoading &&
+                    !existingError &&
+                    existingReports.length === 0 && (
+                      <p className="text-sm text-[#a8b6cc]">
+                        No F5 reports yet for this project.
+                      </p>
+                    )}
+                  {!existingLoading && existingReports.length > 0 && (
+                    <ul className="max-h-56 overflow-y-auto space-y-2">
+                      {existingReports.map((r) => (
+                        <li key={r.id}>
+                          <button
+                            type="button"
+                            onClick={() => openExistingF5Report(r.id)}
+                            className="w-full text-left rounded-xl border border-white/10 bg-[#152238] px-3 py-2.5 hover:border-brand-orange/50 hover:bg-[#1a2d4a] transition-colors"
+                          >
+                            <span className="flex items-center justify-between gap-2">
+                              <span className="min-w-0">
+                                <span className="block text-sm font-semibold text-white mb-0.5">
+                                  {formatReportLabel(r)}
+                                </span>
+                                <span className="block text-xs text-[#8a97ab]">
+                                  Activities: {r.activities_count ?? 0}
+                                </span>
+                              </span>
+                              <ChevronRight className="h-4 w-4 shrink-0 text-[#8a97ab]" />
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </>
+            )}
+
+            {workflow === 'f5-upload' && f5UploadMode === 'scan' && pendingFile && (
+              <F5WizardFlow
+                key={pendingFile.name + pendingFile.lastModified}
+                project={project}
+                initialFile={pendingFile}
+                autoStart
+                onStepChange={(s) =>
+                  setF4WizardWide(s === 'wizard' || s === 'review')
+                }
+                onReturnToMenu={finishF5Upload}
+                onAutoStartFailed={(msg) => {
+                  setUploadError(msg);
+                  setWorkflow('f5-choice');
+                }}
+              />
+            )}
+
+            {workflow === 'f5-upload' && f5UploadMode === 'fill' && (
+              <ProgramReportForm
+                project={project}
+                onReturnToMenu={finishF5Upload}
+                onSubmitAnotherForm={() => {
+                  setCurrentProgramDraft(null);
+                  setWorkflow('f5-upload');
+                }}
+                initialDraft={currentProgramDraft}
+              />
+            )}
+
+            {workflow === 'f5-view' && viewReportId && token && (
+              <F5ReportView
+                reportId={viewReportId}
+                token={token}
+                onBack={finishF5Upload}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
       {workflow === 'fill' && (
         <div className="rounded-xl border border-white/10 bg-[#122038]/60 p-4">
           <ReportingForm
@@ -629,11 +869,7 @@ export default function F4F5ProjectPage() {
 
       {workflow === 'program-scan' && (
         <div className="rounded-xl border border-white/10 bg-[#122038]/60 p-4">
-          <ScanCustomForm
-            project={project}
-            onReturnToMenu={goBack}
-            onSubmitAnotherForm={() => setWorkflow('program-scan')}
-          />
+          <F5WizardFlow project={project} onReturnToMenu={goBack} />
         </div>
       )}
 

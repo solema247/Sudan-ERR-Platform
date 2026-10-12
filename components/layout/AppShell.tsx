@@ -71,7 +71,11 @@ const AppShell: React.FC<AppShellProps> = ({ children, title, bare }) => {
   }
 
   return (
-    <div className={`min-h-screen app-page-bg flex ${isDesktop ? 'flex-row' : 'flex-col'}`}>
+    <div
+      className={`min-h-screen app-page-bg flex ${
+        isDesktop ? 'flex-row app-shell--desktop' : 'flex-col app-shell--mobile'
+      }`}
+    >
       {isDesktop && (
         <aside className="w-64 shrink-0 bg-[#152238]/95 backdrop-blur-sm border-r border-white/10 flex flex-col sticky top-0 h-screen">
           <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10">

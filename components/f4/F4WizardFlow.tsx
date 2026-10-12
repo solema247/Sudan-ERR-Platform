@@ -624,25 +624,33 @@ export default function F4WizardFlow({
         type="button"
         onClick={() => void handleSave()}
         disabled={!receiptConfirmed || !summary.report_date || !fx}
-        className={primaryBtn}
+        className={`${primaryBtn} w-full`}
       >
         Submit report
       </button>
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-3 gap-1.5">
         <button
           type="button"
           onClick={() => {
             setError('');
             setStep('wizard');
           }}
-          className={ghostBtn}
+          className={`${ghostBtn} px-1.5 py-2 text-xs leading-tight`}
         >
           Back to highlighting
         </button>
-        <button type="button" onClick={startOver} className={ghostBtn}>
+        <button
+          type="button"
+          onClick={startOver}
+          className={`${ghostBtn} px-1.5 py-2 text-xs leading-tight`}
+        >
           Start over
         </button>
-        <button type="button" onClick={onReturnToMenu} className={ghostBtn}>
+        <button
+          type="button"
+          onClick={onReturnToMenu}
+          className={`${ghostBtn} px-1.5 py-2 text-xs leading-tight`}
+        >
           Cancel
         </button>
       </div>
@@ -650,7 +658,7 @@ export default function F4WizardFlow({
   );
 
   return (
-    <div className="space-y-4 pb-6">
+    <div className="space-y-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
       <div>
         <p className="app-section-label mb-1">F4 · Review</p>
         <h3 className="text-lg font-bold text-white mb-1">Check the extracted details</h3>
@@ -992,7 +1000,6 @@ export default function F4WizardFlow({
         </label>
       </div>
 
-      <div className="pt-2 border-t border-white/10">{reviewActions}</div>
     </div>
   );
 }

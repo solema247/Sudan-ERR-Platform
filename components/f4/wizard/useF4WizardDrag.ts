@@ -31,6 +31,16 @@ type DragPointerEvent = {
   currentTarget: EventTarget & HTMLDivElement;
 };
 
+/** Fixed edge bands (px). Percent-based zones made tiny moves scroll the whole page. */
+const EDGE_Y_TOUCH = 56;
+const EDGE_Y_MOUSE = 44;
+const EDGE_X_TOUCH = 48;
+const EDGE_X_MOUSE = 40;
+const STEP_TOUCH = 12;
+const STEP_MOUSE = 10;
+/** Ignore edge scroll until the pointer has moved at least this far (px). */
+const EDGE_SCROLL_MOVE_THRESHOLD = 28;
+
 /** Window-level drag + continuous edge scroll for wizard region selection (mouse + touch). */
 export function useF4WizardDrag({
   active,
@@ -97,14 +107,30 @@ export function useF4WizardDrag({
       }
     }
 
-    // Edge zone is relative to the *file viewer* (scrollport), not the phone chrome.
-    // Touch uses a large share of the viewer so scrolling starts as soon as the finger
-    // reaches the bottom/top of the document pane.
-    const maxStep = isTouch ? 32 : 16;
+    const edgeY = isTouch ? EDGE_Y_TOUCH : EDGE_Y_MOUSE;
+    const edgeX = isTouch ? EDGE_X_TOUCH : EDGE_X_MOUSE;
+    const maxStep = isTouch ? STEP_TOUCH : STEP_MOUSE;
 
+    const startClientX = e.clientX;
+    const startClientY = e.clientY;
     let lastClientX = e.clientX;
     let lastClientY = e.clientY;
+    let movedEnoughForEdgeScroll = false;
     let rafId = 0;
+
+    const clampToImage = (
+      clientX: number,
+      clientY: number,
+      imgEl: HTMLImageElement
+    ) => {
+      const imgRect = imgEl.getBoundingClientRect();
+      const w = imgEl.clientWidth;
+      const h = imgEl.clientHeight;
+      return {
+        cx: Math.min(Math.max(0, clientX - imgRect.left), w),
+        cy: Math.min(Math.max(0, clientY - imgRect.top), h),
+      };
+    };
 
     const updateDragFromClient = (clientX: number, clientY: number) => {
       const d = draggingRef.current;
@@ -113,35 +139,40 @@ export function useF4WizardDrag({
       if (!pageEl) return;
       const imgEl = pageEl.querySelector('img');
       if (!imgEl) return;
-      const imgRect = imgEl.getBoundingClientRect();
-      const next = {
-        ...d,
-        cx: clientX - imgRect.left,
-        cy: clientY - imgRect.top,
-      };
+      const { cx, cy } = clampToImage(clientX, clientY, imgEl);
+      const next = { ...d, cx, cy };
       draggingRef.current = next;
       setDragging(next);
     };
 
-    /** Scroll when the pointer is near the file-viewer edges; returns true if scrolled. */
+    const pointerNearViewerEdge = () => {
+      const scrollEl = wizardViewerScrollRef.current;
+      if (!scrollEl) return false;
+      const sr = scrollEl.getBoundingClientRect();
+      if (sr.height < 8 || sr.width < 8) return false;
+      const pastBottom = lastClientY > sr.bottom;
+      const pastTop = lastClientY < sr.top;
+      const pastRight = lastClientX > sr.right;
+      const pastLeft = lastClientX < sr.left;
+      if (pastBottom || pastTop || pastRight || pastLeft) return true;
+      const x = Math.min(Math.max(lastClientX, sr.left), sr.right);
+      const y = Math.min(Math.max(lastClientY, sr.top), sr.bottom);
+      return (
+        y >= sr.bottom - edgeY ||
+        y <= sr.top + edgeY ||
+        x >= sr.right - edgeX ||
+        x <= sr.left + edgeX
+      );
+    };
+
+    /** Scroll only when near the file-viewer edges; returns true if scrolled. */
     const applyEdgeScroll = () => {
       const scrollEl = wizardViewerScrollRef.current;
       if (!scrollEl || !draggingRef.current) return false;
+      if (!movedEnoughForEdgeScroll) return false;
       const sr = scrollEl.getBoundingClientRect();
       if (sr.height < 8 || sr.width < 8) return false;
 
-      // Zone = portion of the viewer pane (not the whole screen / bottom nav)
-      const edgeY = Math.max(
-        isTouch ? 72 : 48,
-        Math.round(sr.height * (isTouch ? 0.38 : 0.22))
-      );
-      const edgeX = Math.max(
-        isTouch ? 56 : 40,
-        Math.round(sr.width * (isTouch ? 0.22 : 0.14))
-      );
-
-      // Clamp pointer into the viewer for edge math so going past the pane
-      // still counts as "at that edge" of the file viewer (not the app chrome).
       const x = Math.min(Math.max(lastClientX, sr.left), sr.right);
       const y = Math.min(Math.max(lastClientY, sr.top), sr.bottom);
 
@@ -150,21 +181,21 @@ export function useF4WizardDrag({
 
       if (y >= sr.bottom - edgeY) {
         const depth = Math.min(1, (y - (sr.bottom - edgeY)) / edgeY);
-        dy = Math.ceil(maxStep * (0.4 + 0.6 * depth));
+        dy = Math.ceil(maxStep * (0.35 + 0.65 * depth));
       } else if (y <= sr.top + edgeY) {
         const depth = Math.min(1, (sr.top + edgeY - y) / edgeY);
-        dy = -Math.ceil(maxStep * (0.4 + 0.6 * depth));
+        dy = -Math.ceil(maxStep * (0.35 + 0.65 * depth));
       }
 
       if (x >= sr.right - edgeX) {
         const depth = Math.min(1, (x - (sr.right - edgeX)) / edgeX);
-        dx = Math.ceil(maxStep * (0.4 + 0.6 * depth));
+        dx = Math.ceil(maxStep * (0.35 + 0.65 * depth));
       } else if (x <= sr.left + edgeX) {
         const depth = Math.min(1, (sr.left + edgeX - x) / edgeX);
-        dx = -Math.ceil(maxStep * (0.4 + 0.6 * depth));
+        dx = -Math.ceil(maxStep * (0.35 + 0.65 * depth));
       }
 
-      // Finger already past the viewer bottom/top → always scroll that way
+      // Finger already past the viewer → keep scrolling that way
       if (lastClientY > sr.bottom) dy = Math.max(dy, maxStep);
       if (lastClientY < sr.top) dy = Math.min(dy, -maxStep);
       if (lastClientX > sr.right) dx = Math.max(dx, maxStep);
@@ -185,8 +216,19 @@ export function useF4WizardDrag({
       return moved;
     };
 
+    const stopEdgeLoop = () => {
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+        rafId = 0;
+      }
+    };
+
     const edgeLoop = () => {
       if (!draggingRef.current) {
+        rafId = 0;
+        return;
+      }
+      if (!pointerNearViewerEdge() || !movedEnoughForEdgeScroll) {
         rafId = 0;
         return;
       }
@@ -196,6 +238,7 @@ export function useF4WizardDrag({
 
     const ensureEdgeLoop = () => {
       if (rafId) return;
+      if (!movedEnoughForEdgeScroll || !pointerNearViewerEdge()) return;
       rafId = window.requestAnimationFrame(edgeLoop);
     };
 
@@ -204,8 +247,21 @@ export function useF4WizardDrag({
       if (ev.cancelable) ev.preventDefault();
       lastClientX = ev.clientX;
       lastClientY = ev.clientY;
+      if (!movedEnoughForEdgeScroll) {
+        const dist = Math.hypot(
+          lastClientX - startClientX,
+          lastClientY - startClientY
+        );
+        if (dist >= EDGE_SCROLL_MOVE_THRESHOLD) {
+          movedEnoughForEdgeScroll = true;
+        }
+      }
       updateDragFromClient(ev.clientX, ev.clientY);
-      ensureEdgeLoop();
+      if (movedEnoughForEdgeScroll && pointerNearViewerEdge()) {
+        ensureEdgeLoop();
+      } else {
+        stopEdgeLoop();
+      }
     };
 
     const finish = (ev: PointerEvent) => {
@@ -255,13 +311,9 @@ export function useF4WizardDrag({
     window.addEventListener('pointermove', onMove, { passive: false });
     window.addEventListener('pointerup', finish);
     window.addEventListener('pointercancel', finish);
-    ensureEdgeLoop();
 
     cleanupRef.current = () => {
-      if (rafId) {
-        window.cancelAnimationFrame(rafId);
-        rafId = 0;
-      }
+      stopEdgeLoop();
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', finish);
       window.removeEventListener('pointercancel', finish);

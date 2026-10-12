@@ -48,9 +48,11 @@ module.exports = {
         xl2: '1rem',
       },
       keyframes: {
+        // Opacity only — a persistent transform on <main> traps position:fixed
+        // descendants and lets the bottom nav (sibling, z-40) paint over modals.
         'fade-up': {
-          '0%': { opacity: '0', transform: 'translateY(6px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
         },
       },
       animation: {

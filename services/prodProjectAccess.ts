@@ -57,7 +57,7 @@ export async function assertProdProjectAccess(opts: {
   projectId: string;
   select?: string;
 }): Promise<
-  | { ok: true; project: ProdProjectRow; scope: AccessScope }
+  | { ok: true; project: ProdProjectRow; scope: AccessScope; status?: undefined; error?: undefined }
   | { ok: false; status: 403 | 404 | 500; error: string }
 > {
   const { accessToken, userId, prod, projectId } = opts;
@@ -95,12 +95,12 @@ export async function assertProdProjectAccess(opts: {
     const roomIdSet = new Set(scope.roomIds.map(String));
     const errCodes = await resolveRoomErrCodes(prod, scope.roomIds);
     const errCodeSet = new Set(errCodes);
-    if (!inScope(project as ProdProjectRow, roomIdSet, errCodeSet)) {
+    if (!inScope(project as unknown as ProdProjectRow, roomIdSet, errCodeSet)) {
       return { ok: false, status: 403, error: 'Forbidden' };
     }
   }
 
-  return { ok: true, project: project as ProdProjectRow, scope };
+  return { ok: true, project: project as unknown as ProdProjectRow, scope };
 }
 
 /** F4 temp uploads must stay under f4-financial-reports/{projectId}/tmp/... */
@@ -108,5 +108,13 @@ export function isAllowedF4TempKey(fileKey: string, projectId: string): boolean 
   if (!fileKey || !projectId) return false;
   if (fileKey.includes('..') || fileKey.includes('\\')) return false;
   const prefix = `f4-financial-reports/${projectId}/tmp/`;
+  return fileKey.startsWith(prefix) && fileKey.length > prefix.length;
+}
+
+/** F5 temp uploads must stay under f5-program-reports/{projectId}/tmp/... */
+export function isAllowedF5TempKey(fileKey: string, projectId: string): boolean {
+  if (!fileKey || !projectId) return false;
+  if (fileKey.includes('..') || fileKey.includes('\\')) return false;
+  const prefix = `f5-program-reports/${projectId}/tmp/`;
   return fileKey.startsWith(prefix) && fileKey.length > prefix.length;
 }

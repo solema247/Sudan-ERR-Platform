@@ -76,6 +76,37 @@ html[dir='ltr'] {
       linear-gradient(180deg, #152238 0%, #0f1828 55%, #0c1422 100%);
   }
 
+  /* Modal sits in the content band between sticky header and bottom nav */
+  .app-shell--mobile {
+    --app-shell-header-h: 4rem;
+    --app-shell-bottom-nav-h: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .app-shell--desktop {
+    --app-shell-header-h: 3.75rem;
+    --app-shell-bottom-nav-h: 0px;
+  }
+
+  .app-shell-modal-backdrop {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--app-shell-header-h, 4rem);
+    bottom: var(--app-shell-bottom-nav-h, 0px);
+    z-index: 30; /* below header/nav (z-40) so chrome stays visible */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+    background-color: rgb(15 24 40 / 0.85);
+    backdrop-filter: blur(4px);
+  }
+
+  .app-shell-modal-panel {
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
   .app-panel {
     @apply bg-[#1c2d48] border border-white/10 rounded-2xl shadow-soft;
   }

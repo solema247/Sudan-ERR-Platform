@@ -11,6 +11,9 @@ import { useRequireAuth } from '../../../hooks/useRequireAuth';
 import { HomeCard } from '../../../components/home/HomeSection';
 import F4WizardFlow from '../../../components/f4/F4WizardFlow';
 import F4ReportView from '../../../components/f4/F4ReportView';
+import F5WizardFlow from '../../../components/f5/F5WizardFlow';
+import F5ReportView from '../../../components/f5/F5ReportView';
+import ProgramReportForm from '../../../components/forms/ProgramReportForm/ReportingForm';
 import ReportingForm from '../../../components/forms/ReportForm/ReportingForm';
 import {
   ReportingScene,
@@ -78,6 +81,9 @@ export default function F4F5ReportingIndexPage() {
   const [existingError, setExistingError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const isF5 = Boolean(action && action.startsWith('f5'));
+  const reportApi = isF5 ? '/api/f5/project-reports' : '/api/f4/project-reports';
+
   const openAction = (next: ReportingAction) => {
     setAction(next);
     setView('pick-project');
@@ -104,6 +110,11 @@ export default function F4F5ReportingIndexPage() {
 
   const goUploadNew = () => {
     if (!f4ModalProject || !action) return;
+    if (action === 'f5-manual') {
+      // Prod manual F5 is not ready yet — use the existing program report form
+      setF4ModalStep('upload');
+      return;
+    }
     if (action === 'f4-manual') {
       setManualReportId(uuidv4());
       setF4ModalStep('upload');
@@ -148,7 +159,7 @@ export default function F4F5ReportingIndexPage() {
     if (fileInputRef.current) fileInputRef.current.value = '';
     if (f4ModalProject && token) {
       fetch(
-        `/api/f4/project-reports?project_id=${encodeURIComponent(f4ModalProject.id)}`,
+        `${reportApi}?project_id=${encodeURIComponent(f4ModalProject.id)}`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
         .then((r) => r.json())
@@ -167,7 +178,7 @@ export default function F4F5ReportingIndexPage() {
       setExistingError('');
       try {
         const res = await fetch(
-          `/api/f4/project-reports?project_id=${encodeURIComponent(f4ModalProject.id)}`,
+          `${reportApi}?project_id=${encodeURIComponent(f4ModalProject.id)}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await res.json();
@@ -185,11 +196,16 @@ export default function F4F5ReportingIndexPage() {
     return () => {
       cancelled = true;
     };
-  }, [f4ModalProject, token]);
+  }, [f4ModalProject, token, reportApi]);
 
   const onSelectProject = (project: ProjectRow) => {
     if (!action) return;
-    if (action === 'f4-ai' || action === 'f4-manual') {
+    if (
+      action === 'f4-ai' ||
+      action === 'f4-manual' ||
+      action === 'f5-ai' ||
+      action === 'f5-manual'
+    ) {
       setF4ModalProject(project);
       setF4ModalStep('choice');
       setPendingFile(null);
@@ -248,7 +264,7 @@ export default function F4F5ReportingIndexPage() {
           layout="status-table"
           enableSmartFilters
           reportKind={action.startsWith('f5') ? 'f5' : 'f4'}
-          useProdDb={action.startsWith('f4')}
+          useProdDb
           onSelect={onSelectProject}
         />
 
@@ -262,17 +278,17 @@ export default function F4F5ReportingIndexPage() {
 
         {f4ModalProject && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f1828]/85 backdrop-blur-sm p-4"
+            className="app-shell-modal-backdrop"
             onClick={f4ModalStep === 'choice' ? closeF4Modal : undefined}
             role="presentation"
           >
             <div
-              className={`app-panel w-full shadow-xl ${
+              className={`app-panel app-shell-modal-panel w-full shadow-xl ${
                 f4ModalStep === 'choice'
                   ? 'max-w-sm p-5'
                   : f4WizardWide
-                    ? 'max-w-5xl max-h-[92vh] overflow-y-auto p-4'
-                    : 'max-w-lg max-h-[90vh] overflow-y-auto p-5'
+                    ? 'max-w-5xl p-4'
+                    : 'max-w-lg p-5'
               }`}
               onClick={(e) => e.stopPropagation()}
               role="dialog"
@@ -283,7 +299,9 @@ export default function F4F5ReportingIndexPage() {
                 <>
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="min-w-0">
-                      <p className="app-section-label mb-1">F4 · Financial</p>
+                      <p className="app-section-label mb-1">
+                        {isF5 ? 'F5 · Program' : 'F4 · Financial'}
+                      </p>
                       <h3
                         id="f4-choice-title"
                         className="text-lg font-bold text-white leading-snug mb-0"
@@ -301,7 +319,7 @@ export default function F4F5ReportingIndexPage() {
                     </button>
                   </div>
 
-                  {action === 'f4-ai' && pendingFile ? (
+                  {(action === 'f4-ai' || action === 'f5-ai') && pendingFile ? (
                     <div className="mb-4 space-y-3">
                       <div className="rounded-xl border border-white/10 bg-[#152238] px-3 py-2.5">
                         <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a97ab] mb-0.5">
@@ -366,7 +384,7 @@ export default function F4F5ReportingIndexPage() {
                       !existingError &&
                       existingReports.length === 0 && (
                         <p className="text-sm text-[#a8b6cc]">
-                          No F4 reports yet for this project.
+                          No {isF5 ? 'F5' : 'F4'} reports yet for this project.
                         </p>
                       )}
                     {!existingLoading && existingReports.length > 0 && (
@@ -384,8 +402,10 @@ export default function F4F5ReportingIndexPage() {
                                     {formatReportLabel(r)}
                                   </span>
                                   <span className="block text-xs text-[#8a97ab]">
-                                    Expenses: {formatUsd(r.total_expenses)}
-                                    {r.review_status
+                                    {isF5
+                                      ? `Activities: ${r.activities_count ?? 0}`
+                                      : `Expenses: ${formatUsd(r.total_expenses)}`}
+                                    {!isF5 && r.review_status
                                       ? ` · ${r.review_status}`
                                       : ''}
                                   </span>
@@ -418,6 +438,32 @@ export default function F4F5ReportingIndexPage() {
                 />
               )}
 
+              {f4ModalStep === 'upload' && action === 'f5-ai' && pendingFile && (
+                <F5WizardFlow
+                  key={pendingFile.name + pendingFile.lastModified}
+                  project={f4ModalProject}
+                  initialFile={pendingFile}
+                  autoStart
+                  onStepChange={(s) =>
+                    setF4WizardWide(s === 'wizard' || s === 'review')
+                  }
+                  onReturnToMenu={onUploadFinished}
+                  onAutoStartFailed={(msg) => {
+                    setUploadError(msg);
+                    setF4ModalStep('choice');
+                  }}
+                />
+              )}
+
+              {f4ModalStep === 'upload' && action === 'f5-manual' && (
+                <ProgramReportForm
+                  project={f4ModalProject as any}
+                  onReturnToMenu={onUploadFinished}
+                  onSubmitAnotherForm={() => setF4ModalStep('upload')}
+                  initialDraft={null}
+                />
+              )}
+
               {f4ModalStep === 'upload' &&
                 action === 'f4-manual' &&
                 manualReportId && (
@@ -431,8 +477,16 @@ export default function F4F5ReportingIndexPage() {
                   />
                 )}
 
-              {f4ModalStep === 'view' && viewReportId && token && (
+              {f4ModalStep === 'view' && viewReportId && token && !isF5 && (
                 <F4ReportView
+                  reportId={viewReportId}
+                  token={token}
+                  onBack={backToChoice}
+                />
+              )}
+
+              {f4ModalStep === 'view' && viewReportId && token && isF5 && (
+                <F5ReportView
                   reportId={viewReportId}
                   token={token}
                   onBack={backToChoice}
