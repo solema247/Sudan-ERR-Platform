@@ -39,12 +39,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!isProdSupabaseConfigured()) {
     console.error(
-      'f1/temp-upload: missing NEXT_PUBLIC_PROD_SUPABASE_URL and/or PROD_SUPABASE_SERVICE_ROLE_KEY in server env (save .env.local and restart next dev)'
+      'f1/temp-upload: reporting DB not configured (prod service role or staging SUPABASE_SERVICE_KEY)'
     );
     return res.status(500).json({
       success: false,
       message:
-        'Prod storage is not configured. Save NEXT_PUBLIC_PROD_SUPABASE_URL and PROD_SUPABASE_SERVICE_ROLE_KEY in .env.local, then restart the server.',
+        'Reporting storage is not configured. Set prod service role vars or NEXT_PUBLIC_NEW_SUPABASE_URL + SUPABASE_SERVICE_KEY, then restart.',
     });
   }
 

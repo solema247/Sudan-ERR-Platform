@@ -54,16 +54,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       db: dbTarget,
     } = req.query;
 
-    // Scope always from staging profile; project rows may come from Prod (F4 reporting).
+    // Scope always from staging profile; `db=prod` means reporting admin DB
+    // (prod if configured, else staging service role — see prodSupabaseAdmin).
     const staging = createAuthenticatedClient(token);
-    const useProd = String(dbTarget || '') === 'prod';
-    if (useProd && !isProdSupabaseConfigured()) {
+    const useReportingDb = String(dbTarget || '') === 'prod';
+    if (useReportingDb && !isProdSupabaseConfigured()) {
       return res.status(500).json({
         success: false,
-        message: 'Prod Supabase not configured',
+        message: 'Reporting database not configured',
       });
     }
-    const db = useProd ? createProdSupabaseAdmin() : staging;
+    const db = useReportingDb ? createProdSupabaseAdmin() : staging;
 
     const limit = Math.min(Math.max(parseInt(String(limitRaw || '100'), 10) || 100, 1), 200);
     const offset = Math.max(parseInt(String(offsetRaw || '0'), 10) || 0, 0);

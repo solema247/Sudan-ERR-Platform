@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (!isProdSupabaseConfigured()) {
-    return res.status(500).json({ error: 'Prod Supabase not configured' });
+    return res.status(500).json({ error: 'Reporting database not configured' });
   }
   if (!process.env.GEMINI_API_KEY) {
     return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });

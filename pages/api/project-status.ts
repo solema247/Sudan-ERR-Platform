@@ -151,7 +151,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({
         success: false,
         message:
-          'Prod Supabase not configured (NEXT_PUBLIC_PROD_SUPABASE_URL + PROD_SUPABASE_SERVICE_ROLE_KEY)',
+          'Reporting database not configured (prod service role or NEXT_PUBLIC_NEW_SUPABASE_URL + SUPABASE_SERVICE_KEY)',
       });
     }
 

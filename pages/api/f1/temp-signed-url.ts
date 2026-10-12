@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (!isProdSupabaseConfigured()) {
-    return res.status(500).json({ success: false, message: 'Prod storage is not configured' });
+    return res.status(500).json({ success: false, message: 'Reporting storage is not configured' });
   }
 
   const authHeader = req.headers.authorization;

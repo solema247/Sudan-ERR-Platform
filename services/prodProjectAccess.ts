@@ -1,6 +1,7 @@
 /**
- * Ensure a staging-authenticated user may access a Prod err_projects row.
- * Scope comes from staging users/rooms; project data is read from Prod.
+ * Ensure a staging-authenticated user may access a reporting err_projects row.
+ * Scope comes from staging users/rooms; project data is read from the reporting DB
+ * (prod if configured, else staging service role — see prodSupabaseAdmin).
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createAuthenticatedClient } from './createAuthenticatedClient';

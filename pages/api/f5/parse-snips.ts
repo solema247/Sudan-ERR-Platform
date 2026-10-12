@@ -269,7 +269,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Extraction service is not configured' });
   }
   if (!isProdSupabaseConfigured()) {
-    return res.status(500).json({ error: 'Prod Supabase not configured' });
+    return res.status(500).json({ error: 'Reporting database not configured' });
   }
 
   try {

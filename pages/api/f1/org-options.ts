@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!isProdSupabaseConfigured()) {
     return res.status(500).json({
       success: false,
-      message: 'Prod Supabase not configured',
+      message: 'Reporting database not configured',
     });
   }
 
